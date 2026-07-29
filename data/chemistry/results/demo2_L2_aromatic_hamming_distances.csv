@@ -1,0 +1,4 @@
+Isomer_A,Isomer_B,Hamming_Distance_Bits
+CC1=CC(C)=CC=C1,CC1=CC=C(C)C=C1,1023
+CC1=CC(C)=CC=C1,CC1=C(C)C=CC=C1,1015
+CC1=CC=C(C)C=C1,CC1=C(C)C=CC=C1,996

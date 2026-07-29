@@ -1,0 +1,5 @@
+V,E,Betti_Number,L1_Candidates,L3_True_Matches,L3_Latency_ms,VF2_Latency_Est
+20,19,1,0,0,0,15.00
+20,25,6,0,0,0,113.91
+20,35,16,0,0,0,6568.41
+20,45,26,0,0,0,378767.52

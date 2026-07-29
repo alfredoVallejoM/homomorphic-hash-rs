@@ -1,0 +1,9 @@
+domain,experiment_name,vertices,edges,density,parse_time_ns,l1_shield_time_ns,galois_engine_time_ns,l1_rejection_rate,threads_utilized,peak_memory_mb,isomorphism_verified,false_positives_detected
+Chem,Demo1_L1,100,0,0.0,106,0,945938392,0.0,1,0.0,true,0
+Chem,Demo1_L2,100,0,0.0,67,0,1723155695,0.0,1,0.0,true,0
+Chem,Demo1_L3,247888,0,0.0,4255163445,0,584079262507,0.0,24,0.0,true,0
+Chem,Demo2_L1,5,0,0.0,28,0,1658296,0.0,1,0.0,true,0
+Chem,Demo2_L2,3,0,0.0,99,0,1605050,0.0,1,0.0,true,0
+Chem,Demo2_L3,2,0,0.0,51,0,2119972,0.0,1,0.0,true,0
+Chem,Demo2_L4_Massive,1754,0,0.0,17062649,0,583510537627,0.0,24,0.0,true,0
+Chem,Demo3_L1_HTS_Industrial,1000000,0,0.0,2713509469,0,2359500537,100.0,24,0.0,true,0

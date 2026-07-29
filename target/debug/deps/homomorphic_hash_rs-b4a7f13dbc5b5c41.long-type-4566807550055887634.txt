@@ -1,0 +1,5 @@
+std::ptr::Unique<(dyn TopologyProvider + 'static)>
+(Box<(dyn TopologyProvider + 'static)>, Vec<GaloisSignature256>)
+PhantomData<(Box<(dyn TopologyProvider + 'static)>, Vec<GaloisSignature256>)>
+alloc::raw_vec::RawVec<(Box<(dyn TopologyProvider + 'static)>, Vec<GaloisSignature256>)>
+Vec<(Box<(dyn TopologyProvider + 'static)>, Vec<GaloisSignature256>)>

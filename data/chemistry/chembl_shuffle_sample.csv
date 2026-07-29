@@ -1,0 +1,5 @@
+molecule_id,smiles
+MOL_1,CC1=C(C)C=CC=C1
+MOL_1,C1(=C(C)C=CC=C1)C
+MOL_2,C1=CC=CC=C1
+MOL_2,c1ccccc1

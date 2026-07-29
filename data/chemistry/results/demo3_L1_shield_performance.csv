@@ -1,0 +1,3 @@
+Query_Target,Database_Size,L1_Search_Latency_us,L1_Rejected_Count,L1_Rejection_Rate_Pct,L1_Passed_Candidates,L3_True_Positives,L1_False_Positive_Rate_Pct,Total_Pipeline_Time_ms
+Low_Density_Ring,1000000,108636,28797,2.8797,971203,0,100.00,1020272.64
+High_Density_Core,1000000,14836,960869,96.0869,39131,0,100.00,28787.84

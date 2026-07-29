@@ -1,0 +1,14 @@
+/home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs/target/release/deps/serde-4831e7800c42df09.d: /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs/target/release/build/serde-c78e55b41b44cf8e/out/private.rs
+
+/home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs/target/release/deps/libserde-4831e7800c42df09.rlib: /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs/target/release/build/serde-c78e55b41b44cf8e/out/private.rs
+
+/home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs/target/release/deps/libserde-4831e7800c42df09.rmeta: /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs/target/release/build/serde-c78e55b41b44cf8e/out/private.rs
+
+/home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/home/alfred/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs/target/release/build/serde-c78e55b41b44cf8e/out/private.rs:
+
+# env-dep:OUT_DIR=/home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs/target/release/build/serde-c78e55b41b44cf8e/out
