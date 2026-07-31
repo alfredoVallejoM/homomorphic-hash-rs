@@ -12,7 +12,8 @@ La arquitectura
 mantiene separadas la biblioteca `no_std`, la especificación matemática, los
 casos de uso y los adaptadores de I/O.
 
-H2 está implementado localmente en la rama `agent/h2-gf2-256-hh-v1`.
+H2 está implementado y publicado en la rama
+`agent/h2-gf2-256-hh-v1`, a partir del commit `060fe8b`.
 `Gf2_256HhV1` es el único tipo grande público: no es un placeholder y contiene
 encoding, aritmética y operaciones de extensión completas. No usa `unsafe`,
 heap, dispatch dinámico ni `Engine` en el camino escalar.
@@ -33,7 +34,7 @@ heap, dispatch dinámico ni `Engine` en el camino escalar.
 | CI H1.5 | Correcto remotamente | cinco jobs verdes en la ejecución `30592909350` |
 | MSRV H2 | Correcto localmente | Rust 1.89 supera runtime y suite completa |
 | Miri H2 | Correcto | 18 tests con `portable,builtin-fields` y nightly 1.96 |
-| Vertical GF(2²⁵⁶) | Correcto localmente | tipo completo, Sage, referencia lenta y legado |
+| Vertical GF(2²⁵⁶) | Implementado en rama | tipo completo, Sage, referencia lenta y legado |
 
 ## Correcciones introducidas durante esta revisión
 
@@ -67,11 +68,11 @@ pero no promete durabilidad frente a caída del sistema, publicación concurrent
 ni atomicidad entre filesystems. Antes de usar el generador concurrentemente se
 necesitará bloqueo por campo o staging con una política de coordinación.
 
-### Operativa — H2 todavía local
+### Operativa — H2 pendiente de integración
 
-H1.5 está publicado y recuperable. Los cambios H2 permanecen sin commit en su
-rama de trabajo y necesitarán su propia revisión y ejecución CI antes de
-integrarse.
+H1.5 está publicado y recuperable. H2 dispone de un commit independiente en su
+rama remota; necesita mantener su matriz CI verde y superar la revisión antes
+de integrarse en `main`.
 
 ### Fuera de alcance
 
@@ -136,11 +137,10 @@ En el i7-13700HX usado para esta revisión: multiplicación 461 ns, cuadrado
 
 ### H2 — Vertical `Gf2_256HhV1`
 
-Todos los puntos del vertical están implementados localmente. Antes de H3:
+Todos los puntos del vertical están implementados en su rama. Antes de H3:
 
-1. revisar el diff H2;
-2. crear un commit específico;
-3. subir la rama y observar la nueva matriz CI.
+1. mantener verde la matriz CI de la rama;
+2. revisar e integrar H2 en `main`.
 
 Salida alcanzada: un único campo grande completo y portable, todavía sin batch
 ni ISA.

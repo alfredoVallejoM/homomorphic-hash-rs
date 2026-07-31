@@ -1118,11 +1118,12 @@ terminaron correctamente.
 
 # 5. Fase 1 - Vertical binario portable
 
-**Estado H2:** `Gf2_256HhV1` está implementado localmente con producto portable,
-reducción const-generic, cuadrado dedicado, inversión por plan, potencia,
-`mul_by_x`, Frobenius, traza, norma y encoding. Supera leyes deterministas,
-vectores Sage, compatibilidad con `GaloisSignature256`, Miri y auditoría de
-ensamblado. H3 y H4 permanecen pendientes.
+**Estado H2:** `Gf2_256HhV1` está implementado y publicado en la rama
+`agent/h2-gf2-256-hh-v1`, con producto portable, reducción const-generic,
+cuadrado dedicado, inversión por plan, potencia, `mul_by_x`, Frobenius, traza,
+norma y encoding. Supera leyes deterministas, vectores Sage, compatibilidad con
+`GaloisSignature256`, Miri y auditoría de ensamblado. H3 y H4 permanecen
+pendientes.
 
 ## 5.1 Campos obligatorios
 

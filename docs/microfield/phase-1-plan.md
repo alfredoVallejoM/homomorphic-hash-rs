@@ -43,7 +43,7 @@ tipo GF(2²⁵⁶). El diagnóstico detallado está en
 
 ## H2 — Vertical `Gf2_256HhV1`
 
-**Estado: implementado y validado localmente (31 de julio de 2026).**
+**Estado: implementado y publicado en rama (31 de julio de 2026).**
 
 - Tipo transparente con limbs privados y layout 32/8.
 - Encoding y operadores.
@@ -53,6 +53,9 @@ tipo GF(2²⁵⁶). El diagnóstico detallado está en
 - Miri y auditoría de ensamblado sin asignador ni indirect calls algebraicas.
 
 Salida: primer campo completo y portable.
+
+La integración en `main` exige que todos los gates de la rama permanezcan
+verdes y que el diff se revise como unidad independiente.
 
 ## H3 — Generalización
 

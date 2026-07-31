@@ -9,7 +9,7 @@ use super::representation::{Limbs256, Wide512};
 /// const parameter makes the field-specific strategy visible to the optimizer.
 #[inline]
 pub(crate) fn reduce_256<const MODULUS_TAIL: u64>(wide: Wide512) -> Limbs256 {
-    debug_assert!(MODULUS_TAIL & 1 == 1);
+    debug_assert_eq!(MODULUS_TAIL & 1, 1);
     debug_assert!(u64::BITS - MODULUS_TAIL.leading_zeros() <= 33);
 
     let high = [wide[4], wide[5], wide[6], wide[7]];
