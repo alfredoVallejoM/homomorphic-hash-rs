@@ -29,6 +29,8 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
         run: cargo +stable doc -p microfield --all-features --no-deps
+      - name: Compile-fail documentation contracts
+        run: cargo +stable test -p microfield --all-features --doc
       - name: Legacy library regression
         run: cargo +stable test -p homomorphic-hash-rs --lib
       - name: Legacy field compatibility

@@ -15,15 +15,20 @@ paquete incluye:
 - manifiestos normativos certificados para los tres campos de la Fase 1;
 - vectores golden v2 generados con SageMath 10.7 y verificados mediante un
   modelo polinómico independiente;
-- `Gf2_256HhV1`, con encoding, producto carry-less, reducción, cuadrado,
-  inversión, potencia, Frobenius, traza y norma.
+- `Gf2_128V1`, `Gf2_256HhV1` y `Gf2_256AltV1`, con encoding, producto
+  carry-less, reducción, cuadrado, inversión, potencia, Frobenius, traza y
+  norma;
+- estrategias estáticas compartidas para 128 y 256 bits, sin dispatch
+  dinámico ni asignaciones en el camino escalar.
 
-`Gf2_128V1` y `Gf2_256AltV1` permanecen privados hasta H3. No se exponen limbs,
-productos anchos ni conversiones implícitas entre presentaciones.
+Los tres campos son newtypes públicos distintos. No se exponen limbs,
+productos anchos ni conversiones implícitas entre presentaciones, incluso
+cuando dos campos tienen el mismo cardinal.
 
 ```text
 cargo test -p microfield
 cargo test -p microfield --features generator --all-targets
+cargo test -p microfield --all-features --doc
 cargo clippy -p microfield --all-features --all-targets -- -D warnings
 cargo check -p microfield --no-default-features --features portable,builtin-fields
 ```

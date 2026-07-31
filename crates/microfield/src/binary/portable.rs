@@ -1,6 +1,6 @@
 //! Allocation-free portable carry-less field arithmetic.
 
-use super::representation::{Limbs256, Wide512};
+use super::representation::{Limbs128, Limbs256, Wide256, Wide512};
 
 /// Computes the carry-less product of two 64-bit polynomials.
 ///
@@ -25,10 +25,14 @@ pub(crate) fn clmul64(lhs: u64, rhs: u64) -> (u64, u64) {
     (low, high)
 }
 
-/// Computes an unreduced schoolbook product of two degree-256 polynomials.
+/// Computes an unreduced schoolbook product with statically checked shapes.
 #[inline]
-pub(crate) fn wide_product_256(lhs: Limbs256, rhs: Limbs256) -> Wide512 {
-    let mut output = [0; 8];
+fn wide_product<const LIMBS: usize, const WIDE: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+) -> [u64; WIDE] {
+    debug_assert_eq!(WIDE, LIMBS * 2);
+    let mut output = [0; WIDE];
     for (lhs_index, lhs_limb) in lhs.into_iter().enumerate() {
         for (rhs_index, rhs_limb) in rhs.into_iter().enumerate() {
             let (low, high) = clmul64(lhs_limb, rhs_limb);
@@ -37,6 +41,18 @@ pub(crate) fn wide_product_256(lhs: Limbs256, rhs: Limbs256) -> Wide512 {
         }
     }
     output
+}
+
+/// Computes an unreduced product of two degree-128 polynomials.
+#[inline]
+pub(crate) fn wide_product_128(lhs: Limbs128, rhs: Limbs128) -> Wide256 {
+    wide_product::<2, 4>(lhs, rhs)
+}
+
+/// Computes an unreduced product of two degree-256 polynomials.
+#[inline]
+pub(crate) fn wide_product_256(lhs: Limbs256, rhs: Limbs256) -> Wide512 {
+    wide_product::<4, 8>(lhs, rhs)
 }
 
 #[cfg(test)]

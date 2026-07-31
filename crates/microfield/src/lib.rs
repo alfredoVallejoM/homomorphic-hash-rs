@@ -1,8 +1,8 @@
 //! Portable binary finite fields built from zero-cost abstractions.
 //!
 //! The current milestone publishes the stable capability contracts, field
-//! identifiers, the base field [`F2`] and the first maintained portable
-//! extension field `Gf2_256HhV1`.
+//! identifiers, the base field [`F2`] and three maintained portable extension
+//! fields.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
@@ -32,4 +32,4 @@ pub use field::{
 pub use id::{ArtifactBundleDigest, ArtifactId, FieldId};
 
 #[cfg(feature = "builtin-fields")]
-pub use generated::Gf2_256HhV1;
+pub use generated::{Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1};

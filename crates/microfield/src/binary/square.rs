@@ -1,19 +1,28 @@
 //! Dedicated polynomial squaring.
 
 use super::{
-    reduction::reduce_256,
-    representation::{Limbs256, Wide512},
+    reduction::{reduce_128, reduce_256},
+    representation::{Limbs128, Limbs256, Wide256, Wide512},
 };
+
+/// Squares a degree-128 polynomial without evaluating cross products.
+#[inline]
+pub(crate) fn square_128<const MODULUS_TAIL: u64>(value: Limbs128) -> Limbs128 {
+    let wide: Wide256 = wide_square::<2, 4>(value);
+    reduce_128::<MODULUS_TAIL>(wide)
+}
 
 /// Squares a degree-256 polynomial without evaluating cross products.
 #[inline]
 pub(crate) fn square_256<const MODULUS_TAIL: u64>(value: Limbs256) -> Limbs256 {
-    reduce_256::<MODULUS_TAIL>(wide_square_256(value))
+    let wide: Wide512 = wide_square::<4, 8>(value);
+    reduce_256::<MODULUS_TAIL>(wide)
 }
 
 #[inline]
-fn wide_square_256(value: Limbs256) -> Wide512 {
-    let mut output = [0; 8];
+fn wide_square<const LIMBS: usize, const WIDE: usize>(value: [u64; LIMBS]) -> [u64; WIDE] {
+    debug_assert_eq!(WIDE, LIMBS * 2);
+    let mut output = [0; WIDE];
     for (index, limb) in value.into_iter().enumerate() {
         let (low, high) = square64(limb);
         output[index * 2] = low;

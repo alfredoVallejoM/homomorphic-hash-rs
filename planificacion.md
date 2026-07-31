@@ -500,12 +500,13 @@ Habrá implementaciones de `LimbArray` para arrays concretos:
 No se dependerá de `generic_const_exprs` para formar `[u64; 2 * N]`.
 El generador emitirá los tipos `Limbs` y `Wide` concretos.
 
-Decisión de H2: mientras solo existe una representación grande, el trait
-`BinaryFieldImpl` no se materializa como abstracción sin consumidores. El
-vertical usa funciones estáticas sobre `[u64; 4]` y reducción const-generic por
-tail. H3 introducirá el contrato común al coexistir `[u64; 2]` y `[u64; 4]`,
-momento en que podrá demostrarse reutilización real sin dispatch ni código
-muerto.
+Decisión de H2: mientras solo existía una representación grande, el trait
+`BinaryFieldImpl` no se materializó como abstracción sin consumidores. H3 ya
+introduce el contrato común al coexistir `[u64; 2]` y `[u64; 4]`.
+`Polynomial128<TAIL>` y `Polynomial256<TAIL>` encapsulan las estrategias
+estáticas, mientras un macro privado genera solo newtypes, metadatos y
+delegación. Producto, reducción, cuadrado, inversión y operaciones de extensión
+se reutilizan sin dispatch ni lógica matemática duplicada.
 
 ## 3.3 Composición
 
@@ -1118,12 +1119,15 @@ terminaron correctamente.
 
 # 5. Fase 1 - Vertical binario portable
 
-**Estado H2:** `Gf2_256HhV1` está implementado y publicado en la rama
-`agent/h2-gf2-256-hh-v1`, con producto portable, reducción const-generic,
+**Estado H2:** `Gf2_256HhV1` está implementado e integrado en `main` mediante
+`f3f7fc3`, con producto portable, reducción const-generic,
 cuadrado dedicado, inversión por plan, potencia, `mul_by_x`, Frobenius, traza,
 norma y encoding. Supera leyes deterministas, vectores Sage, compatibilidad con
-`GaloisSignature256`, Miri y auditoría de ensamblado. H3 y H4 permanecen
-pendientes.
+`GaloisSignature256`, Miri y auditoría de ensamblado. Las ejecuciones CI de la
+rama y de `main`, `30622165087` y `30622957505`, terminaron correctamente.
+
+**Estado H3:** los tres campos obligatorios están implementados y validados
+localmente sobre un único núcleo algebraico estático. H4 permanece pendiente.
 
 ## 5.1 Campos obligatorios
 

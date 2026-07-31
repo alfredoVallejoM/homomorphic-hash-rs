@@ -47,10 +47,11 @@ cruzada de artefactos y casos adversariales de filesystem. H1.5 cerró con 62
 tests y fue publicado en `c9671ee`; los cinco jobs del workflow remoto
 `30592909350` terminaron correctamente.
 
-H2 eleva la suite de Microfield a 72 tests, añade 3 contratos contra el tipo
-legado y ejecuta 18 tests bajo Miri con el campo grande habilitado. La matriz
-local pasa con Rust estable 1.93.1, Clippy y rustdoc con warnings denegados; la
-compatibilidad MSRV se mantiene en Rust 1.89.
+H2 elevó la suite de Microfield a 72 tests, añadió 3 contratos contra el tipo
+legado y ejecutó 18 tests bajo Miri con el campo grande habilitado. La matriz
+local pasó con Rust estable 1.93.1, Clippy y rustdoc con warnings denegados; la
+compatibilidad MSRV se mantuvo en Rust 1.89. H2 está integrado en `main` en
+`f3f7fc3` y los workflows `30622165087` y `30622957505` terminaron verdes.
 Los hallazgos y el siguiente orden de trabajo están en
 [`current-status-and-next.md`](current-status-and-next.md).
 
@@ -69,3 +70,10 @@ estrategias sin implementación y define la matriz CI. H2 implementa
 `Gf2_256HhV1` completo, contrasta 128 productos con reducción lenta, consume
 los vectores Sage y demuestra compatibilidad semántica con
 `GaloisSignature256`.
+
+H3 amplía la API a los tres campos congelados mediante un contrato interno y
+dos estrategias estáticas de ancho. La matemática se comparte y monomorfiza;
+el macro privado se limita a emitir newtypes y delegación. La suite alcanza 77
+tests de runtime y dos doctests compile-fail, y ejecuta las 11 operaciones Sage
+sobre cada tipo público. Miri supera los 23 tests de runtime habilitados y los
+dos doctests sin detectar comportamiento indefinido.

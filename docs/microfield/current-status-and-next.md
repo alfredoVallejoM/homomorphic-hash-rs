@@ -4,24 +4,24 @@ Fecha de revisión: 31 de julio de 2026.
 
 ## Diagnóstico ejecutivo
 
-El scaffold H0, la Fase 0 mínima H1 y H1.5 están publicados en `origin/main`
-mediante el commit `c9671ee`. Los cinco jobs de la primera matriz CI remota
-terminaron correctamente en la ejecución
-[`30592909350`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30592909350).
-La arquitectura
-mantiene separadas la biblioteca `no_std`, la especificación matemática, los
-casos de uso y los adaptadores de I/O.
+H0, H1, H1.5 y H2 están integrados en `origin/main`. H2 entró mediante el
+commit `f3f7fc3`; sus cinco jobs y los cinco jobs posteriores de `main`
+terminaron correctamente en las ejecuciones
+[`30622165087`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30622165087)
+y
+[`30622957505`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30622957505).
 
-H2 está implementado y publicado en la rama
-`agent/h2-gf2-256-hh-v1`, a partir del commit `060fe8b`.
-`Gf2_256HhV1` es el único tipo grande público: no es un placeholder y contiene
-encoding, aritmética y operaciones de extensión completas. No usa `unsafe`,
-heap, dispatch dinámico ni `Engine` en el camino escalar.
+H3 está implementado y validado localmente en `agent/h3-generalization`.
+`Gf2_128V1`, `Gf2_256HhV1` y `Gf2_256AltV1` son tipos públicos completos que
+comparten estrategias estáticas y algoritmos binarios. Los elementos conservan
+representación privada, identidad nominal y layout natural; el camino escalar
+no usa `unsafe`, heap, dispatch dinámico ni `Engine`.
 
 | Área | Estado | Evidencia |
 |---|---|---|
 | Workspace e higiene | Correcto | paquete legado preservado; `target/` fuera del índice |
-| API algebraica | Correcto para H2 | traits segregados, `F2` y `Gf2_256HhV1` |
+| API algebraica | Correcto para H3 | traits segregados, `F2` y tres campos binarios públicos |
+| Generalización | Correcta localmente | `BinaryFieldImpl`, estrategias 128/256 y algoritmos compartidos |
 | Manifiesto v1 | Correcto | parser estricto, normalización idempotente y límites de recursos |
 | Identidad | Congelada | golden de `FieldId`, `ArtifactId` y `ArtifactBundleDigest` |
 | Irreducibilidad | Correcto | Rabin, SymPy y ensayo independiente en grados 2–8 |
@@ -29,35 +29,32 @@ heap, dispatch dinámico ni `Engine` en el camino escalar.
 | Emisión | Correcta a nivel de proceso | staging, reemplazo, deriva y entradas especiales probados |
 | CLI | Correcta | salidas JSON/texto y códigos 0/1/2 probados |
 | `no_std` | Correcto | generador opcional; runtime sin dependencias obligatorias |
-| Vectores v2 | Correcto | tres goldens versionados; enum tipado, anchos, cobertura y recursos probados |
-| Sage | Correcto | SageMath 10.7; tres campos regenerados con diff vacío y modelo lento independiente |
-| CI H1.5 | Correcto remotamente | cinco jobs verdes en la ejecución `30592909350` |
-| MSRV H2 | Correcto localmente | Rust 1.89 supera runtime y suite completa |
-| Miri H2 | Correcto | 18 tests con `portable,builtin-fields` y nightly 1.96 |
-| Vertical GF(2²⁵⁶) | Implementado en rama | tipo completo, Sage, referencia lenta y legado |
+| Vectores v2 | Correcto | tres goldens; enum tipado, anchos, cobertura y recursos probados |
+| Sage | Correcto | 33 ejecuciones: 11 operaciones sobre cada API pública |
+| CI H2 | Correcto remotamente | rama y `main` verdes en `30622165087` y `30622957505` |
+| MSRV H3 | Correcto localmente | Rust 1.89 supera runtime y doctests |
+| Miri H3 | Correcto localmente | 23 tests de runtime y 2 doctests sin UB |
+| Ensamblado H3 | Correcto localmente | sin asignador ni llamadas indirectas algebraicas |
 
-## Correcciones introducidas durante esta revisión
+## Decisiones materializadas en H3
 
-1. El manifiesto queda limitado a 64 KiB antes de parsear.
-2. El grado v1 tiene un techo absoluto de 4096 que ninguna configuración puede
-   elevar; el builder solo puede imponer límites menores.
-3. La cantidad de términos del módulo se acota antes de construir estructuras
-   auxiliares.
-4. Una publicación existente que sea fichero o symlink se rechaza sin
-   reemplazarla.
-5. `check` detecta ficheros extra, directorios vacíos y rechaza symlinks o
-   entradas especiales.
-6. Se añadieron accessors verificables para dimensiones de producto/reducción
-   y para el límite efectivo del validador.
-7. Los vectores usan un esquema v2 tipado con cobertura normativa completa.
-8. Cada publicación incluye `bundle.json` y `ArtifactBundleDigest`.
-9. `karatsuba` se rechaza mientras no exista una implementación medida.
-10. Se añadió una matriz CI reproducible.
-11. `Gf2_256HhV1` usa representación privada 32/8 y metadatos generados.
-12. Producto carry-less, reducción word-level y cuadrado dedicado quedan
-    separados por responsabilidad.
-13. Inversión, potencia, `mul_by_x`, Frobenius, traza y norma están completos.
-14. La compatibilidad con `GaloisSignature256` se valida byte a byte.
+1. `BinaryFieldImpl` segrega el value object público de la estrategia
+   matemática interna.
+2. `Polynomial128<TAIL>` y `Polynomial256<TAIL>` son descriptores estáticos;
+   no guardan estado ni exigen dispatch virtual.
+3. Producto ancho, reducción, cuadrado, inversión, Frobenius y traza se
+   implementan una vez y se monomorfizan para cada grado y tail.
+4. Un macro privado emite solo newtypes, metadatos, operadores y delegación;
+   no duplica la lógica algebraica.
+5. `Gf2_256HhV1` y `Gf2_256AltV1` no se pueden mezclar ni convertir
+   implícitamente, aunque ambos tengan 256 bits.
+6. Los limbs y productos anchos permanecen privados.
+7. Las suites genéricas ejercitan las mismas leyes sobre los tres campos.
+8. El workflow ejecuta doctests compile-fail para congelar las fronteras de
+   tipo y representación.
+
+La motivación y las alternativas se registran en
+[`ADR 0008`](adr/0008-static-field-generalization.md).
 
 ## Hallazgos abiertos
 
@@ -68,11 +65,11 @@ pero no promete durabilidad frente a caída del sistema, publicación concurrent
 ni atomicidad entre filesystems. Antes de usar el generador concurrentemente se
 necesitará bloqueo por campo o staging con una política de coordinación.
 
-### Operativa — H2 pendiente de integración
+### Operativa — integración de H3
 
-H1.5 está publicado y recuperable. H2 dispone de un commit independiente en su
-rama remota; necesita mantener su matriz CI verde y superar la revisión antes
-de integrarse en `main`.
+`agent/h3-generalization` es la unidad de entrega de la implementación y sus
+pruebas. No debe integrarse hasta revisar su commit como unidad y exigir la
+misma matriz CI remota que protegió H2.
 
 ### Fuera de alcance
 
@@ -87,71 +84,61 @@ El paquete legado conserva 447 tests de biblioteca correctos, pero
 - `cargo fmt --all --check` detecta formato histórico pendiente en el paquete
   legado.
 
-Estos fallos no deben bloquear H2 salvo que se decida incluir todo el legado en
-la matriz global, pero sí impiden afirmar que el workspace completo está verde.
+Estos fallos no bloquean H3 porque la matriz de Microfield y la compatibilidad
+legada se ejecutan de forma aislada, pero impiden afirmar que todos los targets
+históricos del workspace están verdes.
 
-## Nueva cobertura
+## Cobertura H3
 
-La suite de Microfield contiene 72 tests y la compatibilidad legada añade 3:
+La suite de Microfield contiene 77 tests de runtime, dos doctests compile-fail
+y la compatibilidad legada añade 3:
 
 - leyes exhaustivas, encoding, potencia, layout y formato de `F2`;
-- claves desconocidas en todas las capas del TOML;
-- valores fijos no soportados y formas polinómicas inválidas;
-- límites de tamaño en parser y loader, y grado no anulable;
-- normalización idempotente y build canónico;
-- 247 candidatos mónicos de grados 2–8 comparados con división por ensayo;
-- identidades, certificados, planes y digests golden;
-- reducción por plan contra división polinómica;
-- reconstrucción exacta del exponente `2^m-2`;
-- consistencia y digest independiente de los siete ficheros de cada artefacto;
-- determinismo entre generaciones independientes;
-- significado preciso del cambio de nombre;
-- deriva, ficheros extra, directorios vacíos, symlinks y rollback conservador;
-- contratos CLI de éxito, error y deriva;
-- esquema v2 completo, cobertura obligatoria y operaciones desconocidas;
-- anchos canónicos y anchos no alineados a byte mediante GF(2⁵);
-- producto ancho, bits de padding, exponentes e inversión cero/no-cero;
-- límites de 8 MiB, 4096 casos y 4096 bytes de exponente;
-- importación, publicación y regeneración estable de los JSON golden;
-- contraste de todas las operaciones Sage con un modelo polinómico lento e
-  independiente para los tres campos;
-- 128 productos, cuadrados y desplazamientos contra reducción bit a bit;
-- 48 tríos deterministas para leyes de campo;
-- inversión de Fermat, Frobenius, traza, norma y polinomios de hasta 97 bytes;
-- las 11 operaciones Sage ejecutadas contra la API pública;
+- contratos del manifiesto, normalización, identidad, Rabin, planes, CLI y
+  publicación transaccional;
+- esquema de vectores v2, límites de recursos y regeneración determinista;
+- todos los bits de la base canónica para los tres campos públicos;
+- productos, cuadrados y `mul_by_x` contra un modelo polinómico independiente;
+- leyes de campo, inversión, potencia, Frobenius, traza y norma genéricas;
+- reducción de entradas polinómicas de longitudes arbitrarias;
+- las 11 operaciones Sage ejecutadas sobre cada uno de los tres tipos;
+- distinción matemática y nominal de los dos campos de 256 bits;
+- compile-fail al mezclar campos o intentar construir limbs privados;
 - 64 comparaciones de encoding, suma, producto y fase con el tipo legado, más
   8 inversiones.
 
-## Rendimiento estructural H2
+## Rendimiento estructural H3
 
-El release `no_std` no contiene símbolos del asignador. La rutina algebraica de
-inversión no contiene indirect calls; las únicas indirecciones observadas en
-el objeto corresponden al protocolo de `Formatter`, fuera del hot path.
+El release `no_std` no contiene símbolos del asignador. Las rutinas de
+inversión solo realizan llamadas directas a instancias monomorfizadas de
+producto/cuadrado; no aparecen llamadas indirectas algebraicas.
 
-El harness Criterion registra una línea base local reproducible por operación.
-En el i7-13700HX usado para esta revisión: multiplicación 461 ns, cuadrado
-12,16 ns, `mul_by_x` 1,57 ns, reducción de 64 bytes 503 ns e inversión
-123,22 µs. Son datos de comparación local, no garantías portables.
+Medición orientativa del 31 de julio de 2026, Rust 1.97.1, release, Linux
+x86-64 e Intel Core i7-13700HX:
+
+| Campo | Multiplicación | Cuadrado | `mul_by_x` | Reducción | Inversión |
+|---|---:|---:|---:|---:|---:|
+| `Gf2_128V1` | 111,17 ns | 6,97 ns | 0,85 ns | 219,30 ns | 16,36 µs |
+| `Gf2_256HhV1` | 460,10 ns | 11,92 ns | 1,59 ns | 518,14 ns | 118,38 µs |
+| `Gf2_256AltV1` | 460,04 ns | 11,83 ns | 1,57 ns | 519,89 ns | 116,57 µs |
+
+La multiplicación HH permanece en la misma banda que la línea base H2 de
+461 ns. El cambio de compilador impide interpretar diferencias pequeñas como
+una mejora o regresión estricta.
 
 ## Orden recomendado
 
-### H2 — Vertical `Gf2_256HhV1`
+### Cierre de H3
 
-Todos los puntos del vertical están implementados en su rama. Antes de H3:
+1. revisar el commit atómico de `agent/h3-generalization`;
+2. exigir CI verde en la rama;
+3. integrar por fast-forward en `main` y repetir CI.
 
-1. mantener verde la matriz CI de la rama;
-2. revisar e integrar H2 en `main`.
-
-Salida alcanzada: un único campo grande completo y portable, todavía sin batch
-ni ISA.
-
-### H3 — Generalización
-
-Generar `Gf2_128V1` y `Gf2_256AltV1` usando el mismo IR y algoritmos, añadir
-compile-fail de mezcla de campos y demostrar que no existe lógica matemática
-duplicada.
+Salida: tres presentaciones nominalmente distintas que reutilizan un único
+núcleo algebraico portable.
 
 ### H4 — Batch portable
 
 Introducir `KernelSet`, catálogo sellado, `EngineBuilder`, validación previa de
-slices, tests de canarios/asignaciones y benchmark del único dispatch por lote.
+slices, operaciones out-of-place/in-place, tests de canarios y asignaciones, y
+benchmark del único dispatch por lote.

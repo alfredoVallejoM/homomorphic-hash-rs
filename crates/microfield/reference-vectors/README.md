@@ -41,6 +41,11 @@ cargo run -p microfield --features generator --bin microfield-gen -- \
   --out crates/microfield/reference-vectors/gf2_256_hh_v1.json
 ```
 
+El mismo comando se ejecuta para `gf2_128_v1`, `gf2_256_hh_v1` y
+`gf2_256_alt_v1`, sustituyendo el stem en manifiesto y salida. La suite H3
+importa los tres ficheros y ejecuta sus 11 casos contra el tipo público
+correspondiente.
+
 Si Sage no puede escribir su caché por las restricciones del entorno, se puede
 dirigir fuera del directorio personal:
 

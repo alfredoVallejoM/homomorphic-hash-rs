@@ -13,8 +13,9 @@ little-endian y el bit `i` representa el coeficiente de `x^i`.
 
 Los tres módulos han superado Rabin mediante el validador independiente del
 generador. SageMath 10.7 ha validado sus vectores y la convención de encoding.
-`Gf2_256HhV1` es público porque ya dispone de todas sus operaciones; los otros
-dos tipos permanecen privados hasta H3.
+Los tres tipos son públicos y ofrecen el mismo conjunto de capacidades. Son
+newtypes nominalmente distintos: no existe conversión implícita entre
+`Gf2_256HhV1` y `Gf2_256AltV1` pese a compartir cardinal.
 
 ## Identidad
 
@@ -89,14 +90,20 @@ wide[i + j]     ^= low
 wide[i + j + 1] ^= high
 ```
 
-`Gf2_256HhV1` usa producto escolar de cuatro limbs. La reducción recibe como
-parámetro constante el tail generado `x^10+x^5+x^2+1` y realiza dos folds
+`Polynomial128<TAIL>` y `Polynomial256<TAIL>` implementan las estrategias
+estáticas internas de representación, producto, reducción y cuadrado. Cada
+newtype delega mediante `BinaryFieldImpl`; el compilador monomorfiza el tail y
+el ancho sin `dyn Trait`, heap ni punteros almacenados en el elemento.
+
+El producto escolar se comparte para dos y cuatro limbs. La reducción recibe
+como parámetro constante el tail generado de cada módulo y realiza folds
 word-level; la cota de grado del tail se comprueba en el algoritmo. El cuadrado
 expande bits directamente y no llama a `mul(self, self)`.
 
-La inversión ejecuta la cadena fija certificada para `2^256-2`. La reducción
-rápida se contrasta con división polinómica lenta y con Sage. Ninguna operación
-escalar consulta `Engine`, reserva heap o usa dispatch dinámico.
+La inversión ejecuta una cadena fija parametrizada por el grado para
+`2^m-2`. La reducción rápida se contrasta con división polinómica lenta y con
+Sage. Ninguna operación escalar consulta `Engine`, reserva heap o usa dispatch
+dinámico.
 
 ## Errores y escrituras
 

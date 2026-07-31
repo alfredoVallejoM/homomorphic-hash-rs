@@ -1,7 +1,7 @@
 # Artefactos generados
 
-Este directorio recibirá descriptores normalizados y planes generados por
-`microfield-gen`. No se aceptarán artefactos escritos manualmente.
+Este directorio contiene descriptores normalizados y planes generados por
+`microfield-gen`. No se aceptan artefactos escritos manualmente.
 
 Cada conjunto se publicará de forma transaccional y contendrá:
 
@@ -21,5 +21,6 @@ cargo run -p microfield --features generator --bin microfield-gen -- \
 Cada publicación contiene `normalized.toml`, `descriptor.json`,
 `certificate.json`, `generation-plan.json`, `metadata.json`, `field.rs` y
 `bundle.json`. El último autentica rutas, longitudes y SHA-256 de los otros
-seis payloads. `field.rs` solo contiene constantes certificadas; todavía no
-afirma que el tipo aritmético esté implementado.
+seis payloads. `field.rs` contiene solo constantes certificadas; los tres tipos
+aritméticos públicos consumen esas constantes desde `src/generated` y comparten
+el núcleo algebraico de `src/binary`.

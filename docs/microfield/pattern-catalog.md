@@ -10,7 +10,8 @@
 | Facade | raíz y `Engine` | API pequeña y estable | Cero o wrapper medido |
 | Adapter | `spec::adapters` | Aislar TOML, FS y Sage | Fuera del hot path |
 | Command | `microfield-gen` | Mapear CLI a casos de uso | Fuera del runtime |
-| Template Method estático | `binary` | Reutilizar producto, reducción, cuadrado e inversión | Monomorfizado |
+| Template Method estático | `BinaryFieldImpl` + `Polynomial128/256<TAIL>` | Reutilizar producto, reducción, cuadrado, inversión y extensión | Monomorfizado |
+| Macro de delegación interna | `generated::binary_field` | Emitir impls nominales sin duplicar matemáticas | Cero |
 | Unit of Work | emisión | Publicación transaccional | Solo generación |
 
 ## Patrones rechazados

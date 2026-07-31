@@ -2,11 +2,11 @@
 
 use crate::{Field, Square};
 
-/// Executes the generated binary chain for the exponent `2^256 - 2`.
+/// Executes the binary chain for the exponent `2^DEGREE - 2`.
 ///
 /// The loop bounds and sequence are independent of the input. The initial zero
 /// check implements the public `Option` contract.
-pub(crate) fn invert_256<F>(value: F) -> Option<F>
+pub(crate) fn invert_binary<F, const DEGREE: usize>(value: F) -> Option<F>
 where
     F: Field + Square,
 {
@@ -15,7 +15,8 @@ where
     }
 
     let mut accumulator = value;
-    for _ in 0..254 {
+    debug_assert!(DEGREE >= 2);
+    for _ in 0..DEGREE - 2 {
         accumulator = accumulator.square().mul(value);
     }
     Some(accumulator.square())

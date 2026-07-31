@@ -56,15 +56,18 @@ argumentos CLI ni procesos externos.
 Escalar:
 
 ```text
-Gf2_256HhV1
-  → producto carry-less / cuadrado dedicado
+Gf2_128V1 / Gf2_256HhV1 / Gf2_256AltV1
+  → BinaryFieldImpl
+  → Polynomial128<TAIL> / Polynomial256<TAIL>
+  → producto carry-less / cuadrado dedicado compartidos
   → reducción const-generic con tail certificado
   → resultado
 ```
 
 El value object vive en `generated`; `binary` concentra algoritmos
-independientes de API. El tipo aporta únicamente representación privada,
-constantes generadas y delegación estática.
+independientes de API. Cada tipo aporta únicamente identidad nominal,
+metadatos y una estrategia estática privada. El macro interno elimina
+boilerplate de delegación, pero no genera matemáticas distintas por campo.
 
 Batch:
 
