@@ -1,4 +1,5 @@
-//! Sealed representation contract for generated binary fields.
+//! Static composition boundary for generated binary fields.
 //!
-//! The concrete contract is introduced with the first complete generated
-//! field so that the scaffold does not freeze an unvalidated internal API.
+//! Concrete field value objects delegate to the small algorithm modules in
+//! this package. No runtime registry or dynamic dispatch participates in the
+//! scalar path.

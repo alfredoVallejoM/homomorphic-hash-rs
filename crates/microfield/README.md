@@ -2,7 +2,8 @@
 
 Núcleo portable para campos finitos binarios con abstracciones de coste cero.
 
-El scaffold y la Fase 0 mínima están implementados. El paquete incluye:
+El scaffold, la Fase 0 y el primer vertical portable están implementados. El
+paquete incluye:
 
 - contratos algebraicos segregados;
 - los value objects `FieldId` y `ArtifactId`;
@@ -13,11 +14,12 @@ El scaffold y la Fase 0 mínima están implementados. El paquete incluye:
 - CLI, puertos de infraestructura y adaptadores de filesystem/Sage;
 - manifiestos normativos certificados para los tres campos de la Fase 1;
 - vectores golden v2 generados con SageMath 10.7 y verificados mediante un
-  modelo polinómico independiente.
+  modelo polinómico independiente;
+- `Gf2_256HhV1`, con encoding, producto carry-less, reducción, cuadrado,
+  inversión, potencia, Frobenius, traza y norma.
 
-Los tipos GF(2¹²⁸) y GF(2²⁵⁶) no se exportarán hasta disponer de validación de
-irreducibilidad, vectores independientes y operaciones completas. Las dos
-primeras condiciones ya están satisfechas.
+`Gf2_128V1` y `Gf2_256AltV1` permanecen privados hasta H3. No se exponen limbs,
+productos anchos ni conversiones implícitas entre presentaciones.
 
 ```text
 cargo test -p microfield

@@ -56,8 +56,15 @@ argumentos CLI ni procesos externos.
 Escalar:
 
 ```text
-tipo concreto → algoritmo monomorfizado → resultado
+Gf2_256HhV1
+  → producto carry-less / cuadrado dedicado
+  → reducción const-generic con tail certificado
+  → resultado
 ```
+
+El value object vive en `generated`; `binary` concentra algoritmos
+independientes de API. El tipo aporta únicamente representación privada,
+constantes generadas y delegación estática.
 
 Batch:
 

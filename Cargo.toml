@@ -23,6 +23,7 @@ flate2 = "1.0.28"                                      # Streaming GZIP decompre
 
 [dev-dependencies]
 criterion = "0.5" # Para el perfilado termodinamico (benches)
+microfield = { path = "crates/microfield" }
 
 [profile.release]
 opt-level = 3

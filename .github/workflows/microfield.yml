@@ -31,10 +31,14 @@ jobs:
         run: cargo +stable doc -p microfield --all-features --no-deps
       - name: Legacy library regression
         run: cargo +stable test -p homomorphic-hash-rs --lib
+      - name: Legacy field compatibility
+        run: cargo +stable test -p homomorphic-hash-rs --test microfield_compat
 
   features:
     name: Runtime feature matrix
     runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -D warnings
     steps:
       - uses: actions/checkout@v6
       - name: Install stable Rust
@@ -78,4 +82,4 @@ jobs:
       - name: Install nightly Miri
         run: rustup toolchain install nightly --profile minimal --component miri,rust-src
       - run: cargo +nightly miri setup
-      - run: cargo +nightly miri test -p microfield --no-default-features
+      - run: cargo +nightly miri test -p microfield --no-default-features --features portable,builtin-fields

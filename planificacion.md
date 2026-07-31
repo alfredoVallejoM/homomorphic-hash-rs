@@ -500,6 +500,13 @@ Habrá implementaciones de `LimbArray` para arrays concretos:
 No se dependerá de `generic_const_exprs` para formar `[u64; 2 * N]`.
 El generador emitirá los tipos `Limbs` y `Wide` concretos.
 
+Decisión de H2: mientras solo existe una representación grande, el trait
+`BinaryFieldImpl` no se materializa como abstracción sin consumidores. El
+vertical usa funciones estáticas sobre `[u64; 4]` y reducción const-generic por
+tail. H3 introducirá el contrato común al coexistir `[u64; 2]` y `[u64; 4]`,
+momento en que podrá demostrarse reutilización real sin dispatch ni código
+muerto.
+
 ## 3.3 Composición
 
 `Engine<F>` contiene un `KernelSet<F>`, no hereda de un backend.
@@ -1105,11 +1112,17 @@ Fase 0 termina cuando:
 El hito implementado H1 es deliberadamente una Fase 0 mínima. H1.5 cierra el
 contrato v2, el digest de bundle y la automatización CI. SageMath 10.7 ha
 generado los tres juegos golden, su regeneración es idéntica byte a byte y un
-modelo polinómico lento verifica todas las operaciones. Solo la primera
-observación remota del workflow permanece como gate operativo antes de fijar la
-línea base del vertical H2.
+modelo polinómico lento verifica todas las operaciones. La línea base quedó
+publicada en `c9671ee` y los cinco jobs del workflow remoto `30592909350`
+terminaron correctamente.
 
 # 5. Fase 1 - Vertical binario portable
+
+**Estado H2:** `Gf2_256HhV1` está implementado localmente con producto portable,
+reducción const-generic, cuadrado dedicado, inversión por plan, potencia,
+`mul_by_x`, Frobenius, traza, norma y encoding. Supera leyes deterministas,
+vectores Sage, compatibilidad con `GaloisSignature256`, Miri y auditoría de
+ensamblado. H3 y H4 permanecen pendientes.
 
 ## 5.1 Campos obligatorios
 
@@ -1190,6 +1203,7 @@ Cada tipo apunta a metadatos inmutables:
 ```rust
 pub struct StaticFieldSpec {
     pub field_id: FieldId,
+    pub artifact_id: ArtifactId,
     pub name: &'static str,
     pub characteristic: u64,
     pub degree: u32,

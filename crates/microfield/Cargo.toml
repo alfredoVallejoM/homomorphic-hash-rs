@@ -16,6 +16,12 @@ name = "microfield-gen"
 path = "src/bin/microfield-gen.rs"
 required-features = ["generator"]
 
+[[bench]]
+name = "portable_scalar"
+path = "benches/portable_scalar.rs"
+harness = false
+required-features = ["builtin-fields"]
+
 [features]
 default = ["std", "portable", "builtin-fields"]
 std = ["alloc"]
@@ -29,6 +35,9 @@ serde = { version = "1.0.228", features = ["derive"], optional = true }
 serde_json = { version = "1.0.149", optional = true }
 sha2 = { version = "0.10.9", optional = true }
 toml = { version = "0.8.23", optional = true }
+
+[dev-dependencies]
+criterion = "0.5.1"
 
 [lints.rust]
 missing_docs = "warn"

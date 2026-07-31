@@ -26,6 +26,8 @@ reproducibles byte a byte.
 
 ## H1.5 — Estabilización
 
+- **Publicado:** commit `c9671ee` en `origin/main`.
+- **Validado remotamente:** workflow GitHub `30592909350`, cinco jobs correctos.
 - **Implementado localmente:** esquema tipado v2 de vectores externos.
 - **Implementado localmente:** semántica de `ArtifactId` y
   `ArtifactBundleDigest`.
@@ -33,10 +35,7 @@ reproducibles byte a byte.
 - **Implementado localmente:** workflow stable/MSRV/features/Miri.
 - **Implementado y contrastado externamente:** tres juegos de vectores SageMath
   10.7, regeneración determinista y verificación polinómica lenta.
-- Ejecutar la matriz CI remota.
-- Repetir Miri sobre la aritmética portable de H2; el runtime actual ya supera
-  sus 9 tests aplicables.
-- Crear un commit base revisable.
+- **Ejecutado:** Miri sobre el runtime H1.5 y sobre la aritmética portable H2.
 
 Salida: contratos externos congelados y matriz reproducible antes del primer
 tipo GF(2²⁵⁶). El diagnóstico detallado está en
@@ -44,11 +43,14 @@ tipo GF(2²⁵⁶). El diagnóstico detallado está en
 
 ## H2 — Vertical `Gf2_256HhV1`
 
-- Tipo transparente con limbs privados.
+**Estado: implementado y validado localmente (31 de julio de 2026).**
+
+- Tipo transparente con limbs privados y layout 32/8.
 - Encoding y operadores.
 - Producto ancho, reducción rápida/lenta y cuadrado propio.
 - `mul_by_x`, potencia, inversa, Frobenius, traza y norma.
-- Leyes genéricas y vectores Sage.
+- Leyes genéricas, vectores Sage y compatibilidad con el tipo legado.
+- Miri y auditoría de ensamblado sin asignador ni indirect calls algebraicas.
 
 Salida: primer campo completo y portable.
 

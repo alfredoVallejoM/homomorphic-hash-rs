@@ -1,4 +1,7 @@
 //! Validated generated field types.
-//!
-//! This module intentionally exports no large field until certificates,
-//! reduction plans and independent vectors are committed together.
+
+#[cfg(feature = "builtin-fields")]
+mod gf2_256_hh_v1;
+
+#[cfg(feature = "builtin-fields")]
+pub use gf2_256_hh_v1::Gf2_256HhV1;

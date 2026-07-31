@@ -1,8 +1,8 @@
 //! Portable binary finite fields built from zero-cost abstractions.
 //!
 //! The current milestone publishes the stable capability contracts, field
-//! identifiers and the base field [`F2`]. Larger built-in fields remain
-//! private until their generated artifacts and independent vectors exist.
+//! identifiers, the base field [`F2`] and the first maintained portable
+//! extension field `Gf2_256HhV1`.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
@@ -11,6 +11,7 @@
 extern crate alloc;
 
 mod backend;
+#[cfg(feature = "builtin-fields")]
 mod binary;
 mod engine;
 mod generated;
@@ -29,3 +30,6 @@ pub use field::{
     StaticField, StaticFieldSpec,
 };
 pub use id::{ArtifactBundleDigest, ArtifactId, FieldId};
+
+#[cfg(feature = "builtin-fields")]
+pub use generated::Gf2_256HhV1;

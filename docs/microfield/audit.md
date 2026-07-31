@@ -40,13 +40,17 @@ ejecutable nuevo continúa siendo `F2` hasta completar el vertical portable.
 - Puertos de publicación/oráculo, filesystem transaccional y adaptador Sage.
 - Tests golden, reducibles, identidad, deriva y regeneración byte a byte.
 
-La revisión del 31 de julio amplió inicialmente la suite a 49 tests y añadió límites duros
-de recursos, ensayo independiente para los 247 candidatos mónicos de grados
-2–8, contratos de CLI, planes de inversión, consistencia cruzada de artefactos
-y casos adversariales de filesystem. El runtime sin features supera además 9
-tests bajo Miri. La matriz completa de Microfield pasa con Rust estable 1.93.1,
-Clippy y rustdoc con warnings denegados. Los 62 tests y el runtime `no_std`
-superan también el MSRV 1.89.
+La revisión del 31 de julio amplió inicialmente la suite a 49 tests y añadió
+límites duros de recursos, ensayo independiente para los 247 candidatos
+mónicos de grados 2–8, contratos de CLI, planes de inversión, consistencia
+cruzada de artefactos y casos adversariales de filesystem. H1.5 cerró con 62
+tests y fue publicado en `c9671ee`; los cinco jobs del workflow remoto
+`30592909350` terminaron correctamente.
+
+H2 eleva la suite de Microfield a 72 tests, añade 3 contratos contra el tipo
+legado y ejecuta 18 tests bajo Miri con el campo grande habilitado. La matriz
+local pasa con Rust estable 1.93.1, Clippy y rustdoc con warnings denegados; la
+compatibilidad MSRV se mantiene en Rust 1.89.
 Los hallazgos y el siguiente orden de trabajo están en
 [`current-status-and-next.md`](current-status-and-next.md).
 
@@ -61,6 +65,7 @@ segunda comprobación no sustituye los vectores operacionales de Sage.
 
 H1.5 amplía la suite a 62 tests, congela el esquema tipado de vectores v2,
 separa `ArtifactBundleDigest` de `ArtifactId`, añade `bundle.json`, rechaza
-estrategias sin implementación y define la matriz CI. La validación Sage está
-cerrada; únicamente permanece pendiente la primera observación remota del
-workflow.
+estrategias sin implementación y define la matriz CI. H2 implementa
+`Gf2_256HhV1` completo, contrasta 128 productos con reducción lenta, consume
+los vectores Sage y demuestra compatibilidad semántica con
+`GaloisSignature256`.

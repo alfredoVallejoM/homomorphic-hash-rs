@@ -13,7 +13,8 @@ little-endian y el bit `i` representa el coeficiente de `x^i`.
 
 Los tres módulos han superado Rabin mediante el validador independiente del
 generador. SageMath 10.7 ha validado sus vectores y la convención de encoding.
-Los tipos no serán públicos hasta que existan todas sus operaciones.
+`Gf2_256HhV1` es público porque ya dispone de todas sus operaciones; los otros
+dos tipos permanecen privados hasta H3.
 
 ## Identidad
 
@@ -41,7 +42,8 @@ Identidades congeladas:
 | `Gf2_256HhV1` | `6b62fea68b968fd4f8c39a4f69b78f714c80858b1d0f667ec5a63d4417b43ca8` |
 | `Gf2_256AltV1` | `5c78ea2f9ea1b2d59b88bf32e38ae33be4c2f977f0232c4441f7a16e4c9bb54d` |
 
-`ArtifactId` usa otro dominio SHA-256 e incorpora `FieldId`, versión del
+`StaticFieldSpec` expone tanto `FieldId` como `ArtifactId`. `ArtifactId` usa
+otro dominio SHA-256 e incorpora `FieldId`, versión del
 generador, versión del IR, familia target y build normalizado. Cambiar el
 nombre del campo no altera ninguna identidad; cambiar el build conserva
 `FieldId` y cambia `ArtifactId`.
@@ -87,8 +89,14 @@ wide[i + j]     ^= low
 wide[i + j + 1] ^= high
 ```
 
-La reducción rápida consume un plan generado y se contrasta con división
-polinómica lenta. Ninguna operación escalar consulta `Engine`.
+`Gf2_256HhV1` usa producto escolar de cuatro limbs. La reducción recibe como
+parámetro constante el tail generado `x^10+x^5+x^2+1` y realiza dos folds
+word-level; la cota de grado del tail se comprueba en el algoritmo. El cuadrado
+expande bits directamente y no llama a `mul(self, self)`.
+
+La inversión ejecuta la cadena fija certificada para `2^256-2`. La reducción
+rápida se contrasta con división polinómica lenta y con Sage. Ninguna operación
+escalar consulta `Engine`, reserva heap o usa dispatch dinámico.
 
 ## Errores y escrituras
 

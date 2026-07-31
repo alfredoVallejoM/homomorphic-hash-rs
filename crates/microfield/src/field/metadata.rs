@@ -1,11 +1,12 @@
 //! Immutable metadata associated with maintained field presentations.
 
-use crate::FieldId;
+use crate::{ArtifactId, FieldId};
 
 /// Generated metadata for a statically maintained field.
 #[derive(Debug)]
 pub struct StaticFieldSpec {
     pub(crate) field_id: FieldId,
+    pub(crate) artifact_id: ArtifactId,
     pub(crate) name: &'static str,
     pub(crate) characteristic: u64,
     pub(crate) degree: u32,
@@ -19,6 +20,12 @@ impl StaticFieldSpec {
     #[must_use]
     pub const fn field_id(&self) -> FieldId {
         self.field_id
+    }
+
+    /// Returns the identity of the generated portable representation.
+    #[must_use]
+    pub const fn artifact_id(&self) -> ArtifactId {
+        self.artifact_id
     }
 
     /// Returns the maintained presentation name.

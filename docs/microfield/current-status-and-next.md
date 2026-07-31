@@ -4,23 +4,23 @@ Fecha de revisión: 31 de julio de 2026.
 
 ## Diagnóstico ejecutivo
 
-El scaffold H0, la Fase 0 mínima H1 y H1.5 están implementados y validados
-localmente. La arquitectura
+El scaffold H0, la Fase 0 mínima H1 y H1.5 están publicados en `origin/main`
+mediante el commit `c9671ee`. Los cinco jobs de la primera matriz CI remota
+terminaron correctamente en la ejecución
+[`30592909350`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30592909350).
+La arquitectura
 mantiene separadas la biblioteca `no_std`, la especificación matemática, los
-casos de uso y los adaptadores de I/O. No existen tipos públicos ficticios para
-GF(2¹²⁸) o GF(2²⁵⁶), ni `unsafe`, dispatch dinámico o asignaciones incorporadas
-al elemento de campo.
+casos de uso y los adaptadores de I/O.
 
-La base matemática ya es adecuada para comenzar el vertical portable. SageMath
-10.7 generó los tres juegos golden v2, una implementación polinómica lenta los
-verifica dentro de la suite y la regeneración es idéntica byte a byte. Quedan
-dos tareas operativas antes de fijar la línea base: observar la matriz CI remota
-y crear un commit revisable.
+H2 está implementado localmente en la rama `agent/h2-gf2-256-hh-v1`.
+`Gf2_256HhV1` es el único tipo grande público: no es un placeholder y contiene
+encoding, aritmética y operaciones de extensión completas. No usa `unsafe`,
+heap, dispatch dinámico ni `Engine` en el camino escalar.
 
 | Área | Estado | Evidencia |
 |---|---|---|
 | Workspace e higiene | Correcto | paquete legado preservado; `target/` fuera del índice |
-| API algebraica | Correcto para el alcance | traits segregados y `F2` exhaustivamente probado |
+| API algebraica | Correcto para H2 | traits segregados, `F2` y `Gf2_256HhV1` |
 | Manifiesto v1 | Correcto | parser estricto, normalización idempotente y límites de recursos |
 | Identidad | Congelada | golden de `FieldId`, `ArtifactId` y `ArtifactBundleDigest` |
 | Irreducibilidad | Correcto | Rabin, SymPy y ensayo independiente en grados 2–8 |
@@ -30,9 +30,10 @@ y crear un commit revisable.
 | `no_std` | Correcto | generador opcional; runtime sin dependencias obligatorias |
 | Vectores v2 | Correcto | tres goldens versionados; enum tipado, anchos, cobertura y recursos probados |
 | Sage | Correcto | SageMath 10.7; tres campos regenerados con diff vacío y modelo lento independiente |
-| CI/MSRV | Correcto localmente, pendiente de ejecución remota | Rust 1.89 supera los 62 tests y el runtime `no_std`; workflow completo definido |
-| Miri | Correcto para el runtime actual | 9 tests `--no-default-features` superados con nightly 1.96 |
-| Vertical GF(2²⁵⁶) | No iniciado | no se exporta ningún tipo grande |
+| CI H1.5 | Correcto remotamente | cinco jobs verdes en la ejecución `30592909350` |
+| MSRV H2 | Correcto localmente | Rust 1.89 supera runtime y suite completa |
+| Miri H2 | Correcto | 18 tests con `portable,builtin-fields` y nightly 1.96 |
+| Vertical GF(2²⁵⁶) | Correcto localmente | tipo completo, Sage, referencia lenta y legado |
 
 ## Correcciones introducidas durante esta revisión
 
@@ -51,6 +52,11 @@ y crear un commit revisable.
 8. Cada publicación incluye `bundle.json` y `ArtifactBundleDigest`.
 9. `karatsuba` se rechaza mientras no exista una implementación medida.
 10. Se añadió una matriz CI reproducible.
+11. `Gf2_256HhV1` usa representación privada 32/8 y metadatos generados.
+12. Producto carry-less, reducción word-level y cuadrado dedicado quedan
+    separados por responsabilidad.
+13. Inversión, potencia, `mul_by_x`, Frobenius, traza y norma están completos.
+14. La compatibilidad con `GaloisSignature256` se valida byte a byte.
 
 ## Hallazgos abiertos
 
@@ -61,11 +67,11 @@ pero no promete durabilidad frente a caída del sistema, publicación concurrent
 ni atomicidad entre filesystems. Antes de usar el generador concurrentemente se
 necesitará bloqueo por campo o staging con una política de coordinación.
 
-### Operativa — Cambios todavía sin commit
+### Operativa — H2 todavía local
 
-Los ficheros de Microfield continúan sin seguimiento y la retirada de 5443
-entradas históricas de `target/` está staged. Debe hacerse un commit deliberado
-antes de continuar para que la base sea recuperable y revisable.
+H1.5 está publicado y recuperable. Los cambios H2 permanecen sin commit en su
+rama de trabajo y necesitarán su propia revisión y ejecución CI antes de
+integrarse.
 
 ### Fuera de alcance
 
@@ -85,7 +91,7 @@ la matriz global, pero sí impiden afirmar que el workspace completo está verde
 
 ## Nueva cobertura
 
-La suite de Microfield contiene 62 tests:
+La suite de Microfield contiene 72 tests y la compatibilidad legada añade 3:
 
 - leyes exhaustivas, encoding, potencia, layout y formato de `F2`;
 - claves desconocidas en todas las capas del TOML;
@@ -107,34 +113,37 @@ La suite de Microfield contiene 62 tests:
 - límites de 8 MiB, 4096 casos y 4096 bytes de exponente;
 - importación, publicación y regeneración estable de los JSON golden;
 - contraste de todas las operaciones Sage con un modelo polinómico lento e
-  independiente para los tres campos.
+  independiente para los tres campos;
+- 128 productos, cuadrados y desplazamientos contra reducción bit a bit;
+- 48 tríos deterministas para leyes de campo;
+- inversión de Fermat, Frobenius, traza, norma y polinomios de hasta 97 bytes;
+- las 11 operaciones Sage ejecutadas contra la API pública;
+- 64 comparaciones de encoding, suma, producto y fase con el tipo legado, más
+  8 inversiones.
+
+## Rendimiento estructural H2
+
+El release `no_std` no contiene símbolos del asignador. La rutina algebraica de
+inversión no contiene indirect calls; las únicas indirecciones observadas en
+el objeto corresponden al protocolo de `Formatter`, fuera del hot path.
+
+El harness Criterion registra una línea base local reproducible por operación.
+En el i7-13700HX usado para esta revisión: multiplicación 461 ns, cuadrado
+12,16 ns, `mul_by_x` 1,57 ns, reducción de 64 bytes 503 ns e inversión
+123,22 µs. Son datos de comparación local, no garantías portables.
 
 ## Orden recomendado
 
-### H1.5 — Estabilización previa al vertical
-
-1. Ejecutar en GitHub la matriz ya definida; stable y MSRV 1.89 ya están
-   confirmados localmente junto con
-   `no_std`, Clippy, rustdoc, artefactos y biblioteca legada.
-2. Repetir Miri cuando H2 introduzca la aritmética portable; el runtime actual
-   ya supera sus 9 tests aplicables con Miri nightly 1.96.
-3. Crear un commit base revisable después de comprobar el diff de `target/`.
-
 ### H2 — Vertical `Gf2_256HhV1`
 
-1. Introducir `#[repr(transparent)] Gf2_256HhV1([u64; 4])` con limbs privados.
-2. Implementar encoding canónico y una referencia polinómica lenta.
-3. Implementar `clmul64` portable y producto escolar ancho.
-4. Ejecutar la reducción generada y contrastarla con división lenta para
-   vectores dirigidos y property tests reproducibles.
-5. Añadir cuadrado dedicado, `mul_by_x`, potencia e inversión por plan.
-6. Implementar Frobenius, traza y norma.
-7. Ejecutar leyes genéricas, vectores Sage y compatibilidad byte a byte con
-   `GaloisSignature256`.
-8. Verificar tamaño 32, alineamiento 8, cero asignaciones y desensamblado
-   escalar sin llamadas indirectas.
+Todos los puntos del vertical están implementados localmente. Antes de H3:
 
-Salida: un único campo grande completo y portable, todavía sin batch ni ISA.
+1. revisar el diff H2;
+2. crear un commit específico;
+3. subir la rama y observar la nueva matriz CI.
+
+Salida alcanzada: un único campo grande completo y portable, todavía sin batch
+ni ISA.
 
 ### H3 — Generalización
 

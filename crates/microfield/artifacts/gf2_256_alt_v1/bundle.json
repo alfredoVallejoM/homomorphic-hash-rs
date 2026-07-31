@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "artifact_id": "e621b33392973099560d94540fde5c564edf8d3b1cbb467604c0f8d3934711de",
-  "bundle_digest": "c0f3758760200b741a1a62443b62c0196452d229dafc793a765a0c8228b6c939",
+  "bundle_digest": "60ec052a38063924ec0437a32833fa2817af21e91ee7ca92ce1df21f0cf7816e",
   "files": [
     {
       "path": "certificate.json",
@@ -15,8 +15,8 @@
     },
     {
       "path": "field.rs",
-      "bytes": 743,
-      "sha256": "5d7aa9ed7a92c23a8b3630f0b7478dd8a7110f8920060eb1249f15fc9c56b34f"
+      "bytes": 750,
+      "sha256": "a795d4c86057801a4a29b62bbdd20897302cafb45cf5db49af9395ac3cb583da"
     },
     {
       "path": "generation-plan.json",
