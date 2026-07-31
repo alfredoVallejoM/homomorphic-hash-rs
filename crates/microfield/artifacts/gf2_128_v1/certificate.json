@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "field_id": "4825b6d5606e34af32722a4a6a96d04a1e21337be0fb734adb9c69f9b9d77d31",
+  "validator": "microfield-rabin-v1",
+  "irreducibility": {
+    "algorithm": "rabin-gf2-v1",
+    "degree": 128,
+    "modulus_exponents_desc": [
+      128,
+      7,
+      2,
+      1,
+      0
+    ],
+    "checks": [
+      {
+        "prime_divisor": 2,
+        "frobenius_steps": 64,
+        "gcd_hex_le": "01000000000000000000000000000000"
+      }
+    ],
+    "final_frobenius_residue_hex_le": "02000000000000000000000000000000"
+  }
+}

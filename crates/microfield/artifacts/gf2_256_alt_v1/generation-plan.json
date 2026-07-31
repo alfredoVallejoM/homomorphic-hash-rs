@@ -1,0 +1,4106 @@
+{
+  "schema": 1,
+  "field_id": "5c78ea2f9ea1b2d59b88bf32e38ae33be4c2f977f0232c4441f7a16e4c9bb54d",
+  "artifact_id": "e621b33392973099560d94540fde5c564edf8d3b1cbb467604c0f8d3934711de",
+  "ir_version": 1,
+  "target_family": "portable",
+  "product": {
+    "limb_bits": 64,
+    "input_limbs": 4,
+    "wide_limbs": 8,
+    "strategies": [
+      "schoolbook"
+    ]
+  },
+  "reduction": {
+    "algorithm": "descending-polynomial-fold-v1",
+    "input_bits": 512,
+    "output_bits": 256,
+    "steps": [
+      {
+        "source_bit": 510,
+        "xor_targets": [
+          270,
+          257,
+          255,
+          254
+        ]
+      },
+      {
+        "source_bit": 509,
+        "xor_targets": [
+          269,
+          256,
+          254,
+          253
+        ]
+      },
+      {
+        "source_bit": 508,
+        "xor_targets": [
+          268,
+          255,
+          253,
+          252
+        ]
+      },
+      {
+        "source_bit": 507,
+        "xor_targets": [
+          267,
+          254,
+          252,
+          251
+        ]
+      },
+      {
+        "source_bit": 506,
+        "xor_targets": [
+          266,
+          253,
+          251,
+          250
+        ]
+      },
+      {
+        "source_bit": 505,
+        "xor_targets": [
+          265,
+          252,
+          250,
+          249
+        ]
+      },
+      {
+        "source_bit": 504,
+        "xor_targets": [
+          264,
+          251,
+          249,
+          248
+        ]
+      },
+      {
+        "source_bit": 503,
+        "xor_targets": [
+          263,
+          250,
+          248,
+          247
+        ]
+      },
+      {
+        "source_bit": 502,
+        "xor_targets": [
+          262,
+          249,
+          247,
+          246
+        ]
+      },
+      {
+        "source_bit": 501,
+        "xor_targets": [
+          261,
+          248,
+          246,
+          245
+        ]
+      },
+      {
+        "source_bit": 500,
+        "xor_targets": [
+          260,
+          247,
+          245,
+          244
+        ]
+      },
+      {
+        "source_bit": 499,
+        "xor_targets": [
+          259,
+          246,
+          244,
+          243
+        ]
+      },
+      {
+        "source_bit": 498,
+        "xor_targets": [
+          258,
+          245,
+          243,
+          242
+        ]
+      },
+      {
+        "source_bit": 497,
+        "xor_targets": [
+          257,
+          244,
+          242,
+          241
+        ]
+      },
+      {
+        "source_bit": 496,
+        "xor_targets": [
+          256,
+          243,
+          241,
+          240
+        ]
+      },
+      {
+        "source_bit": 495,
+        "xor_targets": [
+          255,
+          242,
+          240,
+          239
+        ]
+      },
+      {
+        "source_bit": 494,
+        "xor_targets": [
+          254,
+          241,
+          239,
+          238
+        ]
+      },
+      {
+        "source_bit": 493,
+        "xor_targets": [
+          253,
+          240,
+          238,
+          237
+        ]
+      },
+      {
+        "source_bit": 492,
+        "xor_targets": [
+          252,
+          239,
+          237,
+          236
+        ]
+      },
+      {
+        "source_bit": 491,
+        "xor_targets": [
+          251,
+          238,
+          236,
+          235
+        ]
+      },
+      {
+        "source_bit": 490,
+        "xor_targets": [
+          250,
+          237,
+          235,
+          234
+        ]
+      },
+      {
+        "source_bit": 489,
+        "xor_targets": [
+          249,
+          236,
+          234,
+          233
+        ]
+      },
+      {
+        "source_bit": 488,
+        "xor_targets": [
+          248,
+          235,
+          233,
+          232
+        ]
+      },
+      {
+        "source_bit": 487,
+        "xor_targets": [
+          247,
+          234,
+          232,
+          231
+        ]
+      },
+      {
+        "source_bit": 486,
+        "xor_targets": [
+          246,
+          233,
+          231,
+          230
+        ]
+      },
+      {
+        "source_bit": 485,
+        "xor_targets": [
+          245,
+          232,
+          230,
+          229
+        ]
+      },
+      {
+        "source_bit": 484,
+        "xor_targets": [
+          244,
+          231,
+          229,
+          228
+        ]
+      },
+      {
+        "source_bit": 483,
+        "xor_targets": [
+          243,
+          230,
+          228,
+          227
+        ]
+      },
+      {
+        "source_bit": 482,
+        "xor_targets": [
+          242,
+          229,
+          227,
+          226
+        ]
+      },
+      {
+        "source_bit": 481,
+        "xor_targets": [
+          241,
+          228,
+          226,
+          225
+        ]
+      },
+      {
+        "source_bit": 480,
+        "xor_targets": [
+          240,
+          227,
+          225,
+          224
+        ]
+      },
+      {
+        "source_bit": 479,
+        "xor_targets": [
+          239,
+          226,
+          224,
+          223
+        ]
+      },
+      {
+        "source_bit": 478,
+        "xor_targets": [
+          238,
+          225,
+          223,
+          222
+        ]
+      },
+      {
+        "source_bit": 477,
+        "xor_targets": [
+          237,
+          224,
+          222,
+          221
+        ]
+      },
+      {
+        "source_bit": 476,
+        "xor_targets": [
+          236,
+          223,
+          221,
+          220
+        ]
+      },
+      {
+        "source_bit": 475,
+        "xor_targets": [
+          235,
+          222,
+          220,
+          219
+        ]
+      },
+      {
+        "source_bit": 474,
+        "xor_targets": [
+          234,
+          221,
+          219,
+          218
+        ]
+      },
+      {
+        "source_bit": 473,
+        "xor_targets": [
+          233,
+          220,
+          218,
+          217
+        ]
+      },
+      {
+        "source_bit": 472,
+        "xor_targets": [
+          232,
+          219,
+          217,
+          216
+        ]
+      },
+      {
+        "source_bit": 471,
+        "xor_targets": [
+          231,
+          218,
+          216,
+          215
+        ]
+      },
+      {
+        "source_bit": 470,
+        "xor_targets": [
+          230,
+          217,
+          215,
+          214
+        ]
+      },
+      {
+        "source_bit": 469,
+        "xor_targets": [
+          229,
+          216,
+          214,
+          213
+        ]
+      },
+      {
+        "source_bit": 468,
+        "xor_targets": [
+          228,
+          215,
+          213,
+          212
+        ]
+      },
+      {
+        "source_bit": 467,
+        "xor_targets": [
+          227,
+          214,
+          212,
+          211
+        ]
+      },
+      {
+        "source_bit": 466,
+        "xor_targets": [
+          226,
+          213,
+          211,
+          210
+        ]
+      },
+      {
+        "source_bit": 465,
+        "xor_targets": [
+          225,
+          212,
+          210,
+          209
+        ]
+      },
+      {
+        "source_bit": 464,
+        "xor_targets": [
+          224,
+          211,
+          209,
+          208
+        ]
+      },
+      {
+        "source_bit": 463,
+        "xor_targets": [
+          223,
+          210,
+          208,
+          207
+        ]
+      },
+      {
+        "source_bit": 462,
+        "xor_targets": [
+          222,
+          209,
+          207,
+          206
+        ]
+      },
+      {
+        "source_bit": 461,
+        "xor_targets": [
+          221,
+          208,
+          206,
+          205
+        ]
+      },
+      {
+        "source_bit": 460,
+        "xor_targets": [
+          220,
+          207,
+          205,
+          204
+        ]
+      },
+      {
+        "source_bit": 459,
+        "xor_targets": [
+          219,
+          206,
+          204,
+          203
+        ]
+      },
+      {
+        "source_bit": 458,
+        "xor_targets": [
+          218,
+          205,
+          203,
+          202
+        ]
+      },
+      {
+        "source_bit": 457,
+        "xor_targets": [
+          217,
+          204,
+          202,
+          201
+        ]
+      },
+      {
+        "source_bit": 456,
+        "xor_targets": [
+          216,
+          203,
+          201,
+          200
+        ]
+      },
+      {
+        "source_bit": 455,
+        "xor_targets": [
+          215,
+          202,
+          200,
+          199
+        ]
+      },
+      {
+        "source_bit": 454,
+        "xor_targets": [
+          214,
+          201,
+          199,
+          198
+        ]
+      },
+      {
+        "source_bit": 453,
+        "xor_targets": [
+          213,
+          200,
+          198,
+          197
+        ]
+      },
+      {
+        "source_bit": 452,
+        "xor_targets": [
+          212,
+          199,
+          197,
+          196
+        ]
+      },
+      {
+        "source_bit": 451,
+        "xor_targets": [
+          211,
+          198,
+          196,
+          195
+        ]
+      },
+      {
+        "source_bit": 450,
+        "xor_targets": [
+          210,
+          197,
+          195,
+          194
+        ]
+      },
+      {
+        "source_bit": 449,
+        "xor_targets": [
+          209,
+          196,
+          194,
+          193
+        ]
+      },
+      {
+        "source_bit": 448,
+        "xor_targets": [
+          208,
+          195,
+          193,
+          192
+        ]
+      },
+      {
+        "source_bit": 447,
+        "xor_targets": [
+          207,
+          194,
+          192,
+          191
+        ]
+      },
+      {
+        "source_bit": 446,
+        "xor_targets": [
+          206,
+          193,
+          191,
+          190
+        ]
+      },
+      {
+        "source_bit": 445,
+        "xor_targets": [
+          205,
+          192,
+          190,
+          189
+        ]
+      },
+      {
+        "source_bit": 444,
+        "xor_targets": [
+          204,
+          191,
+          189,
+          188
+        ]
+      },
+      {
+        "source_bit": 443,
+        "xor_targets": [
+          203,
+          190,
+          188,
+          187
+        ]
+      },
+      {
+        "source_bit": 442,
+        "xor_targets": [
+          202,
+          189,
+          187,
+          186
+        ]
+      },
+      {
+        "source_bit": 441,
+        "xor_targets": [
+          201,
+          188,
+          186,
+          185
+        ]
+      },
+      {
+        "source_bit": 440,
+        "xor_targets": [
+          200,
+          187,
+          185,
+          184
+        ]
+      },
+      {
+        "source_bit": 439,
+        "xor_targets": [
+          199,
+          186,
+          184,
+          183
+        ]
+      },
+      {
+        "source_bit": 438,
+        "xor_targets": [
+          198,
+          185,
+          183,
+          182
+        ]
+      },
+      {
+        "source_bit": 437,
+        "xor_targets": [
+          197,
+          184,
+          182,
+          181
+        ]
+      },
+      {
+        "source_bit": 436,
+        "xor_targets": [
+          196,
+          183,
+          181,
+          180
+        ]
+      },
+      {
+        "source_bit": 435,
+        "xor_targets": [
+          195,
+          182,
+          180,
+          179
+        ]
+      },
+      {
+        "source_bit": 434,
+        "xor_targets": [
+          194,
+          181,
+          179,
+          178
+        ]
+      },
+      {
+        "source_bit": 433,
+        "xor_targets": [
+          193,
+          180,
+          178,
+          177
+        ]
+      },
+      {
+        "source_bit": 432,
+        "xor_targets": [
+          192,
+          179,
+          177,
+          176
+        ]
+      },
+      {
+        "source_bit": 431,
+        "xor_targets": [
+          191,
+          178,
+          176,
+          175
+        ]
+      },
+      {
+        "source_bit": 430,
+        "xor_targets": [
+          190,
+          177,
+          175,
+          174
+        ]
+      },
+      {
+        "source_bit": 429,
+        "xor_targets": [
+          189,
+          176,
+          174,
+          173
+        ]
+      },
+      {
+        "source_bit": 428,
+        "xor_targets": [
+          188,
+          175,
+          173,
+          172
+        ]
+      },
+      {
+        "source_bit": 427,
+        "xor_targets": [
+          187,
+          174,
+          172,
+          171
+        ]
+      },
+      {
+        "source_bit": 426,
+        "xor_targets": [
+          186,
+          173,
+          171,
+          170
+        ]
+      },
+      {
+        "source_bit": 425,
+        "xor_targets": [
+          185,
+          172,
+          170,
+          169
+        ]
+      },
+      {
+        "source_bit": 424,
+        "xor_targets": [
+          184,
+          171,
+          169,
+          168
+        ]
+      },
+      {
+        "source_bit": 423,
+        "xor_targets": [
+          183,
+          170,
+          168,
+          167
+        ]
+      },
+      {
+        "source_bit": 422,
+        "xor_targets": [
+          182,
+          169,
+          167,
+          166
+        ]
+      },
+      {
+        "source_bit": 421,
+        "xor_targets": [
+          181,
+          168,
+          166,
+          165
+        ]
+      },
+      {
+        "source_bit": 420,
+        "xor_targets": [
+          180,
+          167,
+          165,
+          164
+        ]
+      },
+      {
+        "source_bit": 419,
+        "xor_targets": [
+          179,
+          166,
+          164,
+          163
+        ]
+      },
+      {
+        "source_bit": 418,
+        "xor_targets": [
+          178,
+          165,
+          163,
+          162
+        ]
+      },
+      {
+        "source_bit": 417,
+        "xor_targets": [
+          177,
+          164,
+          162,
+          161
+        ]
+      },
+      {
+        "source_bit": 416,
+        "xor_targets": [
+          176,
+          163,
+          161,
+          160
+        ]
+      },
+      {
+        "source_bit": 415,
+        "xor_targets": [
+          175,
+          162,
+          160,
+          159
+        ]
+      },
+      {
+        "source_bit": 414,
+        "xor_targets": [
+          174,
+          161,
+          159,
+          158
+        ]
+      },
+      {
+        "source_bit": 413,
+        "xor_targets": [
+          173,
+          160,
+          158,
+          157
+        ]
+      },
+      {
+        "source_bit": 412,
+        "xor_targets": [
+          172,
+          159,
+          157,
+          156
+        ]
+      },
+      {
+        "source_bit": 411,
+        "xor_targets": [
+          171,
+          158,
+          156,
+          155
+        ]
+      },
+      {
+        "source_bit": 410,
+        "xor_targets": [
+          170,
+          157,
+          155,
+          154
+        ]
+      },
+      {
+        "source_bit": 409,
+        "xor_targets": [
+          169,
+          156,
+          154,
+          153
+        ]
+      },
+      {
+        "source_bit": 408,
+        "xor_targets": [
+          168,
+          155,
+          153,
+          152
+        ]
+      },
+      {
+        "source_bit": 407,
+        "xor_targets": [
+          167,
+          154,
+          152,
+          151
+        ]
+      },
+      {
+        "source_bit": 406,
+        "xor_targets": [
+          166,
+          153,
+          151,
+          150
+        ]
+      },
+      {
+        "source_bit": 405,
+        "xor_targets": [
+          165,
+          152,
+          150,
+          149
+        ]
+      },
+      {
+        "source_bit": 404,
+        "xor_targets": [
+          164,
+          151,
+          149,
+          148
+        ]
+      },
+      {
+        "source_bit": 403,
+        "xor_targets": [
+          163,
+          150,
+          148,
+          147
+        ]
+      },
+      {
+        "source_bit": 402,
+        "xor_targets": [
+          162,
+          149,
+          147,
+          146
+        ]
+      },
+      {
+        "source_bit": 401,
+        "xor_targets": [
+          161,
+          148,
+          146,
+          145
+        ]
+      },
+      {
+        "source_bit": 400,
+        "xor_targets": [
+          160,
+          147,
+          145,
+          144
+        ]
+      },
+      {
+        "source_bit": 399,
+        "xor_targets": [
+          159,
+          146,
+          144,
+          143
+        ]
+      },
+      {
+        "source_bit": 398,
+        "xor_targets": [
+          158,
+          145,
+          143,
+          142
+        ]
+      },
+      {
+        "source_bit": 397,
+        "xor_targets": [
+          157,
+          144,
+          142,
+          141
+        ]
+      },
+      {
+        "source_bit": 396,
+        "xor_targets": [
+          156,
+          143,
+          141,
+          140
+        ]
+      },
+      {
+        "source_bit": 395,
+        "xor_targets": [
+          155,
+          142,
+          140,
+          139
+        ]
+      },
+      {
+        "source_bit": 394,
+        "xor_targets": [
+          154,
+          141,
+          139,
+          138
+        ]
+      },
+      {
+        "source_bit": 393,
+        "xor_targets": [
+          153,
+          140,
+          138,
+          137
+        ]
+      },
+      {
+        "source_bit": 392,
+        "xor_targets": [
+          152,
+          139,
+          137,
+          136
+        ]
+      },
+      {
+        "source_bit": 391,
+        "xor_targets": [
+          151,
+          138,
+          136,
+          135
+        ]
+      },
+      {
+        "source_bit": 390,
+        "xor_targets": [
+          150,
+          137,
+          135,
+          134
+        ]
+      },
+      {
+        "source_bit": 389,
+        "xor_targets": [
+          149,
+          136,
+          134,
+          133
+        ]
+      },
+      {
+        "source_bit": 388,
+        "xor_targets": [
+          148,
+          135,
+          133,
+          132
+        ]
+      },
+      {
+        "source_bit": 387,
+        "xor_targets": [
+          147,
+          134,
+          132,
+          131
+        ]
+      },
+      {
+        "source_bit": 386,
+        "xor_targets": [
+          146,
+          133,
+          131,
+          130
+        ]
+      },
+      {
+        "source_bit": 385,
+        "xor_targets": [
+          145,
+          132,
+          130,
+          129
+        ]
+      },
+      {
+        "source_bit": 384,
+        "xor_targets": [
+          144,
+          131,
+          129,
+          128
+        ]
+      },
+      {
+        "source_bit": 383,
+        "xor_targets": [
+          143,
+          130,
+          128,
+          127
+        ]
+      },
+      {
+        "source_bit": 382,
+        "xor_targets": [
+          142,
+          129,
+          127,
+          126
+        ]
+      },
+      {
+        "source_bit": 381,
+        "xor_targets": [
+          141,
+          128,
+          126,
+          125
+        ]
+      },
+      {
+        "source_bit": 380,
+        "xor_targets": [
+          140,
+          127,
+          125,
+          124
+        ]
+      },
+      {
+        "source_bit": 379,
+        "xor_targets": [
+          139,
+          126,
+          124,
+          123
+        ]
+      },
+      {
+        "source_bit": 378,
+        "xor_targets": [
+          138,
+          125,
+          123,
+          122
+        ]
+      },
+      {
+        "source_bit": 377,
+        "xor_targets": [
+          137,
+          124,
+          122,
+          121
+        ]
+      },
+      {
+        "source_bit": 376,
+        "xor_targets": [
+          136,
+          123,
+          121,
+          120
+        ]
+      },
+      {
+        "source_bit": 375,
+        "xor_targets": [
+          135,
+          122,
+          120,
+          119
+        ]
+      },
+      {
+        "source_bit": 374,
+        "xor_targets": [
+          134,
+          121,
+          119,
+          118
+        ]
+      },
+      {
+        "source_bit": 373,
+        "xor_targets": [
+          133,
+          120,
+          118,
+          117
+        ]
+      },
+      {
+        "source_bit": 372,
+        "xor_targets": [
+          132,
+          119,
+          117,
+          116
+        ]
+      },
+      {
+        "source_bit": 371,
+        "xor_targets": [
+          131,
+          118,
+          116,
+          115
+        ]
+      },
+      {
+        "source_bit": 370,
+        "xor_targets": [
+          130,
+          117,
+          115,
+          114
+        ]
+      },
+      {
+        "source_bit": 369,
+        "xor_targets": [
+          129,
+          116,
+          114,
+          113
+        ]
+      },
+      {
+        "source_bit": 368,
+        "xor_targets": [
+          128,
+          115,
+          113,
+          112
+        ]
+      },
+      {
+        "source_bit": 367,
+        "xor_targets": [
+          127,
+          114,
+          112,
+          111
+        ]
+      },
+      {
+        "source_bit": 366,
+        "xor_targets": [
+          126,
+          113,
+          111,
+          110
+        ]
+      },
+      {
+        "source_bit": 365,
+        "xor_targets": [
+          125,
+          112,
+          110,
+          109
+        ]
+      },
+      {
+        "source_bit": 364,
+        "xor_targets": [
+          124,
+          111,
+          109,
+          108
+        ]
+      },
+      {
+        "source_bit": 363,
+        "xor_targets": [
+          123,
+          110,
+          108,
+          107
+        ]
+      },
+      {
+        "source_bit": 362,
+        "xor_targets": [
+          122,
+          109,
+          107,
+          106
+        ]
+      },
+      {
+        "source_bit": 361,
+        "xor_targets": [
+          121,
+          108,
+          106,
+          105
+        ]
+      },
+      {
+        "source_bit": 360,
+        "xor_targets": [
+          120,
+          107,
+          105,
+          104
+        ]
+      },
+      {
+        "source_bit": 359,
+        "xor_targets": [
+          119,
+          106,
+          104,
+          103
+        ]
+      },
+      {
+        "source_bit": 358,
+        "xor_targets": [
+          118,
+          105,
+          103,
+          102
+        ]
+      },
+      {
+        "source_bit": 357,
+        "xor_targets": [
+          117,
+          104,
+          102,
+          101
+        ]
+      },
+      {
+        "source_bit": 356,
+        "xor_targets": [
+          116,
+          103,
+          101,
+          100
+        ]
+      },
+      {
+        "source_bit": 355,
+        "xor_targets": [
+          115,
+          102,
+          100,
+          99
+        ]
+      },
+      {
+        "source_bit": 354,
+        "xor_targets": [
+          114,
+          101,
+          99,
+          98
+        ]
+      },
+      {
+        "source_bit": 353,
+        "xor_targets": [
+          113,
+          100,
+          98,
+          97
+        ]
+      },
+      {
+        "source_bit": 352,
+        "xor_targets": [
+          112,
+          99,
+          97,
+          96
+        ]
+      },
+      {
+        "source_bit": 351,
+        "xor_targets": [
+          111,
+          98,
+          96,
+          95
+        ]
+      },
+      {
+        "source_bit": 350,
+        "xor_targets": [
+          110,
+          97,
+          95,
+          94
+        ]
+      },
+      {
+        "source_bit": 349,
+        "xor_targets": [
+          109,
+          96,
+          94,
+          93
+        ]
+      },
+      {
+        "source_bit": 348,
+        "xor_targets": [
+          108,
+          95,
+          93,
+          92
+        ]
+      },
+      {
+        "source_bit": 347,
+        "xor_targets": [
+          107,
+          94,
+          92,
+          91
+        ]
+      },
+      {
+        "source_bit": 346,
+        "xor_targets": [
+          106,
+          93,
+          91,
+          90
+        ]
+      },
+      {
+        "source_bit": 345,
+        "xor_targets": [
+          105,
+          92,
+          90,
+          89
+        ]
+      },
+      {
+        "source_bit": 344,
+        "xor_targets": [
+          104,
+          91,
+          89,
+          88
+        ]
+      },
+      {
+        "source_bit": 343,
+        "xor_targets": [
+          103,
+          90,
+          88,
+          87
+        ]
+      },
+      {
+        "source_bit": 342,
+        "xor_targets": [
+          102,
+          89,
+          87,
+          86
+        ]
+      },
+      {
+        "source_bit": 341,
+        "xor_targets": [
+          101,
+          88,
+          86,
+          85
+        ]
+      },
+      {
+        "source_bit": 340,
+        "xor_targets": [
+          100,
+          87,
+          85,
+          84
+        ]
+      },
+      {
+        "source_bit": 339,
+        "xor_targets": [
+          99,
+          86,
+          84,
+          83
+        ]
+      },
+      {
+        "source_bit": 338,
+        "xor_targets": [
+          98,
+          85,
+          83,
+          82
+        ]
+      },
+      {
+        "source_bit": 337,
+        "xor_targets": [
+          97,
+          84,
+          82,
+          81
+        ]
+      },
+      {
+        "source_bit": 336,
+        "xor_targets": [
+          96,
+          83,
+          81,
+          80
+        ]
+      },
+      {
+        "source_bit": 335,
+        "xor_targets": [
+          95,
+          82,
+          80,
+          79
+        ]
+      },
+      {
+        "source_bit": 334,
+        "xor_targets": [
+          94,
+          81,
+          79,
+          78
+        ]
+      },
+      {
+        "source_bit": 333,
+        "xor_targets": [
+          93,
+          80,
+          78,
+          77
+        ]
+      },
+      {
+        "source_bit": 332,
+        "xor_targets": [
+          92,
+          79,
+          77,
+          76
+        ]
+      },
+      {
+        "source_bit": 331,
+        "xor_targets": [
+          91,
+          78,
+          76,
+          75
+        ]
+      },
+      {
+        "source_bit": 330,
+        "xor_targets": [
+          90,
+          77,
+          75,
+          74
+        ]
+      },
+      {
+        "source_bit": 329,
+        "xor_targets": [
+          89,
+          76,
+          74,
+          73
+        ]
+      },
+      {
+        "source_bit": 328,
+        "xor_targets": [
+          88,
+          75,
+          73,
+          72
+        ]
+      },
+      {
+        "source_bit": 327,
+        "xor_targets": [
+          87,
+          74,
+          72,
+          71
+        ]
+      },
+      {
+        "source_bit": 326,
+        "xor_targets": [
+          86,
+          73,
+          71,
+          70
+        ]
+      },
+      {
+        "source_bit": 325,
+        "xor_targets": [
+          85,
+          72,
+          70,
+          69
+        ]
+      },
+      {
+        "source_bit": 324,
+        "xor_targets": [
+          84,
+          71,
+          69,
+          68
+        ]
+      },
+      {
+        "source_bit": 323,
+        "xor_targets": [
+          83,
+          70,
+          68,
+          67
+        ]
+      },
+      {
+        "source_bit": 322,
+        "xor_targets": [
+          82,
+          69,
+          67,
+          66
+        ]
+      },
+      {
+        "source_bit": 321,
+        "xor_targets": [
+          81,
+          68,
+          66,
+          65
+        ]
+      },
+      {
+        "source_bit": 320,
+        "xor_targets": [
+          80,
+          67,
+          65,
+          64
+        ]
+      },
+      {
+        "source_bit": 319,
+        "xor_targets": [
+          79,
+          66,
+          64,
+          63
+        ]
+      },
+      {
+        "source_bit": 318,
+        "xor_targets": [
+          78,
+          65,
+          63,
+          62
+        ]
+      },
+      {
+        "source_bit": 317,
+        "xor_targets": [
+          77,
+          64,
+          62,
+          61
+        ]
+      },
+      {
+        "source_bit": 316,
+        "xor_targets": [
+          76,
+          63,
+          61,
+          60
+        ]
+      },
+      {
+        "source_bit": 315,
+        "xor_targets": [
+          75,
+          62,
+          60,
+          59
+        ]
+      },
+      {
+        "source_bit": 314,
+        "xor_targets": [
+          74,
+          61,
+          59,
+          58
+        ]
+      },
+      {
+        "source_bit": 313,
+        "xor_targets": [
+          73,
+          60,
+          58,
+          57
+        ]
+      },
+      {
+        "source_bit": 312,
+        "xor_targets": [
+          72,
+          59,
+          57,
+          56
+        ]
+      },
+      {
+        "source_bit": 311,
+        "xor_targets": [
+          71,
+          58,
+          56,
+          55
+        ]
+      },
+      {
+        "source_bit": 310,
+        "xor_targets": [
+          70,
+          57,
+          55,
+          54
+        ]
+      },
+      {
+        "source_bit": 309,
+        "xor_targets": [
+          69,
+          56,
+          54,
+          53
+        ]
+      },
+      {
+        "source_bit": 308,
+        "xor_targets": [
+          68,
+          55,
+          53,
+          52
+        ]
+      },
+      {
+        "source_bit": 307,
+        "xor_targets": [
+          67,
+          54,
+          52,
+          51
+        ]
+      },
+      {
+        "source_bit": 306,
+        "xor_targets": [
+          66,
+          53,
+          51,
+          50
+        ]
+      },
+      {
+        "source_bit": 305,
+        "xor_targets": [
+          65,
+          52,
+          50,
+          49
+        ]
+      },
+      {
+        "source_bit": 304,
+        "xor_targets": [
+          64,
+          51,
+          49,
+          48
+        ]
+      },
+      {
+        "source_bit": 303,
+        "xor_targets": [
+          63,
+          50,
+          48,
+          47
+        ]
+      },
+      {
+        "source_bit": 302,
+        "xor_targets": [
+          62,
+          49,
+          47,
+          46
+        ]
+      },
+      {
+        "source_bit": 301,
+        "xor_targets": [
+          61,
+          48,
+          46,
+          45
+        ]
+      },
+      {
+        "source_bit": 300,
+        "xor_targets": [
+          60,
+          47,
+          45,
+          44
+        ]
+      },
+      {
+        "source_bit": 299,
+        "xor_targets": [
+          59,
+          46,
+          44,
+          43
+        ]
+      },
+      {
+        "source_bit": 298,
+        "xor_targets": [
+          58,
+          45,
+          43,
+          42
+        ]
+      },
+      {
+        "source_bit": 297,
+        "xor_targets": [
+          57,
+          44,
+          42,
+          41
+        ]
+      },
+      {
+        "source_bit": 296,
+        "xor_targets": [
+          56,
+          43,
+          41,
+          40
+        ]
+      },
+      {
+        "source_bit": 295,
+        "xor_targets": [
+          55,
+          42,
+          40,
+          39
+        ]
+      },
+      {
+        "source_bit": 294,
+        "xor_targets": [
+          54,
+          41,
+          39,
+          38
+        ]
+      },
+      {
+        "source_bit": 293,
+        "xor_targets": [
+          53,
+          40,
+          38,
+          37
+        ]
+      },
+      {
+        "source_bit": 292,
+        "xor_targets": [
+          52,
+          39,
+          37,
+          36
+        ]
+      },
+      {
+        "source_bit": 291,
+        "xor_targets": [
+          51,
+          38,
+          36,
+          35
+        ]
+      },
+      {
+        "source_bit": 290,
+        "xor_targets": [
+          50,
+          37,
+          35,
+          34
+        ]
+      },
+      {
+        "source_bit": 289,
+        "xor_targets": [
+          49,
+          36,
+          34,
+          33
+        ]
+      },
+      {
+        "source_bit": 288,
+        "xor_targets": [
+          48,
+          35,
+          33,
+          32
+        ]
+      },
+      {
+        "source_bit": 287,
+        "xor_targets": [
+          47,
+          34,
+          32,
+          31
+        ]
+      },
+      {
+        "source_bit": 286,
+        "xor_targets": [
+          46,
+          33,
+          31,
+          30
+        ]
+      },
+      {
+        "source_bit": 285,
+        "xor_targets": [
+          45,
+          32,
+          30,
+          29
+        ]
+      },
+      {
+        "source_bit": 284,
+        "xor_targets": [
+          44,
+          31,
+          29,
+          28
+        ]
+      },
+      {
+        "source_bit": 283,
+        "xor_targets": [
+          43,
+          30,
+          28,
+          27
+        ]
+      },
+      {
+        "source_bit": 282,
+        "xor_targets": [
+          42,
+          29,
+          27,
+          26
+        ]
+      },
+      {
+        "source_bit": 281,
+        "xor_targets": [
+          41,
+          28,
+          26,
+          25
+        ]
+      },
+      {
+        "source_bit": 280,
+        "xor_targets": [
+          40,
+          27,
+          25,
+          24
+        ]
+      },
+      {
+        "source_bit": 279,
+        "xor_targets": [
+          39,
+          26,
+          24,
+          23
+        ]
+      },
+      {
+        "source_bit": 278,
+        "xor_targets": [
+          38,
+          25,
+          23,
+          22
+        ]
+      },
+      {
+        "source_bit": 277,
+        "xor_targets": [
+          37,
+          24,
+          22,
+          21
+        ]
+      },
+      {
+        "source_bit": 276,
+        "xor_targets": [
+          36,
+          23,
+          21,
+          20
+        ]
+      },
+      {
+        "source_bit": 275,
+        "xor_targets": [
+          35,
+          22,
+          20,
+          19
+        ]
+      },
+      {
+        "source_bit": 274,
+        "xor_targets": [
+          34,
+          21,
+          19,
+          18
+        ]
+      },
+      {
+        "source_bit": 273,
+        "xor_targets": [
+          33,
+          20,
+          18,
+          17
+        ]
+      },
+      {
+        "source_bit": 272,
+        "xor_targets": [
+          32,
+          19,
+          17,
+          16
+        ]
+      },
+      {
+        "source_bit": 271,
+        "xor_targets": [
+          31,
+          18,
+          16,
+          15
+        ]
+      },
+      {
+        "source_bit": 270,
+        "xor_targets": [
+          30,
+          17,
+          15,
+          14
+        ]
+      },
+      {
+        "source_bit": 269,
+        "xor_targets": [
+          29,
+          16,
+          14,
+          13
+        ]
+      },
+      {
+        "source_bit": 268,
+        "xor_targets": [
+          28,
+          15,
+          13,
+          12
+        ]
+      },
+      {
+        "source_bit": 267,
+        "xor_targets": [
+          27,
+          14,
+          12,
+          11
+        ]
+      },
+      {
+        "source_bit": 266,
+        "xor_targets": [
+          26,
+          13,
+          11,
+          10
+        ]
+      },
+      {
+        "source_bit": 265,
+        "xor_targets": [
+          25,
+          12,
+          10,
+          9
+        ]
+      },
+      {
+        "source_bit": 264,
+        "xor_targets": [
+          24,
+          11,
+          9,
+          8
+        ]
+      },
+      {
+        "source_bit": 263,
+        "xor_targets": [
+          23,
+          10,
+          8,
+          7
+        ]
+      },
+      {
+        "source_bit": 262,
+        "xor_targets": [
+          22,
+          9,
+          7,
+          6
+        ]
+      },
+      {
+        "source_bit": 261,
+        "xor_targets": [
+          21,
+          8,
+          6,
+          5
+        ]
+      },
+      {
+        "source_bit": 260,
+        "xor_targets": [
+          20,
+          7,
+          5,
+          4
+        ]
+      },
+      {
+        "source_bit": 259,
+        "xor_targets": [
+          19,
+          6,
+          4,
+          3
+        ]
+      },
+      {
+        "source_bit": 258,
+        "xor_targets": [
+          18,
+          5,
+          3,
+          2
+        ]
+      },
+      {
+        "source_bit": 257,
+        "xor_targets": [
+          17,
+          4,
+          2,
+          1
+        ]
+      },
+      {
+        "source_bit": 256,
+        "xor_targets": [
+          16,
+          3,
+          1,
+          0
+        ]
+      }
+    ],
+    "proof_digest": "f4a06836f946c87f3fda8f23889670e9182e3b23086cc7108a20879e3a5999e8"
+  },
+  "inversion": {
+    "algorithm": "binary-fixed-chain-v1",
+    "exponent": "2^degree-2",
+    "steps": [
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      },
+      {
+        "operation": "multiply_base"
+      },
+      {
+        "operation": "square",
+        "count": 1
+      }
+    ]
+  }
+}

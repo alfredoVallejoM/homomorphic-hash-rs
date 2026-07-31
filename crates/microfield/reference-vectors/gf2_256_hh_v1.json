@@ -1,0 +1,104 @@
+{
+  "schema": 2,
+  "field_id": "6b62fea68b968fd4f8c39a4f69b78f714c80858b1d0f667ec5a63d4417b43ca8",
+  "oracle": {
+    "name": "SageMath",
+    "version": "10.7"
+  },
+  "generation": {
+    "algorithm": "sha256-labeled-v1",
+    "seed_hex": "b3f333698d4df9cff7eb638a56d2c84af43aa181cf1ac6e10fb8d3e4ac677a77"
+  },
+  "vectors": [
+    {
+      "case": "canonical_zero",
+      "operation": {
+        "kind": "canonical",
+        "element_hex_le": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "case": "canonical_one",
+      "operation": {
+        "kind": "canonical",
+        "element_hex_le": "0100000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "case": "add_seeded",
+      "operation": {
+        "kind": "add",
+        "lhs_hex_le": "c14164da6fc8e06ef3e230ea33db09e0a544916558354b996a3a3e1ed1808673",
+        "rhs_hex_le": "53288827f42148f3777f7656abe324c7806195fd62fcc3b3c73e08c8ded211f8",
+        "output_hex_le": "9269ecfd9be9a89d849d46bc98382d27252504983ac9882aad0436d60f52978b"
+      }
+    },
+    {
+      "case": "wide_product_seeded",
+      "operation": {
+        "kind": "wide_product",
+        "lhs_hex_le": "c14164da6fc8e06ef3e230ea33db09e0a544916558354b996a3a3e1ed1808673",
+        "rhs_hex_le": "53288827f42148f3777f7656abe324c7806195fd62fcc3b3c73e08c8ded211f8",
+        "output_wide_hex_le": "138646722f46d5730258fcadde47eca9776056c9cbf8cf158279bc723545c76a007d19178b32938ba7954d34c39c5c7549b7774533fd8a8705d6c3f37e05f12f"
+      }
+    },
+    {
+      "case": "reduce_seeded_product",
+      "operation": {
+        "kind": "reduce",
+        "input_wide_hex_le": "138646722f46d5730258fcadde47eca9776056c9cbf8cf158279bc723545c76a007d19178b32938ba7954d34c39c5c7549b7774533fd8a8705d6c3f37e05f12f",
+        "output_hex_le": "0152e3bfb6c3a6e8e4b163f7a63c22d0e0c6d4e9489ac5563f215239a101c7c0"
+      }
+    },
+    {
+      "case": "multiply_seeded",
+      "operation": {
+        "kind": "multiply",
+        "lhs_hex_le": "c14164da6fc8e06ef3e230ea33db09e0a544916558354b996a3a3e1ed1808673",
+        "rhs_hex_le": "53288827f42148f3777f7656abe324c7806195fd62fcc3b3c73e08c8ded211f8",
+        "output_hex_le": "0152e3bfb6c3a6e8e4b163f7a63c22d0e0c6d4e9489ac5563f215239a101c7c0"
+      }
+    },
+    {
+      "case": "square_seeded",
+      "operation": {
+        "kind": "square",
+        "input_hex_le": "c14164da6fc8e06ef3e230ea33db09e0a544916558354b996a3a3e1ed1808673",
+        "output_hex_le": "ba91490377753cd2476872a7e519727cdd8983fc91efd52a25340a108c13b8a0"
+      }
+    },
+    {
+      "case": "invert_seeded",
+      "operation": {
+        "kind": "invert",
+        "input_hex_le": "c14164da6fc8e06ef3e230ea33db09e0a544916558354b996a3a3e1ed1808673",
+        "output_hex_le": "fbe0d4ddae07dab6813cc3c4ea6282105436f27ea1356df81e91ecd85ef50153"
+      }
+    },
+    {
+      "case": "invert_zero",
+      "operation": {
+        "kind": "invert",
+        "input_hex_le": "0000000000000000000000000000000000000000000000000000000000000000",
+        "output_hex_le": null
+      }
+    },
+    {
+      "case": "pow_65537",
+      "operation": {
+        "kind": "pow",
+        "base_hex_le": "53288827f42148f3777f7656abe324c7806195fd62fcc3b3c73e08c8ded211f8",
+        "exponent_hex_le": "010001",
+        "output_hex_le": "69ebdbbd003bb6dda86c308016738418aeaed95c5203a33ef3ad472ab098c1d5"
+      }
+    },
+    {
+      "case": "mul_by_x_seeded",
+      "operation": {
+        "kind": "mul_by_x",
+        "input_hex_le": "c14164da6fc8e06ef3e230ea33db09e0a544916558354b996a3a3e1ed1808673",
+        "output_hex_le": "8283c8b4df90c1dde6c561d467b613c04b8922cbb06a9632d5747c3ca2010de7"
+      }
+    }
+  ]
+}

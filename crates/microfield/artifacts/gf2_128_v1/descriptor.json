@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "characteristic": "2",
+  "degree": 128,
+  "basis": {
+    "kind": "polynomial",
+    "coefficient_order": "ascending"
+  },
+  "modulus": [
+    128,
+    7,
+    2,
+    1,
+    0
+  ],
+  "encoding": {
+    "byte_order": "little",
+    "bit_order": "lsb0",
+    "bytes": 16
+  }
+}

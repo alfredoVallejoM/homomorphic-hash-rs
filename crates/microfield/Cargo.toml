@@ -1,0 +1,39 @@
+[package]
+name = "microfield"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+description = "Portable binary finite-field core with zero-cost abstractions"
+publish = false
+autobins = false
+
+[lib]
+name = "microfield"
+path = "src/lib.rs"
+
+[[bin]]
+name = "microfield-gen"
+path = "src/bin/microfield-gen.rs"
+required-features = ["generator"]
+
+[features]
+default = ["std", "portable", "builtin-fields"]
+std = ["alloc"]
+alloc = []
+portable = []
+builtin-fields = []
+generator = ["std", "dep:serde", "dep:serde_json", "dep:sha2", "dep:toml"]
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"], optional = true }
+serde_json = { version = "1.0.149", optional = true }
+sha2 = { version = "0.10.9", optional = true }
+toml = { version = "0.8.23", optional = true }
+
+[lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

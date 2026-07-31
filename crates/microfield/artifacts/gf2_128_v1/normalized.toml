@@ -1,0 +1,24 @@
+schema_version = 1
+
+[field]
+name = "gf2_128_v1"
+characteristic = 2
+degree = 128
+
+[field.basis]
+kind = "polynomial"
+coefficient_order = "ascending"
+
+[field.modulus]
+nonzero_exponents = [128, 7, 2, 1, 0]
+
+[field.encoding]
+byte_order = "little"
+bit_order = "lsb0"
+canonical_bytes = 16
+
+[build]
+limb_bits = 64
+product_strategies = ["schoolbook"]
+reduction_style = "generated_fold"
+requested_backends = ["portable"]
