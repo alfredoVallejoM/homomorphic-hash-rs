@@ -21,6 +21,8 @@ jobs:
         run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
       - name: Format
         run: cargo +stable fmt -p microfield -- --check
+      - name: Format external generated-field fixture
+        run: cargo +stable fmt --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml -- --check
       - name: Test all Microfield targets
         run: cargo +stable test -p microfield --features generator --all-targets
       - name: Zero-allocation batch contract
@@ -29,6 +31,10 @@ jobs:
         run: cargo +stable clippy -p microfield --all-features --all-targets -- -D warnings
       - name: Audit x86-64 PCLMUL assembly
         run: bash crates/microfield/tools/audit_x86_pclmul.sh
+      - name: Install AArch64 target for PMULL assembly audit
+        run: rustup +stable target add aarch64-unknown-linux-gnu
+      - name: Audit AArch64 PMULL assembly
+        run: bash crates/microfield/tools/audit_aarch64_pmull.sh
       - name: Rustdoc
         env:
           RUSTDOCFLAGS: -D warnings
@@ -61,10 +67,14 @@ jobs:
       - run: cargo +stable check -p microfield --no-default-features --features builtin-fields
       - run: cargo +stable check -p microfield --no-default-features --features portable
       - run: cargo +stable check -p microfield --no-default-features --features portable,builtin-fields
+      - run: cargo +stable check -p microfield --no-default-features --features alloc,portable,builtin-fields
       - run: cargo +stable check -p microfield --no-default-features --features std,portable
       - run: cargo +stable check -p microfield --no-default-features --features generator
       - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable
-      - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features std,portable
+      - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable,builtin-fields
+      - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features std,portable,builtin-fields
+      - name: External ABI 3 scalar-only no_std
+        run: cargo +stable check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 
   msrv:
     name: MSRV 1.89
@@ -76,6 +86,7 @@ jobs:
       - run: cargo +1.89.0 check -p microfield --no-default-features
       - run: cargo +1.89.0 test -p microfield --features generator --all-targets
       - run: cargo +1.89.0 test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
+      - run: cargo +1.89.0 check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 
   generated:
     name: Generated artifacts
@@ -103,6 +114,10 @@ jobs:
         run: rustup toolchain install nightly --profile minimal --component miri,rust-src
       - run: cargo +nightly miri setup
       - run: cargo +nightly miri test -p microfield --no-default-features --features portable,builtin-fields
+      - name: Miri owned aligned storage
+        run: >-
+          cargo +nightly miri test -p microfield --no-default-features
+          --features alloc,portable,builtin-fields --lib --test packed_batch
       - name: Miri generated optimizer paths
         run: cargo +nightly miri test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
 
@@ -120,3 +135,52 @@ jobs:
         run: >-
           cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
           -p microfield --all-features --test x86_pclmul
+          --test packed_batch --test packed_views
+      - name: External profile PCLMUL AddressSanitizer
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
+          --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml
+          --lib
+
+  arm64:
+    name: AArch64 PMULL hardware gates
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal --component clippy
+      - name: Differential PMULL suite on hardware
+        run: >-
+          cargo +stable test -p microfield --all-features --test aarch64_pmull
+          --test packed_batch --test packed_views
+      - name: Generated external profiles on PMULL
+        run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
+      - name: Zero-allocation PMULL gate
+        run: cargo +stable test -p microfield --all-features --test batch_allocations
+      - name: AArch64 Clippy
+        run: cargo +stable clippy -p microfield --all-features --all-targets -- -D warnings
+      - name: Audit native PMULL assembly
+        run: bash crates/microfield/tools/audit_aarch64_pmull.sh
+      - name: Build benchmark harness on real hardware
+        run: cargo +stable bench -p microfield --bench portable_batch --no-run
+      - name: Install nightly Rust with sources
+        run: rustup toolchain install nightly --profile minimal --component rust-src
+      - name: PMULL AddressSanitizer
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target aarch64-unknown-linux-gnu
+          -p microfield --no-default-features --features std,portable,builtin-fields
+          --test aarch64_pmull --test packed_batch --test packed_views
+      - name: External profile PMULL AddressSanitizer
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target aarch64-unknown-linux-gnu
+          --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml
+          --lib

@@ -33,6 +33,149 @@ pub enum PortableReductionStrategy {
     DenseWordFold,
 }
 
+/// Structural class used by target-neutral verified ISA profiles.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum IsaProfileClass {
+    /// Power-of-two degree with a complete 64-bit most-significant limb.
+    PowerOfTwoLimbAligned,
+    /// Non-power-of-two degree with a complete 64-bit most-significant limb.
+    LimbAligned,
+    /// A field whose most-significant limb contains canonical padding bits.
+    Unaligned,
+}
+
+/// Carry-less multiplication backend covered by a verified profile.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum IsaProfileBackend {
+    /// x86-64 `PCLMULQDQ` operating on one 64-bit polynomial limb at a time.
+    X86Pclmul,
+    /// `AArch64` `PMULL` operating on one 64-bit polynomial limb at a time.
+    Aarch64Pmull,
+}
+
+/// Selection status attached to a generated ISA profile.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum IsaProfileSelection {
+    /// Correctness is certified, but automatic use awaits target measurements.
+    ExplicitOnly,
+}
+
+/// Value-dependence of the complete generated ISA product plus reduction.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum IsaProfileSchedule {
+    /// Product and generated reduction both execute a fixed schedule.
+    Fixed,
+    /// The generated reduction may branch on bits of the wide product.
+    DataDependent,
+}
+
+/// Target-neutral profile derived exclusively from a validated binary field.
+///
+/// This profile certifies representation and reduction compatibility with the
+/// generic 64-bit carry-less product bridge. It does not claim that a backend
+/// is faster on an arbitrary CPU; generated external profiles therefore start
+/// as [`IsaProfileSelection::ExplicitOnly`].
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct VerifiedIsaProfile {
+    schema: u32,
+    field_id: FieldId,
+    profile_class: IsaProfileClass,
+    limb_bits: usize,
+    input_limbs: usize,
+    wide_limbs: usize,
+    layout: &'static str,
+    product: &'static str,
+    reduction_proof_digest: String,
+    backends: [IsaProfileBackend; 2],
+    selection: IsaProfileSelection,
+    schedule: IsaProfileSchedule,
+    profile_digest: String,
+}
+
+impl VerifiedIsaProfile {
+    /// Returns the semantic field identity certified by this profile.
+    #[must_use]
+    pub const fn field_id(&self) -> FieldId {
+        self.field_id
+    }
+
+    /// Returns the representation class used to specialize generated source.
+    #[must_use]
+    pub const fn profile_class(&self) -> IsaProfileClass {
+        self.profile_class
+    }
+
+    /// Returns the private 64-bit element limb count.
+    #[must_use]
+    pub const fn input_limbs(&self) -> usize {
+        self.input_limbs
+    }
+
+    /// Returns the fixed unreduced product limb count.
+    #[must_use]
+    pub const fn wide_limbs(&self) -> usize {
+        self.wide_limbs
+    }
+
+    /// Returns the ISA families whose generic adapters match this profile.
+    #[must_use]
+    pub const fn backends(&self) -> &[IsaProfileBackend; 2] {
+        &self.backends
+    }
+
+    /// Returns whether the profile may participate in automatic selection.
+    #[must_use]
+    pub const fn selection(&self) -> IsaProfileSelection {
+        self.selection
+    }
+
+    /// Returns value-dependence of the complete product and reduction path.
+    #[must_use]
+    pub const fn schedule(&self) -> IsaProfileSchedule {
+        self.schedule
+    }
+
+    /// Returns the domain-separated digest of the profile without this field.
+    #[must_use]
+    pub fn profile_digest(&self) -> &str {
+        &self.profile_digest
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn new(
+        field_id: FieldId,
+        profile_class: IsaProfileClass,
+        input_limbs: usize,
+        wide_limbs: usize,
+        reduction_proof_digest: String,
+        schedule: IsaProfileSchedule,
+        profile_digest: String,
+    ) -> Self {
+        Self {
+            schema: 1,
+            field_id,
+            profile_class,
+            limb_bits: 64,
+            input_limbs,
+            wide_limbs,
+            layout: "polynomial-limbs-little-endian-v1",
+            product: "clmul64-schoolbook-v1",
+            reduction_proof_digest,
+            backends: [
+                IsaProfileBackend::X86Pclmul,
+                IsaProfileBackend::Aarch64Pmull,
+            ],
+            selection: IsaProfileSelection::ExplicitOnly,
+            schedule,
+            profile_digest,
+        }
+    }
+}
+
 /// Auditable, static optimization decision for generated portable arithmetic.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct PortableOptimizationPlan {
@@ -276,6 +419,7 @@ pub struct GenerationPlan {
     reduction: ReductionPlan,
     inversion: ExponentiationPlan,
     portable_optimization: PortableOptimizationPlan,
+    verified_isa_profile: VerifiedIsaProfile,
 }
 
 impl GenerationPlan {
@@ -315,6 +459,12 @@ impl GenerationPlan {
         &self.portable_optimization
     }
 
+    /// Returns the generated target-neutral ISA compatibility profile.
+    #[must_use]
+    pub const fn verified_isa_profile(&self) -> &VerifiedIsaProfile {
+        &self.verified_isa_profile
+    }
+
     pub(crate) fn new(
         field_id: FieldId,
         artifact_id: ArtifactId,
@@ -322,17 +472,19 @@ impl GenerationPlan {
         reduction: ReductionPlan,
         inversion: ExponentiationPlan,
         portable_optimization: PortableOptimizationPlan,
+        verified_isa_profile: VerifiedIsaProfile,
     ) -> Self {
         Self {
             schema: 1,
             field_id,
             artifact_id,
-            ir_version: 2,
-            target_family: "portable",
+            ir_version: 3,
+            target_family: "portable_with_verified_isa_profile",
             product,
             reduction,
             inversion,
             portable_optimization,
+            verified_isa_profile,
         }
     }
 }

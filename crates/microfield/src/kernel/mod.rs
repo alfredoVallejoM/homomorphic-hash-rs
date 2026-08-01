@@ -3,9 +3,10 @@
 mod catalog;
 mod metadata;
 
-pub(crate) use catalog::KernelSet;
 #[cfg(feature = "portable")]
-pub use catalog::{BuiltinField, KernelCatalog};
+pub use catalog::BuiltinField;
+pub use catalog::KernelCatalog;
+pub(crate) use catalog::KernelSet;
 pub use metadata::{BackendId, KernelMetadata, ScheduleKind};
 
 #[cfg(all(feature = "portable", feature = "builtin-fields"))]

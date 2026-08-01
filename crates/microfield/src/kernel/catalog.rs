@@ -47,7 +47,6 @@ impl<F: Field> KernelSet<F> {
 /// This type is public only because it appears in the sealed [`BuiltinField`]
 /// contract. It has no public constructor or kernel accessors.
 #[doc(hidden)]
-#[cfg(feature = "portable")]
 #[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub struct KernelCatalog<F: Field> {
@@ -57,7 +56,6 @@ pub struct KernelCatalog<F: Field> {
     aarch64_pmull: Option<&'static KernelSet<F>>,
 }
 
-#[cfg(feature = "portable")]
 impl<F: Field> KernelCatalog<F> {
     pub(crate) const fn portable(kernels: &'static KernelSet<F>) -> Self {
         assert!(matches!(
@@ -105,6 +103,7 @@ impl<F: Field> KernelCatalog<F> {
         self
     }
 
+    #[cfg(feature = "portable")]
     pub(crate) const fn get(&self, backend: super::BackendId) -> Option<&'static KernelSet<F>> {
         match backend {
             super::BackendId::Portable => Some(self.portable),

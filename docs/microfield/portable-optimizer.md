@@ -83,5 +83,5 @@ de bounds, no a selección matemática runtime.
 - Karatsuba no se activa hasta medir cruces por rango de limbs;
 - módulos densos evitan explosión de código, pero no se afirma que su ruta sea
   óptima para todos los grados;
-- H2.3 ya añade detección y política sin cambiar esta ruta; H2.4/H2.5 añadirán
+- H2.3 añadió detección y política sin cambiar esta ruta; H2.4/H2.5 añadieron
   PCLMUL/PMULL sin alterar la semántica portable.

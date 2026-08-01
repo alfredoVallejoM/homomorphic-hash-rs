@@ -87,9 +87,10 @@ obtiene un comportamiento determinista portable, y `std` habilita detección
 explícita. Los errores son suficientemente precisos para distinguir una build
 sin backend, un campo no elegible y una CPU incompatible.
 
-H2.4 y H2.5 deberán registrar un backend en dos sitios coherentes: el conjunto
-compilado y el catálogo de cada campo certificado. Activar solo uno no permite
-seleccionarlo.
+H2.4 y H2.5 registran cada backend en dos sitios coherentes: el conjunto
+compilado y el catálogo del campo certificado. Activar solo uno no permite
+seleccionarlo. ABI 3 amplía esa segunda frontera mediante un perfil generado,
+sin abrir el catálogo raw.
 
 ## Alternativas rechazadas
 

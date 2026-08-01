@@ -236,14 +236,30 @@ fn assert_builder_contract<F: BatchField>() {
         Err(EngineBuildError::BackendNotCompiled(BackendId::X86Pclmul))
     ));
 
-    for backend in [BackendId::X86Vpclmul, BackendId::Aarch64Pmull] {
-        assert!(matches!(
-            EngineBuilder::<F>::new()
-                .force_backend(backend)
-                .build(),
-            Err(EngineBuildError::BackendNotCompiled(found)) if found == backend
-        ));
-    }
+    assert!(matches!(
+        EngineBuilder::<F>::new()
+            .force_backend(BackendId::X86Vpclmul)
+            .build(),
+        Err(EngineBuildError::BackendNotCompiled(BackendId::X86Vpclmul))
+    ));
+
+    let pmull = EngineBuilder::<F>::new()
+        .force_backend(BackendId::Aarch64Pmull)
+        .build();
+    #[cfg(target_arch = "aarch64")]
+    assert!(matches!(
+        pmull,
+        Err(EngineBuildError::BackendUnsupportedByCpu(
+            BackendId::Aarch64Pmull
+        ))
+    ));
+    #[cfg(not(target_arch = "aarch64"))]
+    assert!(matches!(
+        pmull,
+        Err(EngineBuildError::BackendNotCompiled(
+            BackendId::Aarch64Pmull
+        ))
+    ));
 
     assert!(matches!(
         EngineBuilder::<F>::new()

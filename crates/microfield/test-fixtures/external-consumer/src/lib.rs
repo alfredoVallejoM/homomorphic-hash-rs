@@ -32,7 +32,17 @@ mod generated_233 {
     include!(concat!(env!("OUT_DIR"), "/gf2_233_fixture.rs"));
 }
 
+mod generated_128 {
+    include!(concat!(env!("OUT_DIR"), "/gf2_128_external_fixture.rs"));
+}
+
+mod generated_192 {
+    include!(concat!(env!("OUT_DIR"), "/gf2_192_external_fixture.rs"));
+}
+
 pub use generated_10_dense::Gf2_10DenseFixture;
+pub use generated_128::Gf2_128ExternalFixture;
+pub use generated_192::Gf2_192ExternalFixture;
 pub use generated_233::Gf2_233Fixture;
 
 #[cfg(test)]
@@ -41,11 +51,15 @@ mod tests {
 
     use microfield::{
         BackendId, BinaryPolynomialField, CanonicalEncoding, CpuCapabilities, DecodeError, Engine,
-        EngineBuildError, ExecutionPolicy, ExtensionField, Field, Invert, Pow, Square, StaticField,
+        EngineBuildError, ExecutionPolicy, ExtensionField, Field, Invert, PackedBatch, Pow,
+        ScheduleKind, Square, StaticField,
     };
     use std::format;
 
-    use super::{Gf2_9Fixture, Gf2_10DenseFixture, Gf2_233Fixture};
+    use super::{
+        Gf2_9Fixture, Gf2_10DenseFixture, Gf2_128ExternalFixture, Gf2_192ExternalFixture,
+        Gf2_233Fixture,
+    };
 
     const MODULUS: u32 = (1 << 9) | (1 << 4) | 1;
 
@@ -203,23 +217,8 @@ mod tests {
             .expected_batch(3)
             .capabilities(CpuCapabilities::portable_only())
             .build()
-            .expect("ABI 2 fields inherit a portable-only catalog");
+            .expect("ABI 3 keeps explicit-only ISA profiles off automatic selection");
         assert_eq!(engine.backend_id(), BackendId::Portable);
-        let pclmul = Engine::<Gf2_9Fixture>::builder()
-            .force_backend(BackendId::X86Pclmul)
-            .build();
-        #[cfg(target_arch = "x86_64")]
-        assert!(matches!(
-            pclmul,
-            Err(EngineBuildError::BackendUnsupportedByField(
-                BackendId::X86Pclmul
-            ))
-        ));
-        #[cfg(not(target_arch = "x86_64"))]
-        assert!(matches!(
-            pclmul,
-            Err(EngineBuildError::BackendNotCompiled(BackendId::X86Pclmul))
-        ));
         let lhs = [element(3), element(0x101), element(0x1ff)];
         let rhs = [element(7), element(0x55), element(0x101)];
         let mut out = [Gf2_9Fixture::ZERO; 3];
@@ -228,6 +227,236 @@ mod tests {
             .expect("matching lengths");
         for index in 0..out.len() {
             assert_eq!(out[index], lhs[index] * rhs[index]);
+        }
+
+        let detected = Engine::<Gf2_9Fixture>::builder()
+            .policy(ExecutionPolicy::Throughput)
+            .expected_batch(3)
+            .detect()
+            .expect("explicit-only profiles leave portable available");
+        assert_eq!(detected.backend_id(), BackendId::Portable);
+
+        assert_current_architecture_profile(&lhs, &rhs);
+    }
+
+    fn assert_current_architecture_profile(lhs: &[Gf2_9Fixture], rhs: &[Gf2_9Fixture]) {
+        #[cfg(target_arch = "x86_64")]
+        let backend = BackendId::X86Pclmul;
+        #[cfg(target_arch = "aarch64")]
+        let backend = BackendId::Aarch64Pmull;
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+        let backend = BackendId::X86Pclmul;
+
+        let selected = Engine::<Gf2_9Fixture>::builder()
+            .force_backend(backend)
+            .detect();
+        #[cfg(target_arch = "x86_64")]
+        let available = std::arch::is_x86_feature_detected!("pclmulqdq");
+        #[cfg(target_arch = "aarch64")]
+        let available = std::arch::is_aarch64_feature_detected!("neon")
+            && std::arch::is_aarch64_feature_detected!("pmull");
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+        let available = false;
+
+        if !available {
+            let expected = if cfg!(any(target_arch = "x86_64", target_arch = "aarch64")) {
+                EngineBuildError::BackendUnsupportedByCpu(backend)
+            } else {
+                EngineBuildError::BackendNotCompiled(backend)
+            };
+            assert!(matches!(selected, Err(error) if error == expected));
+            return;
+        }
+
+        let isa = selected.expect("the verified profile supports the current ISA");
+        assert_eq!(isa.backend_id(), backend);
+        assert!(!isa.metadata().automatic_selection());
+        let mut out = [Gf2_9Fixture::ZERO; 3];
+        isa.mul_into(&mut out, lhs, rhs).expect("matching lengths");
+        for index in 0..out.len() {
+            assert_eq!(out[index], lhs[index] * rhs[index]);
+        }
+        isa.square_assign(&mut out);
+        for index in 0..out.len() {
+            assert_eq!(out[index], (lhs[index] * rhs[index]).square());
+        }
+    }
+
+    #[test]
+    fn power_of_two_external_profile_is_nominal_and_field_correct() {
+        assert_eq!(Gf2_128ExternalFixture::spec().degree(), 128);
+        let mut lhs_bytes = [0_u8; 16];
+        let mut rhs_bytes = [0_u8; 16];
+        for index in 0..16 {
+            lhs_bytes[index] = (index as u8).wrapping_mul(37).wrapping_add(3);
+            rhs_bytes[index] = (index as u8).wrapping_mul(91).wrapping_add(7);
+        }
+        let lhs = Gf2_128ExternalFixture::from_canonical(&lhs_bytes).expect("full-width value");
+        let rhs = Gf2_128ExternalFixture::from_canonical(&rhs_bytes).expect("full-width value");
+        assert_eq!(lhs * rhs, rhs * lhs);
+        assert_eq!(lhs.square(), lhs * lhs);
+        assert_eq!(
+            lhs * lhs.invert().expect("sample is non-zero"),
+            Gf2_128ExternalFixture::ONE
+        );
+    }
+
+    #[test]
+    fn verified_isa_bridge_covers_every_generated_reduction_class() {
+        assert_profile_batch(
+            &[element(0), element(1), element(0x101), element(0x1ff)],
+            &[element(7), element(0x55), element(0x101), element(3)],
+            ScheduleKind::DataDependent,
+        );
+        assert_profile_batch(
+            &[
+                dense_element(0),
+                dense_element(1),
+                dense_element(0x201),
+                dense_element(0x3ff),
+            ],
+            &[
+                dense_element(7),
+                dense_element(0x155),
+                dense_element(0x201),
+                dense_element(3),
+            ],
+            ScheduleKind::DataDependent,
+        );
+
+        let mut a = [0_u8; 16];
+        let mut b = [0_u8; 16];
+        for index in 0..16 {
+            a[index] = (index as u8).wrapping_mul(37).wrapping_add(3);
+            b[index] = (index as u8).wrapping_mul(91).wrapping_add(7);
+        }
+        let a = Gf2_128ExternalFixture::from_canonical(&a).expect("full-width value");
+        let b = Gf2_128ExternalFixture::from_canonical(&b).expect("full-width value");
+        assert_profile_batch(
+            &[Gf2_128ExternalFixture::ZERO, a, b, a + b],
+            &[b, a, a + b, a],
+            ScheduleKind::Fixed,
+        );
+
+        let mut a = [0_u8; 24];
+        let mut b = [0_u8; 24];
+        for index in 0..24 {
+            a[index] = (index as u8).wrapping_mul(53).wrapping_add(11);
+            b[index] = (index as u8).wrapping_mul(79).wrapping_add(5);
+        }
+        let a = Gf2_192ExternalFixture::from_canonical(&a).expect("full-width value");
+        let b = Gf2_192ExternalFixture::from_canonical(&b).expect("full-width value");
+        assert_profile_batch(
+            &[Gf2_192ExternalFixture::ZERO, a, b, a + b],
+            &[b, a, a + b, a],
+            ScheduleKind::Fixed,
+        );
+
+        let a = hex_233("cd240c95c64a5798e1632bccb09f98c5667208e4dbf6180232d0a67d2701");
+        let b = hex_233("51b3180bb22ec32b52fee524ba63353058344218073f87761795005e1c00");
+        assert_profile_batch(
+            &[Gf2_233Fixture::ZERO, a, b, a + b],
+            &[b, a, a + b, a],
+            ScheduleKind::DataDependent,
+        );
+    }
+
+    fn assert_profile_batch<F>(lhs: &[F], rhs: &[F], expected_schedule: ScheduleKind)
+    where
+        F: microfield::__private::PortableField + StaticField + core::fmt::Debug,
+    {
+        let portable = Engine::<F>::portable();
+        let mut expected = std::vec![F::ZERO; lhs.len()];
+        portable
+            .mul_into(&mut expected, lhs, rhs)
+            .expect("equal lengths");
+        let packed_lhs = PackedBatch::from_aos(&portable, lhs).expect("external packed lhs");
+        let packed_rhs = PackedBatch::from_aos(&portable, rhs).expect("external packed rhs");
+        let mut packed_out = PackedBatch::new(&portable, lhs.len()).expect("external packed out");
+        portable
+            .mul_packed_into(&mut packed_out, &packed_lhs, &packed_rhs)
+            .expect("matching external plans");
+        let mut packed_actual = std::vec![F::ZERO; lhs.len()];
+        packed_out
+            .unpack_into(&mut packed_actual)
+            .expect("matching external output");
+        assert_eq!(packed_actual, expected);
+
+        #[cfg(target_arch = "x86_64")]
+        let (backend, available) = (
+            BackendId::X86Pclmul,
+            std::arch::is_x86_feature_detected!("pclmulqdq"),
+        );
+        #[cfg(target_arch = "aarch64")]
+        let (backend, available) = (
+            BackendId::Aarch64Pmull,
+            std::arch::is_aarch64_feature_detected!("neon")
+                && std::arch::is_aarch64_feature_detected!("pmull"),
+        );
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+        let (backend, available) = (BackendId::X86Pclmul, false);
+        if !available {
+            return;
+        }
+
+        let isa = Engine::<F>::builder()
+            .force_backend(backend)
+            .detect()
+            .expect("the generated profile registers a current-target strategy");
+        assert!(!isa.metadata().automatic_selection());
+        assert_eq!(isa.metadata().schedule(), expected_schedule);
+
+        let fixed = Engine::<F>::builder()
+            .policy(ExecutionPolicy::FixedSchedule)
+            .force_backend(backend)
+            .detect();
+        if expected_schedule == ScheduleKind::Fixed {
+            assert_eq!(
+                fixed
+                    .expect("a fixed generated reduction satisfies the policy")
+                    .backend_id(),
+                backend
+            );
+        } else {
+            assert!(matches!(
+                fixed,
+                Err(EngineBuildError::PolicyUnsatisfied(
+                    ExecutionPolicy::FixedSchedule
+                ))
+            ));
+        }
+
+        let mut actual = std::vec![F::ZERO; lhs.len()];
+        isa.mul_into(&mut actual, lhs, rhs).expect("equal lengths");
+        assert_eq!(actual, expected);
+
+        let isa_lhs = PackedBatch::from_aos(&isa, lhs).expect("external ISA packed lhs");
+        let isa_rhs = PackedBatch::from_aos(&isa, rhs).expect("external ISA packed rhs");
+        let mut isa_out = PackedBatch::new(&isa, lhs.len()).expect("external ISA packed out");
+        isa.mul_packed_into(&mut isa_out, &isa_lhs, &isa_rhs)
+            .expect("matching external ISA plans");
+        isa_out
+            .unpack_into(&mut actual)
+            .expect("matching external ISA output");
+        assert_eq!(actual, expected);
+
+        portable
+            .square_into(&mut expected, lhs)
+            .expect("equal lengths");
+        isa.square_into(&mut actual, lhs).expect("equal lengths");
+        assert_eq!(actual, expected);
+
+        let mut expected_assign = lhs.to_vec();
+        let mut actual_assign = lhs.to_vec();
+        portable
+            .mul_assign(&mut expected_assign, rhs)
+            .expect("equal lengths");
+        isa.mul_assign(&mut actual_assign, rhs)
+            .expect("equal lengths");
+        assert_eq!(actual_assign, expected_assign);
+        isa.square_assign(&mut actual_assign);
+        for (actual, product) in actual_assign.iter().zip(expected_assign) {
+            assert_eq!(*actual, product.square());
         }
     }
 

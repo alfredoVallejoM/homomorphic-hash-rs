@@ -23,10 +23,23 @@ cargo bench -p microfield --bench portable_batch
 Este harness separa:
 
 - algoritmo portable directo frente a fachada portable;
-- estrategia portable frente a PCLMUL detectado;
+- estrategia portable frente al backend seleccionado automáticamente;
+- estrategia ISA forzada —PCLMUL o PMULL— separada del selector automático;
 - producto, cuadrado y suma en lotes 1, 8, 64 y 4096;
 - coste de validación y dispatch;
 - construcción con capabilities portables frente a detección `std`.
+
+H2.6 añade al mismo harness, sin mezclar las muestras:
+
+- pack sobre un batch owned ya asignado;
+- unpack aislado;
+- producto packed con operands persistentes;
+- pipeline reutilizado `pack + kernel + unpack`;
+- pipeline completo `allocate + pack + kernel + unpack`.
+
+AoS packed actual no se presenta como aceleración: estas muestras fijan una
+línea base honesta para decidir en H2.7 si SoA/tiles y VPCLMUL amortizan su coste
+total.
 
 ## Línea base local H2
 
@@ -133,3 +146,52 @@ El segundo comando compila el harness, inspecciona el ELF y exige instrucciones
 PCLMUL sin referencias al asignador ni llamadas indirectas dentro de los
 kernels. Los resultados dependen de CPU, frecuencia, microcode y compilador;
 no constituyen una garantía de latencia en otro sistema.
+
+## Estado H2.5 AArch64
+
+El harness publica nombres separados
+`*_engine_forced_aarch64_pmull`. No se registran cifras de QEMU: su función es
+solo verificar corrección. Hasta ejecutar la misma medición en hardware ARM
+representativo, PMULL no participa en selección automática ni publica un punto
+de equilibrio.
+
+Auditoría reproducible de código AArch64:
+
+```text
+bash crates/microfield/tools/audit_aarch64_pmull.sh
+```
+
+El gate exige instrucciones PMULL, especializaciones para 128/256 bits y
+ausencia de branches/calls indirectos (`br`/`blr`) y referencias al asignador
+dentro del artefacto auditado.
+
+## Medición local H2.6
+
+Medición del 1 de agosto de 2026, Rust 1.97.1/LLVM 22.1.6, release, Linux
+6.18.7 x86-64, Intel Core i7-13700HX, PCLMUL seleccionado y 4096 elementos
+HH-256. Criterion ejecutó 20 muestras, 1 s de warm-up y 2 s de medición:
+
+| Región medida | Intervalo observado |
+|---|---:|
+| `Engine::mul_into` PCLMUL AoS | 38,711–38,778 µs |
+| producto `PackedBatch` reutilizado | 39,583–39,838 µs |
+| pack de un operand en storage existente | 1,9944–1,9955 µs |
+| unpack | 1,6416–1,6556 µs |
+| dos packs + producto + unpack reutilizados | 45,069–45,101 µs |
+| tres allocs + dos packs + producto + unpack | 51,608–51,679 µs |
+
+El wrapper packed persistente añade aproximadamente 2,3 % frente al kernel
+AoS a través de `Engine`, dentro del gate local de 3 %. El pipeline reutilizado
+expone el coste real de mover dos entradas y una salida; no se atribuye una
+aceleración a AoS packed. La oportunidad de H2.7 consiste en amortizar esos
+movimientos durante varias operaciones con un layout que gane en el kernel.
+
+Comando reproducible:
+
+```text
+cargo +stable bench -p microfield --bench portable_batch -- \
+  'gf2_256_hh_v1/batch/4096/(pack_into_reused|unpack_from_reused|\
+mul_packed_reused|pipeline_reused_pack_mul_unpack|\
+pipeline_owned_allocate_pack_mul_unpack)' \
+  --warm-up-time 1 --measurement-time 2 --sample-size 20
+```

@@ -48,6 +48,10 @@ impl ArtifactGenerator {
                 render_field_constants(validated, plan).into_bytes(),
             )?,
             GeneratedFile::new("generation-plan.json", pretty_json(plan)?)?,
+            GeneratedFile::new(
+                "verified-isa-profile.json",
+                pretty_json(plan.verified_isa_profile())?,
+            )?,
             GeneratedFile::new("metadata.json", pretty_json(&metadata)?)?,
             GeneratedFile::new(
                 "normalized.toml",

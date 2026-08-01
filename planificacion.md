@@ -18,9 +18,12 @@ status: "fase-1-cerrada-fase-2-revisada"
 > **Estado de implementación, 1 de agosto de 2026.** La Fase 1 está cerrada en
 > `main` mediante `95f82f5`. El esquema ejecutable v1 permanece limitado a
 > GF(2) en base polinómica con encoding `little`/`lsb0`. En la Fase 2, H2.1–H2.4
-> ya cubren factory estática, optimización portable, selector y PCLMUL para los
-> presets; siguen PMULL y layouts packed. `Prime`, `Normal`, `Tower` y
-> contextos dinámicos permanecen fuera del alcance.
+> cubren factory estática, optimización portable, selector y PCLMUL. El puente
+> ABI 3 genera perfiles ISA verificados para campos externos y H2.5 implementa
+> PMULL en AArch64. H2.6 implementa batches persistentes, storage alineado y
+> vistas sin `alloc`; sigue H2.7, VPCLMUL/layouts de throughput. La calibración
+> PMULL en hardware real permanece pendiente antes de selección automática. `Prime`, `Normal`,
+> `Tower` y contextos dinámicos permanecen fuera del alcance.
 
 Este documento convierte `arquitectura_campos_finitos_vectorizados` en una
 especificación funcional implementable para sus tres fases iniciales:
@@ -222,7 +225,7 @@ estas fases: sigue siendo una API experimental. Se usarán:
 ```text
 src/backend/x86/
 src/backend/aarch64/
-src/packed/aligned.rs
+src/engine/packed/storage.rs
 ```
 
 Todo `unsafe fn` tendrá una sección `# Safety` que especifique:
@@ -1519,7 +1522,7 @@ fn square_portable(
 `Engine::portable()` estará disponible en Fase 1:
 
 ```rust
-impl<F: BuiltinField> Engine<F> {
+impl<F: PortableField + StaticField> Engine<F> {
     pub fn portable() -> Self;
 
     pub fn add_into(
@@ -1699,8 +1702,9 @@ un tipo Rust nominal, monomorfizado y sin coste adicional en el hot path.
 | H2.2 ✅ | optimizador portable estático para campos generados | H2.1 |
 | H2.3 ✅ | capacidades de CPU, catálogo ampliado y selección única | H2.2 |
 | H2.4 ✅ | backend x86 PCLMUL | H2.3 |
-| H2.5 | backend AArch64 PMULL | H2.3 |
-| H2.6 | `PackedBatch`, storage alineado y vistas | H2.4/H2.5 |
+| Puente ABI 3 ✅ | perfiles ISA verificados para campos externos | H2.4 |
+| H2.5 ✅ | backend AArch64 PMULL | H2.3/Puente ABI 3 |
+| H2.6 ✅ | `PackedBatch`, storage alineado y vistas | H2.4/H2.5 |
 | H2.7 | VPCLMUL y layouts de throughput | H2.6 |
 | H2.8 | calibración, auditoría, CI multi-ISA y cierre | H2.4-H2.7 |
 
@@ -1823,8 +1827,9 @@ combinaciones sintéticas sin permitir que un consumidor falsee soporte ISA.
 
 `KernelCatalog<F>` contiene portable obligatorio y slots opcionales para
 PCLMUL, VPCLMUL y PMULL. Los módulos generados ABI 1/2 heredan un catálogo
-portable; los presets pueden sobrescribirlo internamente. `EngineBuilder` elige
-una vez y `Engine` no almacena capabilities ni vuelve a detectar.
+portable; ABI 3 adjunta adapters ISA propiedad del runtime mediante un perfil
+verificado. `EngineBuilder` elige una vez y `Engine` no almacena capabilities
+ni vuelve a detectar.
 
 Semántica implementada:
 
@@ -1837,9 +1842,34 @@ Semántica implementada:
 
 Estado: implementado. La tabla unitaria cubre exhaustivamente las combinaciones
 forzadas y la matriz automática. Integración verifica detección real,
-concurrencia, cero asignaciones, `no_std` y compatibilidad ABI 1/2. Ningún
-backend distinto de PCLMUL se marca compilado todavía. H2.4 activa PCLMUL solo
-en x86-64 y para catálogos certificados.
+concurrencia, cero asignaciones, `no_std` y compatibilidad ABI 1..=3. H2.4
+activa PCLMUL en x86-64 y H2.5 activa PMULL en AArch64; ambos exigen
+capabilities detectadas y catálogos certificados.
+
+## 6.1.5 Puente ABI 3 — perfiles ISA externos verificados
+
+Después de normalización, Rabin y planificación, todo campo válido del esquema
+v1 recibe un `VerifiedIsaProfile` target-neutral. El perfil autentica `FieldId`,
+layout, tamaños de limb/producto, digest de reducción, backends compatibles,
+política `explicit_only` y schedule completo. Se publica como
+`verified-isa-profile.json`, participa en `ArtifactId`/bundle y su digest queda
+embebido en la fuente.
+
+La fuente generada solo implementa un contrato seguro con arrays por valor y
+reducción generada. `VerifiedIsaStrategy` permanece opaca y construye dentro de
+Microfield los adapters PCLMUL/PMULL; el consumidor no puede registrar punteros,
+intrinsics ni falsificar capabilities. `Auto` conserva portable y una ISA solo
+se alcanza con `force_backend` tras `detect()`.
+
+El mismo módulo ABI 3 compila scalar-only `no_std` sin activar `portable`; en
+esa configuración el perfil no arrastra `Engine` ni adapters ISA. Activar batch
+no altera layout, identidad ni aritmética escalar.
+
+El producto schoolbook tiene calendario fijo. Low-tail publica perfil completo
+`fixed`; sparse/dense publican `data_dependent` porque su reducción inspecciona
+bits del producto. Esta clasificación autenticada gobierna `FixedSchedule`.
+Grados 9, 10 denso, 128, 192 y 233 prueban las tres clases estructurales y las
+tres familias de reducción bajo x86-64 y AArch64.
 
 ## 6.2 `BackendId`
 
@@ -2076,12 +2106,12 @@ Proceso exacto:
 2. detectar o recibir capabilities;
 3. eliminar kernels no compilados;
 4. eliminar kernels incompatibles con CPU;
-5. aplicar `PortableOnly` o backend forzado;
-6. estimar coste con `expected_batch`;
-7. aplicar política;
-8. elegir `KernelSet`;
-9. guardar puntero;
-10. no repetir detección en operaciones.
+5. si hay backend forzado, validar campo y política y terminar;
+6. excluir perfiles `automatic_selection = false`;
+7. aplicar `PortableOnly` y la clasificación de schedule;
+8. estimar coste con `expected_batch`;
+9. elegir `KernelSet`;
+10. guardar la estrategia y no repetir detección en operaciones.
 
 Si `expected_batch` no está presente, `Auto` elige un backend conservador para
 lotes medianos. La operación puede usar un subkernel de tail, pero no cambiar
@@ -2138,11 +2168,13 @@ gane en la familia de CPU medida.
 Estado H2.4: implementado. Los tres presets usan Karatsuba (tres productos en
 128 bits y nueve en 256), cuadrado dedicado y los reductores ya certificados.
 El selector requiere detección real, `PortableOnly` permanece intacto y los
-campos externos sin perfil ISA reciben `BackendUnsupportedByField`. ASan,
-canarios, longitudes 0..16 384, in-place, cero asignaciones y desensamblado
-están cubiertos. En el i7-13700HX medido, el límite conservador de mejora
-supera 20 % desde un elemento; `minimum_batch` queda fijado en 1. La frontera
-completa se documenta en `docs/microfield/adr/0013-x86-pclmul-backend.md`.
+campos externos ABI 3 usan el adapter schoolbook explícito del runtime. Una
+fuente ABI 1/2 sin perfil recibe `BackendUnsupportedByField`. ASan, canarios,
+longitudes 0..16 384, in-place, cero asignaciones y desensamblado están
+cubiertos. En el i7-13700HX medido, el límite conservador de mejora supera 20 %
+desde un elemento; `minimum_batch` queda fijado en 1 para los presets. La
+frontera completa se documenta en
+`docs/microfield/adr/0013-x86-pclmul-backend.md`.
 
 ## 6.13 x86 VPCLMUL
 
@@ -2193,39 +2225,45 @@ El uso de la mitad alta/PMULL2 se añade si los intrinsics estables o un wrapper
 estrecho permiten demostrar ventaja. PMULL básico es requisito; PMULL2 es una
 optimización condicionada, no una dependencia de la API.
 
+Estado H2.5: implementado. Los presets usan Karatsuba con 3/9 PMULL y cuadrado
+dedicado con 2/4; los perfiles ABI 3 usan schoolbook monomorfizado. Ambas rutas
+reutilizan reductores certificados, aceptan toda longitud, soportan in-place y
+no asignan. El selector exige NEON + PMULL detectados y el backend permanece
+`explicit_only` hasta calibración en hardware ARM real.
+
+QEMU 8.2 `-cpu max` ejecuta tres tests específicos sobre los presets y 11 del
+consumidor externo, también bajo AddressSanitizer. El audit release exige
+PMULL, especializaciones 128/256 y ausencia de `br`/`blr`/asignador. QEMU no
+produce cifras de rendimiento. La decisión se documenta en
+`docs/microfield/adr/0015-aarch64-pmull-backend.md`.
+
 ## 6.15 `PackingPlan`
 
 ```rust
 pub struct PackingPlan {
-    pub backend: BackendId,
-    pub layout: PackedLayout,
-    pub logical_len: usize,
-    pub padded_len: usize,
-    pub tile_elements: usize,
-    pub limb_count: usize,
-    pub alignment: usize,
+    // campos privados: backend, FieldId, layout, longitudes, tile,
+    // limb_count, element_size, alignment y data_bytes
 }
 
+#[non_exhaustive]
 pub enum PackedLayout {
     Aos,
-    Soa64,
-    HybridTile {
-        elements: u16,
-        limbs: u16,
-    },
 }
 ```
 
-La selección del layout depende de campo y backend, no del usuario.
+La selección del layout depende de campo y backend, no del usuario. H2.6
+publica únicamente AoS, el estado consumible por portable/PCLMUL/PMULL. SoA y
+tiles híbridos se incorporarán con H2.7; no se modelan variantes futuras
+parcialmente válidas.
 
 ## 6.16 `AlignedBuffer`
 
 ```rust
-pub(crate) struct AlignedBuffer {
-    ptr: NonNull<u8>,
-    len_bytes: usize,
-    capacity_bytes: usize,
-    alignment: usize,
+pub(crate) struct AlignedBuffer<F: Copy> {
+    ptr: NonNull<F>,
+    len: usize,
+    layout: Option<Layout>,
+    field: PhantomData<F>,
 }
 ```
 
@@ -2243,17 +2281,16 @@ Es el único `unsafe` de `packed`.
 ## 6.17 `PackedBatch<F>`
 
 ```rust
-pub struct PackedBatch<F: BuiltinField> {
-    storage: AlignedBuffer,
+pub struct PackedBatch<F: PortableField + StaticField> {
+    storage: AlignedBuffer<F>,
     plan: PackingPlan,
-    _field: PhantomData<F>,
 }
 ```
 
 Funciones:
 
 ```rust
-impl<F: BuiltinField> PackedBatch<F> {
+impl<F: PortableField + StaticField> PackedBatch<F> {
     pub fn new(
         engine: &Engine<F>,
         len: usize,
@@ -2307,6 +2344,11 @@ impl<F: BuiltinField> Engine<F> {
         out: &mut PackedBatch<F>,
         values: &PackedBatch<F>,
     ) -> Result<(), PackError>;
+
+    pub fn mul_packed_assign(...)
+        -> Result<(), PackError>;
+    pub fn square_packed_assign(...)
+        -> Result<(), PackError>;
 }
 ```
 
@@ -2326,7 +2368,7 @@ Para `no_std + alloc` limitado o scratch proporcionado:
 pub struct PackedBatchView<'a, F> { ... }
 pub struct PackedBatchViewMut<'a, F> { ... }
 
-pub fn required_packed_bytes<F>(
+pub fn required_packed_bytes(
     plan: &PackingPlan,
 ) -> Result<usize, PackError>;
 
@@ -2337,7 +2379,9 @@ pub fn pack_into_storage<'a, F>(
 ) -> Result<PackedBatchViewMut<'a, F>, PackError>;
 ```
 
-El batch owned es ergonomía; la vista es la ruta sin asignación oculta.
+El batch owned es ergonomía bajo `alloc`; la vista está disponible con
+`portable` sin `alloc`. Las mismas operaciones out-of-place e in-place existen
+para vistas.
 
 ## 6.20 Errores de Fase 2
 
@@ -2350,17 +2394,25 @@ pub enum EngineBuildError {
 }
 
 pub enum PackError {
-    LengthMismatch,
+    LengthMismatch { expected: usize, actual: usize },
     SizeOverflow,
+    ZeroSizedField,
+    InvalidAlignment { alignment: usize },
     AllocationFailed,
-    WrongBackend,
-    WrongLayout,
+    WrongBackend { expected: BackendId, actual: BackendId },
+    IncompatiblePlan,
     InsufficientStorage {
         required: usize,
         provided: usize,
     },
 }
 ```
+
+**Estado H2.6:** implementado. Los tres presets y los campos externos usan el
+mismo contrato. El storage owned y prestado pasa longitudes límite, offsets de
+alineamiento, Miri/ASan, errores transaccionales y contador de cero asignaciones
+durante reutilización. El benchmark separa pack, unpack, kernel persistente y
+pipeline total. Véase `docs/microfield/adr/0016-persistent-packed-batches.md`.
 
 ## 6.21 Pruebas diferenciales
 
@@ -2400,7 +2452,7 @@ QEMU sirve para corrección cruzada. No se usará para cifras de rendimiento.
 
 ## 6.23 Auditoría de instrucciones
 
-`microfield-gen asm-audit` comprobará:
+Los scripts de auditoría de Fase 2 comprueban:
 
 - presencia de `pclmulqdq` en kernel PCLMUL;
 - presencia de VPCLMUL en kernel correspondiente;
@@ -2855,15 +2907,17 @@ Orden revisado después del cierre de Fase 1:
 2. optimizador portable estático para la mayoría de GF(2^m);
 3. capabilities, `EngineBuilder` detectado y catálogo ampliado;
 4. PCLMUL;
-5. PMULL;
-6. `PackedBatch` y vistas sobre storage aportado;
-7. VPCLMUL y layouts persistentes;
-8. thresholds, auditoría, CI multi-ISA y cierre.
+5. perfiles ISA externos verificados mediante ABI 3;
+6. PMULL;
+7. `PackedBatch` y vistas sobre storage aportado;
+8. VPCLMUL y layouts persistentes;
+9. thresholds, auditoría, CI multi-ISA y cierre.
 
 PCLMUL y PMULL se desarrollan sobre el mismo conjunto de vectores. VPCLMUL no
 bloquea la corrección del motor si no alcanza aún el rendimiento esperado.
-Los campos externos comienzan con portable; la elegibilidad ISA no se infiere
-solo por grado o cardinalidad.
+Los campos externos conservan portable y reciben elegibilidad ISA estructural
+solo después de validación/certificación. Corrección no implica selección
+automática: esa decisión exige calibración por target.
 
 # 13. Ejemplo de uso objetivo
 

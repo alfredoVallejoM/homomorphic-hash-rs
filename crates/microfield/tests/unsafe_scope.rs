@@ -1,17 +1,20 @@
-//! Ensures H2.4 cannot silently expand its audited `unsafe` boundary.
+//! Ensures H2.6 cannot silently expand its audited `unsafe` boundaries.
 
 #![cfg(all(feature = "std", feature = "portable", feature = "builtin-fields"))]
 
 use std::{fs, path::Path};
 
 #[test]
-fn unsafe_code_is_confined_to_the_pclmul_adapter() {
+fn unsafe_code_is_confined_to_isa_adapters_and_packed_storage() {
     let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
     let mut rust_files = Vec::new();
     collect_rust_files(&source, &mut rust_files);
 
     let pclmul = source.join("backend/x86_pclmul.rs");
+    let pmull = source.join("backend/aarch64_pmull.rs");
+    let packed_storage = source.join("engine/packed/storage.rs");
     let backend_module = source.join("backend/mod.rs");
+    let packed_module = source.join("engine/packed/mod.rs");
     let mut unsafe_sites = 0;
     let mut allow_sites = 0;
 
@@ -30,13 +33,18 @@ fn unsafe_code_is_confined_to_the_pclmul_adapter() {
             .any(|token| line.contains(token))
             {
                 unsafe_sites += 1;
-                assert_eq!(path, pclmul, "unsafe code escaped the audited adapter");
+                assert!(
+                    path == pclmul || path == pmull || path == packed_storage,
+                    "unsafe code escaped the three audited boundaries: {}",
+                    path.display()
+                );
             }
             if line.contains("allow(unsafe_code)") {
                 allow_sites += 1;
-                assert_eq!(
-                    path, backend_module,
-                    "an additional module relaxed the unsafe lint"
+                assert!(
+                    path == backend_module || path == packed_module,
+                    "an additional module relaxed the unsafe lint: {}",
+                    path.display()
                 );
             }
         }
@@ -47,8 +55,8 @@ fn unsafe_code_is_confined_to_the_pclmul_adapter() {
         "the gate must observe the audited wrapper"
     );
     assert_eq!(
-        allow_sites, 1,
-        "exactly one module-level exception is allowed"
+        allow_sites, 3,
+        "exactly three audited module exceptions are allowed"
     );
     let root = fs::read_to_string(source.join("lib.rs")).expect("crate root must be readable");
     assert!(root.contains("#![deny(unsafe_code)]"));

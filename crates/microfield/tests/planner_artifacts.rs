@@ -13,7 +13,8 @@ use microfield::spec::{
     ArtifactGenerator, Generator,
     error::GenerationError,
     model::{
-        ExponentiationStep, FieldManifest, FoldStep, GeneratedArtifacts, PortableDegreeClass,
+        ExponentiationStep, FieldManifest, FoldStep, GeneratedArtifacts, IsaProfileBackend,
+        IsaProfileClass, IsaProfileSchedule, IsaProfileSelection, PortableDegreeClass,
         PortableReductionStrategy,
     },
 };
@@ -31,24 +32,40 @@ struct TestBundleFile {
     sha256: String,
 }
 
+#[derive(serde::Deserialize, serde::Serialize)]
+struct TestUnsignedIsaProfile {
+    schema: u32,
+    field_id: String,
+    profile_class: String,
+    limb_bits: usize,
+    input_limbs: usize,
+    wide_limbs: usize,
+    layout: String,
+    product: String,
+    reduction_proof_digest: String,
+    backends: [String; 2],
+    selection: String,
+    schedule: String,
+}
+
 const GOLDEN: [(&str, &str, &str, &str); 3] = [
     (
         "gf2_128_v1.toml",
-        "377b8f5402b057dae37ecdad1be47259d8e24555a794faa46535ecae298b558c",
+        "cf819f1bdc3feb90b660251db0a03f0e5313bca2590e749911d7fbf7881985fc",
         "07545484d4a09b1d44c25d0a0042042046396f9b5e2467bc5b6b0d7a2c327220",
-        "53f5a53218beb44d45b81982eb6235b10f0ad847fa7a6f81697780594925a1bb",
+        "b2283fd766420fd832fb6e3b8465c2e7f4800c4f82d60a5e7fb026bb700c196a",
     ),
     (
         "gf2_256_alt_v1.toml",
-        "ef3d67b5ff9df3c21fb529aee76759f87d16290082dca22171a8d8e705ff3bc3",
+        "5a7699177fffb929db93400084f9fa8495c015bd4eb0da1b247ce538ce831487",
         "f4a06836f946c87f3fda8f23889670e9182e3b23086cc7108a20879e3a5999e8",
-        "5087cd8431c2edbe4982261147bd21328fe40358ebdd9c72e36e7d308e6d686c",
+        "8faa30de1fdc110be2ef78cb8f8fb6bc403e08a2ab10921f000e4cde176d972c",
     ),
     (
         "gf2_256_hh_v1.toml",
-        "b21097ca93e5e041b2059ba48a8b1017c3d77b031c485805780ecab6e3296544",
+        "f9752213c4cd64f851e6a9e89e4c1d1d557fe067cc6c8dbc9780c227fc8f23e4",
         "476cb23704fa07610dfdaad7b662c365208583f9a05e61e3e2809f96da9851f3",
-        "af60eebc43cc43f96331e589acecc71d7d360df47978317c2a00ffaf4413b77f",
+        "2d139e0faaca1199a10be73f37b5adaee78b4172f3a93dcfa0a20ffc160d0128",
     ),
 ];
 
@@ -84,6 +101,22 @@ fn product_reduction_and_identity_plans_have_frozen_shapes() {
             optimized.modulus_terms(),
             descriptor.modulus_exponents().len()
         );
+
+        let isa = plan.verified_isa_profile();
+        assert_eq!(isa.field_id(), validated.field_id());
+        assert_eq!(isa.profile_class(), IsaProfileClass::PowerOfTwoLimbAligned);
+        assert_eq!(isa.input_limbs(), degree / 64);
+        assert_eq!(isa.wide_limbs(), degree / 32);
+        assert_eq!(
+            isa.backends(),
+            &[
+                IsaProfileBackend::X86Pclmul,
+                IsaProfileBackend::Aarch64Pmull
+            ]
+        );
+        assert_eq!(isa.selection(), IsaProfileSelection::ExplicitOnly);
+        assert_eq!(isa.schedule(), IsaProfileSchedule::Fixed);
+        assert_eq!(isa.profile_digest().len(), 64);
 
         let reduction = plan.reduction();
         assert_eq!(reduction.input_bits(), degree * 2);
@@ -149,7 +182,7 @@ fn generated_repository_artifacts_equal_clean_in_memory_generation() {
         let artifacts = generator
             .generate(&manifest_path)
             .expect("generation succeeds");
-        assert_eq!(artifacts.files().len(), 7);
+        assert_eq!(artifacts.files().len(), 8);
         assert_eq!(artifacts.bundle_digest().to_string(), bundle_digest);
         assert_artifact_directory(&artifacts, &artifacts_directory());
         assert_cross_file_identity(&artifacts);
@@ -230,6 +263,7 @@ fn presentation_name_changes_files_but_not_semantic_or_representation_ids() {
         "certificate.json",
         "descriptor.json",
         "generation-plan.json",
+        "verified-isa-profile.json",
     ] {
         assert_eq!(original_map[unchanged], renamed_map[unchanged]);
     }
@@ -307,6 +341,8 @@ fn assert_cross_file_identity(artifacts: &GeneratedArtifacts) {
         serde_json::from_slice(files["descriptor.json"]).expect("descriptor JSON");
     let bundle: serde_json::Value =
         serde_json::from_slice(files["bundle.json"]).expect("bundle JSON");
+    let isa_profile: serde_json::Value = serde_json::from_slice(files["verified-isa-profile.json"])
+        .expect("verified ISA profile JSON");
 
     assert_eq!(metadata["field_name"], artifacts.field_name());
     assert_eq!(metadata["field_id"], artifacts.field_id().to_string());
@@ -314,12 +350,31 @@ fn assert_cross_file_identity(artifacts: &GeneratedArtifacts) {
     assert_eq!(plan["field_id"], metadata["field_id"]);
     assert_eq!(plan["artifact_id"], metadata["artifact_id"]);
     assert_eq!(certificate["field_id"], metadata["field_id"]);
+    assert_eq!(isa_profile["field_id"], metadata["field_id"]);
+    assert_eq!(plan["verified_isa_profile"], isa_profile);
+    assert_eq!(
+        isa_profile["reduction_proof_digest"],
+        plan["reduction"]["proof_digest"]
+    );
+    let unsigned: TestUnsignedIsaProfile =
+        serde_json::from_slice(files["verified-isa-profile.json"])
+            .expect("profile descriptor deserializes without trusting its digest");
+    let unsigned_bytes = serde_json::to_vec(&unsigned).expect("profile descriptor serializes");
+    let mut profile_hasher = Sha256::new();
+    profile_hasher.update(b"microfield:verified-isa-profile:v1\0");
+    profile_hasher.update(unsigned_bytes);
+    assert_eq!(
+        hex(&profile_hasher.finalize()),
+        isa_profile["profile_digest"]
+            .as_str()
+            .expect("digest string")
+    );
     assert_eq!(bundle["artifact_id"], metadata["artifact_id"]);
     assert_eq!(
         bundle["bundle_digest"],
         artifacts.bundle_digest().to_string()
     );
-    assert_eq!(bundle["files"].as_array().expect("file array").len(), 6);
+    assert_eq!(bundle["files"].as_array().expect("file array").len(), 7);
     assert_eq!(
         descriptor["degree"].as_u64(),
         plan["reduction"]["output_bits"].as_u64()

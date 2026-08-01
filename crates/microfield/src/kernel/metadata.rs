@@ -38,6 +38,7 @@ pub struct KernelMetadata {
     requires_packing: bool,
     scratch_bytes_per_element: usize,
     schedule: ScheduleKind,
+    automatic_selection: bool,
 }
 
 impl KernelMetadata {
@@ -51,6 +52,7 @@ impl KernelMetadata {
             requires_packing: false,
             scratch_bytes_per_element: 0,
             schedule: ScheduleKind::DataDependent,
+            automatic_selection: true,
         }
     }
 
@@ -60,15 +62,44 @@ impl KernelMetadata {
         target_arch = "x86_64"
     ))]
     pub(crate) const fn x86_pclmul<F>(minimum_batch: usize) -> Self {
+        Self::isa::<F>(
+            BackendId::X86Pclmul,
+            minimum_batch,
+            ScheduleKind::Fixed,
+            true,
+        )
+    }
+
+    #[cfg(all(feature = "portable", target_arch = "x86_64"))]
+    pub(crate) const fn x86_pclmul_explicit<F>(schedule: ScheduleKind) -> Self {
+        Self::isa::<F>(BackendId::X86Pclmul, 1, schedule, false)
+    }
+
+    #[cfg(all(feature = "portable", target_arch = "aarch64"))]
+    pub(crate) const fn aarch64_pmull_explicit<F>(schedule: ScheduleKind) -> Self {
+        Self::isa::<F>(BackendId::Aarch64Pmull, 1, schedule, false)
+    }
+
+    #[cfg(all(
+        feature = "portable",
+        any(target_arch = "x86_64", target_arch = "aarch64")
+    ))]
+    const fn isa<F>(
+        backend: BackendId,
+        minimum_batch: usize,
+        schedule: ScheduleKind,
+        automatic_selection: bool,
+    ) -> Self {
         Self {
-            backend: BackendId::X86Pclmul,
+            backend,
             minimum_batch,
             preferred_multiple: 1,
             required_alignment: core::mem::align_of::<F>(),
             supports_in_place: true,
             requires_packing: false,
             scratch_bytes_per_element: 0,
-            schedule: ScheduleKind::Fixed,
+            schedule,
+            automatic_selection,
         }
     }
 
@@ -87,6 +118,25 @@ impl KernelMetadata {
             requires_packing: false,
             scratch_bytes_per_element: 0,
             schedule,
+            automatic_selection: true,
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) const fn for_packing_test(
+        preferred_multiple: usize,
+        required_alignment: usize,
+    ) -> Self {
+        Self {
+            backend: BackendId::Portable,
+            minimum_batch: 0,
+            preferred_multiple,
+            required_alignment,
+            supports_in_place: true,
+            requires_packing: true,
+            scratch_bytes_per_element: 0,
+            schedule: ScheduleKind::Fixed,
+            automatic_selection: false,
         }
     }
 
@@ -139,5 +189,14 @@ impl KernelMetadata {
     #[must_use]
     pub const fn schedule(&self) -> ScheduleKind {
         self.schedule
+    }
+
+    /// Reports whether unforced policy selection may choose this strategy.
+    ///
+    /// A `false` value means correctness is certified but representative
+    /// target measurements have not yet established an automatic threshold.
+    #[must_use]
+    pub const fn automatic_selection(&self) -> bool {
+        self.automatic_selection
     }
 }

@@ -22,8 +22,13 @@ algoritmos monomorfizados. H4 incorpora el motor batch portable y está integrad
 en `main`; con ello la Fase 1 está cerrada. En Fase 2, H2.1 incorpora la
 factory estática y H2.2 optimiza los campos externos mediante planes portables
 deterministas; H2.3 cierra capabilities/selección y H2.4 añade el backend batch
-x86-64 PCLMUL para los tres presets. El siguiente hito es H2.5, PMULL en
-AArch64.
+x86-64 PCLMUL para los tres presets. El puente ABI 3 permite que cualquier
+campo externo validado reciba perfiles ISA verificados sin abrir catálogos ni
+punteros. H2.5 añade PMULL en AArch64 para presets y perfiles externos; queda
+en selección explícita hasta disponer de calibración reproducible en hardware
+ARM real. H2.6 incorpora `PackingPlan`, `PackedBatch` owned y vistas sobre
+storage externo alineado. El siguiente hito funcional es H2.7, VPCLMUL y
+layouts de throughput.
 
 ## Comandos
 
@@ -32,6 +37,10 @@ cargo test -p microfield --features generator --all-targets
 cargo test -p microfield --all-features --doc
 cargo clippy -p microfield --all-features --all-targets -- -D warnings
 cargo check -p microfield --no-default-features --features portable,builtin-fields
+cargo check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
+cargo test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
+bash crates/microfield/tools/audit_aarch64_pmull.sh
+cargo test -p microfield --all-features --test packed_batch --test packed_views
 cargo test -p homomorphic-hash-rs --lib
 cargo test -p homomorphic-hash-rs --test microfield_compat
 ```

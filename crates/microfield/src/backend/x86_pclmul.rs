@@ -9,6 +9,7 @@ use core::{
     mem::MaybeUninit,
 };
 
+#[cfg(feature = "builtin-fields")]
 mod builtins {
     use super::{
         wide_product_128_karatsuba, wide_product_256_karatsuba, wide_square_128, wide_square_256,
@@ -43,13 +44,13 @@ mod builtins {
         #[inline]
         unsafe fn multiply_pclmul(self, rhs: Self) -> Self {
             let wide = unsafe { wide_product_128_karatsuba(self.into_limbs(), rhs.into_limbs()) };
-            Self::from_limbs(reduce_128::<{ Self::PCLMUL_MODULUS_TAIL }>(wide))
+            Self::from_limbs(reduce_128::<{ Self::ISA_MODULUS_TAIL }>(wide))
         }
 
         #[inline]
         unsafe fn square_pclmul(self) -> Self {
             let wide = unsafe { wide_square_128(self.into_limbs()) };
-            Self::from_limbs(reduce_128::<{ Self::PCLMUL_MODULUS_TAIL }>(wide))
+            Self::from_limbs(reduce_128::<{ Self::ISA_MODULUS_TAIL }>(wide))
         }
     }
 
@@ -60,13 +61,13 @@ mod builtins {
                 unsafe fn multiply_pclmul(self, rhs: Self) -> Self {
                     let wide =
                         unsafe { wide_product_256_karatsuba(self.into_limbs(), rhs.into_limbs()) };
-                    Self::from_limbs(reduce_256::<{ Self::PCLMUL_MODULUS_TAIL }>(wide))
+                    Self::from_limbs(reduce_256::<{ Self::ISA_MODULUS_TAIL }>(wide))
                 }
 
                 #[inline]
                 unsafe fn square_pclmul(self) -> Self {
                     let wide = unsafe { wide_square_256(self.into_limbs()) };
-                    Self::from_limbs(reduce_256::<{ Self::PCLMUL_MODULUS_TAIL }>(wide))
+                    Self::from_limbs(reduce_256::<{ Self::ISA_MODULUS_TAIL }>(wide))
                 }
             }
         };
@@ -133,7 +134,97 @@ mod builtins {
     }
 }
 
+#[cfg(feature = "builtin-fields")]
 pub(crate) use builtins::{GF2_128_V1_KERNELS, GF2_256_ALT_V1_KERNELS, GF2_256_HH_V1_KERNELS};
+
+pub(crate) const fn verified_kernel_set<F, const LIMBS: usize, const WIDE_LIMBS: usize>()
+-> crate::kernel::KernelSet<F>
+where
+    F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
+{
+    crate::kernel::KernelSet::new(
+        crate::KernelMetadata::x86_pclmul_explicit::<F>(F::SCHEDULE),
+        verified_add::<F, LIMBS, WIDE_LIMBS>,
+        verified_multiply::<F, LIMBS, WIDE_LIMBS>,
+        verified_square::<F, LIMBS, WIDE_LIMBS>,
+        verified_multiply_assign::<F, LIMBS, WIDE_LIMBS>,
+        verified_square_assign::<F, LIMBS, WIDE_LIMBS>,
+    )
+}
+
+#[inline]
+fn verified_add<F, const LIMBS: usize, const WIDE_LIMBS: usize>(out: &mut [F], lhs: &[F], rhs: &[F])
+where
+    F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
+{
+    debug_assert_eq!(out.len(), lhs.len());
+    debug_assert_eq!(lhs.len(), rhs.len());
+    for ((output, left), right) in out.iter_mut().zip(lhs).zip(rhs) {
+        *output = left.add(*right);
+    }
+}
+
+#[inline]
+fn verified_multiply<F, const LIMBS: usize, const WIDE_LIMBS: usize>(
+    out: &mut [F],
+    lhs: &[F],
+    rhs: &[F],
+) where
+    F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
+{
+    debug_assert_eq!(out.len(), lhs.len());
+    debug_assert_eq!(lhs.len(), rhs.len());
+    for ((output, left), right) in out.iter_mut().zip(lhs).zip(rhs) {
+        // SAFETY: the selector admits this private entry only after the trusted
+        // `pclmulqdq` capability snapshot has been checked.
+        let wide = unsafe {
+            wide_product_schoolbook::<LIMBS, WIDE_LIMBS>(left.__into_limbs(), right.__into_limbs())
+        };
+        *output = F::__from_reduced_limbs(F::__reduce_wide(wide));
+    }
+}
+
+#[inline]
+fn verified_square<F, const LIMBS: usize, const WIDE_LIMBS: usize>(out: &mut [F], values: &[F])
+where
+    F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
+{
+    debug_assert_eq!(out.len(), values.len());
+    for (output, value) in out.iter_mut().zip(values) {
+        // SAFETY: see `verified_multiply`.
+        let wide = unsafe { wide_square_schoolbook::<LIMBS, WIDE_LIMBS>(value.__into_limbs()) };
+        *output = F::__from_reduced_limbs(F::__reduce_wide(wide));
+    }
+}
+
+#[inline]
+fn verified_multiply_assign<F, const LIMBS: usize, const WIDE_LIMBS: usize>(
+    lhs: &mut [F],
+    rhs: &[F],
+) where
+    F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
+{
+    debug_assert_eq!(lhs.len(), rhs.len());
+    for (left, right) in lhs.iter_mut().zip(rhs) {
+        // SAFETY: see `verified_multiply`.
+        let wide = unsafe {
+            wide_product_schoolbook::<LIMBS, WIDE_LIMBS>(left.__into_limbs(), right.__into_limbs())
+        };
+        *left = F::__from_reduced_limbs(F::__reduce_wide(wide));
+    }
+}
+
+#[inline]
+fn verified_square_assign<F, const LIMBS: usize, const WIDE_LIMBS: usize>(values: &mut [F])
+where
+    F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
+{
+    for value in values {
+        // SAFETY: see `verified_multiply`.
+        let wide = unsafe { wide_square_schoolbook::<LIMBS, WIDE_LIMBS>(value.__into_limbs()) };
+        *value = F::__from_reduced_limbs(F::__reduce_wide(wide));
+    }
+}
 
 #[target_feature(enable = "pclmulqdq")]
 /// Computes one 64 × 64-bit carry-less product.
@@ -159,6 +250,7 @@ fn lanes(value: __m128i) -> [u64; 2] {
 }
 
 #[target_feature(enable = "pclmulqdq")]
+#[cfg(feature = "builtin-fields")]
 /// Computes a 128 × 128-bit product with three carry-less multiplications.
 ///
 /// # Safety
@@ -173,7 +265,7 @@ unsafe fn wide_product_128_karatsuba(lhs: [u64; 2], rhs: [u64; 2]) -> [u64; 4] {
 }
 
 #[target_feature(enable = "pclmulqdq")]
-#[cfg(all(test, feature = "std"))]
+#[cfg(all(test, feature = "std", feature = "builtin-fields"))]
 /// Computes the test-only 128-bit schoolbook product.
 ///
 /// # Safety
@@ -184,6 +276,7 @@ unsafe fn wide_product_128_schoolbook(lhs: [u64; 2], rhs: [u64; 2]) -> [u64; 4] 
 }
 
 #[target_feature(enable = "pclmulqdq")]
+#[cfg(feature = "builtin-fields")]
 /// Computes a 256 × 256-bit product with one outer Karatsuba level.
 ///
 /// # Safety
@@ -213,7 +306,7 @@ unsafe fn wide_product_256_karatsuba(lhs: [u64; 4], rhs: [u64; 4]) -> [u64; 8] {
 }
 
 #[target_feature(enable = "pclmulqdq")]
-#[cfg(all(test, feature = "std"))]
+#[cfg(all(test, feature = "std", feature = "builtin-fields"))]
 /// Computes the test-only 256-bit schoolbook product.
 ///
 /// # Safety
@@ -224,8 +317,7 @@ unsafe fn wide_product_256_schoolbook(lhs: [u64; 4], rhs: [u64; 4]) -> [u64; 8] 
 }
 
 #[target_feature(enable = "pclmulqdq")]
-#[cfg(all(test, feature = "std"))]
-/// Computes a test-only schoolbook product for fixed limb counts.
+/// Computes a schoolbook product for fixed limb counts.
 ///
 /// # Safety
 ///
@@ -248,6 +340,27 @@ unsafe fn wide_product_schoolbook<const LIMBS: usize, const WIDE: usize>(
 }
 
 #[target_feature(enable = "pclmulqdq")]
+/// Expands a generic generated-field square without cross terms.
+///
+/// # Safety
+///
+/// The current CPU must support `pclmulqdq` and `WIDE` must equal
+/// `2 * LIMBS`.
+unsafe fn wide_square_schoolbook<const LIMBS: usize, const WIDE: usize>(
+    value: [u64; LIMBS],
+) -> [u64; WIDE] {
+    debug_assert_eq!(WIDE, LIMBS * 2);
+    let mut output = [0; WIDE];
+    for (index, limb) in value.into_iter().enumerate() {
+        let product = unsafe { clmul64(limb, limb) };
+        output[index * 2] = product[0];
+        output[index * 2 + 1] = product[1];
+    }
+    output
+}
+
+#[target_feature(enable = "pclmulqdq")]
+#[cfg(feature = "builtin-fields")]
 /// Expands a 128-bit square without cross terms.
 ///
 /// # Safety
@@ -260,6 +373,7 @@ unsafe fn wide_square_128(value: [u64; 2]) -> [u64; 4] {
 }
 
 #[target_feature(enable = "pclmulqdq")]
+#[cfg(feature = "builtin-fields")]
 /// Expands a 256-bit square without cross terms.
 ///
 /// # Safety
@@ -273,7 +387,7 @@ unsafe fn wide_square_256(value: [u64; 4]) -> [u64; 8] {
     ]
 }
 
-#[cfg(all(test, feature = "std"))]
+#[cfg(all(test, feature = "std", feature = "builtin-fields"))]
 mod tests {
     use super::*;
 

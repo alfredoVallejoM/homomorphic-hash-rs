@@ -39,7 +39,9 @@ pub mod spec;
 #[cfg(feature = "generator")]
 pub mod generator {
     pub use crate::spec::model::{
+        IsaProfileBackend, IsaProfileClass, IsaProfileSchedule, IsaProfileSelection,
         PortableDegreeClass, PortableOptimizationPlan, PortableReductionStrategy,
+        VerifiedIsaProfile,
     };
     pub use crate::spec::{
         BinaryFieldFactory, BinaryFieldFactoryBuilder, BinaryFieldFactoryError,
@@ -47,9 +49,13 @@ pub mod generator {
     };
 }
 
+#[cfg(all(feature = "portable", feature = "alloc"))]
+pub use engine::PackedBatch;
 #[cfg(feature = "portable")]
 pub use engine::{
     Architecture, CpuCapabilities, Engine, EngineBuildError, EngineBuilder, ExecutionPolicy,
+    PackError, PackedBatchView, PackedBatchViewMut, PackedLayout, PackingPlan, pack_into_storage,
+    required_packed_bytes,
 };
 pub use error::{BatchError, DecodeError};
 pub use field::{
@@ -60,8 +66,11 @@ pub use id::{ArtifactBundleDigest, ArtifactId, FieldId};
 pub use kernel::{BackendId, KernelMetadata, ScheduleKind};
 
 #[doc(hidden)]
+pub use kernel::KernelCatalog;
+
+#[doc(hidden)]
 #[cfg(feature = "portable")]
-pub use kernel::{BuiltinField, KernelCatalog};
+pub use kernel::BuiltinField;
 
 #[cfg(feature = "builtin-fields")]
 pub use generated::{Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1};

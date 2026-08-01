@@ -4,11 +4,18 @@ version = "0.0.0"
 edition = "2024"
 publish = false
 
+[features]
+default = ["batch"]
+batch = ["microfield/portable"]
+
 [workspace]
 resolver = "2"
 
 [dependencies]
-microfield = { path = "../..", default-features = false, features = ["portable"] }
+microfield = { path = "../..", default-features = false }
 
 [build-dependencies]
 microfield = { path = "../..", default-features = false, features = ["generator"] }
+
+[dev-dependencies]
+microfield = { path = "../..", default-features = false, features = ["std", "portable"] }

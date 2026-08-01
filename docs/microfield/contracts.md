@@ -116,8 +116,8 @@ La salida es fuente Rust previa a compilación, no un campo dinámico. El newtyp
 generado contiene exactamente `ceil(m / 64)` limbs privados y el encoding
 contiene `ceil(m / 8)` bytes. Los bits de padding se rechazan; los bytes
 polinómicos arbitrariamente anchos se reducen. La fuente actual usa ABI de
-codegen 2 y cada módulo comprueba su compatibilidad mediante una aserción
-`const`; el runtime conserva helpers ABI 1 y acepta el rango 1..=2.
+codegen 3 y cada módulo comprueba su compatibilidad mediante una aserción
+`const`; el runtime conserva helpers ABI 1/2 y acepta el rango 1..=3.
 `GeneratedFieldPackage::package_digest` autentica conjuntamente el digest del
 bundle de certificados/planes y los bytes exactos del módulo Rust.
 
@@ -126,6 +126,17 @@ cuadrado por expansión de bits, inversión Itoh–Tsujii y una de tres
 reducciones: tail bajo alineado, términos dispersos o palabras densas. La
 decisión depende solo del descriptor validado, queda serializada en el IR y no
 añade ramas de selección al escalar.
+
+IR v3 añade `VerifiedIsaProfile`, derivado exclusivamente tras validación. El
+perfil fija layout, anchuras, backends carry-less compatibles, digest de
+reducción y digest propio. Se emite como archivo del bundle y habilita una
+estrategia ISA segura sin exponer `KernelSet` ni intrinsics. Todo perfil externo
+es `explicit_only`: corrección certificada no autoriza selección automática sin
+calibración nativa.
+
+El contrato ABI 3 compila también sin la feature `portable`: álgebra, encoding
+y metadata permanecen disponibles en `no_std`, mientras `Engine` y los adapters
+ISA no se compilan. Activar batch no cambia layout, identidad ni código escalar.
 
 La publicación crea y sincroniza un archivo de staging antes de renombrarlo. Se
 rechazan directorios o targets que sean symlinks o archivos especiales. Los
@@ -144,13 +155,18 @@ Operaciones v1: `add_into`, `mul_into`, `square_into`, `mul_assign` y
 salida distinta por contrato de préstamos; las rutas `*_assign` expresan
 aliasing intencional.
 
-`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. En
-x86-64 H2.4 compila PCLMUL y lo registra solo para los tres presets mantenidos;
-VPCLMUL y PMULL siguen devolviendo `BackendNotCompiled`. PCLMUL distingue CPU
-sin la capability (`BackendUnsupportedByCpu`) de campo sin perfil certificado
-(`BackendUnsupportedByField`). `FixedSchedule` selecciona PCLMUL únicamente
-tras detección positiva; portable no recibe esa garantía porque su producto
-actual depende de los operandos.
+`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. H2.4
+compila PCLMUL en x86-64 y H2.5 compila PMULL en AArch64; VPCLMUL sigue
+devolviendo `BackendNotCompiled`. ABI 3 registra el adapter ISA compatible para
+campos externos. Un campo ABI 1/2 continúa devolviendo
+`BackendUnsupportedByField`. En todos los casos se distingue CPU sin capability
+(`BackendUnsupportedByCpu`) de campo sin perfil.
+
+PCLMUL mantenido participa en selección automática con el umbral medido. PMULL
+y todo perfil externo tienen `automatic_selection = false`: solo un backend
+forzado tras detección puede usarlos. `FixedSchedule` también respeta esta
+regla salvo que se fuerce el backend. Portable no recibe garantía fija porque
+su producto actual depende de los operandos.
 
 `EngineBuilder::build()` usa por defecto `CpuCapabilities::portable_only()` y
 nunca hace detección implícita. Con `std`, `EngineBuilder::detect()` captura una
@@ -161,10 +177,36 @@ diagnóstico, pero sus bits no tienen constructor público.
 `Auto`. No limitan las longitudes válidas: todo `KernelSet` registrado debe
 aceptar cualquier slice, incluido el vacío.
 
+## Batch persistente
+
+`Engine::packing_plan(len)` es la única factory de planes. El plan queda ligado
+al backend seleccionado, al `FieldId`, al layout, a la longitud lógica/padded,
+al tile y al alineamiento. Sus campos son privados y no se serializa.
+
+H2.6 admite únicamente `PackedLayout::Aos`; los layouts SoA/híbridos se añadirán
+solo con un kernel capaz de ejecutarlos. Esto evita que el usuario pueda crear
+combinaciones campo/backend/layout parcialmente válidas.
+
+`PackedBatch<F>` requiere `alloc`. `PackedBatchView` y
+`PackedBatchViewMut` no lo requieren y toman prestado storage
+`MaybeUninit<u8>` mediante `pack_into_storage`. `required_packed_bytes` incluye
+el peor slack de alineamiento; longitud cero requiere cero bytes. Todo slot
+padded se inicializa con `F::ZERO` antes de exponer una referencia tipada.
+
+Producto y cuadrado packed tienen rutas distintas out-of-place e in-place. Una
+operación valida todos los planes y el backend antes de escribir, y después
+realiza una llamada al kernel seleccionado sobre la región padded. No asigna,
+no hace repacking, no detecta CPU ni selecciona estrategia durante la operación.
+
+Los préstamos expresan aliasing: una vista mutable conserva el préstamo
+exclusivo del storage y no puede coexistir de forma segura con otra vista sobre
+la misma región. No se exponen bytes, offsets, punteros ni padding.
+
 ## Errores y escrituras
 
 - Encoding incorrecto devuelve `DecodeError`; no hace panic.
 - Una longitud batch inválida se detecta antes de escribir.
+- Un backend o plan packed incompatible se detecta antes de escribir.
 - La salida permanece intacta si la validación falla.
 - Invertir cero devuelve `None`.
 - `from_canonical` nunca reduce; `from_polynomial_bytes_mod` sí.
@@ -178,3 +220,9 @@ específica.
 PCLMUL posee schedule fijo respecto de los valores para `mul` y `square`, pero
 esta propiedad de scheduling no equivale por sí sola a una garantía completa
 de tiempo constante del sistema.
+
+Los kernels PMULL de los presets también poseen calendario fijo respecto de
+los valores. El perfil ABI 3 publica `schedule = fixed` solamente para
+`low_tail_fold`; `sparse_term_fold` y `dense_word_fold` publican
+`schedule = data_dependent`, pues su reducción inspecciona bits del producto.
+`FixedSchedule` respeta esa clasificación incluso ante selección explícita.

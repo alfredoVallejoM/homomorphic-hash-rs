@@ -31,13 +31,19 @@ macro_rules! define_binary_field {
                 Self(limbs)
             }
 
-            #[cfg(all(feature = "portable", target_arch = "x86_64"))]
+            #[cfg(all(
+                feature = "portable",
+                any(target_arch = "x86_64", target_arch = "aarch64")
+            ))]
             pub(crate) const fn into_limbs(self) -> $limbs {
                 self.0
             }
 
-            #[cfg(all(feature = "portable", target_arch = "x86_64"))]
-            pub(crate) const PCLMUL_MODULUS_TAIL: u64 = $modulus_tail;
+            #[cfg(all(
+                feature = "portable",
+                any(target_arch = "x86_64", target_arch = "aarch64")
+            ))]
+            pub(crate) const ISA_MODULUS_TAIL: u64 = $modulus_tail;
 
             fn write_hex(self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 for limb in self.0.as_ref().iter().rev() {

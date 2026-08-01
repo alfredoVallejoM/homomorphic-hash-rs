@@ -11,7 +11,8 @@ use std::{
 use microfield::{
     StaticField,
     generator::{
-        BinaryFieldFactory, BinaryFieldFactoryError, PortableDegreeClass, PortableReductionStrategy,
+        BinaryFieldFactory, BinaryFieldFactoryError, IsaProfileBackend, IsaProfileClass,
+        IsaProfileSchedule, IsaProfileSelection, PortableDegreeClass, PortableReductionStrategy,
     },
     spec::{
         Generator, JsonFileOracle,
@@ -73,7 +74,29 @@ fn builder_is_deterministic_and_normalizes_exponent_order() {
     assert_eq!(first.package_digest(), second.package_digest());
     assert_eq!(first.rust_source(), second.rust_source());
     assert_eq!(first.type_name(), "Gf2_3Test");
-    assert_eq!(first.codegen_abi_version(), 2);
+    assert_eq!(first.codegen_abi_version(), 3);
+    assert_eq!(
+        first.verified_isa_profile().profile_class(),
+        IsaProfileClass::Unaligned
+    );
+    assert_eq!(
+        first.verified_isa_profile().backends(),
+        &[
+            IsaProfileBackend::X86Pclmul,
+            IsaProfileBackend::Aarch64Pmull
+        ]
+    );
+    assert_eq!(
+        first.verified_isa_profile().selection(),
+        IsaProfileSelection::ExplicitOnly
+    );
+    assert_eq!(
+        first.verified_isa_profile().schedule(),
+        IsaProfileSchedule::DataDependent
+    );
+    assert_eq!(first.verified_isa_profile().input_limbs(), 1);
+    assert_eq!(first.verified_isa_profile().wide_limbs(), 2);
+    assert_eq!(first.verified_isa_profile().profile_digest().len(), 64);
     assert_eq!(
         first.portable_optimization().degree_class(),
         PortableDegreeClass::Unaligned
@@ -95,10 +118,43 @@ fn builder_is_deterministic_and_normalizes_exponent_order() {
             .any(|window| window == b"unsafe")
     );
     assert!(
+        first
+            .rust_source()
+            .windows(b"VerifiedIsaStrategy".len())
+            .any(|window| window == b"VerifiedIsaStrategy")
+    );
+    assert!(
         !first
             .rust_source()
             .windows(7)
             .any(|window| window == b"dyn Tra")
+    );
+}
+
+#[test]
+fn non_power_of_two_aligned_field_gets_a_fixed_low_tail_profile() {
+    let package = BinaryFieldFactory::builder()
+        .name("gf2_192_test")
+        .degree(192)
+        .modulus_exponents(vec![192, 7, 2, 1, 0])
+        .build()
+        .expect("valid aligned definition")
+        .generate()
+        .expect("Sage-certified irreducible polynomial");
+
+    assert_eq!(
+        package.verified_isa_profile().profile_class(),
+        IsaProfileClass::LimbAligned
+    );
+    assert_eq!(
+        package.verified_isa_profile().schedule(),
+        IsaProfileSchedule::Fixed
+    );
+    assert_eq!(package.verified_isa_profile().input_limbs(), 3);
+    assert_eq!(package.verified_isa_profile().wide_limbs(), 6);
+    assert_eq!(
+        package.portable_optimization().reduction(),
+        PortableReductionStrategy::LowTailFold
     );
 }
 

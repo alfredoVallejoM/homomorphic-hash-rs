@@ -190,7 +190,11 @@ impl CompiledBackends {
         {
             Self(Self::PORTABLE | Self::X86_PCLMUL)
         }
-        #[cfg(not(target_arch = "x86_64"))]
+        #[cfg(target_arch = "aarch64")]
+        {
+            Self(Self::PORTABLE | Self::AARCH64_PMULL)
+        }
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
         {
             Self(Self::PORTABLE)
         }
@@ -239,6 +243,9 @@ fn select<F: PortableField>(
         let Some(kernels) = catalog.get(*backend) else {
             continue;
         };
+        if !kernels.metadata.automatic_selection() {
+            continue;
+        }
         if !policy_accepts(policy, *backend, kernels.metadata.schedule()) {
             continue;
         }

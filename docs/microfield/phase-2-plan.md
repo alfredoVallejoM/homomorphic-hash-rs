@@ -2,8 +2,9 @@
 
 Fecha de planificación: 1 de agosto de 2026.
 
-Estado: en curso. H2.1, H2.2, H2.3 y H2.4 están implementados y validados
-localmente; el siguiente hito operativo es H2.5, AArch64 PMULL.
+Estado: en curso. H2.1–H2.6 y el puente ABI 3 para perfiles externos están
+implementados. H2.7 es el siguiente hito. PMULL conserva selección explícita;
+la calibración nativa sigue siendo necesaria antes de habilitarlo en `Auto`.
 
 ## Objetivo ejecutivo
 
@@ -37,7 +38,8 @@ flowchart LR
     H21[H2.1 Factory binaria] --> H22[H2.2 Optimizador portable]
     H22 --> H23[H2.3 Capabilities y selector]
     H23 --> H24[H2.4 x86 PCLMUL]
-    H23 --> H25[H2.5 AArch64 PMULL]
+    H24 --> Bridge[Puente ABI 3 perfiles externos]
+    Bridge --> H25[H2.5 AArch64 PMULL]
     H24 --> H26[H2.6 PackedBatch]
     H25 --> H26
     H26 --> H27[H2.7 VPCLMUL]
@@ -47,9 +49,10 @@ flowchart LR
     H27 --> H28
 ```
 
-H2.4 y H2.5 pueden avanzar de forma independiente. H2.7 no bloquea el cierre
-si el backend funciona pero no supera el punto de equilibrio exigido; en ese
-caso queda desactivado por el selector y documentado.
+Los adapters H2.4/H2.5 comparten contrato pero su aritmética puede evolucionar
+de forma independiente; el orden operativo situó el puente ABI 3 entre ambos.
+H2.7 no bloquea el cierre si el backend funciona pero no supera el punto de
+equilibrio exigido; en ese caso queda desactivado por el selector y documentado.
 
 ## H2.1 — Factory pública de campos binarios estáticos
 
@@ -329,10 +332,10 @@ garantías entre CPUs. El informe y el comando exacto están en
 
 ### Resultado
 
-Implementado. Los módulos generados nuevos usan ABI 2 y el runtime acepta ABI
-1..=2. Los presets mantenidos conservan sus rutas escalares especializadas;
-sus artefactos se regeneraron porque el IR y el perfil portable certificado sí
-cambiaron.
+H2.2 se entregó con ABI 2. El puente posterior elevó la fuente actual a ABI 3 y
+el runtime acepta ABI 1..=3. Los presets mantenidos conservan sus rutas
+escalares especializadas; sus artefactos se regeneraron porque el IR y el
+perfil certificado sí cambiaron.
 
 ## H2.3 — Capabilities, catálogo ampliado y selector
 
@@ -417,8 +420,8 @@ reductores certificados. Los kernels aceptan todas las longitudes, canarios,
 tails y operaciones in-place sin packing, scratch o asignaciones.
 
 La capability solo se habilita por detección confiable y la selección ocurre
-al construir `Engine`. El crate niega `unsafe` globalmente y una prueba impide
-que la única excepción salga del adaptador PCLMUL. ASan, Miri portable, MSRV,
+al construir `Engine`. El crate niega `unsafe` globalmente y una prueba limita
+las excepciones a los dos adapters ISA auditados. ASan, Miri portable, MSRV,
 compilación AArch64 y consumidor externo están cubiertos. El audit de
 ensamblado confirma instrucciones PCLMUL y ausencia de asignador o dispatch
 interno.
@@ -426,8 +429,51 @@ interno.
 Criterion sobre i7-13700HX/Rust 1.97.1 confirma mejora conservadora superior a
 20 % desde un elemento en producto y cuadrado para los tres presets, por lo
 que `minimum_batch = 1`. HH-256/4096 mejora aproximadamente 37,5x en producto.
-Los campos externos conservan perfil portable hasta que un ABI posterior pueda
-certificar y emitir su catálogo ISA sin abrir el registro de kernels.
+Los campos externos ABI 1/2 conservan perfil portable. ABI 3 materializa el
+puente descrito a continuación sin abrir el registro de kernels.
+
+## Puente previo a H2.5 — perfiles ISA externos verificados
+
+### Propósito
+
+Permitir que un campo externo validado use adaptadores ISA del runtime sin
+entregar punteros, intrinsics, metadata arbitraria o claims desde el manifiesto.
+
+### Trabajo
+
+- `VerifiedIsaProfile` derivado después de normalización, Rabin y planificación;
+- digest con dominio propio, archivo `verified-isa-profile.json` e inclusión en
+  IR v3, `ArtifactId`, bundle y paquete generado;
+- clasificación autenticada del schedule completo: low-tail fijo y
+  sparse/dense dependiente de datos;
+- ABI de codegen 3 con tamaños literales, extracción por valor y reducción
+  segura generada;
+- `VerifiedIsaStrategy` opaca: construye PCLMUL o PMULL dentro de Microfield;
+- estrategia genérica schoolbook monomorfizada para grados 2..=4096;
+- `automatic_selection = false` hasta calibración por campo/objetivo;
+- compatibilidad runtime N-2 para fuente ABI 1..=3.
+
+### Gates
+
+- el manifiesto no puede solicitar ni declarar certificación ISA;
+- fuente emitida sin `unsafe`, `dyn Trait`, heap o punteros de función;
+- la misma fuente compila scalar-only `no_std` sin activar `portable`;
+- digest del perfil recalculado por una prueba independiente;
+- x86 y AArch64: ISA == portable en sparse, dense y low-tail;
+- grados externos 9, 10, 128, 192 y 233, incluidas las tres clases, padding y
+  limbs múltiples;
+- `Auto` conserva portable y backend forzado exige capabilities detectadas;
+- `FixedSchedule` acepta low-tail y rechaza sparse/dense;
+- artefactos mantenidos se regeneran determinísticamente.
+
+### Resultado
+
+Implementado. Todo campo válido del esquema v1 recibe un perfil estructural
+target-neutral; el target decide qué adaptador compila. El fixture externo usa
+PCLMUL en x86 y PMULL bajo AArch64 emulado para las tres reducciones. La
+autenticidad se liga al paquete mediante digests; la seguridad ISA permanece
+en el runtime. Véase
+[`ADR 0014`](adr/0014-verified-external-isa-profiles.md).
 
 ## H2.5 — AArch64 PMULL
 
@@ -451,32 +497,52 @@ Ofrecer la misma semántica acelerada en AArch64 real.
 - matriz de hardware y compilador documentada;
 - selector incapaz de ejecutar PMULL fuera de una capability confirmada.
 
-## H2.6 — `PackedBatch` y storage alineado
+### Resultado
+
+Implementado con selección automática deliberadamente desactivada hasta medir
+hardware ARM real. Los presets usan Karatsuba 3/9 y cuadrado 2/4; ABI 3 usa
+schoolbook genérico. Ambos reutilizan reducción certificada, soportan toda
+longitud e in-place y no asignan.
+
+La suite pública y los cinco campos externos pasan bajo QEMU 8.2 `-cpu max`,
+también con AddressSanitizer. Cross-Clippy cubre `std`/`no_std` y el audit de
+ensamblado exige PMULL y prohíbe `br`/`blr`/asignador. CI añade hardware ARM64
+real.
+No se publican cifras QEMU ni un `minimum_batch` automático. Véase
+[`ADR 0015`](adr/0015-aarch64-pmull-backend.md).
+
+## H2.6 ✅ — `PackedBatch` y storage alineado
 
 ### Propósito
 
 Amortizar transformaciones de layout en cargas que reutilizan lotes sin
 contaminar la API AoS o el tipo escalar.
 
-### Trabajo
+### Resultado
 
-- `PackingPlan` y layouts AoS/SoA/híbridos;
-- `AlignedBuffer` con overflow, `Layout` y `Drop` auditados;
-- `PackedBatch<F>` owned bajo `alloc`;
-- vistas sobre `MaybeUninit<u8>` aportado por el usuario;
-- pack/unpack explícitos;
-- batches ligados a backend, layout, campo y longitud;
-- operaciones packed y rutas in-place explícitas.
+- `PackingPlan` inmutable ligado a backend, `FieldId`, AoS, longitud, padding,
+  tile, tamaño y alineamiento;
+- `PackedLayout::Aos` como único estado v1 ejecutable; SoA/híbrido se difieren
+  hasta que H2.7 aporte un kernel que pueda consumirlos;
+- `AlignedBuffer<F>` con overflow, `Layout`, inicialización completa, `Drop` y
+  `Send`/`Sync` auditados;
+- `PackedBatch<F>` owned bajo `alloc`, también para campos externos generados;
+- vistas sin `alloc` sobre `MaybeUninit<u8>` aportado por el usuario;
+- pack/unpack explícitos, cero elementos y slack de alineamiento calculable;
+- producto/cuadrado packed out-of-place e in-place sobre owned y vistas;
+- validación transaccional antes de la única llamada de kernel.
 
 ### Gates
 
-- Miri sobre storage y vistas seguras;
-- AddressSanitizer en fronteras alineadas;
-- padding inicializado, cero elementos y tails completos;
-- errores dejan destino intacto;
-- compile-fail para aliasing;
-- ningún layout interno se serializa;
-- publicación del coste completo pack + kernel + unpack.
+- Miri cubre storage prestado y owned; ASan los ejecuta en x86-64 y AArch64;
+- offsets posibles, padding, cero elementos y tails tienen tests específicos;
+- errores de longitud/backend/plan dejan el destino intacto;
+- el préstamo exclusivo y un compile-fail impiden aliasing mutable;
+- el plan no se serializa y sus campos no tienen constructor público;
+- el benchmark separa pack, unpack, kernel reutilizado y pipeline completo.
+
+La decisión y su frontera de seguridad están en
+[`ADR 0016`](adr/0016-persistent-packed-batches.md).
 
 ## H2.7 — VPCLMUL y throughput
 

@@ -31,7 +31,7 @@ H2.2 añade un optimizador portable estático al mismo pipeline. Cada campo
 generado recibe producto carry-less, cuadrado dedicado, inversión Itoh–Tsujii
 y una reducción seleccionada por alineamiento y forma del módulo. El plan se
 registra en el IR/`ArtifactId`; `FieldId`, layout, encoding y API permanecen
-estables. La fuente actual usa ABI de codegen 2 y el runtime acepta 1..=2.
+estables. La fuente actual usa ABI de codegen 3 y el runtime acepta 1..=3.
 
 H2.3 completa la frontera previa a ISA. `CpuCapabilities::detect()` toma una
 instantánea real con `std`; `portable_only()` conserva selección explícita y
@@ -39,12 +39,34 @@ determinista en `no_std`. `KernelCatalog` posee slots internos opcionales y
 `EngineBuilder` valida compilación, campo, CPU y política antes de crear un
 motor inmutable. Ninguna operación vuelve a detectar o seleccionar.
 
-H2.4 activa un backend batch PCLMUL en x86-64 para los tres presets. Producto
-y cuadrado usan wrappers ISA estrechos, reducción portable certificada y
-cargas compatibles con alineamiento natural. El resto del crate niega
-`unsafe`; una prueba estructural mantiene la única excepción dentro del
-adaptador. Los campos generados externamente siguen recibiendo el portable
-optimizado hasta disponer de un perfil ISA de codegen certificado.
+H2.4 activa PCLMUL en x86-64. El puente ABI 3 deriva después de Rabin un
+`VerifiedIsaProfile` autenticado y permite que los campos externos usen el
+adaptador genérico del runtime sin entregar intrinsics, funciones ni claims de
+CPU. Los perfiles externos son `explicit_only`; `Auto` conserva portable.
+
+H2.5 activa PMULL en AArch64 para presets y campos externos ABI 3. Producto y
+cuadrado usan wrappers ISA estrechos, reducción certificada y alineamiento
+natural. PMULL queda `explicit_only` hasta calibración en hardware ARM real;
+QEMU se usa exclusivamente para demostrar corrección.
+
+H2.6 añade batches persistentes. `Engine::packing_plan` fija backend, campo,
+layout, longitud y alineamiento; `PackedBatch<F>` posee storage bajo `alloc`, y
+`PackedBatchView(Mut)` usa `MaybeUninit<u8>` aportado por el consumidor sin
+heap. Pack/unpack son explícitos y las operaciones reutilizadas no asignan. El
+crate niega `unsafe` salvo en los dos adaptadores ISA y el único módulo de
+storage alineado auditado. El layout v1 es solo AoS; SoA/híbrido se difiere
+hasta el backend H2.7 que pueda ejecutarlo y justificar su coste total.
+
+```rust
+use microfield::{Engine, Field, Gf2_256HhV1, PackedBatch};
+
+let engine = Engine::<Gf2_256HhV1>::portable();
+let lhs = PackedBatch::from_aos(&engine, &[Gf2_256HhV1::ONE; 8])?;
+let rhs = PackedBatch::from_aos(&engine, &[Gf2_256HhV1::ONE; 8])?;
+let mut out = PackedBatch::new(&engine, 8)?;
+engine.mul_packed_into(&mut out, &lhs, &rhs)?;
+# Ok::<(), microfield::PackError>(())
+```
 
 ```rust
 use microfield::{Engine, ExecutionPolicy, Gf2_256HhV1};
@@ -85,6 +107,7 @@ cargo test -p microfield --features generator --all-targets
 cargo test -p microfield --all-features --doc
 cargo clippy -p microfield --all-features --all-targets -- -D warnings
 cargo check -p microfield --no-default-features --features portable,builtin-fields
+cargo check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 cargo bench -p microfield --bench portable_batch
 cargo bench -p microfield --bench portable_codegen_optimizer
 ```

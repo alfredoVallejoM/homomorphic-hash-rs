@@ -1,9 +1,9 @@
 {
   "schema": 1,
   "field_id": "5c78ea2f9ea1b2d59b88bf32e38ae33be4c2f977f0232c4441f7a16e4c9bb54d",
-  "artifact_id": "ef3d67b5ff9df3c21fb529aee76759f87d16290082dca22171a8d8e705ff3bc3",
-  "ir_version": 2,
-  "target_family": "portable",
+  "artifact_id": "5a7699177fffb929db93400084f9fa8495c015bd4eb0da1b247ce538ce831487",
+  "ir_version": 3,
+  "target_family": "portable_with_verified_isa_profile",
   "product": {
     "limb_bits": 64,
     "input_limbs": 4,
@@ -4111,5 +4111,23 @@
     "reduction": "low_tail_fold",
     "inversion": "itoh-tsujii-binary-v1",
     "modulus_terms": 5
+  },
+  "verified_isa_profile": {
+    "schema": 1,
+    "field_id": "5c78ea2f9ea1b2d59b88bf32e38ae33be4c2f977f0232c4441f7a16e4c9bb54d",
+    "profile_class": "power_of_two_limb_aligned",
+    "limb_bits": 64,
+    "input_limbs": 4,
+    "wide_limbs": 8,
+    "layout": "polynomial-limbs-little-endian-v1",
+    "product": "clmul64-schoolbook-v1",
+    "reduction_proof_digest": "f4a06836f946c87f3fda8f23889670e9182e3b23086cc7108a20879e3a5999e8",
+    "backends": [
+      "x86_pclmul",
+      "aarch64_pmull"
+    ],
+    "selection": "explicit_only",
+    "schedule": "fixed",
+    "profile_digest": "7c3275c93c37b9ce21296404ed7f501ed32966c274c90236c86d32e323cef71c"
   }
 }

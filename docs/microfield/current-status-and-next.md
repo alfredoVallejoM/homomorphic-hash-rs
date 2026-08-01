@@ -4,11 +4,13 @@ Fecha de revisión: 1 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
-Actualización H2.4: el backend batch x86-64 PCLMUL está implementado para los
-tres presets, confinado, probado y medido. La ruta escalar y los campos
-externos ABI 1/2 conservan el portable optimizado; `EngineBuilder::detect()`
-selecciona PCLMUL una sola vez cuando build, campo, CPU y política lo permiten.
-El siguiente trabajo es H2.5, backend AArch64 PMULL.
+H2.6 está implementado: campos mantenidos y externos pueden construir un
+`PackingPlan`, poseer un `PackedBatch` alineado o usar vistas sobre storage
+aportado. Las operaciones reutilizadas no asignan y rechazan backend, layout o
+longitud incompatibles antes de escribir. El layout v1 es únicamente AoS;
+SoA/híbrido se añadirá junto al backend H2.7 que pueda ejecutarlo. PMULL existe
+para presets y perfiles externos y permanece `explicit_only` hasta una medición
+reproducible en hardware ARM real; QEMU no se usa para afirmar rendimiento.
 
 La Fase 1 completa, H0–H4, está integrada en `origin/main`. H4 entró por
 fast-forward mediante `1f176ab`; el `main` resultante superó sus cinco jobs en
@@ -24,28 +26,34 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
-| `no_std` | Correcto | scalar y batch compilan sin `std` ni `alloc` |
+| `no_std` | Correcto | ABI 3 scalar-only sin `portable`; batch sin `std` ni `alloc` |
 | Asignaciones | Correcto local y remoto | contador externo: cero en las cinco operaciones y tres campos |
 | Dispatch | Correcto en ensamblado | dos comparaciones y una llamada indirecta por operación batch |
 | MSRV | Correcto en H4 | Rust 1.89, incluida la medición de cero asignaciones |
-| Miri H2.4 | Correcto local | portable y cinco compile-fail; el wrapper ISA no se ejecuta bajo Miri |
+| Miri portable/ABI 3 | Correcto local | suite portable completa y 11 tests del consumidor externo |
 | Rendimiento H4 | Gate local superado | peor sobrecoste observado: 1,9 % en producto HH/4096 |
 | ISA x86-64 | PCLMUL implementado | tres presets; producto, square, tails e in-place |
 | Factory H2.1 | Implementada | tipos externos nominales 2..=4096, Rabin y emisión atómica |
 | Optimizador H2.2 | Implementado | tres reducciones, square dedicado e Itoh–Tsujii |
-| ABI de codegen | Compatible 1..=2 | fuente nueva usa v2; helpers v1 se conservan |
+| ABI de codegen | Compatible 1..=3 | fuente nueva usa v3; fuentes v1/v2 se conservan |
 | Capabilities H2.3 | Implementado | snapshot no falsificable, detección x86-64/AArch64 y `portable_only` |
 | Selector H2.3 | Implementado | cinco políticas y errores separados por build/campo/CPU/política |
-| Slots ISA | PCLMUL activo en x86-64 | VPCLMUL/PMULL siguen desactivados; campos externos son portable-only |
-| Frontera `unsafe` | Confinada | `deny` global, una excepción de módulo y test estructural |
-| ASan H2.4 | Correcto local | tres pruebas públicas, 17 longitudes y tres campos |
+| Perfiles externos | Implementados | grados 9, 10, 128, 192 y 233; tres clases y tres reducciones |
+| ISA x86-64 | PCLMUL activo | presets automáticos medidos; perfiles externos explícitos |
+| ISA AArch64 | PMULL explícito | presets y ABI 3; calibración nativa pendiente |
+| Packed H2.6 | Implementado | owned `alloc`, vistas sin `alloc`, plan sellado y operaciones in-place |
+| Packing v1 | AoS ejecutable | SoA/híbrido diferido hasta el kernel H2.7 |
+| Frontera `unsafe` | Confinada | `deny` global, dos módulos ISA, storage alineado y test estructural |
+| ASan multi-ISA | Correcto local | presets y 11 tests externos en x86-64/AArch64 |
+| PMULL QEMU | Correcto | 3 tests mantenidos + 11 externos, también bajo ASan |
+| PMULL hardware | Pendiente | job ARM64 añadido; sin cifras ni selección automática aún |
 
 ## Decisiones H4/H2.3/H2.4 materializadas
 
 1. `kernel` posee el ABI neutral y metadatos, no implementaciones matemáticas.
 2. `backend::portable` contiene los bucles seguros y sin asignación.
-3. Cada preset registra su `KernelCatalog<F>` estático; un campo externo ABI
-   1/2 recibe por defecto un catálogo portable.
+3. Cada preset registra su `KernelCatalog<F>` estático; ABI 1/2 recibe portable
+   y ABI 3 adjunta un perfil ISA verificado y explícito.
 4. `BuiltinField` es público para bounds genéricos, oculto y sellado para
    impedir catálogos externos inseguros.
 5. `EngineBuilder` conserva política, backend forzado, tamaño esperado y una
@@ -58,10 +66,18 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
    con `std`; `portable_only` cubre `no_std`.
 9. Un backend forzado diferencia `BackendNotCompiled`,
    `BackendUnsupportedByField`, `BackendUnsupportedByCpu` y política.
-10. PCLMUL se registra solo en x86-64 y para los tres presets certificados;
-    VPCLMUL y PMULL permanecen `BackendNotCompiled`.
-11. Un campo externo en x86-64 recibe `BackendUnsupportedByField` al forzar
-    PCLMUL: disponibilidad del código no equivale a compatibilidad del campo.
+10. PCLMUL se registra en x86-64 y PMULL en AArch64. Los adapters genéricos
+    aceptan ABI 3; VPCLMUL permanece `BackendNotCompiled`.
+11. `automatic_selection` separa corrección de calibración: PCLMUL preset puede
+    entrar en `Auto`; PMULL y perfiles externos requieren `force_backend`.
+12. El perfil autentica layout, producto, reducción, backends y schedule. La
+    clasificación completa es fija en low-tail y dependiente de datos en
+    sparse/dense, de modo que `FixedSchedule` no acepta una promesa falsa.
+13. `PackingPlan` solo lo construye `Engine`; fija backend, campo, layout,
+    longitud, padding y alineamiento. `PackedBatch` owned y las vistas usan la
+    misma operación de kernel sin repacking oculto.
+14. AoS es el único layout v1. No se estabilizan variantes SoA/híbridas antes
+    de que H2.7 tenga código ejecutable y mediciones del pipeline completo.
 
 La frontera se registra en
 [`ADR 0009`](adr/0009-portable-batch-engine.md).
@@ -69,12 +85,18 @@ La detección y el selector se fijan en
 [`ADR 0012`](adr/0012-cpu-capabilities-and-static-selector.md).
 El backend x86-64 y su frontera de seguridad se fijan en
 [`ADR 0013`](adr/0013-x86-pclmul-backend.md).
+El puente externo y PMULL se fijan en
+[`ADR 0014`](adr/0014-verified-external-isa-profiles.md) y
+[`ADR 0015`](adr/0015-aarch64-pmull-backend.md). H2.6 se fija en
+[`ADR 0016`](adr/0016-persistent-packed-batches.md).
 
 ## Cobertura
 
-La suite raíz de Microfield contiene ahora 123 tests de runtime y cinco
-doctests compile-fail. El consumidor generado añade nueve tests de runtime y
-dos compile-fail; la integración legada conserva tres tests. H4 añadió:
+La suite raíz x86-64 de Microfield contiene 134 tests de runtime y siete
+doctests compile-fail; el feature de conteo añade dos tests. El target AArch64
+añade tres tests PMULL específicos. El consumidor generado añade 11 tests de
+runtime y dos compile-fail; la integración legada conserva tres tests. H4
+añadió:
 
 - equivalencia batch/escalar para los tres campos;
 - tamaños `0, 1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 255, 256, 1024,
@@ -94,8 +116,9 @@ feature opcional `count-allocations` añade medición dinámica sin introducir
 `unsafe` en Microfield. El contador se activa solo en el gate de pruebas.
 
 H2.2 añade comparación diferencial low-tail/sparse/dense, la matriz
-64..=4096, ABI 1..=2 y el fixture denso GF(2¹⁰). Miri ejecuta tanto helpers
-internos como los tres campos externos generados.
+64..=4096 y el fixture denso GF(2¹⁰). ABI 3 mantiene compatibilidad runtime
+1..=3. Miri ejecuta helpers internos, presets y los cinco campos externos
+generados.
 
 H2.3 añade 13 tests de runtime: tabla forzada exhaustiva de 491.520
 combinaciones, matriz automática, requisitos de features por arquitectura,
@@ -108,14 +131,35 @@ H2.4 añade dos oráculos internos y cuatro gates de integración. Karatsuba se
 compara con schoolbook PCLMUL en casos frontera y 4096 muestras; el backend
 público se compara contra portable para los tres campos y 17 tamaños, con
 todos los bits de la base, densos, patrones alternos, canarios, in-place y errores
-transaccionales. El test de alcance recorre `src` e impide un segundo módulo
-con `unsafe`. La misma suite pública pasa bajo AddressSanitizer.
+transaccionales. La misma suite pública pasa bajo AddressSanitizer.
 
-La matriz CI añade `portable` sin presets, `std + portable` y compilación
-cruzada AArch64 tanto `no_std` como `std`. Localmente ambas ramas AArch64 se
-validaron construyendo el sysroot desde `rust-src`. SageMath 10.7 bajo
-`laboratorio_np` regeneró además los tres vectores mantenidos con diff byte a
-byte vacío.
+El puente ABI 3 prueba grados externos 9 sparse, 10 dense, 128 low-tail, 192
+alineado no potencia de dos y 233 no alineado. Recalcula el digest del perfil
+de forma independiente, conserva
+`Auto = Portable`, exige detección al forzar ISA y compara producto, cuadrado e
+in-place con el oráculo portable en x86-64 y AArch64. También comprueba que
+`FixedSchedule` acepta únicamente el schedule autenticado como fijo.
+
+H2.5 replica la suite normativa para PMULL: todos los bits de base, 17 tamaños
+hasta 16 384, tres presets, canarios, in-place y errores transaccionales. QEMU
+8.2 `-cpu max` ejecuta los tres tests específicos y los 11 externos; ambos
+conjuntos pasan además bajo AddressSanitizer. El test de alcance recorre `src`
+y permite exactamente tres excepciones `unsafe`: dos adapters ISA y el único
+módulo de storage alineado.
+
+H2.6 añade cuatro tests owned, cinco tests de vistas y dos unit tests de
+planner/storage. Cubre los tres presets, backend ISA detectado, cinco perfiles
+externos, longitud cero, tails, todos los offsets de alineamiento, overflow,
+`Send + Sync`, planes/backend incompatibles, atomicidad y rutas in-place. Dos
+doctests impiden aliasing y serialización; el contador confirma cero
+asignaciones en operaciones owned reutilizadas y en toda la ruta de vistas.
+
+La matriz CI añade `portable` sin presets, `std + portable`, auditoría de
+ensamblado cruzada y un job nativo `ubuntu-24.04-arm` con diferencial PMULL,
+perfiles externos, asignaciones, Clippy y ASan. Localmente AArch64 se compiló y
+ejecutó bajo QEMU; la selección automática espera el resultado y la medición
+del job nativo. SageMath 10.7 bajo `laboratorio_np` regeneró los tres vectores
+mantenidos con diff byte a byte vacío.
 
 ## Rendimiento H4
 
@@ -168,6 +212,14 @@ catálogos publican `minimum_batch = 1`. El audit automático encuentra
 `pclmullqlqdq` y no encuentra asignador ni llamada indirecta dentro del kernel.
 Estas cifras orientan el selector en esta CPU; no son una garantía universal.
 
+## Rendimiento H2.5
+
+No se publica todavía una cifra PMULL. QEMU demuestra corrección, ASan y
+portabilidad del binario, pero no modela el rendimiento de un núcleo ARM real.
+Por eso todos los catálogos PMULL conservan
+`automatic_selection = false`; el benchmark separa la ruta forzada para que la
+calibración nativa pueda medir kernel, fachada y dispatch sin alterar la API.
+
 ## Hallazgos abiertos
 
 ### Media — Alcance de «transaccional»
@@ -203,8 +255,12 @@ H2.1 ha materializado `BinaryFieldFactory`: un consumidor puede declarar
 GF(2^m), validarlo y generar en `build.rs` un tipo nominal con scalar y batch
 portable, sin editar Microfield. H2.2 añade el optimizador portable estático y
 mantiene v1 como oráculo diferencial. H2.3 añade capabilities confiables,
-catálogo ampliado y selector inmutable. H2.4 añade PCLMUL para los presets.
-Después siguen PMULL, `PackedBatch`, VPCLMUL y calibración multi-ISA.
+catálogo ampliado y selector inmutable. H2.4 añade PCLMUL. El puente ABI 3
+extiende perfiles verificados a campos externos y H2.5 añade PMULL en AArch64.
+H2.6 añade batches persistentes owned/prestados y almacenamiento alineado. El
+siguiente hito es H2.7, VPCLMUL y layouts de throughput; después sigue H2.8 con
+calibración multi-ISA. La calibración PMULL nativa es un gate de selección
+automática, no de disponibilidad explícita del backend.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no

@@ -41,6 +41,13 @@ pub(crate) fn proof_digest(plan_bytes: &[u8]) -> String {
     hex(&digest(b"microfield:reduction-plan:v1\0", plan_bytes))
 }
 
+pub(crate) fn isa_profile_digest(profile_bytes: &[u8]) -> String {
+    hex(&digest(
+        b"microfield:verified-isa-profile:v1\0",
+        profile_bytes,
+    ))
+}
+
 pub(crate) fn hex(bytes: &[u8]) -> String {
     const HEX: &[u8; 16] = b"0123456789abcdef";
     let mut result = String::with_capacity(bytes.len() * 2);

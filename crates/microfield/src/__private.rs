@@ -8,6 +8,8 @@
 
 use crate::{F2, Field, Square};
 
+pub use crate::backend::profile::VerifiedIsaStrategy;
+
 /// Opaque, safe portable strategy generated for one statically defined field.
 #[cfg_attr(not(feature = "portable"), allow(dead_code))]
 pub struct PortableStrategy<F: Field + Square> {
@@ -44,18 +46,42 @@ pub trait PortableField: Field + Square {
     ///
     /// ABI 1 and 2 generated fields inherit a portable-only catalog. Maintained
     /// fields can override this method when certified ISA strategies exist.
-    #[cfg(feature = "portable")]
     #[must_use]
     fn __kernel_catalog() -> crate::kernel::KernelCatalog<Self> {
         crate::kernel::KernelCatalog::portable(Self::__portable_strategy().kernels())
     }
 }
 
+/// Generated field boundary used by verified generic ISA adapters.
+///
+/// Implementations are emitted only after manifest normalization,
+/// irreducibility validation and deterministic reduction planning. Every
+/// method remains safe even if downstream source is modified: ISA access and
+/// target-feature preconditions stay inside Microfield's private backends.
+pub trait VerifiedBinaryIsaField<const LIMBS: usize, const WIDE_LIMBS: usize>:
+    PortableField
+{
+    /// Domain-separated digest of the generated compatibility profile.
+    const PROFILE_DIGEST: &'static str;
+
+    /// Value-dependence of the complete ISA product and generated reduction.
+    const SCHEDULE: crate::ScheduleKind;
+
+    /// Extracts the private polynomial limbs by value.
+    fn __into_limbs(self) -> [u64; LIMBS];
+
+    /// Reconstructs a value from already reduced canonical limbs.
+    fn __from_reduced_limbs(limbs: [u64; LIMBS]) -> Self;
+
+    /// Applies the generated reduction plan to an ISA-produced wide value.
+    fn __reduce_wide(wide: [u64; WIDE_LIMBS]) -> [u64; LIMBS];
+}
+
 /// Oldest generated-source ABI accepted by this runtime.
 pub const MIN_CODEGEN_ABI_VERSION: u32 = 1;
 
 /// Newest generated-source ABI accepted by this runtime.
-pub const MAX_CODEGEN_ABI_VERSION: u32 = 2;
+pub const MAX_CODEGEN_ABI_VERSION: u32 = 3;
 
 /// Reports whether generated source can safely call this runtime helper set.
 #[must_use]
@@ -178,6 +204,34 @@ pub fn square_low_tail<const LIMBS: usize, const WIDE_LIMBS: usize, const MODULU
     value: [u64; LIMBS],
 ) -> [u64; LIMBS] {
     let product = wide_square::<LIMBS, WIDE_LIMBS>(value);
+    reduce_wide_low_tail::<LIMBS, WIDE_LIMBS, MODULUS_TAIL>(product)
+}
+
+/// Reduces a verified ISA product using the generated sparse plan.
+#[must_use]
+pub fn reduce_sparse<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    product: [u64; WIDE_LIMBS],
+    degree: usize,
+    modulus_exponents_desc: &[usize],
+) -> [u64; LIMBS] {
+    reduce_wide_sparse(product, degree, modulus_exponents_desc)
+}
+
+/// Reduces a verified ISA product using the generated dense-tail plan.
+#[must_use]
+pub fn reduce_dense<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    product: [u64; WIDE_LIMBS],
+    degree: usize,
+    modulus_tail: &[u64; LIMBS],
+) -> [u64; LIMBS] {
+    reduce_wide_dense(product, degree, modulus_tail)
+}
+
+/// Reduces a verified ISA product using the bounded aligned low-tail plan.
+#[must_use]
+pub fn reduce_low_tail<const LIMBS: usize, const WIDE_LIMBS: usize, const MODULUS_TAIL: u64>(
+    product: [u64; WIDE_LIMBS],
+) -> [u64; LIMBS] {
     reduce_wide_low_tail::<LIMBS, WIDE_LIMBS, MODULUS_TAIL>(product)
 }
 
@@ -526,8 +580,9 @@ mod tests {
     fn codegen_abi_keeps_the_n_minus_one_window() {
         assert!(super::supports_codegen_abi(1));
         assert!(super::supports_codegen_abi(2));
+        assert!(super::supports_codegen_abi(3));
         assert!(!super::supports_codegen_abi(0));
-        assert!(!super::supports_codegen_abi(3));
+        assert!(!super::supports_codegen_abi(4));
     }
 
     #[test]

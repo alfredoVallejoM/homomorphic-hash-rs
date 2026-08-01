@@ -74,6 +74,7 @@ fn selector_requires_a_trusted_cpu_snapshot_and_exposes_fixed_metadata() {
     assert!(!metadata.requires_packing());
     assert_eq!(metadata.scratch_bytes_per_element(), 0);
     assert_eq!(metadata.schedule(), ScheduleKind::Fixed);
+    assert!(metadata.automatic_selection());
 
     let fixed = Engine::<Gf2_256HhV1>::builder()
         .policy(ExecutionPolicy::FixedSchedule)

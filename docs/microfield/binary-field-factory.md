@@ -110,10 +110,12 @@ Los campos con el mismo grado no son intercambiables. `FieldId` identifica la
 semántica matemática; `ArtifactId` identifica el perfil generado y el digest de
 bundle autentica los bytes exactos de los artefactos.
 
-La fuente actual usa ABI de codegen 2; el runtime acepta ABI 1..=2 para que un
-archivo generado por la versión anterior siga compilando durante la ventana de
-compatibilidad. `package.portable_optimization()` permite registrar la clase
-de grado y las estrategias elegidas sin exponer limbs ni punteros.
+La fuente actual usa ABI de codegen 3; el runtime acepta ABI 1..=3 durante la
+ventana N-2. `package.portable_optimization()` registra la clase de grado y las
+estrategias portables. `package.verified_isa_profile()` expone el perfil
+estructural autenticado, nunca limbs, punteros ni capabilities falsificables.
+La misma fuente ABI 3 compila como biblioteca scalar-only `no_std` si el
+consumidor no activa la feature batch `portable` de Microfield.
 
 La optimización es automática y reproducible. Grados alineados con tail bajo
 usan fold por palabras; módulos dispersos, fold por términos; módulos densos,
@@ -123,4 +125,5 @@ hay detección ni selección dentro de las operaciones. Véase
 
 El fixture ejecutable de referencia está en
 `crates/microfield/test-fixtures/external-consumer`; contiene campos de grado
-9, grado 10 con módulo denso y grado 233 validado con Sage.
+9, grado 10 con módulo denso, grados 128/192 low-tail y grado 233 validado con
+Sage.

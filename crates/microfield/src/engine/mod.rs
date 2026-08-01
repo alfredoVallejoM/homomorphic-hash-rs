@@ -28,12 +28,19 @@
 mod batch;
 mod builder;
 mod capabilities;
+mod packed;
 mod policy;
 
 use crate::{__private::PortableField, BackendId, BatchError, KernelMetadata, kernel::KernelSet};
 
 pub use builder::{EngineBuildError, EngineBuilder};
 pub use capabilities::{Architecture, CpuCapabilities};
+#[cfg(feature = "alloc")]
+pub use packed::PackedBatch;
+pub use packed::{
+    PackError, PackedBatchView, PackedBatchViewMut, PackedLayout, PackingPlan, pack_into_storage,
+    required_packed_bytes,
+};
 pub use policy::ExecutionPolicy;
 
 /// Immutable batch execution façade for any statically defined field.

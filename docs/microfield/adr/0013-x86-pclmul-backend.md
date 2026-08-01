@@ -43,10 +43,10 @@ metadata declara:
 
 ## Frontera de seguridad
 
-La raíz del crate y el lint Cargo usan `unsafe_code = "deny"`. Existe una sola
-excepción de módulo en `backend/mod.rs`; todo bloque y función `unsafe` está en
-`backend/x86_pclmul.rs`. Un test recorre el árbol de fuentes y falla si aparece
-otro sitio o una segunda relajación del lint.
+La raíz del crate y el lint Cargo usan `unsafe_code = "deny"`. Todo `unsafe`
+de este backend está en `backend/x86_pclmul.rs`. Tras H2.5 existe una segunda
+excepción equivalente en `backend/aarch64_pmull.rs`; un test recorre el árbol y
+exige exactamente esos dos sitios.
 
 Los entry points seguros del kernel son privados. Solo pueden alcanzarse desde
 una tabla estática que el selector entrega después de validar una
@@ -57,7 +57,7 @@ que habilita la capability real. No se detecta CPU dentro de una operación.
 Los campos externos ABI 1/2 mantienen catálogo portable. En x86-64 forzar
 PCLMUL sobre ellos devuelve `BackendUnsupportedByField`: que el backend forme
 parte del binario no certifica automáticamente una representación externa.
-La generalización ISA exigirá un perfil de codegen explícito y versionado.
+ABI 3 materializa el perfil explícito y versionado exigido por esta decisión.
 
 ## Evidencia
 
@@ -89,7 +89,7 @@ de latencia universal.
 - `expected_batch = 0` conserva portable en `Auto`; forzar PCLMUL sigue siendo
   correcto para un slice vacío porque el umbral no es una precondición.
 - El layout, `FieldId`, `ArtifactId`, encoding y API escalar no cambian.
-- H2.5 puede añadir PMULL sin modificar este backend ni `Engine`.
+- H2.5 añadió PMULL sin modificar este backend ni `Engine`.
 
 ## Alternativas rechazadas
 

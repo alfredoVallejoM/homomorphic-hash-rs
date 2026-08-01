@@ -22,6 +22,12 @@ fn detected_pclmul_available() -> bool {
     }
 }
 
+#[cfg(target_arch = "aarch64")]
+fn detected_pmull_available() -> bool {
+    std::arch::is_aarch64_feature_detected!("neon")
+        && std::arch::is_aarch64_feature_detected!("pmull")
+}
+
 fn expected_detected_backend(expected_batch: usize) -> BackendId {
     if detected_pclmul_available() && expected_batch >= 1 {
         BackendId::X86Pclmul
@@ -112,7 +118,7 @@ fn detection_selects_only_compiled_and_supported_backends() {
             .policy(policy)
             .expected_batch(16_384)
             .detect()
-            .expect("portable or certified PCLMUL must be available");
+            .expect("portable or a certified ISA backend must be available");
         let expected = if policy == ExecutionPolicy::PortableOnly {
             BackendId::Portable
         } else {
@@ -147,14 +153,39 @@ fn detection_selects_only_compiled_and_supported_backends() {
         Err(EngineBuildError::BackendNotCompiled(BackendId::X86Pclmul))
     ));
 
-    for backend in [BackendId::X86Vpclmul, BackendId::Aarch64Pmull] {
+    assert!(matches!(
+        EngineBuilder::<Gf2_128V1>::new()
+            .force_backend(BackendId::X86Vpclmul)
+            .detect(),
+        Err(EngineBuildError::BackendNotCompiled(BackendId::X86Vpclmul))
+    ));
+
+    let forced_pmull = EngineBuilder::<Gf2_128V1>::new()
+        .force_backend(BackendId::Aarch64Pmull)
+        .detect();
+    #[cfg(target_arch = "aarch64")]
+    if detected_pmull_available() {
+        assert_eq!(
+            forced_pmull
+                .expect("detected PMULL is compiled and certified")
+                .backend_id(),
+            BackendId::Aarch64Pmull
+        );
+    } else {
         assert!(matches!(
-            EngineBuilder::<Gf2_128V1>::new()
-                .force_backend(backend)
-                .detect(),
-            Err(EngineBuildError::BackendNotCompiled(found)) if found == backend
+            forced_pmull,
+            Err(EngineBuildError::BackendUnsupportedByCpu(
+                BackendId::Aarch64Pmull
+            ))
         ));
     }
+    #[cfg(not(target_arch = "aarch64"))]
+    assert!(matches!(
+        forced_pmull,
+        Err(EngineBuildError::BackendNotCompiled(
+            BackendId::Aarch64Pmull
+        ))
+    ));
 
     let fixed = EngineBuilder::<Gf2_128V1>::new()
         .policy(ExecutionPolicy::FixedSchedule)
@@ -162,7 +193,7 @@ fn detection_selects_only_compiled_and_supported_backends() {
     if detected_pclmul_available() {
         assert_eq!(
             fixed
-                .expect("PCLMUL has a certified fixed schedule")
+                .expect("the detected ISA backend has a certified fixed schedule")
                 .backend_id(),
             BackendId::X86Pclmul
         );
