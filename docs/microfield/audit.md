@@ -87,4 +87,5 @@ tests ordinarios, más un gate opt-in de asignaciones, y cuatro compile-fail, co
 81 tests con todos los features; Miri ejecuta 26 tests de runtime habilitados y
 los cuatro doctests sin detectar comportamiento indefinido. Rust 1.89, la
 regeneración de los tres artefactos y las 447 pruebas legadas permanecen
-correctos.
+correctos. H4 fue publicado en `9cbfa15`; sus cinco jobs remotos terminaron
+verdes en `30702034699`.

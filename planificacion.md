@@ -1130,13 +1130,14 @@ rama y de `main`, `30622165087` y `30622957505`, terminaron correctamente.
 núcleo algebraico estático e integrados en `main` mediante `78d517f`. La rama
 y `main` superaron `30624475704` y `30701163784`.
 
-**Estado H4:** el motor batch portable está implementado y validado localmente:
+**Estado H4:** el motor batch portable está implementado, publicado y validado:
 catálogo sellado por campo, `EngineBuilder`, selección única, operaciones
 out-of-place/in-place, errores transaccionales y benchmark bajo el gate de 3 %.
 El contador externo confirma cero asignaciones y el ensamblado una única
 llamada indirecta por lote. Stable, Clippy, rustdoc, features, MSRV 1.89, Miri,
-artefactos deterministas y regresión legada están verdes. Permanecen pendientes
-la publicación remota, su CI y la integración posterior.
+artefactos deterministas y regresión legada están verdes. Permanece pendiente
+la integración posterior. La implementación está publicada mediante `9cbfa15`
+y sus cinco jobs remotos terminaron correctamente en `30702034699`.
 
 ## 5.1 Campos obligatorios
 

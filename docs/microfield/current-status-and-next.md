@@ -10,7 +10,9 @@ H0–H3 están integrados en `origin/main`. H3 entró por fast-forward mediante
 y
 [`30701163784`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30701163784).
 
-H4 está implementado y validado localmente en `agent/h4-portable-batch`.
+H4 está implementado y publicado en `agent/h4-portable-batch` mediante
+`9cbfa15`. Sus cinco jobs terminaron correctamente en
+[`30702034699`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30702034699).
 `EngineBuilder<F>` selecciona un catálogo estático sellado; `Engine<F>` valida
 una vez y delega mediante una sola llamada por lote. El backend portable ofrece
 suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
@@ -20,10 +22,10 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 |---|---|---|
 | H3 | Integrado | `78d517f`; rama y `main` con cinco jobs verdes |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
-| Batch H4 | Implementación local completa | `KernelSet`, catálogo, builder, fachada y backend portable |
+| Batch H4 | Rama publicada y CI verde | `9cbfa15`; cinco jobs correctos en `30702034699` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
 | `no_std` | Correcto | scalar y batch compilan sin `std` ni `alloc` |
-| Asignaciones | Correcto localmente | contador externo: cero en las cinco operaciones y tres campos |
+| Asignaciones | Correcto local y remoto | contador externo: cero en las cinco operaciones y tres campos |
 | Dispatch | Correcto en ensamblado | dos comparaciones y una llamada indirecta por operación batch |
 | MSRV | Correcto en H4 | Rust 1.89, incluida la medición de cero asignaciones |
 | Miri | Correcto en H4 | 26 tests de runtime habilitados y cuatro compile-fail |
@@ -113,12 +115,10 @@ está afectada.
 
 ### Cierre de H4
 
-La matriz local está cerrada: stable, Clippy, rustdoc, features, MSRV 1.89,
-Miri, artefactos deterministas y las 447 pruebas de la biblioteca legada han
-terminado correctamente. Solo queda:
-
-1. crear y publicar el commit H4;
-2. exigir CI verde e integrar en `main` en un paso separado.
+La matriz local y la remota están cerradas: stable, Clippy, rustdoc, features,
+MSRV 1.89, Miri, artefactos deterministas y las 447 pruebas de la biblioteca
+legada han terminado correctamente. Solo queda integrar H4 en `main` en un
+paso separado.
 
 Salida: Fase 1 portable completa.
 

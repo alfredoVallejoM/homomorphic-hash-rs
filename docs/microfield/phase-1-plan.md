@@ -75,7 +75,7 @@ La rama y `main` superaron los cinco jobs en `30624475704` y `30701163784`.
 
 ## H4 — Batch portable
 
-**Estado: implementado y validado localmente (1 de agosto de 2026).**
+**Estado: implementado, publicado y validado remotamente (1 de agosto de 2026).**
 
 - ABI seguro de slices, catálogo estático sellado y `EngineBuilder`.
 - Suma, producto y cuadrado out-of-place; producto y cuadrado in-place.
@@ -86,7 +86,9 @@ La rama y `main` superaron los cinco jobs en `30624475704` y `30701163784`.
 El contador dedicado confirma cero asignaciones y el ensamblado confirma una
 llamada indirecta por lote. Stable, Clippy, rustdoc, features, MSRV 1.89,
 Miri, regeneración de los tres artefactos y la regresión legada están verdes.
-Quedan la publicación, CI remota e integración posterior en `main`.
+El commit `9cbfa15` está publicado en `agent/h4-portable-batch` y sus cinco jobs
+terminaron correctamente en `30702034699`. Solo queda su integración posterior
+en `main`.
 
 Salida: Fase 1 completa, todavía sin backends ISA.
 
