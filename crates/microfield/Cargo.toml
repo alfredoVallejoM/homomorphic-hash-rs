@@ -54,7 +54,7 @@ criterion = "0.5.1"
 
 [lints.rust]
 missing_docs = "warn"
-unsafe_code = "forbid"
+unsafe_code = "deny"
 
 [lints.clippy]
 all = "warn"

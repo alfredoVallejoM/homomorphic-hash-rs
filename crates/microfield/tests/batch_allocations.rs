@@ -32,8 +32,16 @@ fn capability_detection_and_engine_selection_allocate_zero_times() {
         let engine = Engine::<Gf2_256HhV1>::builder()
             .expected_batch(4096)
             .detect()
-            .expect("H2.3 falls back to portable");
-        assert_eq!(engine.backend_id(), BackendId::Portable);
+            .expect("portable or certified PCLMUL must be available");
+        #[cfg(target_arch = "x86_64")]
+        let expected = if std::arch::is_x86_feature_detected!("pclmulqdq") {
+            BackendId::X86Pclmul
+        } else {
+            BackendId::Portable
+        };
+        #[cfg(not(target_arch = "x86_64"))]
+        let expected = BackendId::Portable;
+        assert_eq!(engine.backend_id(), expected);
     });
 
     for allocations in [portable, detected] {
@@ -50,7 +58,6 @@ where
 {
     const LEN: usize = 64;
 
-    let engine = Engine::<F>::portable();
     let lhs_value =
         F::from_canonical_slice(&[0xa5; BYTES]).expect("full-width binary values are canonical");
     let rhs_value =
@@ -60,24 +67,30 @@ where
     let mut output = vec![F::ZERO; LEN];
     let mut assigned = lhs.clone();
 
-    let allocations = measure(|| {
-        engine
-            .add_into(&mut output, &lhs, &rhs)
-            .expect("equal lengths are valid");
-        engine
-            .mul_into(&mut output, &lhs, &rhs)
-            .expect("equal lengths are valid");
-        engine
-            .square_into(&mut output, &lhs)
-            .expect("equal lengths are valid");
-        engine
-            .mul_assign(&mut assigned, &rhs)
-            .expect("equal lengths are valid");
-        engine.square_assign(&mut assigned);
-    });
+    let detected = Engine::<F>::builder()
+        .expected_batch(LEN)
+        .detect()
+        .expect("portable or certified PCLMUL must be available");
+    for engine in [Engine::<F>::portable(), detected] {
+        let allocations = measure(|| {
+            engine
+                .add_into(&mut output, &lhs, &rhs)
+                .expect("equal lengths are valid");
+            engine
+                .mul_into(&mut output, &lhs, &rhs)
+                .expect("equal lengths are valid");
+            engine
+                .square_into(&mut output, &lhs)
+                .expect("equal lengths are valid");
+            engine
+                .mul_assign(&mut assigned, &rhs)
+                .expect("equal lengths are valid");
+            engine.square_assign(&mut assigned);
+        });
 
-    assert_eq!(allocations.count_total, 0);
-    assert_eq!(allocations.bytes_total, 0);
-    assert_eq!(allocations.count_current, 0);
-    assert_eq!(allocations.bytes_current, 0);
+        assert_eq!(allocations.count_total, 0);
+        assert_eq!(allocations.bytes_total, 0);
+        assert_eq!(allocations.count_current, 0);
+        assert_eq!(allocations.bytes_current, 0);
+    }
 }

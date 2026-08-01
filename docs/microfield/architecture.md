@@ -51,7 +51,9 @@ argumentos CLI ni procesos externos.
 - `generated` no depende de `spec`.
 - `spec` solo existe con `generator`.
 - Todo runtime portable compila con `no_std`.
-- La Fase 1 compila con `forbid(unsafe_code)`.
+- La ruta portable conserva cero `unsafe`; el crate actual usa
+  `deny(unsafe_code)` y solo `backend::x86_pclmul` recibe una excepción local
+  auditada.
 
 ## Flujos
 
@@ -140,11 +142,12 @@ Las familias low-tail, sparse y dense viven en helpers portables comunes. El
 tipo generado no almacena el plan ni consulta su clase de grado durante una
 operación.
 
-## Selector H2.3
+## Selector H2.3 y backend H2.4
 
-`KernelCatalog` registra portable y tres slots opcionales. En H2.3 los slots
-existen estructuralmente, pero PCLMUL, VPCLMUL y PMULL siguen marcados como no
-compilados. Esto permite probar el selector antes de introducir wrappers ISA.
+`KernelCatalog` registra portable y tres slots opcionales. H2.4 activa PCLMUL
+solo en x86-64 y en los catálogos privados de los tres presets mantenidos.
+VPCLMUL y PMULL continúan marcados como no compilados. Los campos externos ABI
+1/2 no heredan una afirmación ISA por compartir cardinalidad.
 
 Un backend forzado se valida por build, compatibilidad del campo, CPU y
 política. Sin backend forzado, `Auto` usa `expected_batch`, `LowLatency` evita
@@ -154,4 +157,6 @@ priorizar la estrategia vectorial, `Throughput` prioriza caudal,
 válido de longitudes.
 
 La decisión completa está en
-[`ADR 0012`](adr/0012-cpu-capabilities-and-static-selector.md).
+[`ADR 0012`](adr/0012-cpu-capabilities-and-static-selector.md). El algoritmo,
+la frontera `unsafe` y su evidencia se fijan en
+[`ADR 0013`](adr/0013-x86-pclmul-backend.md).

@@ -17,10 +17,10 @@ status: "fase-1-cerrada-fase-2-revisada"
 
 > **Estado de implementación, 1 de agosto de 2026.** La Fase 1 está cerrada en
 > `main` mediante `95f82f5`. El esquema ejecutable v1 permanece limitado a
-> GF(2) en base polinómica con encoding `little`/`lsb0`. La Fase 2 revisada
-> comienza haciendo pública la factory estática de ese dominio antes de añadir
-> PCLMUL, PMULL y layouts packed. `Prime`, `Normal`, `Tower` y contextos
-> dinámicos siguen fuera del alcance.
+> GF(2) en base polinómica con encoding `little`/`lsb0`. En la Fase 2, H2.1–H2.4
+> ya cubren factory estática, optimización portable, selector y PCLMUL para los
+> presets; siguen PMULL y layouts packed. `Prime`, `Normal`, `Tower` y
+> contextos dinámicos permanecen fuera del alcance.
 
 Este documento convierte `arquitectura_campos_finitos_vectorizados` en una
 especificación funcional implementable para sus tres fases iniciales:
@@ -1697,8 +1697,8 @@ un tipo Rust nominal, monomorfizado y sin coste adicional en el hot path.
 |---|---|---|
 | H2.1 ✅ | `BinaryFieldFactory` pública y consumidor externo portable | Fase 1 |
 | H2.2 ✅ | optimizador portable estático para campos generados | H2.1 |
-| H2.3 | capacidades de CPU, catálogo ampliado y selección única | H2.2 |
-| H2.4 | backend x86 PCLMUL | H2.3 |
+| H2.3 ✅ | capacidades de CPU, catálogo ampliado y selección única | H2.2 |
+| H2.4 ✅ | backend x86 PCLMUL | H2.3 |
 | H2.5 | backend AArch64 PMULL | H2.3 |
 | H2.6 | `PackedBatch`, storage alineado y vistas | H2.4/H2.5 |
 | H2.7 | VPCLMUL y layouts de throughput | H2.6 |
@@ -1838,7 +1838,8 @@ Semántica implementada:
 Estado: implementado. La tabla unitaria cubre exhaustivamente las combinaciones
 forzadas y la matriz automática. Integración verifica detección real,
 concurrencia, cero asignaciones, `no_std` y compatibilidad ABI 1/2. Ningún
-backend ISA se marca compilado todavía; H2.4 activará PCLMUL solo tras sus gates.
+backend distinto de PCLMUL se marca compilado todavía. H2.4 activa PCLMUL solo
+en x86-64 y para catálogos certificados.
 
 ## 6.2 `BackendId`
 
@@ -2133,6 +2134,15 @@ Se implementarán dos estrategias:
 
 Ambas deben producir el mismo resultado. Solo se registra como preferida la que
 gane en la familia de CPU medida.
+
+Estado H2.4: implementado. Los tres presets usan Karatsuba (tres productos en
+128 bits y nueve en 256), cuadrado dedicado y los reductores ya certificados.
+El selector requiere detección real, `PortableOnly` permanece intacto y los
+campos externos sin perfil ISA reciben `BackendUnsupportedByField`. ASan,
+canarios, longitudes 0..16 384, in-place, cero asignaciones y desensamblado
+están cubiertos. En el i7-13700HX medido, el límite conservador de mejora
+supera 20 % desde un elemento; `minimum_batch` queda fijado en 1. La frontera
+completa se documenta en `docs/microfield/adr/0013-x86-pclmul-backend.md`.
 
 ## 6.13 x86 VPCLMUL
 

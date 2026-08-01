@@ -27,6 +27,8 @@ jobs:
         run: cargo +stable test -p microfield --all-features --test batch_allocations
       - name: Clippy
         run: cargo +stable clippy -p microfield --all-features --all-targets -- -D warnings
+      - name: Audit x86-64 PCLMUL assembly
+        run: bash crates/microfield/tools/audit_x86_pclmul.sh
       - name: Rustdoc
         env:
           RUSTDOCFLAGS: -D warnings
@@ -103,3 +105,18 @@ jobs:
       - run: cargo +nightly miri test -p microfield --no-default-features --features portable,builtin-fields
       - name: Miri generated optimizer paths
         run: cargo +nightly miri test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
+
+  x86-asan:
+    name: x86-64 PCLMUL AddressSanitizer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install nightly Rust with sources
+        run: rustup toolchain install nightly --profile minimal --component rust-src
+      - name: Test audited PCLMUL boundary under ASan
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
+          -p microfield --all-features --test x86_pclmul

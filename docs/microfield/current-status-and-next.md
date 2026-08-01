@@ -4,12 +4,11 @@ Fecha de revisión: 1 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
-Actualización H2.3: la frontera de capabilities y selección está completa. La
-factory binaria genera campos externos optimizados, y esos módulos ABI 1/2
-heredan un catálogo portable. `CpuCapabilities` ofrece detección real con
-`std` y un límite portable en `no_std`; `EngineBuilder` distingue compilación,
-campo, CPU y política antes de fijar una estrategia. El siguiente trabajo es
-H2.4, backend x86-64 PCLMUL.
+Actualización H2.4: el backend batch x86-64 PCLMUL está implementado para los
+tres presets, confinado, probado y medido. La ruta escalar y los campos
+externos ABI 1/2 conservan el portable optimizado; `EngineBuilder::detect()`
+selecciona PCLMUL una sola vez cuando build, campo, CPU y política lo permiten.
+El siguiente trabajo es H2.5, backend AArch64 PMULL.
 
 La Fase 1 completa, H0–H4, está integrada en `origin/main`. H4 entró por
 fast-forward mediante `1f176ab`; el `main` resultante superó sus cinco jobs en
@@ -29,17 +28,19 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | Asignaciones | Correcto local y remoto | contador externo: cero en las cinco operaciones y tres campos |
 | Dispatch | Correcto en ensamblado | dos comparaciones y una llamada indirecta por operación batch |
 | MSRV | Correcto en H4 | Rust 1.89, incluida la medición de cero asignaciones |
-| Miri H2.3 | Correcto local | 41 tests runtime y cinco compile-fail; consumidor externo: nueve |
+| Miri H2.4 | Correcto local | portable y cinco compile-fail; el wrapper ISA no se ejecuta bajo Miri |
 | Rendimiento H4 | Gate local superado | peor sobrecoste observado: 1,9 % en producto HH/4096 |
-| ISA | No implementado | IDs no implican disponibilidad; las solicitudes se rechazan |
+| ISA x86-64 | PCLMUL implementado | tres presets; producto, square, tails e in-place |
 | Factory H2.1 | Implementada | tipos externos nominales 2..=4096, Rabin y emisión atómica |
 | Optimizador H2.2 | Implementado | tres reducciones, square dedicado e Itoh–Tsujii |
 | ABI de codegen | Compatible 1..=2 | fuente nueva usa v2; helpers v1 se conservan |
 | Capabilities H2.3 | Implementado | snapshot no falsificable, detección x86-64/AArch64 y `portable_only` |
 | Selector H2.3 | Implementado | cinco políticas y errores separados por build/campo/CPU/política |
-| Slots ISA | Estructura completa, ejecución desactivada | ningún backend ISA se marca compilado antes de H2.4/H2.5 |
+| Slots ISA | PCLMUL activo en x86-64 | VPCLMUL/PMULL siguen desactivados; campos externos son portable-only |
+| Frontera `unsafe` | Confinada | `deny` global, una excepción de módulo y test estructural |
+| ASan H2.4 | Correcto local | tres pruebas públicas, 17 longitudes y tres campos |
 
-## Decisiones H4/H2.3 materializadas
+## Decisiones H4/H2.3/H2.4 materializadas
 
 1. `kernel` posee el ABI neutral y metadatos, no implementaciones matemáticas.
 2. `backend::portable` contiene los bucles seguros y sin asignación.
@@ -57,17 +58,21 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
    con `std`; `portable_only` cubre `no_std`.
 9. Un backend forzado diferencia `BackendNotCompiled`,
    `BackendUnsupportedByField`, `BackendUnsupportedByCpu` y política.
-10. PCLMUL, VPCLMUL y PMULL devuelven `BackendNotCompiled` hasta que exista una
-    implementación compilada y auditada.
+10. PCLMUL se registra solo en x86-64 y para los tres presets certificados;
+    VPCLMUL y PMULL permanecen `BackendNotCompiled`.
+11. Un campo externo en x86-64 recibe `BackendUnsupportedByField` al forzar
+    PCLMUL: disponibilidad del código no equivale a compatibilidad del campo.
 
 La frontera se registra en
 [`ADR 0009`](adr/0009-portable-batch-engine.md).
 La detección y el selector se fijan en
 [`ADR 0012`](adr/0012-cpu-capabilities-and-static-selector.md).
+El backend x86-64 y su frontera de seguridad se fijan en
+[`ADR 0013`](adr/0013-x86-pclmul-backend.md).
 
 ## Cobertura
 
-La suite raíz de Microfield contiene ahora 117 tests de runtime y cinco
+La suite raíz de Microfield contiene ahora 123 tests de runtime y cinco
 doctests compile-fail. El consumidor generado añade nueve tests de runtime y
 dos compile-fail; la integración legada conserva tres tests. H4 añadió:
 
@@ -98,6 +103,13 @@ detección contra los macros de Rust, fallback conservador, diagnóstico exacto,
 cero asignaciones, invariantes de metadata del catálogo y construcción
 concurrente determinista. El consumidor externo ABI 2 prueba además que el
 método nuevo con implementación por defecto no rompe su código generado.
+
+H2.4 añade dos oráculos internos y cuatro gates de integración. Karatsuba se
+compara con schoolbook PCLMUL en casos frontera y 4096 muestras; el backend
+público se compara contra portable para los tres campos y 17 tamaños, con
+todos los bits de la base, densos, patrones alternos, canarios, in-place y errores
+transaccionales. El test de alcance recorre `src` e impide un segundo módulo
+con `unsafe`. La misma suite pública pasa bajo AddressSanitizer.
 
 La matriz CI añade `portable` sin presets, `std + portable` y compilación
 cruzada AArch64 tanto `no_std` como `std`. Localmente ambas ramas AArch64 se
@@ -134,6 +146,28 @@ cacheada en 1,0558–1,0602 ns en la máquina local. El contador de asignaciones
 observa cero en ambas rutas. El detalle y el comando reproducible están en el
 [README de benchmarks](../../crates/microfield/benches/README.md).
 
+## Rendimiento H2.4
+
+Criterion, Rust 1.97.1/LLVM 22.1.6, release, Linux x86-64, Intel Core
+i7-13700HX. Intervalos rápidos usados para decidir elegibilidad:
+
+| Campo/lote/operación | Portable `Engine` | PCLMUL `Engine` |
+|---|---:|---:|
+| GF(2¹²⁸)/1 producto | 89,798–89,928 ns | 4,7955–4,9803 ns |
+| GF(2¹²⁸)/1 cuadrado | 6,5390–6,6661 ns | 4,1649–4,2017 ns |
+| HH-256/1 producto | 376,41–380,92 ns | 11,245–11,265 ns |
+| HH-256/1 cuadrado | 10,858–10,932 ns | 7,9176–8,1900 ns |
+| Alt-256/1 producto | 359,07–361,97 ns | 11,269–11,368 ns |
+| Alt-256/1 cuadrado | 10,749–10,776 ns | 7,9207–7,9840 ns |
+| HH-256/4096 producto | 1,4687–1,4811 ms | 39,055–39,333 µs |
+
+Incluso comparando el peor PCLMUL con el mejor portable, el cuadrado mejora
+35,7 %, 24,6 % y 25,7 % desde un elemento. Producto supera ampliamente el
+gate de 20 % y HH-256/4096 mejora aproximadamente 37,5x. Por ello los tres
+catálogos publican `minimum_batch = 1`. El audit automático encuentra
+`pclmullqlqdq` y no encuentra asignador ni llamada indirecta dentro del kernel.
+Estas cifras orientan el selector en esta CPU; no son una garantía universal.
+
 ## Hallazgos abiertos
 
 ### Media — Alcance de «transaccional»
@@ -169,8 +203,8 @@ H2.1 ha materializado `BinaryFieldFactory`: un consumidor puede declarar
 GF(2^m), validarlo y generar en `build.rs` un tipo nominal con scalar y batch
 portable, sin editar Microfield. H2.2 añade el optimizador portable estático y
 mantiene v1 como oráculo diferencial. H2.3 añade capabilities confiables,
-catálogo ampliado y selector inmutable. Después siguen PCLMUL, PMULL,
-`PackedBatch`, VPCLMUL y calibración multi-ISA.
+catálogo ampliado y selector inmutable. H2.4 añade PCLMUL para los presets.
+Después siguen PMULL, `PackedBatch`, VPCLMUL y calibración multi-ISA.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no

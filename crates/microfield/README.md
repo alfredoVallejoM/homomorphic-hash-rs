@@ -37,8 +37,14 @@ H2.3 completa la frontera previa a ISA. `CpuCapabilities::detect()` toma una
 instantánea real con `std`; `portable_only()` conserva selección explícita y
 determinista en `no_std`. `KernelCatalog` posee slots internos opcionales y
 `EngineBuilder` valida compilación, campo, CPU y política antes de crear un
-motor inmutable. Ninguna operación vuelve a detectar o seleccionar, y en H2.3
-solo portable está marcado como compilado.
+motor inmutable. Ninguna operación vuelve a detectar o seleccionar.
+
+H2.4 activa un backend batch PCLMUL en x86-64 para los tres presets. Producto
+y cuadrado usan wrappers ISA estrechos, reducción portable certificada y
+cargas compatibles con alineamiento natural. El resto del crate niega
+`unsafe`; una prueba estructural mantiene la única excepción dentro del
+adaptador. Los campos generados externamente siguen recibiendo el portable
+optimizado hasta disponer de un perfil ISA de codegen certificado.
 
 ```rust
 use microfield::{Engine, ExecutionPolicy, Gf2_256HhV1};
@@ -47,7 +53,11 @@ let engine = Engine::<Gf2_256HhV1>::builder()
     .policy(ExecutionPolicy::Throughput)
     .expected_batch(4096)
     .detect()?;
-assert_eq!(engine.backend_id(), microfield::BackendId::Portable);
+let selected_backend = engine.backend_id();
+assert!(matches!(
+    selected_backend,
+    microfield::BackendId::Portable | microfield::BackendId::X86Pclmul
+));
 # Ok::<(), microfield::EngineBuildError>(())
 ```
 

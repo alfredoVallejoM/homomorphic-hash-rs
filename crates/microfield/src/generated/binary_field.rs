@@ -7,6 +7,8 @@ macro_rules! define_binary_field {
         limbs = $limbs:ty,
         repr = $repr:ty,
         implementation = $implementation:ty,
+        modulus_tail = $modulus_tail:expr,
+        catalog = $catalog:path,
         spec = $spec:expr,
         debug_name = $debug_name:literal
     ) => {
@@ -21,13 +23,21 @@ macro_rules! define_binary_field {
 
         #[cfg(feature = "portable")]
         static KERNEL_CATALOG: crate::kernel::KernelCatalog<$name> =
-            crate::kernel::KernelCatalog::portable(PORTABLE_STRATEGY.kernels());
+            $catalog(PORTABLE_STRATEGY.kernels());
 
         impl $name {
             #[inline]
-            fn from_limbs(limbs: $limbs) -> Self {
+            pub(crate) const fn from_limbs(limbs: $limbs) -> Self {
                 Self(limbs)
             }
+
+            #[cfg(all(feature = "portable", target_arch = "x86_64"))]
+            pub(crate) const fn into_limbs(self) -> $limbs {
+                self.0
+            }
+
+            #[cfg(all(feature = "portable", target_arch = "x86_64"))]
+            pub(crate) const PCLMUL_MODULUS_TAIL: u64 = $modulus_tail;
 
             fn write_hex(self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 for limb in self.0.as_ref().iter().rev() {

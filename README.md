@@ -21,7 +21,9 @@ misma aritmética portable sobre `Gf2_128V1`, `Gf2_256HhV1` y
 algoritmos monomorfizados. H4 incorpora el motor batch portable y está integrado
 en `main`; con ello la Fase 1 está cerrada. En Fase 2, H2.1 incorpora la
 factory estática y H2.2 optimiza los campos externos mediante planes portables
-deterministas; capabilities y selección ISA forman el siguiente hito H2.3.
+deterministas; H2.3 cierra capabilities/selección y H2.4 añade el backend batch
+x86-64 PCLMUL para los tres presets. El siguiente hito es H2.5, PMULL en
+AArch64.
 
 ## Comandos
 

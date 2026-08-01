@@ -22,8 +22,10 @@ cargo bench -p microfield --bench portable_batch
 
 Este harness separa:
 
-- fachada batch frente a kernel directo;
-- coste de validación y dispatch.
+- algoritmo portable directo frente a fachada portable;
+- estrategia portable frente a PCLMUL detectado;
+- producto, cuadrado y suma en lotes 1, 8, 64 y 4096;
+- coste de validación y dispatch;
 - construcción con capabilities portables frente a detección `std`.
 
 ## Línea base local H2
@@ -97,3 +99,37 @@ Comando reproducible:
 cargo +stable bench -p microfield --bench portable_batch -- \
   engine/construction --warm-up-time 1 --measurement-time 3 --sample-size 30
 ```
+
+## Medición local H2.4
+
+Medición de elegibilidad del 1 de agosto de 2026, Rust 1.97.1/LLVM 22.1.6,
+release, Linux 6.18.7 x86-64, Intel Core i7-13700HX y microcode `0x12f`:
+
+| Campo/lote/operación | Portable `Engine` | PCLMUL `Engine` |
+|---|---:|---:|
+| GF(2¹²⁸)/1 producto | 89,798–89,928 ns | 4,7955–4,9803 ns |
+| GF(2¹²⁸)/1 cuadrado | 6,5390–6,6661 ns | 4,1649–4,2017 ns |
+| HH-256/1 producto | 376,41–380,92 ns | 11,245–11,265 ns |
+| HH-256/1 cuadrado | 10,858–10,932 ns | 7,9176–8,1900 ns |
+| Alt-256/1 producto | 359,07–361,97 ns | 11,269–11,368 ns |
+| Alt-256/1 cuadrado | 10,749–10,776 ns | 7,9207–7,9840 ns |
+| HH-256/4096 producto | 1,4687–1,4811 ms | 39,055–39,333 µs |
+| HH-256/4096 cuadrado | 36,668–37,869 µs | 26,763–26,824 µs |
+
+El criterio de registro usa extremos conservadores: límite superior PCLMUL
+contra límite inferior portable. El cuadrado de un elemento mejora al menos
+35,7 % en 128 bits, 24,6 % en HH-256 y 25,7 % en Alt-256. Producto mejora más
+de 18x/31x desde un elemento y aproximadamente 37,5x en HH-256/4096. El umbral
+automático publicado es por tanto `minimum_batch = 1` para los tres presets.
+
+Comandos reproducibles:
+
+```text
+cargo +stable bench -p microfield --bench portable_batch -- --quick
+bash crates/microfield/tools/audit_x86_pclmul.sh
+```
+
+El segundo comando compila el harness, inspecciona el ELF y exige instrucciones
+PCLMUL sin referencias al asignador ni llamadas indirectas dentro de los
+kernels. Los resultados dependen de CPU, frecuencia, microcode y compilador;
+no constituyen una garantía de latencia en otro sistema.

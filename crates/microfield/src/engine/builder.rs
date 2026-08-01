@@ -186,9 +186,14 @@ impl CompiledBackends {
     const AARCH64_PMULL: u8 = 1 << 3;
 
     const fn current() -> Self {
-        // H2.3 establishes the selector boundary. H2.4 and H2.5 will add the
-        // target-gated ISA bits only when their audited wrappers are compiled.
-        Self(Self::PORTABLE)
+        #[cfg(target_arch = "x86_64")]
+        {
+            Self(Self::PORTABLE | Self::X86_PCLMUL)
+        }
+        #[cfg(not(target_arch = "x86_64"))]
+        {
+            Self(Self::PORTABLE)
+        }
     }
 
     const fn contains(self, backend: BackendId) -> bool {

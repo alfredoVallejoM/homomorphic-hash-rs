@@ -205,10 +205,19 @@ mod tests {
             .build()
             .expect("ABI 2 fields inherit a portable-only catalog");
         assert_eq!(engine.backend_id(), BackendId::Portable);
+        let pclmul = Engine::<Gf2_9Fixture>::builder()
+            .force_backend(BackendId::X86Pclmul)
+            .build();
+        #[cfg(target_arch = "x86_64")]
         assert!(matches!(
-            Engine::<Gf2_9Fixture>::builder()
-                .force_backend(BackendId::X86Pclmul)
-                .build(),
+            pclmul,
+            Err(EngineBuildError::BackendUnsupportedByField(
+                BackendId::X86Pclmul
+            ))
+        ));
+        #[cfg(not(target_arch = "x86_64"))]
+        assert!(matches!(
+            pclmul,
             Err(EngineBuildError::BackendNotCompiled(BackendId::X86Pclmul))
         ));
         let lhs = [element(3), element(0x101), element(0x1ff)];

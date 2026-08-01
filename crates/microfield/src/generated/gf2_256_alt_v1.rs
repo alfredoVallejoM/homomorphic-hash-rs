@@ -33,6 +33,8 @@ define_binary_field!(
     limbs = [u64; 4],
     repr = [u8; 32],
     implementation = Polynomial256<MODULUS_TAIL>,
+    modulus_tail = MODULUS_TAIL,
+    catalog = crate::backend::gf2_256_alt_v1_catalog,
     spec = &SPEC,
     debug_name = "Gf2_256AltV1"
 );

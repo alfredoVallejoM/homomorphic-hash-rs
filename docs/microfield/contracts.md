@@ -144,13 +144,13 @@ Operaciones v1: `add_into`, `mul_into`, `square_into`, `mul_assign` y
 salida distinta por contrato de préstamos; las rutas `*_assign` expresan
 aliasing intencional.
 
-`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. En H2.3
-solo `Portable` está compilado. Forzar PCLMUL, VPCLMUL o PMULL devuelve
-`EngineBuildError::BackendNotCompiled`. Cuando existan implementaciones, la
-validación distinguirá `BackendUnsupportedByField` y
-`BackendUnsupportedByCpu`. `FixedSchedule` se rechaza mientras solo esté
-disponible portable, porque su producto actual tiene scheduling dependiente de
-los operandos.
+`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. En
+x86-64 H2.4 compila PCLMUL y lo registra solo para los tres presets mantenidos;
+VPCLMUL y PMULL siguen devolviendo `BackendNotCompiled`. PCLMUL distingue CPU
+sin la capability (`BackendUnsupportedByCpu`) de campo sin perfil certificado
+(`BackendUnsupportedByField`). `FixedSchedule` selecciona PCLMUL únicamente
+tras detección positiva; portable no recibe esa garantía porque su producto
+actual depende de los operandos.
 
 `EngineBuilder::build()` usa por defecto `CpuCapabilities::portable_only()` y
 nunca hace detección implícita. Con `std`, `EngineBuilder::detect()` captura una
@@ -174,3 +174,7 @@ aceptar cualquier slice, incluido el vacío.
 La Fase 1 no promete tiempo constante. `pow` es variable en bits y longitud.
 El contrato prohíbe describir una operación como constante sin auditoría
 específica.
+
+PCLMUL posee schedule fijo respecto de los valores para `mul` y `square`, pero
+esta propiedad de scheduling no equivale por sí sola a una garantía completa
+de tiempo constante del sistema.

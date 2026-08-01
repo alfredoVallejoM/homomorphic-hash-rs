@@ -2,8 +2,8 @@
 
 Fecha de planificación: 1 de agosto de 2026.
 
-Estado: en curso. H2.1, H2.2 y H2.3 están implementados y validados localmente;
-el siguiente hito operativo es H2.4, x86-64 PCLMUL.
+Estado: en curso. H2.1, H2.2, H2.3 y H2.4 están implementados y validados
+localmente; el siguiente hito operativo es H2.5, AArch64 PMULL.
 
 ## Objetivo ejecutivo
 
@@ -380,8 +380,8 @@ alterar `Engine` ni el hot path.
 La tabla unitaria recorre 491.520 combinaciones forzadas y una matriz adicional
 de selección automática. Integración cubre detección real, cero asignaciones,
 construcción concurrente, `no_std`, campos externos y fallback portable. En
-H2.3 ningún slot ISA está marcado como compilado. La matriz CI compila además
-las rutas AArch64 `no_std` y `std`; el próximo trabajo es H2.4.
+H2.3 ningún slot ISA estaba marcado como compilado. La matriz CI compila además
+las rutas AArch64 `no_std` y `std`; H2.4 se apoya en esa frontera ya cerrada.
 
 ## H2.4 — x86-64 PCLMUL
 
@@ -407,6 +407,27 @@ Acelerar producto y cuadrado AoS sin cambiar tipos o encoding.
 - desensamblado con `pclmulqdq`, sin asignador ni dispatch interno;
 - selección únicamente donde la mejora inferior medida supera 20 %;
 - objetivo de 2x en `Gf2_256HhV1`, registrado como objetivo, no como garantía.
+
+### Resultado
+
+Implementado para los tres presets mantenidos. GF(2¹²⁸) usa tres productos
+carry-less mediante Karatsuba; GF(2²⁵⁶) usa nueve mediante un nivel exterior.
+El cuadrado dedicado usa dos/cuatro productos y ambos caminos reutilizan los
+reductores certificados. Los kernels aceptan todas las longitudes, canarios,
+tails y operaciones in-place sin packing, scratch o asignaciones.
+
+La capability solo se habilita por detección confiable y la selección ocurre
+al construir `Engine`. El crate niega `unsafe` globalmente y una prueba impide
+que la única excepción salga del adaptador PCLMUL. ASan, Miri portable, MSRV,
+compilación AArch64 y consumidor externo están cubiertos. El audit de
+ensamblado confirma instrucciones PCLMUL y ausencia de asignador o dispatch
+interno.
+
+Criterion sobre i7-13700HX/Rust 1.97.1 confirma mejora conservadora superior a
+20 % desde un elemento en producto y cuadrado para los tres presets, por lo
+que `minimum_batch = 1`. HH-256/4096 mejora aproximadamente 37,5x en producto.
+Los campos externos conservan perfil portable hasta que un ABI posterior pueda
+certificar y emitir su catálogo ISA sin abrir el registro de kernels.
 
 ## H2.5 — AArch64 PMULL
 

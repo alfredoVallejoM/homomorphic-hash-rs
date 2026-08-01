@@ -54,6 +54,24 @@ impl KernelMetadata {
         }
     }
 
+    #[cfg(all(
+        feature = "portable",
+        feature = "builtin-fields",
+        target_arch = "x86_64"
+    ))]
+    pub(crate) const fn x86_pclmul<F>(minimum_batch: usize) -> Self {
+        Self {
+            backend: BackendId::X86Pclmul,
+            minimum_batch,
+            preferred_multiple: 1,
+            required_alignment: core::mem::align_of::<F>(),
+            supports_in_place: true,
+            requires_packing: false,
+            scratch_bytes_per_element: 0,
+            schedule: ScheduleKind::Fixed,
+        }
+    }
+
     #[cfg(test)]
     pub(crate) const fn for_test(
         backend: BackendId,

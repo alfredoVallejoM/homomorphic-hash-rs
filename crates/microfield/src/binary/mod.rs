@@ -15,3 +15,5 @@ pub(crate) use implementation::{
     limbs_are_zero,
 };
 pub(crate) use invert::invert_binary;
+#[cfg(all(feature = "portable", target_arch = "x86_64"))]
+pub(crate) use reduction::{reduce_128, reduce_256};

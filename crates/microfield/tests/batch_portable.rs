@@ -220,11 +220,23 @@ fn assert_builder_contract<F: BatchField>() {
         .expect("portable is available");
     assert_eq!(forced.backend_id(), BackendId::Portable);
 
-    for backend in [
-        BackendId::X86Pclmul,
-        BackendId::X86Vpclmul,
-        BackendId::Aarch64Pmull,
-    ] {
+    let pclmul = EngineBuilder::<F>::new()
+        .force_backend(BackendId::X86Pclmul)
+        .build();
+    #[cfg(target_arch = "x86_64")]
+    assert!(matches!(
+        pclmul,
+        Err(EngineBuildError::BackendUnsupportedByCpu(
+            BackendId::X86Pclmul
+        ))
+    ));
+    #[cfg(not(target_arch = "x86_64"))]
+    assert!(matches!(
+        pclmul,
+        Err(EngineBuildError::BackendNotCompiled(BackendId::X86Pclmul))
+    ));
+
+    for backend in [BackendId::X86Vpclmul, BackendId::Aarch64Pmull] {
         assert!(matches!(
             EngineBuilder::<F>::new()
                 .force_backend(backend)
