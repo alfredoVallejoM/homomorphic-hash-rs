@@ -2,8 +2,7 @@
 
 Núcleo portable para campos finitos binarios con abstracciones de coste cero.
 
-El scaffold, la Fase 0 y el primer vertical portable están implementados. El
-paquete incluye:
+La Fase 1 portable está completa e integrada. El paquete incluye:
 
 - contratos algebraicos segregados;
 - los value objects `FieldId` y `ArtifactId`;

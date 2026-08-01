@@ -4,15 +4,9 @@ Fecha de revisión: 1 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
-H0–H3 están integrados en `origin/main`. H3 entró por fast-forward mediante
-`78d517f`; la rama y el `main` resultante superaron sus cinco jobs en
-[`30624475704`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30624475704)
-y
-[`30701163784`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30701163784).
-
-H4 está implementado y publicado en `agent/h4-portable-batch` mediante
-`9cbfa15`. Sus cinco jobs terminaron correctamente en
-[`30702034699`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30702034699).
+La Fase 1 completa, H0–H4, está integrada en `origin/main`. H4 entró por
+fast-forward mediante `1f176ab`; el `main` resultante superó sus cinco jobs en
+[`30703842091`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30703842091).
 `EngineBuilder<F>` selecciona un catálogo estático sellado; `Engine<F>` valida
 una vez y delega mediante una sola llamada por lote. El backend portable ofrece
 suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
@@ -20,9 +14,9 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 
 | Área | Estado | Evidencia |
 |---|---|---|
-| H3 | Integrado | `78d517f`; rama y `main` con cinco jobs verdes |
+| Fase 1 | Cerrada en `main` | `1f176ab`; cinco jobs verdes en `30703842091` |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
-| Batch H4 | Rama publicada y CI verde | `9cbfa15`; cinco jobs correctos en `30702034699` |
+| Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
 | `no_std` | Correcto | scalar y batch compilan sin `std` ni `alloc` |
 | Asignaciones | Correcto local y remoto | contador externo: cero en las cinco operaciones y tres campos |
@@ -113,14 +107,17 @@ está afectada.
 
 ## Siguiente orden
 
-### Cierre de H4
+### Cierre de Fase 1
 
 La matriz local y la remota están cerradas: stable, Clippy, rustdoc, features,
 MSRV 1.89, Miri, artefactos deterministas y las 447 pruebas de la biblioteca
-legada han terminado correctamente. Solo queda integrar H4 en `main` en un
-paso separado.
+legada han terminado correctamente. H4 está integrado y no queda trabajo
+pendiente dentro del alcance de Fase 1.
 
 Salida: Fase 1 portable completa.
+
+El detalle consolidado está en
+[`phase-1-final-report.md`](phase-1-final-report.md).
 
 ### Fase posterior
 

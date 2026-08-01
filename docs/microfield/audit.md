@@ -87,5 +87,7 @@ tests ordinarios, más un gate opt-in de asignaciones, y cuatro compile-fail, co
 81 tests con todos los features; Miri ejecuta 26 tests de runtime habilitados y
 los cuatro doctests sin detectar comportamiento indefinido. Rust 1.89, la
 regeneración de los tres artefactos y las 447 pruebas legadas permanecen
-correctos. H4 fue publicado en `9cbfa15`; sus cinco jobs remotos terminaron
-verdes en `30702034699`.
+correctos. H4 fue desarrollado en `9cbfa15` e integrado en `main` mediante
+`1f176ab`; sus cinco jobs de cierre terminaron verdes en `30703842091`. Con
+ello la Fase 1 queda cerrada. El inventario final está en
+[`phase-1-final-report.md`](phase-1-final-report.md).

@@ -18,8 +18,9 @@ transaccionalmente. SageMath 10.7 ha producido vectores externos reproducibles
 para los tres campos. El vertical H2 se integró en `main` y H3 generaliza la
 misma aritmética portable sobre `Gf2_128V1`, `Gf2_256HhV1` y
 `Gf2_256AltV1`. Los tres tipos son públicos, nominalmente distintos y comparten
-algoritmos monomorfizados. H4 incorpora ya el primer motor batch portable; los
-backends ISA pertenecen a la fase posterior.
+algoritmos monomorfizados. H4 incorpora el motor batch portable y está integrado
+en `main`; con ello la Fase 1 está cerrada. Los backends ISA pertenecen a la
+fase posterior.
 
 ## Comandos
 
@@ -51,4 +52,5 @@ assert_eq!((value * inverse).to_canonical(), one);
 La especificación revisada se encuentra en `planificacion.md` y la
 documentación mantenida en `docs/microfield/`. El diagnóstico vigente y el
 orden del siguiente hito están en
-`docs/microfield/current-status-and-next.md`.
+`docs/microfield/current-status-and-next.md`. El resultado completo de la Fase
+1 se documenta en `docs/microfield/phase-1-final-report.md`.
