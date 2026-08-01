@@ -303,16 +303,20 @@ La Fase 1 satisface sus criterios:
 
 ## Próxima fase recomendada
 
-La siguiente fase debe añadir backends ISA como adaptadores internos, sin
-cambiar tipos, encoding, identidad o API escalar:
+La Fase 2 revisada comienza abriendo una `BinaryFieldFactory` para que un crate
+consumidor genere tipos GF(2^m) nominales, certificados y portables sin editar
+Microfield. Después añade backends ISA como adaptadores internos, sin cambiar
+tipos, encoding, identidad o API escalar:
 
-1. modelar capacidades de CPU y detección única;
-2. implementar PCLMUL para x86-64;
-3. implementar PMULL para AArch64;
-4. evaluar VPCLMUL y packing solo con evidencia reproducible;
-5. encapsular cada frontera `unsafe` en wrappers estrechos y auditados;
-6. exigir igualdad byte a byte con el portable, Miri en wrappers seguros,
-   desensamblado y benchmarks por familia de CPU.
+1. factory estática, ABI de codegen y fixture consumidor;
+2. capacidades de CPU y detección única;
+3. PCLMUL para x86-64;
+4. PMULL para AArch64;
+5. `PackedBatch` y storage aportado;
+6. VPCLMUL solo con evidencia reproducible;
+7. auditoría, calibración y CI multi-ISA.
 
 El portable cerrado en esta fase queda como especificación ejecutable y oráculo
 de compatibilidad para todos esos backends.
+
+El desarrollo completo está en [`phase-2-plan.md`](phase-2-plan.md).

@@ -1,10 +1,10 @@
 ---
 title: "Especificación funcional de Microfield"
-subtitle: "Fases 0, 1 y 2: especificación, núcleo binario portable y backends x86-64/AArch64"
+subtitle: "Fases 0, 1 y 2: núcleo portable, factory binaria y backends x86-64/AArch64"
 author: "Plan de implementación derivado de Arquitectura desde primeros principios"
-date: "29 de julio de 2026"
+date: "1 de agosto de 2026"
 lang: es-ES
-status: "revisada-solid-v1"
+status: "fase-1-cerrada-fase-2-revisada"
 ---
 
 # Resumen ejecutivo
@@ -15,13 +15,12 @@ status: "revisada-solid-v1"
 > neutral de kernels, puertos y adaptadores para el generador y una política
 > explícita de abstracciones de coste cero.
 
-> **Estado de implementación, 30 de julio de 2026.** El scaffold y la Fase 0
-> mínima están implementados. El esquema ejecutable v1 se ha reducido
-> deliberadamente a GF(2) en base polinómica con encoding `little`/`lsb0`.
-> Las variantes `Prime`, `Normal`, `Tower`, claims de generador y perfiles de
-> unroll descritos como extensiones futuras en este documento no forman parte
-> del parser v1. Esta restricción prevalece sobre los ejemplos prospectivos de
-> la sección 4.3.
+> **Estado de implementación, 1 de agosto de 2026.** La Fase 1 está cerrada en
+> `main` mediante `95f82f5`. El esquema ejecutable v1 permanece limitado a
+> GF(2) en base polinómica con encoding `little`/`lsb0`. La Fase 2 revisada
+> comienza haciendo pública la factory estática de ese dominio antes de añadir
+> PCLMUL, PMULL y layouts packed. `Prime`, `Normal`, `Tower` y contextos
+> dinámicos siguen fuera del alcance.
 
 Este documento convierte `arquitectura_campos_finitos_vectorizados` en una
 especificación funcional implementable para sus tres fases iniciales:
@@ -29,7 +28,8 @@ especificación funcional implementable para sus tres fases iniciales:
 - **Fase 0:** especificación, identidad, validación, generación y armazón de
   pruebas;
 - **Fase 1:** vertical binario portable completo;
-- **Fase 2:** kernels x86-64 y AArch64, selección de backend y layouts batch.
+- **Fase 2:** factory estática de campos binarios externos, kernels x86-64 y
+  AArch64, selección de backend y layouts batch.
 
 La decisión principal es reducir la fragmentación de la propuesta original.
 Durante estas fases habrá **un solo paquete Cargo llamado `microfield`**, con:
@@ -37,7 +37,8 @@ Durante estas fases habrá **un solo paquete Cargo llamado `microfield`**, con:
 - un target de biblioteca;
 - un binario integrado `microfield-gen`;
 - módulos internos jerárquicos;
-- campos generados dentro del mismo paquete;
+- presets generados dentro del paquete y tipos externos emitidos en el crate
+  consumidor;
 - tests, benchmarks, manifiestos y certificados en el mismo repositorio.
 
 No habrá un crate por cada arquitectura, familia de campo o responsabilidad.
@@ -180,6 +181,11 @@ limbs. Una aplicación genérica declarará exactamente la capacidad que necesit
 **ARCH-004.** Los campos incluidos en Fases 1-2 compartirán implementación
 mediante código generado y traits internos. No compartirán representación por
 herencia.
+
+**ARCH-004.1.** La extensibilidad externa usa generación estática en `build.rs`.
+La factory produce un tipo nominal antes de compilar; no devuelve contextos de
+campo ni elementos dinámicos en runtime. Su salida portable no puede registrar
+catálogos raw o afirmar compatibilidad ISA.
 
 ## 1.4 Dispatch
 
@@ -1668,17 +1674,106 @@ Fase 1 termina cuando:
 - el campo actual tiene pruebas de compatibilidad;
 - no existe `unsafe`.
 
-# 6. Fase 2 - x86-64, AArch64 y motor
+# 6. Fase 2 - factory binaria pública, x86-64, AArch64 y motor
 
 ## 6.1 Objetivo
 
-Fase 2 introduce aceleración sin modificar:
+Fase 2 comienza abriendo la generación estática de campos binarios para
+consumidores externos. Después introduce aceleración sin modificar:
 
 - los tipos de elemento;
 - el encoding;
 - `FieldId`;
 - resultados;
 - API algebraica escalar.
+
+La factory no crea contextos dinámicos ni devuelve un campo heterogéneo en
+runtime. Recibe una definición de GF(2^m), la valida y genera antes de compilar
+un tipo Rust nominal, monomorfizado y sin coste adicional en el hot path.
+
+## 6.1.1 Secuencia de hitos
+
+| Hito | Entrega | Dependencia |
+|---|---|---|
+| H2.1 | `BinaryFieldFactory` pública y consumidor externo portable | Fase 1 |
+| H2.2 | capacidades de CPU, catálogo ampliado y selección única | H2.1 |
+| H2.3 | backend x86 PCLMUL | H2.2 |
+| H2.4 | backend AArch64 PMULL | H2.2 |
+| H2.5 | `PackedBatch`, storage alineado y vistas | H2.3/H2.4 |
+| H2.6 | VPCLMUL y layouts de throughput | H2.5 |
+| H2.7 | calibración, auditoría, CI multi-ISA y cierre | H2.3-H2.6 |
+
+PCLMUL y PMULL son ramas independientes después de H2.2. VPCLMUL es
+condicional: puede quedar implementado pero no seleccionado si no demuestra
+ventaja total incluyendo packing.
+
+El plan operativo, gates y entregables de cada hito se mantienen en
+`docs/microfield/phase-2-plan.md`.
+
+## 6.1.2 H2.1 — Factory pública de campos binarios
+
+El primer hito convierte el pipeline interno en una frontera pública de
+generación estática. El dominio inicial permanece deliberadamente limitado a:
+
+- característica dos;
+- grado de extensión explícito;
+- base polinómica;
+- módulo mónico expresado por exponentes o bytes canónicos;
+- encoding little-endian ya congelado por el esquema v1.
+
+Dentro de ese dominio se soportarán grados 2..=4096. La factory emitirá los
+tamaños literales de limbs, producto ancho y representación canónica, además de
+la máscara de padding. La reducción usará el plan completo generado y no
+quedará limitada a módulos cuyo tail cabe en un `u64`. Los perfiles 128/256
+actuales pueden conservar especializaciones si el ensamblado demuestra que son
+mejores que la ruta portable general.
+
+Contrato objetivo:
+
+```rust
+let package = BinaryFieldFactory::builder()
+    .name("Gf2_233Custom")
+    .degree(233)
+    .modulus_exponents([233, 74, 0])
+    .build()?
+    .generate()?;
+
+package.emit_rust(output_dir)?;
+```
+
+También se soportará `BinaryFieldFactory::from_manifest(path)` para `build.rs`
+y CLI. La salida será código Rust determinista que declara un newtype nominal,
+implementa los traits algebraicos, adjunta identidad/certificado/planes y
+registra la estrategia portable sin exponer `KernelSet` o punteros de función.
+
+Reglas de la frontera:
+
+- la factory vive bajo `feature = "generator"` y puede usar `std`/`alloc`;
+- el tipo generado conserva `no_std`, layout fijo y dispatch escalar estático;
+- el manifiesto nunca puede inyectar tokens Rust arbitrarios;
+- nombres, rutas, grado y tamaño tienen límites duros;
+- Rabin y la validación completa preceden a cualquier emisión;
+- la emisión usa staging y no puede escapar del directorio autorizado;
+- el ABI de codegen queda versionado;
+- los tres campos mantenidos se regeneran por el mismo camino público;
+- un campo externo recibe scalar y batch portable en H2.1;
+- ningún campo externo activa ISA hasta superar un perfil de compatibilidad
+  explícito en un hito posterior.
+
+`BuiltinField` continúa identificando presets mantenidos y catálogos ISA
+internos. H2.1 añadirá un contrato generado seguro para campos externos; no se
+abrirá la construcción pública de catálogos raw.
+
+Criterios de salida H2.1:
+
+1. un crate fixture externo genera, compila y usa un GF(2^m) no mantenido;
+2. añadirlo no modifica ningún fichero de `microfield/src/generated`;
+3. dos generaciones independientes son byte a byte idénticas;
+4. el campo satisface leyes, encoding, Rabin y referencia polinómica lenta;
+5. dos definiciones producen tipos nominales incompatibles;
+6. scalar y batch portable coinciden en todos los tamaños normativos;
+7. `no_std` del runtime generado compila sin activar el generador;
+8. no aparece `unsafe` ni asignación en sus operaciones.
 
 ## 6.2 `BackendId`
 
@@ -1817,8 +1912,12 @@ pub(crate) trait BuiltinField: Field {
 }
 ```
 
-En Fases 0-2 este trait permanece sellado. La generación externa se abre en la
-Fase 5, después de estabilizar el contrato de seguridad.
+`BuiltinField` permanece sellado para presets mantenidos y registro de kernels
+ISA. H2.1 abre la generación externa mediante un contrato distinto y seguro:
+el código generado aporta descripción matemática y operaciones portables, pero
+no puede construir `KernelSet`, registrar punteros ni afirmar compatibilidad
+ISA. Los backends acelerados se habilitan únicamente tras comprobar un perfil
+de layout y operaciones soportadas dentro del selector.
 
 ## 6.8 `EngineBuilder<F>`
 
@@ -2280,6 +2379,9 @@ Objetivo del hito:
 
 Fase 2 termina cuando:
 
+- un crate consumidor genera GF(2^m) externos sin editar Microfield;
+- Builder y manifiesto producen el mismo paquete determinista;
+- presets y campos externos comparten pipeline y portable;
 - existe detección y selección una sola vez;
 - PCLMUL y PMULL son correctos;
 - VPCLMUL funciona o queda documentadamente desactivado si no gana;
@@ -2293,23 +2395,21 @@ Fase 2 termina cuando:
 
 # 7. Procesos end-to-end
 
-## 7.1 Añadir un campo binario mantenido
+## 7.1 Generar un campo binario externo
 
-1. crear `fields/nombre.toml`;
-2. ejecutar `microfield-gen normalize`;
-3. revisar diff normalizado;
-4. ejecutar `validate`;
-5. generar `ReductionPlan` y cadena de inversión;
-6. importar/generar vectores de Sage o NTL;
-7. ejecutar `certify`;
-8. ejecutar `emit`;
-9. revisar Rust generado;
-10. añadir reexport;
-11. ejecutar tests portable;
-12. ejecutar tests ISA;
-13. ejecutar benchmarks;
-14. registrar thresholds;
-15. commit conjunto de manifiesto, código, certificado y vectores.
+1. el consumidor crea `fields/nombre.toml`;
+2. `build.rs` invoca `BinaryFieldFactory::from_manifest`;
+3. la factory normaliza, aplica límites y valida con Rabin;
+4. deriva `FieldId`, planes de reducción/inversión y metadata;
+5. emite un módulo Rust determinista dentro de `OUT_DIR`;
+6. el crate incluye el módulo generado;
+7. el tipo implementa API escalar y batch portable;
+8. la CI del consumidor regenera y compara contra su golden o digest fijado.
+
+No se edita `microfield/src/generated` y no se construyen catálogos raw. Para
+promover una definición externa a preset mantenido se añaden además manifiesto,
+certificado, vectores Sage y artefactos al repositorio de Microfield, usando la
+misma factory sin una ruta matemática alternativa.
 
 ## 7.2 Multiplicación escalar
 
@@ -2472,6 +2572,7 @@ Dependencias opcionales:
 | `portable-no-std` | target sin SO | compilación |
 | `msrv` | Rust 1.89 | compatibilidad |
 | `miri` | portable | wrappers y packed |
+| `external-field-consumer` | crate fixture | factory, build script y tipo externo |
 | `x86-pclmul` | hardware real | diferencial |
 | `x86-vpclmul` | hardware real | diferencial y benchmark |
 | `arm-pmull` | hardware real | diferencial y benchmark |
@@ -2571,6 +2672,17 @@ Un fallo se convierte en vector de regresión.
 - tails;
 - benchmarks.
 
+## Épica E2.0 - Factory binaria pública
+
+- `BinaryFieldDefinition` y Builder público;
+- adaptador de manifiesto para `build.rs`;
+- typestate normalizado/validado/generado;
+- ABI de codegen versionado;
+- emisión de newtype, traits, metadata y portable batch;
+- presets mantenidos regenerados por la misma factory;
+- fixture de consumidor externo;
+- determinismo, `no_std`, compile-fail y límites adversariales.
+
 ## Épica E2.1 - Motor
 
 - capabilities;
@@ -2648,17 +2760,20 @@ elimina duplicación con los otros dos.
 
 ## Fase 2
 
-Semanas orientativas 11-20:
+Orden revisado después del cierre de Fase 1:
 
-1. `EngineBuilder` y catálogo portable;
-2. PCLMUL;
-3. PMULL;
-4. PackedBatch;
-5. VPCLMUL;
-6. thresholds, auditoría y CI real.
+1. factory pública y generación estática de GF(2^m) externos;
+2. capabilities, `EngineBuilder` detectado y catálogo ampliado;
+3. PCLMUL;
+4. PMULL;
+5. `PackedBatch` y vistas sobre storage aportado;
+6. VPCLMUL y layouts persistentes;
+7. thresholds, auditoría, CI multi-ISA y cierre.
 
 PCLMUL y PMULL se desarrollan sobre el mismo conjunto de vectores. VPCLMUL no
 bloquea la corrección del motor si no alcanza aún el rendimiento esperado.
+Los campos externos comienzan con portable; la elegibilidad ISA no se infiere
+solo por grado o cardinalidad.
 
 # 13. Ejemplo de uso objetivo
 
@@ -2730,6 +2845,7 @@ El usuario nunca observa `__m256i`, PMULL ni SoA.
 | unsafe confinado | `backend` y `packed::aligned` |
 | pocos crates | un único paquete Cargo |
 | reutilización jerárquica | traits, composición y tipestate |
+| campos externos sin hardcode | `BinaryFieldFactory` y codegen versionado |
 
 # 15. Decisiones que no deben reabrirse durante Fases 0-2
 
@@ -2743,8 +2859,10 @@ El usuario nunca observa `__m256i`, PMULL ni SoA.
 8. No depender de `std::simd` experimental.
 9. No usar AVX-512 en el alcance inicial.
 10. No añadir paralelismo por hilos al núcleo.
-11. No aceptar un kernel solo porque contiene intrinsics.
-12. No publicar `unsafe` como API de usuario.
+11. No convertir la factory estática en un contexto dinámico.
+12. No exponer catálogos raw para habilitar campos externos.
+13. No aceptar un kernel solo porque contiene intrinsics.
+14. No publicar `unsafe` como API de usuario.
 
 # 16. Riesgos y mitigación
 
@@ -2757,6 +2875,13 @@ y owners claros. Un paquete no implica acoplamiento circular.
 
 Mitigación: IR y plantillas comunes, traits internos y generación revisable.
 No se intenta expresar tamaños anchos con const generics inestables.
+
+## Factory pública bloquea el ABI interno
+
+Mitigación: la salida usa un ABI de codegen versionado y estrecho. El contrato
+público describe matemáticas y encoding; `KernelSet`, punteros, limbs internos
+y wrappers ISA siguen privados. Fixtures de versiones N/N-1 detectan roturas
+antes de estabilizar una revisión del ABI.
 
 ## Generador incorrecto
 
@@ -2790,15 +2915,16 @@ El repositorio contendrá un único paquete coherente capaz de:
 1. describir un campo binario;
 2. normalizar y validar el descriptor;
 3. certificar irreducibilidad;
-4. generar constantes, planes y tipos;
-5. codificar elementos de forma canónica;
-6. ejecutar suma, producto, cuadrado, potencia e inversa;
-7. procesar slices sin asignaciones;
-8. empaquetar lotes persistentes;
-9. seleccionar portable, PCLMUL, VPCLMUL o PMULL;
-10. demostrar igualdad bit a bit;
-11. publicar la región de rendimiento de cada kernel;
-12. compilar portable en `no_std`.
+4. generar desde un crate consumidor tipos externos nominales;
+5. generar constantes, planes, metadata y código portable;
+6. codificar elementos de forma canónica;
+7. ejecutar suma, producto, cuadrado, potencia e inversa;
+8. procesar slices sin asignaciones;
+9. empaquetar lotes persistentes;
+10. seleccionar portable, PCLMUL, VPCLMUL o PMULL;
+11. demostrar igualdad bit a bit;
+12. publicar la región de rendimiento de cada kernel;
+13. compilar tipos generados y portable en `no_std`.
 
 La biblioteca estará preparada para Fase 3, pero todavía no prometerá:
 
@@ -2806,7 +2932,6 @@ La biblioteca estará preparada para Fase 3, pero todavía no prometerá:
 - Itoh-Tsujii optimizado;
 - Horner batch;
 - campos primos;
-- generación externa para consumidores;
 - contextos dinámicos;
 - firmas algebraicas.
 

@@ -14,6 +14,17 @@
 | Macro de delegación interna | `generated::binary_field` | Emitir impls nominales sin duplicar matemáticas | Cero |
 | Unit of Work | emisión | Publicación transaccional | Solo generación |
 
+## Patrones planificados para Fase 2
+
+| Patrón | Ubicación prevista | Finalidad | Coste runtime |
+|---|---|---|---|
+| Factory + Builder | `generator::BinaryFieldFactory` | Crear tipos GF(2^m) externos desde definición validada | Cero; solo build/codegen |
+| Typestate | definición → validado → planificado → generado | Impedir emisión previa a Rabin y verificación de planes | Cero fuera del generador |
+| Versioned Codegen ABI | módulo generado ↔ runtime | Desacoplar consumidores del IR y backends internos | Cero |
+
+La factory es estática: produce código y un tipo nominal antes de compilar. No
+es un registro runtime ni una factoría de objetos `dyn Field`.
+
 ## Patrones rechazados
 
 - Singleton y service locator: ocultan dependencias y dificultan tests.

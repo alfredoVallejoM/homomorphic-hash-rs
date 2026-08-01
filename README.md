@@ -54,3 +54,6 @@ documentación mantenida en `docs/microfield/`. El diagnóstico vigente y el
 orden del siguiente hito están en
 `docs/microfield/current-status-and-next.md`. El resultado completo de la Fase
 1 se documenta en `docs/microfield/phase-1-final-report.md`.
+
+La Fase 2 revisada, comenzando por la factory pública de campos binarios, está
+en `docs/microfield/phase-2-plan.md`.

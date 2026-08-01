@@ -121,5 +121,10 @@ El detalle consolidado está en
 
 ### Fase posterior
 
-Añadir PCLMUL y PMULL como adaptadores internos, con detección una vez,
-wrappers seguros, vectores idénticos al portable y benchmarks reproducibles.
+La Fase 2 comienza con `BinaryFieldFactory`: un consumidor podrá declarar
+GF(2^m), validarlo y generar en `build.rs` un tipo nominal con scalar y batch
+portable, sin editar Microfield. Después se incorporan capabilities, PCLMUL,
+PMULL, `PackedBatch`, VPCLMUL y calibración multi-ISA.
+
+El orden, los gates y los entregables están en
+[`phase-2-plan.md`](phase-2-plan.md).

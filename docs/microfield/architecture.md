@@ -87,3 +87,22 @@ Generación:
 FieldManifest → NormalizedManifest → ValidatedFieldSpec
               → GenerationPlan → GeneratedArtifacts
 ```
+
+## Extensión prevista en Fase 2
+
+H2.1 expondrá una fachada de factory sobre el pipeline, no el modelo interno:
+
+```mermaid
+flowchart LR
+    Manifest[Manifest o Builder] --> Factory[BinaryFieldFactory]
+    Factory --> Validate[Normalizar + Rabin + planes]
+    Validate --> Package[GeneratedFieldPackage]
+    Package --> Build[build.rs / OUT_DIR]
+    Build --> Type[Tipo nominal externo]
+    Type --> Portable[Scalar + batch portable]
+```
+
+El tipo externo se genera antes de compilar y no contiene contexto runtime. La
+factory puede usar `std`; el módulo resultante conserva `no_std`, limbs privados
+y dispatch escalar estático. `KernelSet` y la elegibilidad ISA permanecen bajo
+control interno.
