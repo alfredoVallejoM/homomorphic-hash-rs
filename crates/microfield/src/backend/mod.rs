@@ -1,3 +1,4 @@
 //! Execution-strategy adapters.
 
-mod portable;
+#[cfg(feature = "portable")]
+pub(crate) mod portable;

@@ -15,6 +15,14 @@ macro_rules! define_binary_field {
         #[repr(transparent)]
         pub struct $name($limbs);
 
+        #[cfg(feature = "portable")]
+        static PORTABLE_KERNELS: crate::kernel::KernelSet<$name> =
+            crate::backend::portable::kernel_set::<$name>();
+
+        #[cfg(feature = "portable")]
+        static KERNEL_CATALOG: crate::kernel::KernelCatalog<$name> =
+            crate::kernel::KernelCatalog::portable(&PORTABLE_KERNELS);
+
         impl $name {
             #[inline]
             fn from_limbs(limbs: $limbs) -> Self {
@@ -160,6 +168,16 @@ macro_rules! define_binary_field {
         impl crate::StaticField for $name {
             fn spec() -> &'static crate::StaticFieldSpec {
                 $spec
+            }
+        }
+
+        #[cfg(feature = "portable")]
+        impl crate::kernel::sealed::Sealed for $name {}
+
+        #[cfg(feature = "portable")]
+        impl crate::kernel::BuiltinField for $name {
+            fn __kernel_catalog() -> &'static crate::kernel::KernelCatalog<Self> {
+                &KERNEL_CATALOG
             }
         }
 

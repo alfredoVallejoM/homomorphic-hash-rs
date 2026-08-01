@@ -7,7 +7,7 @@ Este repositorio contiene dos paquetes con ciclos de vida independientes:
 
 `microfield` se desarrolla como un paquete único dentro del workspace. Sus
 fronteras internas siguen SOLID, dispatch estático en operaciones escalares y
-una futura selección de estrategia por lote.
+selección previa de estrategia para operaciones por lote.
 
 ## Estado
 
@@ -18,8 +18,8 @@ transaccionalmente. SageMath 10.7 ha producido vectores externos reproducibles
 para los tres campos. El vertical H2 se integró en `main` y H3 generaliza la
 misma aritmética portable sobre `Gf2_128V1`, `Gf2_256HhV1` y
 `Gf2_256AltV1`. Los tres tipos son públicos, nominalmente distintos y comparten
-algoritmos monomorfizados; batch y los backends ISA pertenecen a hitos
-posteriores.
+algoritmos monomorfizados. H4 incorpora ya el primer motor batch portable; los
+backends ISA pertenecen a la fase posterior.
 
 ## Comandos
 

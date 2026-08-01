@@ -19,7 +19,9 @@ paquete incluye:
   carry-less, reducción, cuadrado, inversión, potencia, Frobenius, traza y
   norma;
 - estrategias estáticas compartidas para 128 y 256 bits, sin dispatch
-  dinámico ni asignaciones en el camino escalar.
+  dinámico ni asignaciones en el camino escalar;
+- `Engine<F>`, `EngineBuilder`, catálogo sellado y operaciones batch portables
+  sobre slices, con una validación y una llamada indirecta por lote.
 
 Los tres campos son newtypes públicos distintos. No se exponen limbs,
 productos anchos ni conversiones implícitas entre presentaciones, incluso
@@ -31,6 +33,7 @@ cargo test -p microfield --features generator --all-targets
 cargo test -p microfield --all-features --doc
 cargo clippy -p microfield --all-features --all-targets -- -D warnings
 cargo check -p microfield --no-default-features --features portable,builtin-fields
+cargo bench -p microfield --bench portable_batch
 ```
 
 Ejemplo:

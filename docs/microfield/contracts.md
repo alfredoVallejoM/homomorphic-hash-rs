@@ -105,6 +105,23 @@ La inversión ejecuta una cadena fija parametrizada por el grado para
 Sage. Ninguna operación escalar consulta `Engine`, reserva heap o usa dispatch
 dinámico.
 
+## Batch portable
+
+`Engine<F>` selecciona una referencia a `KernelSet<F>` al construirse. Cada
+operación valida las longitudes antes de escribir y realiza una única llamada
+indirecta por lote. El backend portable recorre los slices sin asignar, hacer
+packing, detectar CPU ni paralelizar.
+
+Operaciones v1: `add_into`, `mul_into`, `square_into`, `mul_assign` y
+`square_assign`. Los slices vacíos son válidos. Las rutas `*_into` reciben una
+salida distinta por contrato de préstamos; las rutas `*_assign` expresan
+aliasing intencional.
+
+`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. En H4
+solo `Portable` está certificado. Forzar PCLMUL, VPCLMUL o PMULL devuelve
+`EngineBuildError::BackendUnavailable`. `FixedSchedule` se rechaza porque el
+producto portable actual tiene scheduling dependiente de los operandos.
+
 ## Errores y escrituras
 
 - Encoding incorrecto devuelve `DecodeError`; no hace panic.

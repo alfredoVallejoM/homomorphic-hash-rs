@@ -22,6 +22,12 @@ path = "benches/portable_scalar.rs"
 harness = false
 required-features = ["builtin-fields"]
 
+[[bench]]
+name = "portable_batch"
+path = "benches/portable_batch.rs"
+harness = false
+required-features = ["portable", "builtin-fields"]
+
 [features]
 default = ["std", "portable", "builtin-fields"]
 std = ["alloc"]
@@ -29,8 +35,10 @@ alloc = []
 portable = []
 builtin-fields = []
 generator = ["std", "dep:serde", "dep:serde_json", "dep:sha2", "dep:toml"]
+count-allocations = ["std", "dep:allocation-counter"]
 
 [dependencies]
+allocation-counter = { version = "0.8.1", optional = true }
 serde = { version = "1.0.228", features = ["derive"], optional = true }
 serde_json = { version = "1.0.149", optional = true }
 sha2 = { version = "0.10.9", optional = true }

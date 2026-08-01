@@ -59,7 +59,7 @@ correctamente en `30622165087` y `30622957505`.
 
 ## H3 — Generalización
 
-**Estado: implementado y validado localmente (31 de julio de 2026).**
+**Estado: integrado en `main` (1 de agosto de 2026).**
 
 - `Gf2_128V1` y `Gf2_256AltV1` generados como tipos públicos completos.
 - `BinaryFieldImpl` y estrategias `Polynomial128/256<TAIL>` compartidas.
@@ -71,11 +71,22 @@ correctamente en `30622165087` y `30622957505`.
 
 Salida: tres presentaciones nominalmente distintas.
 
+La rama y `main` superaron los cinco jobs en `30624475704` y `30701163784`.
+
 ## H4 — Batch portable
 
-- ABI seguro de slices, catálogo estático y `EngineBuilder`.
-- Operaciones out-of-place e in-place.
-- Tests de tamaños, canarios, errores y cero asignaciones.
+**Estado: implementado y validado localmente (1 de agosto de 2026).**
+
+- ABI seguro de slices, catálogo estático sellado y `EngineBuilder`.
+- Suma, producto y cuadrado out-of-place; producto y cuadrado in-place.
+- Validación previa y salida intacta ante cualquier error de longitud.
+- 17 tamaños normativos, canarios y equivalencia batch/escalar en tres campos.
+- `no_std` sin `alloc` y benchmark fachada frente a bucle directo.
+
+El contador dedicado confirma cero asignaciones y el ensamblado confirma una
+llamada indirecta por lote. Stable, Clippy, rustdoc, features, MSRV 1.89,
+Miri, regeneración de los tres artefactos y la regresión legada están verdes.
+Quedan la publicación, CI remota e integración posterior en `main`.
 
 Salida: Fase 1 completa, todavía sin backends ISA.
 

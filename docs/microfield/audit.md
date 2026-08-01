@@ -77,3 +77,14 @@ el macro privado se limita a emitir newtypes y delegación. La suite alcanza 77
 tests de runtime y dos doctests compile-fail, y ejecuta las 11 operaciones Sage
 sobre cada tipo público. Miri supera los 23 tests de runtime habilitados y los
 dos doctests sin detectar comportamiento indefinido.
+
+H3 fue integrado en `main` mediante `78d517f`; las ejecuciones de rama y main
+`30624475704` y `30701163784` terminaron verdes. H4 materializa las fronteras
+vacías de `kernel`, `backend` y `engine`: catálogo sellado por campo, builder,
+fachada y bucles portables seguros. La primera cobertura eleva la suite a 80
+tests ordinarios, más un gate opt-in de asignaciones, y cuatro compile-fail, con
+17 tamaños batch y canarios para los tres campos. La matriz completa alcanza
+81 tests con todos los features; Miri ejecuta 26 tests de runtime habilitados y
+los cuatro doctests sin detectar comportamiento indefinido. Rust 1.89, la
+regeneración de los tres artefactos y las 447 pruebas legadas permanecen
+correctos.

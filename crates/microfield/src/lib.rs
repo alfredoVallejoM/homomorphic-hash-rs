@@ -24,12 +24,17 @@ pub mod id;
 #[cfg(feature = "generator")]
 pub mod spec;
 
+pub use engine::{Engine, EngineBuildError, EngineBuilder, ExecutionPolicy};
 pub use error::{BatchError, DecodeError};
 pub use field::{
     BinaryPolynomialField, CanonicalEncoding, ExtensionField, F2, Field, Invert, Pow, Square,
     StaticField, StaticFieldSpec,
 };
 pub use id::{ArtifactBundleDigest, ArtifactId, FieldId};
+pub use kernel::{BackendId, KernelMetadata, ScheduleKind};
+
+#[doc(hidden)]
+pub use kernel::{BuiltinField, KernelCatalog};
 
 #[cfg(feature = "builtin-fields")]
 pub use generated::{Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1};

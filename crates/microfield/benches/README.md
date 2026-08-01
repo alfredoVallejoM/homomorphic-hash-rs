@@ -14,10 +14,14 @@ La medición actual separa:
 - reducción de una entrada de anchura doble;
 - inversión.
 
-H4 ampliará el harness para separar:
+H4 incorpora además:
 
-- producto ancho y reducción interna cuando exista una frontera de benchmark
-  que no exponga limbs en la API pública;
+```text
+cargo bench -p microfield --bench portable_batch
+```
+
+Este harness separa:
+
 - fachada batch frente a kernel directo;
 - coste de validación y dispatch.
 
@@ -51,3 +55,21 @@ x86-64 e Intel Core i7-13700HX:
 La medición H3 usa un compilador distinto de la línea base H2; solo permite
 detectar cambios gruesos, no atribuir diferencias pequeñas a la
 generalización.
+
+## Medición local H4
+
+Medición orientativa del 1 de agosto de 2026, Rust 1.97.1, release, Linux
+x86-64, Intel Core i7-13700HX y 4096 elementos:
+
+| Campo/operación | Directo | `Engine` | Diferencia |
+|---|---:|---:|---:|
+| GF(2¹²⁸) producto | 456,23 µs | 448,55 µs | -1,7 % |
+| GF(2¹²⁸) suma | 1,589 µs | 1,587 µs | -0,1 % |
+| HH-256 producto | 1,8190 ms | 1,8533 ms | +1,9 % |
+| HH-256 suma | 4,294 µs | 4,296 µs | +0,04 % |
+| Alt-256 producto | 1,9702 ms | 1,8395 ms | -6,6 % |
+| Alt-256 suma | 4,302 µs | 4,295 µs | -0,1 % |
+
+El peor sobrecoste positivo observado es 1,9 %, inferior al gate de 3 %. Los
+resultados favorables no se interpretan como aceleración de la fachada: son
+variación de compilación, frecuencia y ruido de medida.

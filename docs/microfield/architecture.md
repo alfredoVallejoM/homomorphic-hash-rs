@@ -72,8 +72,14 @@ boilerplate de delegación, pero no genera matemáticas distintas por campo.
 Batch:
 
 ```text
-Engine → validación única → KernelSet seleccionado → bucle portable → salida
+tipo generado → KernelCatalog estático → KernelSet portable
+                                         ↓ selección única
+EngineBuilder → Engine → validación → una llamada indirecta → backend portable
 ```
+
+`kernel` define el ABI neutral y metadatos; `backend::portable` implementa los
+bucles; `generated` registra un catálogo por campo; `engine` solo selecciona,
+valida y delega. No existe dependencia del motor hacia el backend concreto.
 
 Generación:
 

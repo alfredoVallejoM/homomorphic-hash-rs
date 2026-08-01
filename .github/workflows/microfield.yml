@@ -23,6 +23,8 @@ jobs:
         run: cargo +stable fmt -p microfield -- --check
       - name: Test all Microfield targets
         run: cargo +stable test -p microfield --features generator --all-targets
+      - name: Zero-allocation batch contract
+        run: cargo +stable test -p microfield --all-features --test batch_allocations
       - name: Clippy
         run: cargo +stable clippy -p microfield --all-features --all-targets -- -D warnings
       - name: Rustdoc
@@ -46,6 +48,7 @@ jobs:
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
       - run: cargo +stable check -p microfield --no-default-features
+      - run: cargo +stable check -p microfield --no-default-features --features builtin-fields
       - run: cargo +stable check -p microfield --no-default-features --features portable,builtin-fields
       - run: cargo +stable check -p microfield --no-default-features --features generator
 

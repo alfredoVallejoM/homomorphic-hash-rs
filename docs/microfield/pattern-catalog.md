@@ -4,9 +4,9 @@
 |---|---|---|---|
 | Newtype | elementos e IDs | Impedir mezcla accidental | Cero |
 | Typestate | `spec::model` | Evitar saltar validación | Cero fuera del generador |
-| Builder | `engine::builder` | Construcción explícita e inmutable | Una vez |
-| Strategy | `KernelSet` | Intercambiar portable/ISA | Una llamada por lote |
-| Static Factory | catálogo del campo | Registrar kernels válidos | Cero mutable |
+| Builder | `EngineBuilder<F>` | Selección explícita e inmutable | Una vez |
+| Strategy | `KernelSet<F>` | Intercambiar portable/ISA | Una llamada por lote |
+| Static Factory | `KernelCatalog<F>` sellado | Registrar kernels válidos | Cero mutable |
 | Facade | raíz y `Engine` | API pequeña y estable | Cero o wrapper medido |
 | Adapter | `spec::adapters` | Aislar TOML, FS y Sage | Fuera del hot path |
 | Command | `microfield-gen` | Mapear CLI a casos de uso | Fuera del runtime |
