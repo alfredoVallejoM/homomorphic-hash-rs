@@ -24,6 +24,7 @@ Este harness separa:
 
 - fachada batch frente a kernel directo;
 - coste de validación y dispatch.
+- construcción con capabilities portables frente a detección `std`.
 
 ## Línea base local H2
 
@@ -73,3 +74,26 @@ x86-64, Intel Core i7-13700HX y 4096 elementos:
 El peor sobrecoste positivo observado es 1,9 %, inferior al gate de 3 %. Los
 resultados favorables no se interpretan como aceleración de la fachada: son
 variación de compilación, frecuencia y ruido de medida.
+
+## Medición local H2.3
+
+Medición del 1 de agosto de 2026, Rust 1.97.1/LLVM 22.1.6, perfil `bench`, Linux
+6.18.7 x86-64, Intel Core i7-13700HX y microcode `0x12f`. Criterion ejecutó 30
+muestras, 1 s de warm-up y 3 s de medición:
+
+| Construcción de `Engine` | Intervalo observado |
+|---|---:|
+| capabilities portables | 852,29–868,25 ps |
+| capabilities detectadas | 1,0558–1,0602 ns |
+
+La ruta detectada observa el cache interno de los macros estándar tras la
+primera consulta; no representa la latencia fría de CPUID. Ambas rutas están
+fuera del hot path, no asignan y el `Engine` construido conserva exactamente
+la misma operación batch que H4.
+
+Comando reproducible:
+
+```text
+cargo +stable bench -p microfield --bench portable_batch -- \
+  engine/construction --warm-up-time 1 --measurement-time 3 --sample-size 30
+```

@@ -16,16 +16,12 @@ macro_rules! define_binary_field {
         pub struct $name($limbs);
 
         #[cfg(feature = "portable")]
-        static PORTABLE_KERNELS: crate::kernel::KernelSet<$name> =
-            crate::backend::portable::kernel_set::<$name>();
-
-        #[cfg(feature = "portable")]
         static PORTABLE_STRATEGY: crate::__private::PortableStrategy<$name> =
             crate::__private::PortableStrategy::new();
 
         #[cfg(feature = "portable")]
         static KERNEL_CATALOG: crate::kernel::KernelCatalog<$name> =
-            crate::kernel::KernelCatalog::portable(&PORTABLE_KERNELS);
+            crate::kernel::KernelCatalog::portable(PORTABLE_STRATEGY.kernels());
 
         impl $name {
             #[inline]
@@ -182,6 +178,10 @@ macro_rules! define_binary_field {
         impl crate::__private::PortableField for $name {
             fn __portable_strategy() -> &'static crate::__private::PortableStrategy<Self> {
                 &PORTABLE_STRATEGY
+            }
+
+            fn __kernel_catalog() -> crate::kernel::KernelCatalog<Self> {
+                KERNEL_CATALOG
             }
         }
 

@@ -10,9 +10,35 @@ use microfield::{
 const BATCH_LEN: usize = 4096;
 
 fn portable_batch(criterion: &mut Criterion) {
+    benchmark_engine_construction(criterion);
     benchmark_field::<Gf2_128V1>(criterion, "gf2_128_v1", 16);
     benchmark_field::<Gf2_256HhV1>(criterion, "gf2_256_hh_v1", 32);
     benchmark_field::<Gf2_256AltV1>(criterion, "gf2_256_alt_v1", 32);
+}
+
+fn benchmark_engine_construction(criterion: &mut Criterion) {
+    let mut group = criterion.benchmark_group("engine/construction");
+    group.bench_function("portable_capabilities", |bencher| {
+        bencher.iter(|| {
+            black_box(
+                Engine::<Gf2_256HhV1>::builder()
+                    .expected_batch(black_box(BATCH_LEN))
+                    .build()
+                    .expect("portable strategy is compiled"),
+            );
+        });
+    });
+    group.bench_function("detected_capabilities", |bencher| {
+        bencher.iter(|| {
+            black_box(
+                Engine::<Gf2_256HhV1>::builder()
+                    .expected_batch(black_box(BATCH_LEN))
+                    .detect()
+                    .expect("portable fallback is compiled"),
+            );
+        });
+    });
+    group.finish();
 }
 
 fn benchmark_field<F>(criterion: &mut Criterion, name: &str, bytes: usize)

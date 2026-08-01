@@ -39,6 +39,16 @@ impl<F: Field + Square> Default for PortableStrategy<F> {
 pub trait PortableField: Field + Square {
     /// Returns the strategy emitted beside the nominal field type.
     fn __portable_strategy() -> &'static PortableStrategy<Self>;
+
+    /// Returns the immutable backend catalog associated with this field.
+    ///
+    /// ABI 1 and 2 generated fields inherit a portable-only catalog. Maintained
+    /// fields can override this method when certified ISA strategies exist.
+    #[cfg(feature = "portable")]
+    #[must_use]
+    fn __kernel_catalog() -> crate::kernel::KernelCatalog<Self> {
+        crate::kernel::KernelCatalog::portable(Self::__portable_strategy().kernels())
+    }
 }
 
 /// Oldest generated-source ABI accepted by this runtime.

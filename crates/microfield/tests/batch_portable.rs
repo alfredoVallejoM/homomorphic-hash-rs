@@ -229,7 +229,7 @@ fn assert_builder_contract<F: BatchField>() {
             EngineBuilder::<F>::new()
                 .force_backend(backend)
                 .build(),
-            Err(EngineBuildError::BackendUnavailable(found)) if found == backend
+            Err(EngineBuildError::BackendNotCompiled(found)) if found == backend
         ));
     }
 

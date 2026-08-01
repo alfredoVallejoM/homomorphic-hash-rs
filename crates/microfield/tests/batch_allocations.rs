@@ -7,13 +7,41 @@
 ))]
 
 use allocation_counter::measure;
-use microfield::{CanonicalEncoding, Engine, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1};
+use microfield::{
+    BackendId, CanonicalEncoding, CpuCapabilities, Engine, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1,
+};
 
 #[test]
 fn every_portable_batch_operation_allocates_zero_times() {
     assert_zero_allocations::<Gf2_128V1, 16>();
     assert_zero_allocations::<Gf2_256HhV1, 32>();
     assert_zero_allocations::<Gf2_256AltV1, 32>();
+}
+
+#[test]
+fn capability_detection_and_engine_selection_allocate_zero_times() {
+    let portable = measure(|| {
+        let engine = Engine::<Gf2_256HhV1>::builder()
+            .expected_batch(4096)
+            .capabilities(CpuCapabilities::portable_only())
+            .build()
+            .expect("portable selection is infallible");
+        assert_eq!(engine.backend_id(), BackendId::Portable);
+    });
+    let detected = measure(|| {
+        let engine = Engine::<Gf2_256HhV1>::builder()
+            .expected_batch(4096)
+            .detect()
+            .expect("H2.3 falls back to portable");
+        assert_eq!(engine.backend_id(), BackendId::Portable);
+    });
+
+    for allocations in [portable, detected] {
+        assert_eq!(allocations.count_total, 0);
+        assert_eq!(allocations.bytes_total, 0);
+        assert_eq!(allocations.count_current, 0);
+        assert_eq!(allocations.bytes_current, 0);
+    }
 }
 
 fn assert_zero_allocations<F, const BYTES: usize>()

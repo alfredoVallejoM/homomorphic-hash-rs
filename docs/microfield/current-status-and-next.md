@@ -4,11 +4,12 @@ Fecha de revisión: 1 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
-Actualización H2.2: la factory binaria estática ya genera aritmética portable
-optimizada mediante un plan determinista. Manifiesto y Builder convergen en el
-pipeline certificado; un consumidor externo genera GF(2⁹), un GF(2¹⁰) denso y
-GF(2²³³) en `build.rs`, compila su runtime en `no_std` y usa los traits y
-`Engine` portable. El siguiente trabajo es H2.3, capabilities y selector ISA.
+Actualización H2.3: la frontera de capabilities y selección está completa. La
+factory binaria genera campos externos optimizados, y esos módulos ABI 1/2
+heredan un catálogo portable. `CpuCapabilities` ofrece detección real con
+`std` y un límite portable en `no_std`; `EngineBuilder` distingue compilación,
+campo, CPU y política antes de fijar una estrategia. El siguiente trabajo es
+H2.4, backend x86-64 PCLMUL.
 
 La Fase 1 completa, H0–H4, está integrada en `origin/main`. H4 entró por
 fast-forward mediante `1f176ab`; el `main` resultante superó sus cinco jobs en
@@ -28,35 +29,45 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | Asignaciones | Correcto local y remoto | contador externo: cero en las cinco operaciones y tres campos |
 | Dispatch | Correcto en ensamblado | dos comparaciones y una llamada indirecta por operación batch |
 | MSRV | Correcto en H4 | Rust 1.89, incluida la medición de cero asignaciones |
-| Miri | Correcto en H4 | 26 tests de runtime habilitados y cuatro compile-fail |
+| Miri H2.3 | Correcto local | 41 tests runtime y cinco compile-fail; consumidor externo: nueve |
 | Rendimiento H4 | Gate local superado | peor sobrecoste observado: 1,9 % en producto HH/4096 |
 | ISA | No implementado | IDs no implican disponibilidad; las solicitudes se rechazan |
 | Factory H2.1 | Implementada | tipos externos nominales 2..=4096, Rabin y emisión atómica |
 | Optimizador H2.2 | Implementado | tres reducciones, square dedicado e Itoh–Tsujii |
 | ABI de codegen | Compatible 1..=2 | fuente nueva usa v2; helpers v1 se conservan |
+| Capabilities H2.3 | Implementado | snapshot no falsificable, detección x86-64/AArch64 y `portable_only` |
+| Selector H2.3 | Implementado | cinco políticas y errores separados por build/campo/CPU/política |
+| Slots ISA | Estructura completa, ejecución desactivada | ningún backend ISA se marca compilado antes de H2.4/H2.5 |
 
-## Decisiones H4 materializadas
+## Decisiones H4/H2.3 materializadas
 
 1. `kernel` posee el ABI neutral y metadatos, no implementaciones matemáticas.
 2. `backend::portable` contiene los bucles seguros y sin asignación.
-3. Cada tipo generado registra su `KernelCatalog<F>` estático.
+3. Cada preset registra su `KernelCatalog<F>` estático; un campo externo ABI
+   1/2 recibe por defecto un catálogo portable.
 4. `BuiltinField` es público para bounds genéricos, oculto y sellado para
    impedir catálogos externos inseguros.
-5. `EngineBuilder` conserva política, backend forzado y tamaño esperado; la
-   selección ocurre una vez.
+5. `EngineBuilder` conserva política, backend forzado, tamaño esperado y una
+   instantánea de capabilities; la selección ocurre una vez.
 6. `Engine` es inmutable, `Copy + Send + Sync` y solo almacena referencia a la
    estrategia, política y hint de tamaño.
 7. `FixedSchedule` falla de forma tipada: el producto portable actual depende
    de los operandos y no recibe una garantía falsa.
-8. PCLMUL, VPCLMUL y PMULL devuelven `BackendUnavailable` hasta que exista una
-   implementación compilada y auditada.
+8. `build()` nunca detecta implícitamente; `detect()` consulta la CPU una vez
+   con `std`; `portable_only` cubre `no_std`.
+9. Un backend forzado diferencia `BackendNotCompiled`,
+   `BackendUnsupportedByField`, `BackendUnsupportedByCpu` y política.
+10. PCLMUL, VPCLMUL y PMULL devuelven `BackendNotCompiled` hasta que exista una
+    implementación compilada y auditada.
 
 La frontera se registra en
 [`ADR 0009`](adr/0009-portable-batch-engine.md).
+La detección y el selector se fijan en
+[`ADR 0012`](adr/0012-cpu-capabilities-and-static-selector.md).
 
 ## Cobertura
 
-La suite raíz de Microfield contiene ahora 104 tests de runtime y cuatro
+La suite raíz de Microfield contiene ahora 117 tests de runtime y cinco
 doctests compile-fail. El consumidor generado añade nueve tests de runtime y
 dos compile-fail; la integración legada conserva tres tests. H4 añadió:
 
@@ -81,6 +92,19 @@ H2.2 añade comparación diferencial low-tail/sparse/dense, la matriz
 64..=4096, ABI 1..=2 y el fixture denso GF(2¹⁰). Miri ejecuta tanto helpers
 internos como los tres campos externos generados.
 
+H2.3 añade 13 tests de runtime: tabla forzada exhaustiva de 491.520
+combinaciones, matriz automática, requisitos de features por arquitectura,
+detección contra los macros de Rust, fallback conservador, diagnóstico exacto,
+cero asignaciones, invariantes de metadata del catálogo y construcción
+concurrente determinista. El consumidor externo ABI 2 prueba además que el
+método nuevo con implementación por defecto no rompe su código generado.
+
+La matriz CI añade `portable` sin presets, `std + portable` y compilación
+cruzada AArch64 tanto `no_std` como `std`. Localmente ambas ramas AArch64 se
+validaron construyendo el sysroot desde `rust-src`. SageMath 10.7 bajo
+`laboratorio_np` regeneró además los tres vectores mantenidos con diff byte a
+byte vacío.
+
 ## Rendimiento H4
 
 Criterion, Rust 1.97.1, release, Linux x86-64, Intel Core i7-13700HX, lotes de
@@ -103,6 +127,12 @@ El desensamblado del producto HH muestra dos comparaciones de longitud antes de
 `call *0x8(%rax)`: una única llamada indirecta al kernel por invocación. El
 kernel contiene una llamada directa al producto ancho y ninguna indirección o
 referencia al asignador.
+
+H2.3 no añade campos a `Engine` ni modifica sus operaciones. Criterion mide la
+construcción con capabilities portables en 852,29–868,25 ps y con detección
+cacheada en 1,0558–1,0602 ns en la máquina local. El contador de asignaciones
+observa cero en ambas rutas. El detalle y el comando reproducible están en el
+[README de benchmarks](../../crates/microfield/benches/README.md).
 
 ## Hallazgos abiertos
 
@@ -138,9 +168,9 @@ El detalle consolidado está en
 H2.1 ha materializado `BinaryFieldFactory`: un consumidor puede declarar
 GF(2^m), validarlo y generar en `build.rs` un tipo nominal con scalar y batch
 portable, sin editar Microfield. H2.2 añade el optimizador portable estático y
-mantiene v1 como oráculo diferencial. H2.3 incorporará capabilities y
-selección; después siguen PCLMUL, PMULL, `PackedBatch`, VPCLMUL y calibración
-multi-ISA.
+mantiene v1 como oráculo diferencial. H2.3 añade capabilities confiables,
+catálogo ampliado y selector inmutable. Después siguen PCLMUL, PMULL,
+`PackedBatch`, VPCLMUL y calibración multi-ISA.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no

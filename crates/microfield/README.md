@@ -20,7 +20,7 @@ La Fase 1 portable está completa e integrada. El paquete incluye:
 - estrategias estáticas compartidas para 128 y 256 bits, sin dispatch
   dinámico ni asignaciones en el camino escalar;
 - `Engine<F>`, `EngineBuilder`, catálogo sellado y operaciones batch portables
-sobre slices, con una validación y una llamada indirecta por lote.
+  sobre slices, con una validación y una llamada indirecta por lote.
 
 H2.1 añade una factory build-time para nuevos campos binarios. El consumidor
 describe el grado y el polinomio irreducible, genera un tipo nominal en
@@ -32,6 +32,24 @@ generado recibe producto carry-less, cuadrado dedicado, inversión Itoh–Tsujii
 y una reducción seleccionada por alineamiento y forma del módulo. El plan se
 registra en el IR/`ArtifactId`; `FieldId`, layout, encoding y API permanecen
 estables. La fuente actual usa ABI de codegen 2 y el runtime acepta 1..=2.
+
+H2.3 completa la frontera previa a ISA. `CpuCapabilities::detect()` toma una
+instantánea real con `std`; `portable_only()` conserva selección explícita y
+determinista en `no_std`. `KernelCatalog` posee slots internos opcionales y
+`EngineBuilder` valida compilación, campo, CPU y política antes de crear un
+motor inmutable. Ninguna operación vuelve a detectar o seleccionar, y en H2.3
+solo portable está marcado como compilado.
+
+```rust
+use microfield::{Engine, ExecutionPolicy, Gf2_256HhV1};
+
+let engine = Engine::<Gf2_256HhV1>::builder()
+    .policy(ExecutionPolicy::Throughput)
+    .expected_batch(4096)
+    .detect()?;
+assert_eq!(engine.backend_id(), microfield::BackendId::Portable);
+# Ok::<(), microfield::EngineBuildError>(())
+```
 
 ```rust
 let package = microfield::generator::BinaryFieldFactory::builder()

@@ -14,6 +14,8 @@
 | Macro de delegación interna | `generated::binary_field` | Emitir impls nominales sin duplicar matemáticas | Cero |
 | Unit of Work | emisión | Publicación transaccional | Solo generación |
 | Static Strategy Selector | `spec::optimizer` | Elegir reducción/square/inversión desde datos certificados | Cero; solo codegen |
+| Capability Snapshot | `CpuCapabilities` | Separar detección confiable de ejecución | Una vez al construir |
+| Static Runtime Selector | `EngineBuilder` + `KernelCatalog` | Resolver build/campo/CPU/política antes del lote | Una vez al construir |
 
 ## Patrones planificados para Fase 2
 
@@ -22,6 +24,7 @@
 | Factory + Builder ✅ | `generator::BinaryFieldFactory` | Crear tipos GF(2^m) externos desde definición validada | Cero; solo build/codegen |
 | Typestate ✅ | definición → validado → planificado → generado | Impedir emisión previa a Rabin y verificación de planes | Cero fuera del generador |
 | Versioned Codegen ABI ✅ | módulo generado ↔ runtime | Desacoplar consumidores del IR y backends internos | Cero |
+| Capability Snapshot + Selector ✅ | `CpuCapabilities` + `EngineBuilder` | Preparar ISA sin detección en el hot path | Una vez |
 
 La factory es estática: produce código y un tipo nominal antes de compilar. No
 es un registro runtime ni una factoría de objetos `dyn Field`.

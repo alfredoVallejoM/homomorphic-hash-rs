@@ -49,15 +49,69 @@ impl<F: Field> KernelSet<F> {
 #[doc(hidden)]
 #[cfg(feature = "portable")]
 #[allow(dead_code)]
+#[derive(Clone, Copy)]
 pub struct KernelCatalog<F: Field> {
     portable: &'static KernelSet<F>,
+    x86_pclmul: Option<&'static KernelSet<F>>,
+    x86_vpclmul: Option<&'static KernelSet<F>>,
+    aarch64_pmull: Option<&'static KernelSet<F>>,
 }
 
 #[cfg(feature = "portable")]
 impl<F: Field> KernelCatalog<F> {
-    #[cfg(feature = "builtin-fields")]
     pub(crate) const fn portable(kernels: &'static KernelSet<F>) -> Self {
-        Self { portable: kernels }
+        assert!(matches!(
+            kernels.metadata.backend(),
+            super::BackendId::Portable
+        ));
+        Self {
+            portable: kernels,
+            x86_pclmul: None,
+            x86_vpclmul: None,
+            aarch64_pmull: None,
+        }
+    }
+
+    #[allow(dead_code)]
+    #[must_use]
+    pub(crate) const fn with_x86_pclmul(mut self, kernels: &'static KernelSet<F>) -> Self {
+        assert!(matches!(
+            kernels.metadata.backend(),
+            super::BackendId::X86Pclmul
+        ));
+        self.x86_pclmul = Some(kernels);
+        self
+    }
+
+    #[allow(dead_code)]
+    #[must_use]
+    pub(crate) const fn with_x86_vpclmul(mut self, kernels: &'static KernelSet<F>) -> Self {
+        assert!(matches!(
+            kernels.metadata.backend(),
+            super::BackendId::X86Vpclmul
+        ));
+        self.x86_vpclmul = Some(kernels);
+        self
+    }
+
+    #[allow(dead_code)]
+    #[must_use]
+    pub(crate) const fn with_aarch64_pmull(mut self, kernels: &'static KernelSet<F>) -> Self {
+        assert!(matches!(
+            kernels.metadata.backend(),
+            super::BackendId::Aarch64Pmull
+        ));
+        self.aarch64_pmull = Some(kernels);
+        self
+    }
+
+    pub(crate) const fn get(&self, backend: super::BackendId) -> Option<&'static KernelSet<F>> {
+        match backend {
+            super::BackendId::Portable => Some(self.portable),
+            super::BackendId::X86Pclmul => self.x86_pclmul,
+            super::BackendId::X86Vpclmul => self.x86_vpclmul,
+            super::BackendId::Aarch64Pmull => self.aarch64_pmull,
+        }
     }
 }
 

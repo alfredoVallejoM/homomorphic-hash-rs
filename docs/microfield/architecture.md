@@ -74,16 +74,22 @@ boilerplate de delegación, pero no genera matemáticas distintas por campo.
 Batch:
 
 ```text
-PortableField generado → composición segura → KernelSet privado estático
-                                             ↓ selección única
-EngineBuilder → Engine → validación → una llamada indirecta → backend portable
+PortableField generado → KernelCatalog { portable, slots ISA opcionales }
+                                      ↓ compilación + campo + CPU + política
+CpuCapabilities → EngineBuilder → Engine inmutable
+                                  ↓ validación de slices
+                                  una llamada indirecta → backend seleccionado
 ```
 
 `kernel` define el ABI neutral y metadatos; `backend::portable` implementa los
-bucles; la raíz del crate compone ambos; `engine` solo selecciona, valida y
-delega. Los presets conservan su catálogo sellado como frontera para futuros
-slots ISA, pero la ruta portable no exige que un campo externo simule ser un
-preset mantenido.
+bucles; la raíz del crate compone ambos; `engine` detecta solo cuando el
+consumidor llama a `detect`, selecciona una vez, valida y delega. Los presets
+conservan su catálogo sellado como frontera para slots ISA. Los campos externos
+ABI 1/2 heredan un catálogo portable sin simular ser un preset mantenido.
+
+`CpuCapabilities` es una instantánea confiable: detección real con `std` o
+`portable_only` también en `no_std`. Los bits ISA son privados. `Engine` no
+almacena la instantánea y ninguna operación vuelve a detectar o seleccionar.
 
 Generación:
 
@@ -133,3 +139,19 @@ flowchart LR
 Las familias low-tail, sparse y dense viven en helpers portables comunes. El
 tipo generado no almacena el plan ni consulta su clase de grado durante una
 operación.
+
+## Selector H2.3
+
+`KernelCatalog` registra portable y tres slots opcionales. En H2.3 los slots
+existen estructuralmente, pero PCLMUL, VPCLMUL y PMULL siguen marcados como no
+compilados. Esto permite probar el selector antes de introducir wrappers ISA.
+
+Un backend forzado se valida por build, compatibilidad del campo, CPU y
+política. Sin backend forzado, `Auto` usa `expected_batch`, `LowLatency` evita
+priorizar la estrategia vectorial, `Throughput` prioriza caudal,
+`PortableOnly` fija portable y `FixedSchedule` exige metadata `Fixed`.
+`minimum_batch` solo es un umbral de selección automática: no reduce el dominio
+válido de longitudes.
+
+La decisión completa está en
+[`ADR 0012`](adr/0012-cpu-capabilities-and-static-selector.md).

@@ -48,7 +48,9 @@ pub mod generator {
 }
 
 #[cfg(feature = "portable")]
-pub use engine::{Engine, EngineBuildError, EngineBuilder, ExecutionPolicy};
+pub use engine::{
+    Architecture, CpuCapabilities, Engine, EngineBuildError, EngineBuilder, ExecutionPolicy,
+};
 pub use error::{BatchError, DecodeError};
 pub use field::{
     BinaryPolynomialField, CanonicalEncoding, ExtensionField, F2, Field, Invert, Pow, Square,

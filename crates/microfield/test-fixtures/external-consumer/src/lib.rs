@@ -40,8 +40,8 @@ mod tests {
     use core::mem::{align_of, size_of};
 
     use microfield::{
-        BinaryPolynomialField, CanonicalEncoding, DecodeError, Engine, ExtensionField, Field,
-        Invert, Pow, Square, StaticField,
+        BackendId, BinaryPolynomialField, CanonicalEncoding, CpuCapabilities, DecodeError, Engine,
+        EngineBuildError, ExecutionPolicy, ExtensionField, Field, Invert, Pow, Square, StaticField,
     };
     use std::format;
 
@@ -198,7 +198,19 @@ mod tests {
 
     #[test]
     fn external_field_uses_the_public_batch_facade() {
-        let engine = Engine::<Gf2_9Fixture>::portable();
+        let engine = Engine::<Gf2_9Fixture>::builder()
+            .policy(ExecutionPolicy::Throughput)
+            .expected_batch(3)
+            .capabilities(CpuCapabilities::portable_only())
+            .build()
+            .expect("ABI 2 fields inherit a portable-only catalog");
+        assert_eq!(engine.backend_id(), BackendId::Portable);
+        assert!(matches!(
+            Engine::<Gf2_9Fixture>::builder()
+                .force_backend(BackendId::X86Pclmul)
+                .build(),
+            Err(EngineBuildError::BackendNotCompiled(BackendId::X86Pclmul))
+        ));
         let lhs = [element(3), element(0x101), element(0x1ff)];
         let rhs = [element(7), element(0x55), element(0x101)];
         let mut out = [Gf2_9Fixture::ZERO; 3];

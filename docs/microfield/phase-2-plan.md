@@ -2,8 +2,8 @@
 
 Fecha de planificación: 1 de agosto de 2026.
 
-Estado: en curso. H2.1 está cerrado y H2.2 tiene implementación y medición
-local completas; el siguiente hito operativo es H2.3.
+Estado: en curso. H2.1, H2.2 y H2.3 están implementados y validados localmente;
+el siguiente hito operativo es H2.4, x86-64 PCLMUL.
 
 ## Objetivo ejecutivo
 
@@ -366,6 +366,22 @@ campo, CPU y política.
 
 H2.3 termina con selector completo aunque todavía solo pueda elegir portable en
 hardware sin los backends de los hitos siguientes.
+
+### Resultado
+
+Implementado. `CpuCapabilities` solo admite detección real con `std` o el límite
+conservador `portable_only`; sus bits no son construibles por consumidores. El
+catálogo contiene slots opcionales y conserva compatibilidad con fuente
+generada ABI 1/2. `build()` es determinista y no detecta; `detect()` toma una
+instantánea una sola vez. El backend forzado distingue build, campo, CPU y
+política, mientras la selección automática aplica las cinco políticas sin
+alterar `Engine` ni el hot path.
+
+La tabla unitaria recorre 491.520 combinaciones forzadas y una matriz adicional
+de selección automática. Integración cubre detección real, cero asignaciones,
+construcción concurrente, `no_std`, campos externos y fallback portable. En
+H2.3 ningún slot ISA está marcado como compilado. La matriz CI compila además
+las rutas AArch64 `no_std` y `std`; el próximo trabajo es H2.4.
 
 ## H2.4 — x86-64 PCLMUL
 

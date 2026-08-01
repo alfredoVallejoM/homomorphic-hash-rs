@@ -1813,15 +1813,42 @@ GF(2⁹) y con vectores SageMath 10.7 de GF(2²³³). Los resultados locales est
 en `docs/microfield/portable-optimizer.md` y no se convierten en garantías
 universales de latencia.
 
+## 6.1.4 H2.3 — Capabilities y selector inmutable
+
+Antes de introducir instrucciones ISA, la selección separa cuatro dimensiones:
+backend compilado, estrategia certificada para el campo, soporte real de CPU y
+política. `CpuCapabilities` tiene campos privados y solo se obtiene mediante
+detección real con `std` o `portable_only`. Los tests internos pueden recorrer
+combinaciones sintéticas sin permitir que un consumidor falsee soporte ISA.
+
+`KernelCatalog<F>` contiene portable obligatorio y slots opcionales para
+PCLMUL, VPCLMUL y PMULL. Los módulos generados ABI 1/2 heredan un catálogo
+portable; los presets pueden sobrescribirlo internamente. `EngineBuilder` elige
+una vez y `Engine` no almacena capabilities ni vuelve a detectar.
+
+Semántica implementada:
+
+- `Auto` usa capabilities y el tamaño esperado como umbral;
+- `LowLatency` prioriza PCLMUL/PMULL frente a vectorización;
+- `Throughput` prioriza VPCLMUL;
+- `PortableOnly` impide cualquier ISA;
+- `FixedSchedule` exige metadata de schedule fijo;
+- el backend forzado valida build, campo, CPU y política, en ese orden.
+
+Estado: implementado. La tabla unitaria cubre exhaustivamente las combinaciones
+forzadas y la matriz automática. Integración verifica detección real,
+concurrencia, cero asignaciones, `no_std` y compatibilidad ABI 1/2. Ningún
+backend ISA se marca compilado todavía; H2.4 activará PCLMUL solo tras sus gates.
+
 ## 6.2 `BackendId`
 
 ```rust
 #[non_exhaustive]
 pub enum BackendId {
     Portable,
-    X86Pclmul128,
-    X86Vpclmul256,
-    Aarch64Pmull128,
+    X86Pclmul,
+    X86Vpclmul,
+    Aarch64Pmull,
 }
 ```
 
@@ -1831,12 +1858,8 @@ AVX-512, SVE y RISC-V quedan fuera de Fase 2.
 
 ```rust
 pub struct CpuCapabilities {
-    pub architecture: Architecture,
-    pub x86_pclmulqdq: bool,
-    pub x86_avx2: bool,
-    pub x86_vpclmulqdq: bool,
-    pub arm_neon: bool,
-    pub arm_pmull: bool,
+    architecture: Architecture,
+    features: u8,
 }
 ```
 
@@ -1846,6 +1869,12 @@ Funciones:
 impl CpuCapabilities {
     pub fn detect() -> Self;
     pub const fn portable_only() -> Self;
+    pub const fn architecture(self) -> Architecture;
+    pub const fn has_x86_pclmulqdq(self) -> bool;
+    pub const fn has_x86_avx2(self) -> bool;
+    pub const fn has_x86_vpclmulqdq(self) -> bool;
+    pub const fn has_aarch64_neon(self) -> bool;
+    pub const fn has_aarch64_pmull(self) -> bool;
 }
 ```
 
@@ -1964,7 +1993,7 @@ pub struct EngineBuilder<F: PortableField> {
     policy: ExecutionPolicy,
     expected_batch: Option<usize>,
     forced_backend: Option<BackendId>,
-    capabilities: Option<CpuCapabilities>,
+    capabilities: CpuCapabilities,
     _field: PhantomData<F>,
 }
 ```
@@ -1972,7 +2001,7 @@ pub struct EngineBuilder<F: PortableField> {
 Funciones:
 
 ```rust
-impl<F: BuiltinField> EngineBuilder<F> {
+impl<F: PortableField> EngineBuilder<F> {
     pub fn new() -> Self;
 
     pub fn policy(
@@ -1990,6 +2019,16 @@ impl<F: BuiltinField> EngineBuilder<F> {
         backend: BackendId,
     ) -> Self;
 
+    pub fn capabilities(
+        self,
+        capabilities: CpuCapabilities,
+    ) -> Self;
+
+    #[cfg(feature = "std")]
+    pub fn detect(
+        self,
+    ) -> Result<Engine<F>, EngineBuildError>;
+
     pub fn build(
         self,
     ) -> Result<Engine<F>, EngineBuildError>;
@@ -1997,13 +2036,15 @@ impl<F: BuiltinField> EngineBuilder<F> {
 ```
 
 `force_backend` no omite la comprobación de CPU. Si no está disponible devuelve
-error.
+un error que distingue backend no compilado, campo no elegible y CPU sin las
+features necesarias. `build` parte de `portable_only` y no detecta
+implícitamente; `detect` toma la instantánea real y termina la construcción.
 
 ## 6.9 `Engine<F>`
 
 ```rust
-#[derive(Clone)]
-pub struct Engine<F: BuiltinField> {
+#[derive(Clone, Copy)]
+pub struct Engine<F: PortableField> {
     kernels: &'static KernelSet<F>,
     policy: ExecutionPolicy,
 }
@@ -2292,10 +2333,10 @@ El batch owned es ergonomía; la vista es la ruta sin asignación oculta.
 
 ```rust
 pub enum EngineBuildError {
-    NoCompiledBackend,
+    BackendNotCompiled(BackendId),
     BackendUnsupportedByCpu(BackendId),
     BackendUnsupportedByField(BackendId),
-    PolicyUnsatisfied,
+    PolicyUnsatisfied(ExecutionPolicy),
 }
 
 pub enum PackError {
@@ -2801,12 +2842,13 @@ elimina duplicación con los otros dos.
 Orden revisado después del cierre de Fase 1:
 
 1. factory pública y generación estática de GF(2^m) externos;
-2. capabilities, `EngineBuilder` detectado y catálogo ampliado;
-3. PCLMUL;
-4. PMULL;
-5. `PackedBatch` y vistas sobre storage aportado;
-6. VPCLMUL y layouts persistentes;
-7. thresholds, auditoría, CI multi-ISA y cierre.
+2. optimizador portable estático para la mayoría de GF(2^m);
+3. capabilities, `EngineBuilder` detectado y catálogo ampliado;
+4. PCLMUL;
+5. PMULL;
+6. `PackedBatch` y vistas sobre storage aportado;
+7. VPCLMUL y layouts persistentes;
+8. thresholds, auditoría, CI multi-ISA y cierre.
 
 PCLMUL y PMULL se desarrollan sobre el mismo conjunto de vectores. VPCLMUL no
 bloquea la corrección del motor si no alcanza aún el rendimiento esperado.

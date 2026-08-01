@@ -144,10 +144,22 @@ Operaciones v1: `add_into`, `mul_into`, `square_into`, `mul_assign` y
 salida distinta por contrato de préstamos; las rutas `*_assign` expresan
 aliasing intencional.
 
-`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. En H4
-solo `Portable` está certificado. Forzar PCLMUL, VPCLMUL o PMULL devuelve
-`EngineBuildError::BackendUnavailable`. `FixedSchedule` se rechaza porque el
-producto portable actual tiene scheduling dependiente de los operandos.
+`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. En H2.3
+solo `Portable` está compilado. Forzar PCLMUL, VPCLMUL o PMULL devuelve
+`EngineBuildError::BackendNotCompiled`. Cuando existan implementaciones, la
+validación distinguirá `BackendUnsupportedByField` y
+`BackendUnsupportedByCpu`. `FixedSchedule` se rechaza mientras solo esté
+disponible portable, porque su producto actual tiene scheduling dependiente de
+los operandos.
+
+`EngineBuilder::build()` usa por defecto `CpuCapabilities::portable_only()` y
+nunca hace detección implícita. Con `std`, `EngineBuilder::detect()` captura una
+instantánea real una vez. `CpuCapabilities` expone arquitectura y flags para
+diagnóstico, pero sus bits no tienen constructor público.
+
+`expected_batch` y `KernelMetadata::minimum_batch` son pistas de selección para
+`Auto`. No limitan las longitudes válidas: todo `KernelSet` registrado debe
+aceptar cualquier slice, incluido el vacío.
 
 ## Errores y escrituras
 

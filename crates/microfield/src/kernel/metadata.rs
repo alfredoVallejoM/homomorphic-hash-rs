@@ -54,13 +54,34 @@ impl KernelMetadata {
         }
     }
 
+    #[cfg(test)]
+    pub(crate) const fn for_test(
+        backend: BackendId,
+        minimum_batch: usize,
+        schedule: ScheduleKind,
+    ) -> Self {
+        Self {
+            backend,
+            minimum_batch,
+            preferred_multiple: 1,
+            required_alignment: 1,
+            supports_in_place: true,
+            requires_packing: false,
+            scratch_bytes_per_element: 0,
+            schedule,
+        }
+    }
+
     /// Returns the selected backend identifier.
     #[must_use]
     pub const fn backend(&self) -> BackendId {
         self.backend
     }
 
-    /// Returns the smallest supported batch length.
+    /// Returns the smallest batch length recommended for automatic selection.
+    ///
+    /// Every registered kernel must remain correct for shorter slices; this is
+    /// a performance hint, not a precondition of batch operations.
     #[must_use]
     pub const fn minimum_batch(&self) -> usize {
         self.minimum_batch

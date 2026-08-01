@@ -13,14 +13,27 @@
 //!
 //! let _ = KernelCatalog::<Gf2_256HhV1> {};
 //! ```
+//!
+//! CPU feature snapshots cannot be forged by consumers:
+//!
+//! ```compile_fail
+//! use microfield::{Architecture, CpuCapabilities};
+//!
+//! let _ = CpuCapabilities {
+//!     architecture: Architecture::X86_64,
+//!     features: u8::MAX,
+//! };
+//! ```
 
 mod batch;
 mod builder;
+mod capabilities;
 mod policy;
 
 use crate::{__private::PortableField, BackendId, BatchError, KernelMetadata, kernel::KernelSet};
 
 pub use builder::{EngineBuildError, EngineBuilder};
+pub use capabilities::{Architecture, CpuCapabilities};
 pub use policy::ExecutionPolicy;
 
 /// Immutable batch execution façade for any statically defined field.
