@@ -110,5 +110,17 @@ Los campos con el mismo grado no son intercambiables. `FieldId` identifica la
 semántica matemática; `ArtifactId` identifica el perfil generado y el digest de
 bundle autentica los bytes exactos de los artefactos.
 
+La fuente actual usa ABI de codegen 2; el runtime acepta ABI 1..=2 para que un
+archivo generado por la versión anterior siga compilando durante la ventana de
+compatibilidad. `package.portable_optimization()` permite registrar la clase
+de grado y las estrategias elegidas sin exponer limbs ni punteros.
+
+La optimización es automática y reproducible. Grados alineados con tail bajo
+usan fold por palabras; módulos dispersos, fold por términos; módulos densos,
+un tail empaquetado. Todos usan cuadrado dedicado e inversión Itoh–Tsujii. No
+hay detección ni selección dentro de las operaciones. Véase
+[`portable-optimizer.md`](portable-optimizer.md).
+
 El fixture ejecutable de referencia está en
-`crates/microfield/test-fixtures/external-consumer`.
+`crates/microfield/test-fixtures/external-consumer`; contiene campos de grado
+9, grado 10 con módulo denso y grado 233 validado con Sage.

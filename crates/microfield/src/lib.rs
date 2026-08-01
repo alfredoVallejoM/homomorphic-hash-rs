@@ -38,6 +38,9 @@ pub mod spec;
 /// Stable build-time entry points for generating certified binary field types.
 #[cfg(feature = "generator")]
 pub mod generator {
+    pub use crate::spec::model::{
+        PortableDegreeClass, PortableOptimizationPlan, PortableReductionStrategy,
+    };
     pub use crate::spec::{
         BinaryFieldFactory, BinaryFieldFactoryBuilder, BinaryFieldFactoryError,
         GeneratedFieldPackage,

@@ -28,6 +28,11 @@ path = "benches/portable_batch.rs"
 harness = false
 required-features = ["portable", "builtin-fields"]
 
+[[bench]]
+name = "portable_codegen_optimizer"
+path = "benches/portable_codegen_optimizer.rs"
+harness = false
+
 [features]
 default = ["std", "portable", "builtin-fields"]
 std = ["alloc"]

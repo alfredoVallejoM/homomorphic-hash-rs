@@ -10,7 +10,9 @@ use std::{
 
 use microfield::{
     StaticField,
-    generator::{BinaryFieldFactory, BinaryFieldFactoryError},
+    generator::{
+        BinaryFieldFactory, BinaryFieldFactoryError, PortableDegreeClass, PortableReductionStrategy,
+    },
     spec::{
         Generator, JsonFileOracle,
         error::{PipelineError, ValidationError},
@@ -71,7 +73,21 @@ fn builder_is_deterministic_and_normalizes_exponent_order() {
     assert_eq!(first.package_digest(), second.package_digest());
     assert_eq!(first.rust_source(), second.rust_source());
     assert_eq!(first.type_name(), "Gf2_3Test");
-    assert_eq!(first.codegen_abi_version(), 1);
+    assert_eq!(first.codegen_abi_version(), 2);
+    assert_eq!(
+        first.portable_optimization().degree_class(),
+        PortableDegreeClass::Unaligned
+    );
+    assert_eq!(
+        first.portable_optimization().reduction(),
+        PortableReductionStrategy::SparseTermFold
+    );
+    assert!(
+        first
+            .rust_source()
+            .windows(b"multiply_sparse".len())
+            .any(|window| window == b"multiply_sparse")
+    );
     assert!(
         !first
             .rust_source()
@@ -232,7 +248,47 @@ fn maintained_presets_have_the_same_identity_through_the_factory() {
             .generate()
             .expect("maintained modulus is certified");
         assert_eq!(package.field_id(), expected, "identity drift in {file}");
+        assert_eq!(
+            package.portable_optimization().degree_class(),
+            PortableDegreeClass::PowerOfTwoLimbAligned
+        );
+        assert_eq!(
+            package.portable_optimization().reduction(),
+            PortableReductionStrategy::LowTailFold
+        );
+        assert!(
+            package
+                .rust_source()
+                .windows(b"multiply_low_tail".len())
+                .any(|window| window == b"multiply_low_tail")
+        );
     }
+}
+
+#[test]
+fn dense_external_modulus_emits_the_packed_word_strategy() {
+    let manifest = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("test-fixtures/external-consumer/field_10_dense.toml");
+    let package = BinaryFieldFactory::from_manifest(manifest)
+        .expect("dense fixture manifest")
+        .generate()
+        .expect("dense fixture is irreducible");
+    assert_eq!(
+        package.portable_optimization().reduction(),
+        PortableReductionStrategy::DenseWordFold
+    );
+    assert!(
+        package
+            .rust_source()
+            .windows(b"multiply_dense".len())
+            .any(|window| window == b"multiply_dense")
+    );
+    assert!(
+        package
+            .rust_source()
+            .windows(b"MODULUS_TAIL_WORDS".len())
+            .any(|window| window == b"MODULUS_TAIL_WORDS")
+    );
 }
 
 #[test]

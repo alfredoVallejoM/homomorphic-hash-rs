@@ -10,7 +10,7 @@ use crate::spec::{
     model::{GeneratedArtifacts, GeneratedFile, GenerationPlan, ValidatedFieldSpec},
 };
 
-/// Stateless renderer for portable version-1 generated files.
+/// Stateless renderer for portable version-2 generated files.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct ArtifactGenerator;
 

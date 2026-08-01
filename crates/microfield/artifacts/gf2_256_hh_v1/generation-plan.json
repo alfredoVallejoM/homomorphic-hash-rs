@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "field_id": "6b62fea68b968fd4f8c39a4f69b78f714c80858b1d0f667ec5a63d4417b43ca8",
-  "artifact_id": "61116d0c70d490cb8d210d35dddff0f638d75d7e08b6e8d138197594d42334cb",
-  "ir_version": 1,
+  "artifact_id": "b21097ca93e5e041b2059ba48a8b1017c3d77b031c485805780ecab6e3296544",
+  "ir_version": 2,
   "target_family": "portable",
   "product": {
     "limb_bits": 64,
@@ -4102,5 +4102,14 @@
         "count": 1
       }
     ]
+  },
+  "portable_optimization": {
+    "schema": 1,
+    "degree_class": "power_of_two_limb_aligned",
+    "multiplication": "set-bit-schoolbook-v1",
+    "squaring": "bit-spread-v1",
+    "reduction": "low_tail_fold",
+    "inversion": "itoh-tsujii-binary-v1",
+    "modulus_terms": 5
   }
 }

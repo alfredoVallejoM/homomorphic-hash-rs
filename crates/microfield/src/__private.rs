@@ -45,7 +45,7 @@ pub trait PortableField: Field + Square {
 pub const MIN_CODEGEN_ABI_VERSION: u32 = 1;
 
 /// Newest generated-source ABI accepted by this runtime.
-pub const MAX_CODEGEN_ABI_VERSION: u32 = 1;
+pub const MAX_CODEGEN_ABI_VERSION: u32 = 2;
 
 /// Reports whether generated source can safely call this runtime helper set.
 #[must_use]
@@ -90,6 +90,40 @@ pub fn multiply<const LIMBS: usize, const WIDE_LIMBS: usize>(
     reduce_wide(product, degree, modulus_exponents_desc)
 }
 
+/// Optimized schoolbook product followed by sparse descending reduction.
+#[must_use]
+pub fn multiply_sparse<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+    degree: usize,
+    modulus_exponents_desc: &[usize],
+) -> [u64; LIMBS] {
+    let product = wide_product::<LIMBS, WIDE_LIMBS>(lhs, rhs);
+    reduce_wide_sparse(product, degree, modulus_exponents_desc)
+}
+
+/// Optimized schoolbook product followed by packed dense-tail reduction.
+#[must_use]
+pub fn multiply_dense<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+    degree: usize,
+    modulus_tail: &[u64; LIMBS],
+) -> [u64; LIMBS] {
+    let product = wide_product::<LIMBS, WIDE_LIMBS>(lhs, rhs);
+    reduce_wide_dense(product, degree, modulus_tail)
+}
+
+/// Optimized product and bounded fold for aligned low-tail moduli.
+#[must_use]
+pub fn multiply_low_tail<const LIMBS: usize, const WIDE_LIMBS: usize, const MODULUS_TAIL: u64>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+) -> [u64; LIMBS] {
+    let product = wide_product::<LIMBS, WIDE_LIMBS>(lhs, rhs);
+    reduce_wide_low_tail::<LIMBS, WIDE_LIMBS, MODULUS_TAIL>(product)
+}
+
 #[must_use]
 pub fn square<const LIMBS: usize, const WIDE_LIMBS: usize>(
     value: [u64; LIMBS],
@@ -104,6 +138,37 @@ pub fn square<const LIMBS: usize, const WIDE_LIMBS: usize>(
         }
     }
     reduce_wide(product, degree, modulus_exponents_desc)
+}
+
+/// Dedicated bit-spreading square followed by sparse descending reduction.
+#[must_use]
+pub fn square_sparse<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    value: [u64; LIMBS],
+    degree: usize,
+    modulus_exponents_desc: &[usize],
+) -> [u64; LIMBS] {
+    let product = wide_square::<LIMBS, WIDE_LIMBS>(value);
+    reduce_wide_sparse(product, degree, modulus_exponents_desc)
+}
+
+/// Dedicated bit-spreading square followed by packed dense-tail reduction.
+#[must_use]
+pub fn square_dense<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    value: [u64; LIMBS],
+    degree: usize,
+    modulus_tail: &[u64; LIMBS],
+) -> [u64; LIMBS] {
+    let product = wide_square::<LIMBS, WIDE_LIMBS>(value);
+    reduce_wide_dense(product, degree, modulus_tail)
+}
+
+/// Dedicated bit-spreading square and bounded aligned low-tail fold.
+#[must_use]
+pub fn square_low_tail<const LIMBS: usize, const WIDE_LIMBS: usize, const MODULUS_TAIL: u64>(
+    value: [u64; LIMBS],
+) -> [u64; LIMBS] {
+    let product = wide_square::<LIMBS, WIDE_LIMBS>(value);
+    reduce_wide_low_tail::<LIMBS, WIDE_LIMBS, MODULUS_TAIL>(product)
 }
 
 #[must_use]
@@ -180,6 +245,31 @@ pub fn invert<F: Field + Square, const DEGREE: usize>(value: F) -> Option<F> {
     Some(result.square())
 }
 
+/// Inverts with an Itoh--Tsujii binary addition chain selected statically.
+#[must_use]
+pub fn invert_itoh_tsujii<F: Field + Square, const DEGREE: usize>(value: F) -> Option<F> {
+    if value.is_zero() {
+        return None;
+    }
+    debug_assert!(DEGREE >= 2);
+    let target = DEGREE - 1;
+    let highest_bit = usize::BITS as usize - 1 - target.leading_zeros() as usize;
+    let mut block = 1_usize;
+    let mut result = value;
+
+    for bit_index in (0..highest_bit).rev() {
+        let previous = result;
+        result = repeat_square(result, block).mul(previous);
+        block *= 2;
+        if (target >> bit_index) & 1 != 0 {
+            result = result.square().mul(value);
+            block += 1;
+        }
+    }
+    debug_assert_eq!(block, target);
+    Some(result.square())
+}
+
 #[must_use]
 pub fn frobenius<F: Field + Square, const DEGREE: usize>(mut value: F, power: usize) -> F {
     for _ in 0..power % DEGREE {
@@ -221,6 +311,137 @@ fn reduce_wide<const LIMBS: usize, const WIDE_LIMBS: usize>(
 }
 
 #[inline]
+fn wide_product<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+) -> [u64; WIDE_LIMBS] {
+    assert!(WIDE_LIMBS >= LIMBS.saturating_mul(2));
+    let mut product = [0; WIDE_LIMBS];
+    for (left_index, left) in lhs.iter().copied().enumerate() {
+        for (right_index, right) in rhs.iter().copied().enumerate() {
+            let (low, high) = clmul64_set_bits(left, right);
+            product[left_index + right_index] ^= low;
+            product[left_index + right_index + 1] ^= high;
+        }
+    }
+    product
+}
+
+#[inline]
+fn wide_square<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    value: [u64; LIMBS],
+) -> [u64; WIDE_LIMBS] {
+    assert!(WIDE_LIMBS >= LIMBS.saturating_mul(2));
+    let mut product = [0; WIDE_LIMBS];
+    for (index, limb) in value.iter().copied().enumerate() {
+        product[index * 2] = spread32(limb);
+        product[index * 2 + 1] = spread32(limb >> 32);
+    }
+    product
+}
+
+fn reduce_wide_sparse<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    mut product: [u64; WIDE_LIMBS],
+    degree: usize,
+    modulus_exponents_desc: &[usize],
+) -> [u64; LIMBS] {
+    if degree > 1 {
+        for source_bit in (degree..=(degree * 2 - 2)).rev() {
+            if bit(&product, source_bit) {
+                toggle(&mut product, source_bit);
+                let shift = source_bit - degree;
+                for &exponent in &modulus_exponents_desc[1..] {
+                    toggle(&mut product, shift + exponent);
+                }
+            }
+        }
+    }
+    low_limbs(product, degree)
+}
+
+fn reduce_wide_dense<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    mut product: [u64; WIDE_LIMBS],
+    degree: usize,
+    modulus_tail: &[u64; LIMBS],
+) -> [u64; LIMBS] {
+    if degree > 1 {
+        for source_bit in (degree..=(degree * 2 - 2)).rev() {
+            if bit(&product, source_bit) {
+                toggle(&mut product, source_bit);
+                xor_shifted_words(&mut product, modulus_tail, source_bit - degree);
+            }
+        }
+    }
+    low_limbs(product, degree)
+}
+
+fn reduce_wide_low_tail<const LIMBS: usize, const WIDE_LIMBS: usize, const MODULUS_TAIL: u64>(
+    mut product: [u64; WIDE_LIMBS],
+) -> [u64; LIMBS] {
+    assert!(LIMBS > 0);
+    assert!(WIDE_LIMBS >= LIMBS.saturating_mul(2));
+    debug_assert_eq!(MODULUS_TAIL & 1, 1);
+    debug_assert!(u64::BITS - MODULUS_TAIL.leading_zeros() <= 33);
+
+    for source_index in LIMBS..LIMBS * 2 {
+        let high = product[source_index];
+        product[source_index] = 0;
+        xor_low_tail(&mut product, source_index - LIMBS, high, MODULUS_TAIL);
+    }
+    let overflow = product[LIMBS];
+    product[LIMBS] = 0;
+    let mut tail = MODULUS_TAIL;
+    while tail != 0 {
+        product[0] ^= overflow << tail.trailing_zeros();
+        tail &= tail - 1;
+    }
+    low_limbs(product, LIMBS * 64)
+}
+
+#[inline]
+fn xor_low_tail<const WIDE_LIMBS: usize>(
+    product: &mut [u64; WIDE_LIMBS],
+    target: usize,
+    high: u64,
+    mut tail: u64,
+) {
+    while tail != 0 {
+        let shift = tail.trailing_zeros();
+        product[target] ^= high << shift;
+        if shift != 0 {
+            product[target + 1] ^= high >> (u64::BITS - shift);
+        }
+        tail &= tail - 1;
+    }
+}
+
+#[inline]
+fn xor_shifted_words<const SOURCE_LIMBS: usize, const TARGET_LIMBS: usize>(
+    target: &mut [u64; TARGET_LIMBS],
+    source: &[u64; SOURCE_LIMBS],
+    shift: usize,
+) {
+    let word_shift = shift / 64;
+    let bit_shift = shift % 64;
+    for (index, word) in source.iter().copied().enumerate() {
+        target[word_shift + index] ^= word << bit_shift;
+        if bit_shift != 0 && word_shift + index + 1 < TARGET_LIMBS {
+            target[word_shift + index + 1] ^= word >> (64 - bit_shift);
+        }
+    }
+}
+
+fn low_limbs<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    product: [u64; WIDE_LIMBS],
+    degree: usize,
+) -> [u64; LIMBS] {
+    let mut result = [0; LIMBS];
+    result.copy_from_slice(&product[..LIMBS]);
+    mask_unused_bits(&mut result, degree);
+    result
+}
+
+#[inline]
 fn bit<const LIMBS: usize>(limbs: &[u64; LIMBS], position: usize) -> bool {
     ((limbs[position / 64] >> (position % 64)) & 1) != 0
 }
@@ -248,11 +469,56 @@ fn clmul64(lhs: u64, rhs: u64) -> u128 {
     result
 }
 
+#[inline]
+fn clmul64_set_bits(lhs: u64, rhs: u64) -> (u64, u64) {
+    let mut low = 0;
+    let mut high = 0;
+    let mut remaining = rhs;
+    while remaining != 0 {
+        let shift = remaining.trailing_zeros();
+        low ^= lhs << shift;
+        if shift != 0 {
+            high ^= lhs >> (u64::BITS - shift);
+        }
+        remaining &= remaining - 1;
+    }
+    (low, high)
+}
+
+#[inline]
+fn spread32(mut value: u64) -> u64 {
+    value &= 0x0000_0000_ffff_ffff;
+    value = (value | (value << 16)) & 0x0000_ffff_0000_ffff;
+    value = (value | (value << 8)) & 0x00ff_00ff_00ff_00ff;
+    value = (value | (value << 4)) & 0x0f0f_0f0f_0f0f_0f0f;
+    value = (value | (value << 2)) & 0x3333_3333_3333_3333;
+    (value | (value << 1)) & 0x5555_5555_5555_5555
+}
+
+fn repeat_square<F: Square>(mut value: F, count: usize) -> F {
+    for _ in 0..count {
+        value = value.square();
+    }
+    value
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{canonical_padding_is_zero, mul_by_x, multiply, reduce_polynomial_bytes, square};
+    use super::{
+        canonical_padding_is_zero, mul_by_x, multiply, multiply_dense, multiply_low_tail,
+        multiply_sparse, reduce_polynomial_bytes, square, square_dense, square_low_tail,
+        square_sparse,
+    };
 
     const MODULUS_3: &[usize] = &[3, 1, 0];
+
+    #[test]
+    fn codegen_abi_keeps_the_n_minus_one_window() {
+        assert!(super::supports_codegen_abi(1));
+        assert!(super::supports_codegen_abi(2));
+        assert!(!super::supports_codegen_abi(0));
+        assert!(!super::supports_codegen_abi(3));
+    }
 
     #[test]
     fn gf8_known_products_and_square_agree() {
@@ -290,5 +556,108 @@ mod tests {
         assert!(canonical_padding_is_zero(&[0xff, 0x01], 9));
         assert!(!canonical_padding_is_zero(&[0xff, 0x02], 9));
         assert!(canonical_padding_is_zero(&[0xff], 8));
+    }
+
+    #[test]
+    fn aligned_low_tail_path_matches_the_v1_reference() {
+        const MODULUS: &[usize] = &[128, 7, 2, 1, 0];
+        let mut state = 0x6a09_e667_f3bc_c909_u64;
+        let rounds = if cfg!(miri) { 8 } else { 256 };
+        for _ in 0..rounds {
+            let lhs = [next(&mut state), next(&mut state)];
+            let rhs = [next(&mut state), next(&mut state)];
+            assert_eq!(
+                multiply_low_tail::<2, 4, 0x87>(lhs, rhs),
+                multiply::<2, 4>(lhs, rhs, 128, MODULUS)
+            );
+            assert_eq!(
+                square_low_tail::<2, 4, 0x87>(lhs),
+                square::<2, 4>(lhs, 128, MODULUS)
+            );
+        }
+    }
+
+    #[test]
+    fn aligned_power_of_two_degrees_share_the_certified_fold() {
+        check_aligned_power_of_two::<1, 2>(64);
+        check_aligned_power_of_two::<2, 4>(128);
+        check_aligned_power_of_two::<4, 8>(256);
+        check_aligned_power_of_two::<8, 16>(512);
+        check_aligned_power_of_two::<16, 32>(1024);
+        check_aligned_power_of_two::<32, 64>(2048);
+        check_aligned_power_of_two::<64, 128>(4096);
+    }
+
+    #[test]
+    fn unaligned_sparse_path_matches_the_v1_reference() {
+        const MODULUS: &[usize] = &[233, 74, 0];
+        let mut state = 0xbb67_ae85_84ca_a73b_u64;
+        let rounds = if cfg!(miri) { 4 } else { 96 };
+        for _ in 0..rounds {
+            let mut lhs = [0_u64; 4];
+            let mut rhs = [0_u64; 4];
+            for limb in &mut lhs {
+                *limb = next(&mut state);
+            }
+            for limb in &mut rhs {
+                *limb = next(&mut state);
+            }
+            lhs[3] &= (1_u64 << 41) - 1;
+            rhs[3] &= (1_u64 << 41) - 1;
+            assert_eq!(
+                multiply_sparse::<4, 8>(lhs, rhs, 233, MODULUS),
+                multiply::<4, 8>(lhs, rhs, 233, MODULUS)
+            );
+            assert_eq!(
+                square_sparse::<4, 8>(lhs, 233, MODULUS),
+                square::<4, 8>(lhs, 233, MODULUS)
+            );
+        }
+    }
+
+    #[test]
+    fn dense_word_path_matches_term_by_term_reduction() {
+        let modulus = core::array::from_fn::<_, 71, _>(|index| 70 - index);
+        let tail = [u64::MAX, 0x3f];
+        let mut state = 0x3c6e_f372_fe94_f82b_u64;
+        let rounds = if cfg!(miri) { 4 } else { 96 };
+        for _ in 0..rounds {
+            let lhs = [next(&mut state), next(&mut state) & 0x3f];
+            let rhs = [next(&mut state), next(&mut state) & 0x3f];
+            assert_eq!(
+                multiply_dense::<2, 4>(lhs, rhs, 70, &tail),
+                multiply::<2, 4>(lhs, rhs, 70, &modulus)
+            );
+            assert_eq!(
+                square_dense::<2, 4>(lhs, 70, &tail),
+                square::<2, 4>(lhs, 70, &modulus)
+            );
+        }
+    }
+
+    fn next(state: &mut u64) -> u64 {
+        *state ^= *state << 13;
+        *state ^= *state >> 7;
+        *state ^= *state << 17;
+        *state
+    }
+
+    fn check_aligned_power_of_two<const LIMBS: usize, const WIDE_LIMBS: usize>(degree: usize) {
+        const TAIL: u64 = 0x125;
+        let modulus = [degree, 8, 5, 2, 0];
+        let mut state = 0xa54f_f53a_5f1d_36f1_u64 ^ degree as u64;
+        let rounds = if cfg!(miri) { 1 } else { 8 };
+        for _ in 0..rounds {
+            let lhs = core::array::from_fn(|_| next(&mut state));
+            let rhs = core::array::from_fn(|_| next(&mut state));
+            assert_eq!(
+                multiply_low_tail::<LIMBS, WIDE_LIMBS, TAIL>(lhs, rhs),
+                multiply::<LIMBS, WIDE_LIMBS>(lhs, rhs, degree, &modulus)
+            );
+            assert_eq!(
+                square_low_tail::<LIMBS, WIDE_LIMBS, TAIL>(lhs),
+                square::<LIMBS, WIDE_LIMBS>(lhs, degree, &modulus)
+            );
+        }
     }
 }

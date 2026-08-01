@@ -24,10 +24,15 @@ pub struct CompileFailContracts;
 
 include!(concat!(env!("OUT_DIR"), "/gf2_9_fixture.rs"));
 
+mod generated_10_dense {
+    include!(concat!(env!("OUT_DIR"), "/gf2_10_dense_fixture.rs"));
+}
+
 mod generated_233 {
     include!(concat!(env!("OUT_DIR"), "/gf2_233_fixture.rs"));
 }
 
+pub use generated_10_dense::Gf2_10DenseFixture;
 pub use generated_233::Gf2_233Fixture;
 
 #[cfg(test)]
@@ -40,12 +45,16 @@ mod tests {
     };
     use std::format;
 
-    use super::{Gf2_9Fixture, Gf2_233Fixture};
+    use super::{Gf2_9Fixture, Gf2_10DenseFixture, Gf2_233Fixture};
 
     const MODULUS: u32 = (1 << 9) | (1 << 4) | 1;
 
     fn element(value: u16) -> Gf2_9Fixture {
         Gf2_9Fixture::from_canonical(&value.to_le_bytes()).expect("value is below 2^9")
+    }
+
+    fn dense_element(value: u16) -> Gf2_10DenseFixture {
+        Gf2_10DenseFixture::from_canonical(&value.to_le_bytes()).expect("value is below 2^10")
     }
 
     fn reference_multiply(lhs: u16, rhs: u16) -> u16 {
@@ -58,6 +67,22 @@ mod tests {
         for bit in (9..=16).rev() {
             if product & (1 << bit) != 0 {
                 product ^= MODULUS << (bit - 9);
+            }
+        }
+        product as u16
+    }
+
+    fn reference_multiply_dense(lhs: u16, rhs: u16) -> u16 {
+        const DENSE_MODULUS: u32 = (1 << 11) - 1;
+        let mut product = 0_u32;
+        for bit in 0..10 {
+            if (rhs >> bit) & 1 != 0 {
+                product ^= u32::from(lhs) << bit;
+            }
+        }
+        for bit in (10..=18).rev() {
+            if product & (1 << bit) != 0 {
+                product ^= DENSE_MODULUS << (bit - 10);
             }
         }
         product as u16
@@ -106,6 +131,34 @@ mod tests {
                     element(lhs) * element(rhs),
                     element(reference_multiply(lhs, rhs)),
                     "lhs={lhs:#x}, rhs={rhs:#x}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn dense_generated_reduction_matches_an_independent_model() {
+        let lhs_limit = if cfg!(miri) { 64 } else { 1024 };
+        let rhs_step = if cfg!(miri) { 127 } else { 31 };
+        for lhs in 0_u16..lhs_limit {
+            for rhs in (0_u16..1024).step_by(rhs_step) {
+                assert_eq!(
+                    dense_element(lhs) * dense_element(rhs),
+                    dense_element(reference_multiply_dense(lhs, rhs)),
+                    "lhs={lhs:#x}, rhs={rhs:#x}"
+                );
+            }
+            let value = dense_element(lhs);
+            assert_eq!(
+                value.square(),
+                dense_element(reference_multiply_dense(lhs, lhs))
+            );
+            if lhs == 0 {
+                assert_eq!(value.invert(), None);
+            } else {
+                assert_eq!(
+                    value * value.invert().expect("non-zero inverse"),
+                    Gf2_10DenseFixture::ONE
                 );
             }
         }

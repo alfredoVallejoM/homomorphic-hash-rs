@@ -2,8 +2,8 @@
 
 Fecha de planificación: 1 de agosto de 2026.
 
-Estado: en curso. H2.1 implementado y sometido a gates locales; H2.2 es el
-siguiente hito.
+Estado: en curso. H2.1 está cerrado y H2.2 tiene implementación y medición
+local completas; el siguiente hito operativo es H2.3.
 
 ## Objetivo ejecutivo
 
@@ -34,19 +34,20 @@ identidad dentro de cada producto.
 
 ```mermaid
 flowchart LR
-    H21[H2.1 Factory binaria] --> H22[H2.2 Capabilities y selector]
-    H22 --> H23[H2.3 x86 PCLMUL]
-    H22 --> H24[H2.4 AArch64 PMULL]
-    H23 --> H25[H2.5 PackedBatch]
-    H24 --> H25
-    H25 --> H26[H2.6 VPCLMUL]
-    H23 --> H27[H2.7 Cierre]
-    H24 --> H27
-    H25 --> H27
-    H26 --> H27
+    H21[H2.1 Factory binaria] --> H22[H2.2 Optimizador portable]
+    H22 --> H23[H2.3 Capabilities y selector]
+    H23 --> H24[H2.4 x86 PCLMUL]
+    H23 --> H25[H2.5 AArch64 PMULL]
+    H24 --> H26[H2.6 PackedBatch]
+    H25 --> H26
+    H26 --> H27[H2.7 VPCLMUL]
+    H24 --> H28[H2.8 Cierre]
+    H25 --> H28
+    H26 --> H28
+    H27 --> H28
 ```
 
-H2.3 y H2.4 pueden avanzar de forma independiente. H2.6 no bloquea el cierre
+H2.4 y H2.5 pueden avanzar de forma independiente. H2.7 no bloquea el cierre
 si el backend funciona pero no supera el punto de equilibrio exigido; en ese
 caso queda desactivado por el selector y documentado.
 
@@ -267,10 +268,73 @@ H2.1 dispone ya de un vertical ejecutable:
 
 La guía de consumo está en `binary-field-factory.md` y la compatibilidad del
 ABI en ADR 0010. Los backends ISA para campos externos permanecen fuera de
-H2.1: H2.2 debe decidir elegibilidad a partir de capacidades, nunca a partir de
+H2.1: H2.3 debe decidir elegibilidad a partir de capacidades, nunca a partir de
 un trait libre implementado por el consumidor.
 
-## H2.2 — Capabilities, catálogo ampliado y selector
+## H2.2 — Optimizador portable estático
+
+### Propósito
+
+Evitar que la extensibilidad de H2.1 condene a los campos externos a una ruta
+bit a bit. Cada campo certificado recibe en codegen un plan portable estático,
+sin handcode por campo, contexto runtime ni selección dentro de una operación.
+
+### Selección determinista
+
+El selector puro clasifica el grado como:
+
+- potencia de dos y alineado a limb;
+- alineado a limb;
+- no alineado.
+
+La clasificación prioriza 64, 128, 256, 512, 1024, 2048 y 4096, pero no
+confunde «potencia de dos» con «optimizable». La forma del módulo decide la
+reducción:
+
+- `LowTailFold`: grado múltiplo de 64 y tail de grado máximo 32;
+- `SparseTermFold`: número acotado de términos no nulos;
+- `DenseWordFold`: tail empaquetado en palabras para módulos densos.
+
+Todas las rutas comparten producto escolar carry-less que visita bits activos,
+cuadrado dedicado por expansión de bits e inversión Itoh–Tsujii. El límite de
+4096 y los campos no alineados conservan soporte; no se hace padding semántico
+ni cambia el encoding.
+
+### Estabilidad
+
+- `FieldId`, layout, encoding, traits y resultados no cambian;
+- el plan forma parte del IR v2 y de `ArtifactId`;
+- el digest de paquete sigue cubriendo los bytes exactos de la fuente;
+- ABI de codegen 2 llama a helpers nuevos; el runtime conserva ABI 1;
+- la selección es previa a compilación y queda visible en
+  `GeneratedFieldPackage::portable_optimization`;
+- el fallback v1 permanece como oráculo diferencial, no como ruta generada
+  por defecto;
+- no se introduce `unsafe`, heap, `dyn Trait` ni dispatch escalar.
+
+### Pruebas y rendimiento
+
+- equivalencia directa de las tres reducciones v2 contra v1;
+- matriz alineada para 64, 128, 256, 512, 1024, 2048 y 4096 bits;
+- GF(2⁹) exhaustivo, GF(2²³³) contra SageMath 10.7;
+- fixture denso GF(2¹⁰) exhaustivo usando
+  \(x^{10}+x^9+\ldots+x+1\);
+- regeneración determinista y goldens de `ArtifactId`/bundle actualizados;
+- benchmark Criterion separado para referencia y optimizado.
+
+En el i7-13700HX local el producto mejoró 5,4x en GF(2¹²⁸) y 2,0x en
+GF(2²³³); la inversión GF(2²³³), 2,8x. Son observaciones reproducibles, no
+garantías entre CPUs. El informe y el comando exacto están en
+`portable-optimizer.md`.
+
+### Resultado
+
+Implementado. Los módulos generados nuevos usan ABI 2 y el runtime acepta ABI
+1..=2. Los presets mantenidos conservan sus rutas escalares especializadas;
+sus artefactos se regeneraron porque el IR y el perfil portable certificado sí
+cambiaron.
+
+## H2.3 — Capabilities, catálogo ampliado y selector
 
 ### Propósito
 
@@ -300,10 +364,10 @@ campo, CPU y política.
 - una sola llamada indirecta por lote;
 - construcción concurrente determinista y Engine `Send + Sync`.
 
-H2.2 termina con selector completo aunque todavía solo pueda elegir portable en
+H2.3 termina con selector completo aunque todavía solo pueda elegir portable en
 hardware sin los backends de los hitos siguientes.
 
-## H2.3 — x86-64 PCLMUL
+## H2.4 — x86-64 PCLMUL
 
 ### Propósito
 
@@ -328,7 +392,7 @@ Acelerar producto y cuadrado AoS sin cambiar tipos o encoding.
 - selección únicamente donde la mejora inferior medida supera 20 %;
 - objetivo de 2x en `Gf2_256HhV1`, registrado como objetivo, no como garantía.
 
-## H2.4 — AArch64 PMULL
+## H2.5 — AArch64 PMULL
 
 ### Propósito
 
@@ -350,7 +414,7 @@ Ofrecer la misma semántica acelerada en AArch64 real.
 - matriz de hardware y compilador documentada;
 - selector incapaz de ejecutar PMULL fuera de una capability confirmada.
 
-## H2.5 — `PackedBatch` y storage alineado
+## H2.6 — `PackedBatch` y storage alineado
 
 ### Propósito
 
@@ -377,7 +441,7 @@ contaminar la API AoS o el tipo escalar.
 - ningún layout interno se serializa;
 - publicación del coste completo pack + kernel + unpack.
 
-## H2.6 — VPCLMUL y throughput
+## H2.7 — VPCLMUL y throughput
 
 ### Propósito
 
@@ -399,7 +463,7 @@ incluido packing, con intervalo reproducible. Si no gana, permanece probado y
 forzable para diagnóstico o se compila fuera; nunca se selecciona por prestigio
 de la instrucción.
 
-## H2.7 — Calibración, auditoría y cierre
+## H2.8 — Calibración, auditoría y cierre
 
 ### Propósito
 
@@ -434,6 +498,7 @@ Convertir implementaciones correctas en una política de producción trazable.
 ## Entregables documentales
 
 - ADR de factory y ABI de codegen;
+- ADR del optimizador portable y selección determinista;
 - ADR de elegibilidad ISA para campos externos;
 - contratos del Builder/manifiesto y actualización;
 - guía `build.rs` para consumidores;

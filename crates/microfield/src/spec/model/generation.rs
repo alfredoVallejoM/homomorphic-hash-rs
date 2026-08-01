@@ -9,6 +9,96 @@ use serde::Serialize;
 
 use crate::{ArtifactBundleDigest, ArtifactId, FieldId, spec::error::GenerationError};
 
+/// Degree shape used by the deterministic portable optimizer.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PortableDegreeClass {
+    /// The degree is both a power of two and a multiple of the 64-bit limb size.
+    PowerOfTwoLimbAligned,
+    /// The degree is a multiple of the 64-bit limb size.
+    LimbAligned,
+    /// The most significant limb contains canonical padding bits.
+    Unaligned,
+}
+
+/// Reduction family selected at generation time.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PortableReductionStrategy {
+    /// Word-aligned two-stage fold for a modulus tail of degree at most 32.
+    LowTailFold,
+    /// Descending fold that visits non-zero modulus terms directly.
+    SparseTermFold,
+    /// Descending fold using a packed word representation of a dense tail.
+    DenseWordFold,
+}
+
+/// Auditable, static optimization decision for generated portable arithmetic.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct PortableOptimizationPlan {
+    schema: u32,
+    degree_class: PortableDegreeClass,
+    multiplication: &'static str,
+    squaring: &'static str,
+    reduction: PortableReductionStrategy,
+    inversion: &'static str,
+    modulus_terms: usize,
+}
+
+impl PortableOptimizationPlan {
+    /// Returns the shape of the extension degree.
+    #[must_use]
+    pub const fn degree_class(&self) -> PortableDegreeClass {
+        self.degree_class
+    }
+
+    /// Returns the selected multiplication family.
+    #[must_use]
+    pub const fn multiplication(&self) -> &'static str {
+        self.multiplication
+    }
+
+    /// Returns the selected dedicated squaring family.
+    #[must_use]
+    pub const fn squaring(&self) -> &'static str {
+        self.squaring
+    }
+
+    /// Returns the selected reduction family.
+    #[must_use]
+    pub const fn reduction(&self) -> PortableReductionStrategy {
+        self.reduction
+    }
+
+    /// Returns the selected inversion schedule family.
+    #[must_use]
+    pub const fn inversion(&self) -> &'static str {
+        self.inversion
+    }
+
+    /// Returns the number of non-zero terms in the complete monic modulus.
+    #[must_use]
+    pub const fn modulus_terms(&self) -> usize {
+        self.modulus_terms
+    }
+
+    pub(crate) const fn new(
+        degree_class: PortableDegreeClass,
+        reduction: PortableReductionStrategy,
+        modulus_terms: usize,
+    ) -> Self {
+        Self {
+            schema: 1,
+            degree_class,
+            multiplication: "set-bit-schoolbook-v1",
+            squaring: "bit-spread-v1",
+            reduction,
+            inversion: "itoh-tsujii-binary-v1",
+            modulus_terms,
+        }
+    }
+}
+
 /// Static multiplication-shape plan.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct ProductPlan {
@@ -185,6 +275,7 @@ pub struct GenerationPlan {
     product: ProductPlan,
     reduction: ReductionPlan,
     inversion: ExponentiationPlan,
+    portable_optimization: PortableOptimizationPlan,
 }
 
 impl GenerationPlan {
@@ -218,22 +309,30 @@ impl GenerationPlan {
         &self.inversion
     }
 
+    /// Returns the deterministic portable code-generation decision.
+    #[must_use]
+    pub const fn portable_optimization(&self) -> &PortableOptimizationPlan {
+        &self.portable_optimization
+    }
+
     pub(crate) fn new(
         field_id: FieldId,
         artifact_id: ArtifactId,
         product: ProductPlan,
         reduction: ReductionPlan,
         inversion: ExponentiationPlan,
+        portable_optimization: PortableOptimizationPlan,
     ) -> Self {
         Self {
             schema: 1,
             field_id,
             artifact_id,
-            ir_version: 1,
+            ir_version: 2,
             target_family: "portable",
             product,
             reduction,
             inversion,
+            portable_optimization,
         }
     }
 }

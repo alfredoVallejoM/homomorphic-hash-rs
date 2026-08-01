@@ -9,6 +9,7 @@ pub mod error;
 mod factory;
 mod identity;
 pub mod model;
+mod optimizer;
 mod planner;
 mod polynomial;
 pub mod ports;

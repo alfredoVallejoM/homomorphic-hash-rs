@@ -95,3 +95,5 @@ jobs:
         run: rustup toolchain install nightly --profile minimal --component miri,rust-src
       - run: cargo +nightly miri setup
       - run: cargo +nightly miri test -p microfield --no-default-features --features portable,builtin-fields
+      - name: Miri generated optimizer paths
+        run: cargo +nightly miri test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib

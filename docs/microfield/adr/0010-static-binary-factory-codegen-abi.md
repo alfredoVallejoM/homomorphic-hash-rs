@@ -19,7 +19,7 @@ tamaños literales, limbs privados y llamadas estáticas a helpers portables.
 
 El módulo `microfield::__private` es público y oculto de la documentación
 normal solo porque el código generado vive en otro crate. No es una API para
-programación manual. Queda congelado el ABI de codegen 1:
+programación manual. El ABI de codegen 1 congeló:
 
 - suma XOR, prueba de cero y encoding de arrays de `u64`;
 - producto carry-less y cuadrado con producto ancho literal;
@@ -28,7 +28,7 @@ programación manual. Queda congelado el ABI de codegen 1:
 - inversión, Frobenius y traza genéricos;
 - construcción inmutable de `StaticFieldSpec`.
 
-Cada fuente contiene `assert!(supports_codegen_abi(1))` en contexto `const`.
+Cada fuente v1 contiene `assert!(supports_codegen_abi(1))` en contexto `const`.
 Una fuente incompatible falla al compilar. Al introducir ABI N, el runtime
 conservará los símbolos de N-1 durante al menos un ciclo menor y el rango
 `MIN_CODEGEN_ABI_VERSION..=MAX_CODEGEN_ABI_VERSION` lo expresará. Los símbolos
@@ -52,7 +52,18 @@ no puede conservar silenciosamente la huella de publicación.
   128/256 conservan especializaciones mientras el ensamblado/benchmark las
   justifique.
 - La elegibilidad ISA no puede declararla libremente un crate externo; se
-  resolverá mediante perfiles internos certificados en H2.2.
+  resolverá mediante perfiles internos certificados en H2.3.
+
+## Enmienda H2.2 — ABI 2
+
+ABI 2 añade nombres nuevos para producto/cuadrado con reducción de cola baja,
+dispersa o densa, y para inversión Itoh–Tsujii. No cambia firmas ni semántica
+de ABI 1. El runtime declara compatibilidad `1..=2`; la fuente nueva comprueba
+`supports_codegen_abi(2)`.
+
+El plan de optimización portable forma parte del IR v2 y de `ArtifactId`.
+`FieldId` no cambia porque el algoritmo no cambia el campo matemático. El ADR
+0011 documenta la selección y sus límites.
 
 ## Alternativas rechazadas
 

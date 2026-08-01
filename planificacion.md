@@ -1696,14 +1696,15 @@ un tipo Rust nominal, monomorfizado y sin coste adicional en el hot path.
 | Hito | Entrega | Dependencia |
 |---|---|---|
 | H2.1 ✅ | `BinaryFieldFactory` pública y consumidor externo portable | Fase 1 |
-| H2.2 | capacidades de CPU, catálogo ampliado y selección única | H2.1 |
-| H2.3 | backend x86 PCLMUL | H2.2 |
-| H2.4 | backend AArch64 PMULL | H2.2 |
-| H2.5 | `PackedBatch`, storage alineado y vistas | H2.3/H2.4 |
-| H2.6 | VPCLMUL y layouts de throughput | H2.5 |
-| H2.7 | calibración, auditoría, CI multi-ISA y cierre | H2.3-H2.6 |
+| H2.2 ✅ | optimizador portable estático para campos generados | H2.1 |
+| H2.3 | capacidades de CPU, catálogo ampliado y selección única | H2.2 |
+| H2.4 | backend x86 PCLMUL | H2.3 |
+| H2.5 | backend AArch64 PMULL | H2.3 |
+| H2.6 | `PackedBatch`, storage alineado y vistas | H2.4/H2.5 |
+| H2.7 | VPCLMUL y layouts de throughput | H2.6 |
+| H2.8 | calibración, auditoría, CI multi-ISA y cierre | H2.4-H2.7 |
 
-PCLMUL y PMULL son ramas independientes después de H2.2. VPCLMUL es
+PCLMUL y PMULL son ramas independientes después de H2.3. VPCLMUL es
 condicional: puede quedar implementado pero no seleccionado si no demuestra
 ventaja total incluyendo packing.
 
@@ -1782,6 +1783,35 @@ compila en `no_std`, contiene pruebas compile-fail y usa scalar y batch. Los
 presets atraviesan la factory para verificar identidad, aunque conservan sus
 especializaciones 128/256 mientras sigan ganando en codegen. El ABI de codegen
 v1 se documenta en ADR 0010.
+
+## 6.1.3 H2.2 — Optimizador portable estático
+
+La factory no debe limitarse a ofrecer corrección mediante bucles bit a bit.
+El segundo hito selecciona durante generación un perfil auditable sin cambiar
+el tipo, `FieldId`, encoding o API:
+
+- producto escolar carry-less por bits activos;
+- cuadrado dedicado por expansión de bits;
+- reducción `LowTailFold` para grados alineados y tails de grado máximo 32;
+- reducción por términos para módulos dispersos;
+- reducción por palabras para módulos densos;
+- inversión mediante cadena binaria Itoh–Tsujii.
+
+La clase de grado distingue potencias de dos alineadas, otros grados alineados
+y grados no alineados. Las potencias de dos 64..=4096 tienen prioridad, pero la
+estructura del módulo prevalece: un grado no alineado con módulo disperso
+también recibe optimización y un módulo denso nunca fuerza codegen expandido
+sin cota.
+
+El plan portable forma parte del IR v2 y de `ArtifactId`; `FieldId` permanece
+idéntico. ABI de codegen 2 usa helpers nuevos y el runtime conserva ABI 1 para
+compatibilidad N-1. La implementación v1 queda como oráculo diferencial.
+
+Estado: implementado y medido. Las rutas se comparan con v1 en grados
+64/128/256/512/1024/2048/4096, con un fixture denso GF(2¹⁰), con el modelo exhaustivo
+GF(2⁹) y con vectores SageMath 10.7 de GF(2²³³). Los resultados locales están
+en `docs/microfield/portable-optimizer.md` y no se convierten en garantías
+universales de latencia.
 
 ## 6.2 `BackendId`
 

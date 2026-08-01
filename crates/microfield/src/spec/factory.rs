@@ -13,7 +13,10 @@ use super::{
     ArtifactGenerator, GenerationPlanner, ValidationEngine,
     error::PipelineError,
     identity::generated_package_digest,
-    model::{FieldManifest, GeneratedArtifacts, ValidatedFieldSpec},
+    model::{
+        FieldManifest, GeneratedArtifacts, PortableOptimizationPlan, PortableReductionStrategy,
+        ValidatedFieldSpec,
+    },
 };
 
 /// Failure while configuring, certifying, rendering or emitting a field.
@@ -116,13 +119,14 @@ impl BinaryFieldFactory {
             .generate(&validated, &plan)
             .map_err(PipelineError::from)?;
         let type_name = rust_type_name(validated.normalized().name());
-        let source = render_rust_module(&validated, &artifacts, &type_name);
+        let source = render_rust_module(&validated, &plan, &artifacts, &type_name);
         let source = source.into_bytes();
         let package_digest = generated_package_digest(artifacts.bundle_digest(), &source);
         Ok(GeneratedFieldPackage {
             type_name,
             source,
             package_digest,
+            portable_optimization: plan.portable_optimization().clone(),
             artifacts,
         })
     }
@@ -232,6 +236,7 @@ pub struct GeneratedFieldPackage {
     type_name: String,
     source: Vec<u8>,
     package_digest: ArtifactBundleDigest,
+    portable_optimization: PortableOptimizationPlan,
     artifacts: GeneratedArtifacts,
 }
 
@@ -239,7 +244,7 @@ impl GeneratedFieldPackage {
     /// Returns the runtime-helper ABI required by this generated source.
     #[must_use]
     pub const fn codegen_abi_version(&self) -> u32 {
-        1
+        2
     }
 
     /// Returns the presentation name from the manifest.
@@ -270,6 +275,12 @@ impl GeneratedFieldPackage {
     #[must_use]
     pub const fn package_digest(&self) -> ArtifactBundleDigest {
         self.package_digest
+    }
+
+    /// Returns the immutable portable strategy decision used by codegen.
+    #[must_use]
+    pub const fn portable_optimization(&self) -> &PortableOptimizationPlan {
+        &self.portable_optimization
     }
 
     /// Returns the complete generated Rust module bytes.
@@ -421,6 +432,7 @@ fn artifact_bytes<'a>(artifacts: &'a GeneratedArtifacts, path: &str) -> &'a [u8]
 
 fn render_rust_module(
     validated: &ValidatedFieldSpec,
+    plan: &super::model::GenerationPlan,
     artifacts: &GeneratedArtifacts,
     type_name: &str,
 ) -> String {
@@ -428,6 +440,49 @@ fn render_rust_module(
     let degree = descriptor.degree();
     let limbs = degree.div_ceil(64);
     let bytes = descriptor.canonical_bytes();
+    let mut modulus_tail_words = vec![0_u64; limbs];
+    for exponent in &descriptor.modulus_exponents()[1..] {
+        modulus_tail_words[exponent / 64] |= 1_u64 << (exponent % 64);
+    }
+    let low_tail = modulus_tail_words[0];
+    let (multiply_body, square_body, dense_tail_constant) = match plan
+        .portable_optimization()
+        .reduction()
+    {
+        PortableReductionStrategy::LowTailFold => (
+            format!(
+                "Self(::microfield::__private::multiply_low_tail::<{limbs}, {}, {low_tail}>(self.0, rhs.0))",
+                limbs * 2
+            ),
+            format!(
+                "Self(::microfield::__private::square_low_tail::<{limbs}, {}, {low_tail}>(self.0))",
+                limbs * 2
+            ),
+            String::new(),
+        ),
+        PortableReductionStrategy::SparseTermFold => (
+            format!(
+                "Self(::microfield::__private::multiply_sparse::<{limbs}, {}>(self.0, rhs.0, DEGREE, MODULUS_EXPONENTS_DESC))",
+                limbs * 2
+            ),
+            format!(
+                "Self(::microfield::__private::square_sparse::<{limbs}, {}>(self.0, DEGREE, MODULUS_EXPONENTS_DESC))",
+                limbs * 2
+            ),
+            String::new(),
+        ),
+        PortableReductionStrategy::DenseWordFold => (
+            format!(
+                "Self(::microfield::__private::multiply_dense::<{limbs}, {}>(self.0, rhs.0, DEGREE, &MODULUS_TAIL_WORDS))",
+                limbs * 2
+            ),
+            format!(
+                "Self(::microfield::__private::square_dense::<{limbs}, {}>(self.0, DEGREE, &MODULUS_TAIL_WORDS))",
+                limbs * 2
+            ),
+            format!("const MODULUS_TAIL_WORDS: [u64; {limbs}] = {modulus_tail_words:?};"),
+        ),
+    };
     let mut source = GENERATED_MODULE_TEMPLATE.to_owned();
     for (token, value) in [
         ("__TYPE__", type_name.to_owned()),
@@ -443,6 +498,9 @@ fn render_rust_module(
             "__MODULUS__",
             format!("{:?}", descriptor.modulus_exponents()),
         ),
+        ("__DENSE_TAIL_CONSTANT__", dense_tail_constant),
+        ("__MULTIPLY_BODY__", multiply_body),
+        ("__SQUARE_BODY__", square_body),
         (
             "__FIELD_ID__",
             format!("{:?}", artifacts.field_id().as_bytes()),
@@ -467,10 +525,11 @@ fn render_rust_module(
 
 const GENERATED_MODULE_TEMPLATE: &str = r#"// Certified binary field generated by `microfield`.
 
-const _: () = assert!(::microfield::__private::supports_codegen_abi(1));
+const _: () = assert!(::microfield::__private::supports_codegen_abi(2));
 
 const DEGREE: usize = __DEGREE__;
 const MODULUS_EXPONENTS_DESC: &[usize] = &__MODULUS__;
+__DENSE_TAIL_CONSTANT__
 const DESCRIPTOR_JSON: &[u8] = &__DESCRIPTOR_JSON__;
 const CERTIFICATE_JSON: &[u8] = &__CERTIFICATE_JSON__;
 
@@ -517,9 +576,7 @@ impl ::microfield::Field for __TYPE__ {
     fn neg(self) -> Self { self }
     #[inline]
     fn mul(self, rhs: Self) -> Self {
-        Self(::microfield::__private::multiply::<__LIMBS__, __WIDE_LIMBS__>(
-            self.0, rhs.0, DEGREE, MODULUS_EXPONENTS_DESC,
-        ))
+        __MULTIPLY_BODY__
     }
     #[inline]
     fn is_zero(&self) -> bool { ::microfield::__private::is_zero(&self.0) }
@@ -528,15 +585,13 @@ impl ::microfield::Field for __TYPE__ {
 impl ::microfield::Square for __TYPE__ {
     #[inline]
     fn square(self) -> Self {
-        Self(::microfield::__private::square::<__LIMBS__, __WIDE_LIMBS__>(
-            self.0, DEGREE, MODULUS_EXPONENTS_DESC,
-        ))
+        __SQUARE_BODY__
     }
 }
 
 impl ::microfield::Invert for __TYPE__ {
     fn invert(self) -> Option<Self> {
-        ::microfield::__private::invert::<Self, DEGREE>(self)
+        ::microfield::__private::invert_itoh_tsujii::<Self, DEGREE>(self)
     }
 }
 

@@ -36,6 +36,7 @@ flowchart LR
     Sage[Sage adapter] --> Ports
     UseCases --> Model[model / typestate]
     UseCases --> Ports
+    Optimizer[portable optimizer] --> Model
 ```
 
 Los casos de uso dependen de interfaces de persistencia y oráculo. El binario
@@ -88,7 +89,7 @@ Generación:
 
 ```text
 FieldManifest → NormalizedManifest → ValidatedFieldSpec
-              → GenerationPlan → GeneratedArtifacts
+              → PortableOptimizer → GenerationPlan → GeneratedArtifacts
 ```
 
 ## Extensión implementada en H2.1
@@ -108,5 +109,27 @@ flowchart LR
 El tipo externo se genera antes de compilar y no contiene contexto runtime. La
 factory usa `std`; el módulo resultante conserva `no_std`, limbs privados y
 dispatch escalar estático. `KernelSet` y la elegibilidad ISA permanecen bajo
-control interno. El fixture externo compila campos de grados 9 y 233 y actúa
-como prueba end-to-end de esta frontera.
+control interno. El fixture externo compila campos de grados 9, 10 denso y 233
+y actúa como prueba end-to-end de esta frontera.
+
+## Optimización portable H2.2
+
+`PortableOptimizer` tiene una sola responsabilidad: transformar propiedades
+certificadas del grado y del módulo en `PortableOptimizationPlan`. No ejecuta
+I/O, detección de CPU ni benchmarks y no conoce tipos Rust concretos. El
+renderer traduce después el enum de reducción a una llamada monomorfizada ABI
+2.
+
+```mermaid
+flowchart LR
+    Validated[ValidatedFieldSpec] --> Selector[PortableOptimizer]
+    Selector --> Plan[PortableOptimizationPlan]
+    Plan --> Artifact[IR v2 + ArtifactId]
+    Plan --> Renderer[Renderer ABI 2]
+    Renderer --> Scalar[Producto / square / invert estáticos]
+    Scalar --> Oracle[Comparación diferencial ABI 1]
+```
+
+Las familias low-tail, sparse y dense viven en helpers portables comunes. El
+tipo generado no almacena el plan ni consulta su clase de grado durante una
+operación.

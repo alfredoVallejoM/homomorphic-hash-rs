@@ -12,7 +12,10 @@ use std::{
 use microfield::spec::{
     ArtifactGenerator, Generator,
     error::GenerationError,
-    model::{ExponentiationStep, FieldManifest, FoldStep, GeneratedArtifacts},
+    model::{
+        ExponentiationStep, FieldManifest, FoldStep, GeneratedArtifacts, PortableDegreeClass,
+        PortableReductionStrategy,
+    },
 };
 use sha2::{Digest, Sha256};
 
@@ -31,21 +34,21 @@ struct TestBundleFile {
 const GOLDEN: [(&str, &str, &str, &str); 3] = [
     (
         "gf2_128_v1.toml",
-        "7be252a754124403744d441293d21e9e7d18e20b6a9ace12c175aba6cd50b188",
+        "377b8f5402b057dae37ecdad1be47259d8e24555a794faa46535ecae298b558c",
         "07545484d4a09b1d44c25d0a0042042046396f9b5e2467bc5b6b0d7a2c327220",
-        "ec1c4df1c9e47a73f24366a734863380ab9c62e44bd7241e1783e22762d56790",
+        "53f5a53218beb44d45b81982eb6235b10f0ad847fa7a6f81697780594925a1bb",
     ),
     (
         "gf2_256_alt_v1.toml",
-        "e621b33392973099560d94540fde5c564edf8d3b1cbb467604c0f8d3934711de",
+        "ef3d67b5ff9df3c21fb529aee76759f87d16290082dca22171a8d8e705ff3bc3",
         "f4a06836f946c87f3fda8f23889670e9182e3b23086cc7108a20879e3a5999e8",
-        "60ec052a38063924ec0437a32833fa2817af21e91ee7ca92ce1df21f0cf7816e",
+        "5087cd8431c2edbe4982261147bd21328fe40358ebdd9c72e36e7d308e6d686c",
     ),
     (
         "gf2_256_hh_v1.toml",
-        "61116d0c70d490cb8d210d35dddff0f638d75d7e08b6e8d138197594d42334cb",
+        "b21097ca93e5e041b2059ba48a8b1017c3d77b031c485805780ecab6e3296544",
         "476cb23704fa07610dfdaad7b662c365208583f9a05e61e3e2809f96da9851f3",
-        "19b1709ed1bc824f597575bdcca0333420cefb5c6c6fcf5af760788820f87a5d",
+        "af60eebc43cc43f96331e589acecc71d7d360df47978317c2a00ffaf4413b77f",
     ),
 ];
 
@@ -65,6 +68,22 @@ fn product_reduction_and_identity_plans_have_frozen_shapes() {
         assert_eq!(plan.product().input_limbs(), degree.div_ceil(64));
         assert_eq!(plan.product().wide_limbs(), degree.div_ceil(64) * 2);
         assert_eq!(plan.product().strategies(), &["schoolbook".to_owned()]);
+        let optimized = plan.portable_optimization();
+        assert_eq!(
+            optimized.degree_class(),
+            PortableDegreeClass::PowerOfTwoLimbAligned
+        );
+        assert_eq!(
+            optimized.reduction(),
+            PortableReductionStrategy::LowTailFold
+        );
+        assert_eq!(optimized.multiplication(), "set-bit-schoolbook-v1");
+        assert_eq!(optimized.squaring(), "bit-spread-v1");
+        assert_eq!(optimized.inversion(), "itoh-tsujii-binary-v1");
+        assert_eq!(
+            optimized.modulus_terms(),
+            descriptor.modulus_exponents().len()
+        );
 
         let reduction = plan.reduction();
         assert_eq!(reduction.input_bits(), degree * 2);

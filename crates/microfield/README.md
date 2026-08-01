@@ -27,6 +27,12 @@ describe el grado y el polinomio irreducible, genera un tipo nominal en
 `build.rs` y lo usa con los mismos traits y `Engine` portable. No se crea un
 contexto de campo runtime ni se limita la factory a los tres presets.
 
+H2.2 añade un optimizador portable estático al mismo pipeline. Cada campo
+generado recibe producto carry-less, cuadrado dedicado, inversión Itoh–Tsujii
+y una reducción seleccionada por alineamiento y forma del módulo. El plan se
+registra en el IR/`ArtifactId`; `FieldId`, layout, encoding y API permanecen
+estables. La fuente actual usa ABI de codegen 2 y el runtime acepta 1..=2.
+
 ```rust
 let package = microfield::generator::BinaryFieldFactory::builder()
     .name("gf2_233_custom")
@@ -52,6 +58,7 @@ cargo test -p microfield --all-features --doc
 cargo clippy -p microfield --all-features --all-targets -- -D warnings
 cargo check -p microfield --no-default-features --features portable,builtin-fields
 cargo bench -p microfield --bench portable_batch
+cargo bench -p microfield --bench portable_codegen_optimizer
 ```
 
 Ejemplo:

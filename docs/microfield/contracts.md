@@ -44,10 +44,10 @@ Identidades congeladas:
 | `Gf2_256AltV1` | `5c78ea2f9ea1b2d59b88bf32e38ae33be4c2f977f0232c4441f7a16e4c9bb54d` |
 
 `StaticFieldSpec` expone tanto `FieldId` como `ArtifactId`. `ArtifactId` usa
-otro dominio SHA-256 e incorpora `FieldId`, versión del
-generador, versión del IR, familia target y build normalizado. Cambiar el
-nombre del campo no altera ninguna identidad; cambiar el build conserva
-`FieldId` y cambia `ArtifactId`.
+otro dominio SHA-256 e incorpora `FieldId`, versión del generador, versión del
+IR, familia target, build normalizado y plan de optimización portable. Cambiar
+el nombre del campo no altera ninguna identidad; cambiar build o codegen
+conserva `FieldId` y cambia `ArtifactId`.
 
 `ArtifactBundleDigest` usa el dominio
 `microfield:artifact-bundle:v1\0` sobre la lista canónica de rutas, longitudes
@@ -115,10 +115,17 @@ normalización, identidad, Rabin, planificación y artefactos.
 La salida es fuente Rust previa a compilación, no un campo dinámico. El newtype
 generado contiene exactamente `ceil(m / 64)` limbs privados y el encoding
 contiene `ceil(m / 8)` bytes. Los bits de padding se rechazan; los bytes
-polinómicos arbitrariamente anchos se reducen. El ABI de helpers de codegen es
-v1 y cada módulo comprueba su compatibilidad mediante una aserción `const`.
+polinómicos arbitrariamente anchos se reducen. La fuente actual usa ABI de
+codegen 2 y cada módulo comprueba su compatibilidad mediante una aserción
+`const`; el runtime conserva helpers ABI 1 y acepta el rango 1..=2.
 `GeneratedFieldPackage::package_digest` autentica conjuntamente el digest del
 bundle de certificados/planes y los bytes exactos del módulo Rust.
+
+El plan portable v2 elige estáticamente producto escolar por bits activos,
+cuadrado por expansión de bits, inversión Itoh–Tsujii y una de tres
+reducciones: tail bajo alineado, términos dispersos o palabras densas. La
+decisión depende solo del descriptor validado, queda serializada en el IR y no
+añade ramas de selección al escalar.
 
 La publicación crea y sincroniza un archivo de staging antes de renombrarlo. Se
 rechazan directorios o targets que sean symlinks o archivos especiales. Los

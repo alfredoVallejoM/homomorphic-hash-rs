@@ -9,9 +9,10 @@ use crate::spec::{
         ExponentiationPlan, ExponentiationStep, FoldStep, GenerationPlan, ProductPlan,
         ReductionPlan, ValidatedFieldSpec,
     },
+    optimizer::PortableOptimizer,
 };
 
-/// Stateless planner for the portable version-1 intermediate representation.
+/// Stateless planner for the portable version-2 intermediate representation.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct GenerationPlanner;
 
@@ -58,14 +59,16 @@ impl GenerationPlanner {
         }
         inversion_steps.push(ExponentiationStep::Square { count: 1 });
         let inversion = ExponentiationPlan::new(inversion_steps);
+        let portable_optimization = PortableOptimizer::plan(validated);
 
         let artifact_descriptor = ArtifactDescriptor {
             schema: 1,
             field_id: validated.field_id(),
             generator_version: env!("CARGO_PKG_VERSION"),
-            ir_version: 1,
+            ir_version: 2,
             target_family: "portable",
             build,
+            portable_optimization: &portable_optimization,
         };
         let artifact_bytes = serde_json::to_vec(&artifact_descriptor)
             .map_err(|error| GenerationError::Serialization(error.to_string()))?;
@@ -77,6 +80,7 @@ impl GenerationPlanner {
             product,
             reduction,
             inversion,
+            portable_optimization,
         ))
     }
 }
@@ -89,4 +93,5 @@ struct ArtifactDescriptor<'a> {
     ir_version: u32,
     target_family: &'static str,
     build: &'a crate::spec::model::NormalizedBuild,
+    portable_optimization: &'a crate::spec::model::PortableOptimizationPlan,
 }

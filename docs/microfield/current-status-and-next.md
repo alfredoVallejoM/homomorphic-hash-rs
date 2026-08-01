@@ -4,11 +4,11 @@ Fecha de revisión: 1 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
-Actualización H2.1: la factory binaria estática está implementada en la rama
-de trabajo de Fase 2. Manifiesto y Builder convergen en el pipeline certificado;
-un consumidor externo genera GF(2⁹) y GF(2²³³) en `build.rs`, compila su runtime
-en `no_std` y usa los traits y `Engine` portable. El siguiente trabajo es H2.2,
-capabilities y selector ISA.
+Actualización H2.2: la factory binaria estática ya genera aritmética portable
+optimizada mediante un plan determinista. Manifiesto y Builder convergen en el
+pipeline certificado; un consumidor externo genera GF(2⁹), un GF(2¹⁰) denso y
+GF(2²³³) en `build.rs`, compila su runtime en `no_std` y usa los traits y
+`Engine` portable. El siguiente trabajo es H2.3, capabilities y selector ISA.
 
 La Fase 1 completa, H0–H4, está integrada en `origin/main`. H4 entró por
 fast-forward mediante `1f176ab`; el `main` resultante superó sus cinco jobs en
@@ -31,6 +31,9 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | Miri | Correcto en H4 | 26 tests de runtime habilitados y cuatro compile-fail |
 | Rendimiento H4 | Gate local superado | peor sobrecoste observado: 1,9 % en producto HH/4096 |
 | ISA | No implementado | IDs no implican disponibilidad; las solicitudes se rechazan |
+| Factory H2.1 | Implementada | tipos externos nominales 2..=4096, Rabin y emisión atómica |
+| Optimizador H2.2 | Implementado | tres reducciones, square dedicado e Itoh–Tsujii |
+| ABI de codegen | Compatible 1..=2 | fuente nueva usa v2; helpers v1 se conservan |
 
 ## Decisiones H4 materializadas
 
@@ -53,8 +56,9 @@ La frontera se registra en
 
 ## Cobertura
 
-La suite de Microfield contiene ahora 81 tests de runtime, cuatro doctests
-compile-fail y tres tests de compatibilidad legada. H4 añade:
+La suite raíz de Microfield contiene ahora 104 tests de runtime y cuatro
+doctests compile-fail. El consumidor generado añade nueve tests de runtime y
+dos compile-fail; la integración legada conserva tres tests. H4 añadió:
 
 - equivalencia batch/escalar para los tres campos;
 - tamaños `0, 1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 255, 256, 1024,
@@ -72,6 +76,10 @@ compile-fail y tres tests de compatibilidad legada. H4 añade:
 La compilación `no_std` sin `alloc` proporciona una barrera estructural y el
 feature opcional `count-allocations` añade medición dinámica sin introducir
 `unsafe` en Microfield. El contador se activa solo en el gate de pruebas.
+
+H2.2 añade comparación diferencial low-tail/sparse/dense, la matriz
+64..=4096, ABI 1..=2 y el fixture denso GF(2¹⁰). Miri ejecuta tanto helpers
+internos como los tres campos externos generados.
 
 ## Rendimiento H4
 
@@ -129,8 +137,15 @@ El detalle consolidado está en
 
 H2.1 ha materializado `BinaryFieldFactory`: un consumidor puede declarar
 GF(2^m), validarlo y generar en `build.rs` un tipo nominal con scalar y batch
-portable, sin editar Microfield. H2.2 incorporará capabilities y selección;
-después siguen PCLMUL, PMULL, `PackedBatch`, VPCLMUL y calibración multi-ISA.
+portable, sin editar Microfield. H2.2 añade el optimizador portable estático y
+mantiene v1 como oráculo diferencial. H2.3 incorporará capabilities y
+selección; después siguen PCLMUL, PMULL, `PackedBatch`, VPCLMUL y calibración
+multi-ISA.
+
+La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
+rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no
+garantías. Entorno, intervalos y comando están en
+[`portable-optimizer.md`](portable-optimizer.md).
 
 El orden, los gates y los entregables están en
 [`phase-2-plan.md`](phase-2-plan.md).
