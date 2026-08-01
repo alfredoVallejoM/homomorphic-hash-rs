@@ -1,6 +1,8 @@
 //! Static catalogs implementing the Strategy and Abstract Factory patterns.
 
-use crate::{Field, Square};
+use crate::Field;
+#[cfg(feature = "portable")]
+use crate::Square;
 
 use super::KernelMetadata;
 
@@ -10,6 +12,7 @@ pub(crate) type BinaryAssignKernel<F> = fn(lhs: &mut [F], rhs: &[F]);
 pub(crate) type UnaryAssignKernel<F> = fn(values: &mut [F]);
 
 /// Internal immutable strategy table selected once per engine.
+#[cfg_attr(not(feature = "portable"), allow(dead_code))]
 pub(crate) struct KernelSet<F: Field> {
     pub(crate) metadata: KernelMetadata,
     pub(crate) add: BinaryKernel<F>,
@@ -20,7 +23,6 @@ pub(crate) struct KernelSet<F: Field> {
 }
 
 impl<F: Field> KernelSet<F> {
-    #[cfg(feature = "portable")]
     pub(crate) const fn new(
         metadata: KernelMetadata,
         add: BinaryKernel<F>,
@@ -45,21 +47,21 @@ impl<F: Field> KernelSet<F> {
 /// This type is public only because it appears in the sealed [`BuiltinField`]
 /// contract. It has no public constructor or kernel accessors.
 #[doc(hidden)]
+#[cfg(feature = "portable")]
+#[allow(dead_code)]
 pub struct KernelCatalog<F: Field> {
     portable: &'static KernelSet<F>,
 }
 
+#[cfg(feature = "portable")]
 impl<F: Field> KernelCatalog<F> {
-    #[cfg(feature = "portable")]
+    #[cfg(feature = "builtin-fields")]
     pub(crate) const fn portable(kernels: &'static KernelSet<F>) -> Self {
         Self { portable: kernels }
     }
-
-    pub(crate) const fn portable_kernels(&self) -> &'static KernelSet<F> {
-        self.portable
-    }
 }
 
+#[cfg(feature = "portable")]
 pub(crate) mod sealed {
     pub trait Sealed {}
 }
@@ -69,8 +71,9 @@ pub(crate) mod sealed {
 /// Consumers can use this trait as a generic bound, but cannot implement it or
 /// construct kernel catalogs.
 #[doc(hidden)]
+#[cfg(feature = "portable")]
 #[allow(private_bounds)]
-pub trait BuiltinField: Field + Square + sealed::Sealed {
+pub trait BuiltinField: Field + Square + crate::__private::PortableField + sealed::Sealed {
     /// Returns the immutable strategies certified for this field.
     #[doc(hidden)]
     fn __kernel_catalog() -> &'static KernelCatalog<Self>;

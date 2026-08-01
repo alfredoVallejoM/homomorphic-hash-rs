@@ -6,6 +6,7 @@ description = "Libreria de Hashes Homomorficos Topologicos basados en GF(2^256)"
 
 [workspace]
 members = ["crates/microfield"]
+exclude = ["crates/microfield/test-fixtures/external-consumer"]
 default-members = ["crates/microfield"]
 resolver = "2"
 

@@ -41,7 +41,6 @@ pub struct KernelMetadata {
 }
 
 impl KernelMetadata {
-    #[cfg(feature = "portable")]
     pub(crate) const fn portable<F>() -> Self {
         Self {
             backend: BackendId::Portable,

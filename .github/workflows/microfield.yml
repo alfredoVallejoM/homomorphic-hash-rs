@@ -33,6 +33,12 @@ jobs:
         run: cargo +stable doc -p microfield --all-features --no-deps
       - name: Compile-fail documentation contracts
         run: cargo +stable test -p microfield --all-features --doc
+      - name: External generated-field consumer
+        run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --all-targets
+      - name: External compile-fail contracts
+        run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --doc
+      - name: External generated-source Clippy
+        run: cargo +stable clippy --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --all-targets -- -D warnings
       - name: Legacy library regression
         run: cargo +stable test -p homomorphic-hash-rs --lib
       - name: Legacy field compatibility
@@ -61,6 +67,7 @@ jobs:
         run: rustup toolchain install 1.89.0 --profile minimal
       - run: cargo +1.89.0 check -p microfield --no-default-features
       - run: cargo +1.89.0 test -p microfield --features generator --all-targets
+      - run: cargo +1.89.0 test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
 
   generated:
     name: Generated artifacts

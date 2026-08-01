@@ -4,6 +4,12 @@ Fecha de revisión: 1 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
+Actualización H2.1: la factory binaria estática está implementada en la rama
+de trabajo de Fase 2. Manifiesto y Builder convergen en el pipeline certificado;
+un consumidor externo genera GF(2⁹) y GF(2²³³) en `build.rs`, compila su runtime
+en `no_std` y usa los traits y `Engine` portable. El siguiente trabajo es H2.2,
+capabilities y selector ISA.
+
 La Fase 1 completa, H0–H4, está integrada en `origin/main`. H4 entró por
 fast-forward mediante `1f176ab`; el `main` resultante superó sus cinco jobs en
 [`30703842091`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30703842091).
@@ -119,12 +125,12 @@ Salida: Fase 1 portable completa.
 El detalle consolidado está en
 [`phase-1-final-report.md`](phase-1-final-report.md).
 
-### Fase posterior
+### Fase 2 en curso
 
-La Fase 2 comienza con `BinaryFieldFactory`: un consumidor podrá declarar
+H2.1 ha materializado `BinaryFieldFactory`: un consumidor puede declarar
 GF(2^m), validarlo y generar en `build.rs` un tipo nominal con scalar y batch
-portable, sin editar Microfield. Después se incorporan capabilities, PCLMUL,
-PMULL, `PackedBatch`, VPCLMUL y calibración multi-ISA.
+portable, sin editar Microfield. H2.2 incorporará capabilities y selección;
+después siguen PCLMUL, PMULL, `PackedBatch`, VPCLMUL y calibración multi-ISA.
 
 El orden, los gates y los entregables están en
 [`phase-2-plan.md`](phase-2-plan.md).

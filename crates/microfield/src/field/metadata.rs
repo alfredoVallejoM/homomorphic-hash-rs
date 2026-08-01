@@ -16,6 +16,34 @@ pub struct StaticFieldSpec {
 }
 
 impl StaticFieldSpec {
+    /// Constructs metadata embedded by the certified source generator.
+    ///
+    /// This entry point is hidden because handwritten callers should not claim
+    /// certification. Generated modules use it to keep metadata immutable and
+    /// allocation-free.
+    #[doc(hidden)]
+    #[must_use]
+    pub const fn __from_generated(
+        field_id: FieldId,
+        artifact_id: ArtifactId,
+        name: &'static str,
+        degree: u32,
+        canonical_bytes: u16,
+        descriptor_json: &'static [u8],
+        certificate_json: &'static [u8],
+    ) -> Self {
+        Self {
+            field_id,
+            artifact_id,
+            name,
+            characteristic: 2,
+            degree,
+            canonical_bytes,
+            descriptor_json,
+            certificate_json,
+        }
+    }
+
     /// Returns the stable field identity.
     #[must_use]
     pub const fn field_id(&self) -> FieldId {

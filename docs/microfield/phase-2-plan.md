@@ -2,7 +2,8 @@
 
 Fecha de planificación: 1 de agosto de 2026.
 
-Estado: planificada, todavía no iniciada.
+Estado: en curso. H2.1 implementado y sometido a gates locales; H2.2 es el
+siguiente hito.
 
 ## Objetivo ejecutivo
 
@@ -81,7 +82,7 @@ Dos adaptadores alimentan el mismo caso de uso:
 
 ```rust
 let package = BinaryFieldFactory::builder()
-    .name("Gf2_233Custom")
+    .name("gf2_233_custom")
     .degree(233)
     .modulus_exponents([233, 74, 0])
     .build()?
@@ -233,6 +234,41 @@ tests diferenciales, no por una implementación libre de un trait marcador.
 Un repositorio consumidor limpio puede declarar un campo binario soportado,
 generarlo en `build.rs`, compilarlo, usar todas las operaciones escalares y
 batch portables y regenerarlo sin diff, sin editar Microfield.
+
+### Resultado implementado (H2.1)
+
+H2.1 dispone ya de un vertical ejecutable:
+
+- `microfield::generator::BinaryFieldFactory` acepta Builder o manifiesto;
+- ambos adaptadores convergen en `FieldManifest`, normalización, `FieldId`,
+  Rabin, planificación y artefactos existentes;
+- `GeneratedFieldPackage` entrega identidad, artefactos, fuente y publicación
+  atómica para `OUT_DIR`;
+- el ABI de codegen v1 queda comprobado mediante un `const` al compilar el
+  módulo generado;
+- la representación usa arrays literales de `u64`, módulo completo multilimb y
+  padding estricto para cualquier grado admitido por v1;
+- el escalar generado es estático, `no_std`, sin heap, `unsafe`, trait objects
+  ni contexto dentro del elemento;
+- `Engine<F>` acepta presets y tipos con la capability segura emitida por la
+  factory; sus punteros y tablas siguen privados y se construyen por la
+  composición interna;
+- un crate fixture externo genera GF(2⁹) y GF(2²³³) desde `build.rs`, usa
+  `include!`, compila el runtime sin `std` y ejercita la fachada batch;
+- GF(2⁹) se contrasta exhaustivamente con un modelo independiente y GF(2²³³)
+  cubre aritmética multilimb, inversión, Frobenius y el fold del módulo;
+- SageMath 10.7 en `laboratorio_np` aporta vectores externos v2 para GF(2²³³)
+  y el consumidor los contrasta con suma, producto, cuadrado, inversa,
+  potencia y `mul_by_x`;
+- los tres presets mantenidos atraviesan la factory y conservan exactamente su
+  `FieldId`; siguen usando sus especializaciones escalares 128/256 medidas;
+- nombres hostiles, polinomios reducibles, límites, symlinks, mezcla de tipos y
+  acceso a limbs tienen pruebas negativas.
+
+La guía de consumo está en `binary-field-factory.md` y la compatibilidad del
+ABI en ADR 0010. Los backends ISA para campos externos permanecen fuera de
+H2.1: H2.2 debe decidir elegibilidad a partir de capacidades, nunca a partir de
+un trait libre implementado por el consumidor.
 
 ## H2.2 — Capabilities, catálogo ampliado y selector
 

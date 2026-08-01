@@ -6,6 +6,7 @@
 mod adapters;
 mod artifact;
 pub mod error;
+mod factory;
 mod identity;
 pub mod model;
 mod planner;
@@ -18,6 +19,9 @@ pub use adapters::{
     FileSystemArtifactSink, FileSystemError, JsonFileOracle, OracleError, SageOracle,
 };
 pub use artifact::ArtifactGenerator;
+pub use factory::{
+    BinaryFieldFactory, BinaryFieldFactoryBuilder, BinaryFieldFactoryError, GeneratedFieldPackage,
+};
 pub use planner::GenerationPlanner;
 pub use use_cases::{Generator, GeneratorBuilder};
 pub use validation::ValidationEngine;

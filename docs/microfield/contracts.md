@@ -105,9 +105,29 @@ La inversión ejecuta una cadena fija parametrizada por el grado para
 Sage. Ninguna operación escalar consulta `Engine`, reserva heap o usa dispatch
 dinámico.
 
+## Factory binaria estática
+
+Con `generator`, `BinaryFieldFactory` acepta un manifiesto v1 o un Builder de
+parámetros matemáticos. El Builder no elude el esquema: construye una entrada
+que vuelve a pasar por el parser estricto y por el mismo pipeline de
+normalización, identidad, Rabin, planificación y artefactos.
+
+La salida es fuente Rust previa a compilación, no un campo dinámico. El newtype
+generado contiene exactamente `ceil(m / 64)` limbs privados y el encoding
+contiene `ceil(m / 8)` bytes. Los bits de padding se rechazan; los bytes
+polinómicos arbitrariamente anchos se reducen. El ABI de helpers de codegen es
+v1 y cada módulo comprueba su compatibilidad mediante una aserción `const`.
+`GeneratedFieldPackage::package_digest` autentica conjuntamente el digest del
+bundle de certificados/planes y los bytes exactos del módulo Rust.
+
+La publicación crea y sincroniza un archivo de staging antes de renombrarlo. Se
+rechazan directorios o targets que sean symlinks o archivos especiales. Los
+nombres v1 son `snake_case` ASCII estricto y nunca se interpretan como tokens o
+rutas antes de normalizarse.
+
 ## Batch portable
 
-`Engine<F>` selecciona una referencia a `KernelSet<F>` al construirse. Cada
+`Engine<F>` construye y selecciona un `KernelSet<F>` privado al construirse. Cada
 operación valida las longitudes antes de escribir y realiza una única llamada
 indirecta por lote. El backend portable recorre los slices sin asignar, hacer
 packing, detectar CPU ni paralelizar.

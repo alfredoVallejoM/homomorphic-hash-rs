@@ -20,7 +20,26 @@ La Fase 1 portable está completa e integrada. El paquete incluye:
 - estrategias estáticas compartidas para 128 y 256 bits, sin dispatch
   dinámico ni asignaciones en el camino escalar;
 - `Engine<F>`, `EngineBuilder`, catálogo sellado y operaciones batch portables
-  sobre slices, con una validación y una llamada indirecta por lote.
+sobre slices, con una validación y una llamada indirecta por lote.
+
+H2.1 añade una factory build-time para nuevos campos binarios. El consumidor
+describe el grado y el polinomio irreducible, genera un tipo nominal en
+`build.rs` y lo usa con los mismos traits y `Engine` portable. No se crea un
+contexto de campo runtime ni se limita la factory a los tres presets.
+
+```rust
+let package = microfield::generator::BinaryFieldFactory::builder()
+    .name("gf2_233_custom")
+    .degree(233)
+    .modulus_exponents(vec![233, 74, 0])
+    .build()?
+    .generate()?;
+package.emit_rust(std::env::var_os("OUT_DIR").ok_or("OUT_DIR")?)?;
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+La configuración Cargo completa y los contratos de actualización están en
+[`docs/microfield/binary-field-factory.md`](../../docs/microfield/binary-field-factory.md).
 
 Los tres campos son newtypes públicos distintos. No se exponen limbs,
 productos anchos ni conversiones implícitas entre presentaciones, incluso

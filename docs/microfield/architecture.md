@@ -20,11 +20,12 @@ flowchart LR
     Kernel --> Generated
     Backend --> Generated
     Kernel --> Engine
-    Generated --> Engine
 ```
 
 Las flechas significan «puede depender de». `Engine` no conoce backends
-concretos: el tipo generado entrega un catálogo estático de estrategias.
+concretos. La raíz de composición interna construye la estrategia portable y el
+motor conserva una referencia a su tabla estática; ni el tipo de campo ni el consumidor
+entregan punteros.
 
 ## Generador
 
@@ -72,14 +73,16 @@ boilerplate de delegación, pero no genera matemáticas distintas por campo.
 Batch:
 
 ```text
-tipo generado → KernelCatalog estático → KernelSet portable
-                                         ↓ selección única
+PortableField generado → composición segura → KernelSet privado estático
+                                             ↓ selección única
 EngineBuilder → Engine → validación → una llamada indirecta → backend portable
 ```
 
 `kernel` define el ABI neutral y metadatos; `backend::portable` implementa los
-bucles; `generated` registra un catálogo por campo; `engine` solo selecciona,
-valida y delega. No existe dependencia del motor hacia el backend concreto.
+bucles; la raíz del crate compone ambos; `engine` solo selecciona, valida y
+delega. Los presets conservan su catálogo sellado como frontera para futuros
+slots ISA, pero la ruta portable no exige que un campo externo simule ser un
+preset mantenido.
 
 Generación:
 
@@ -88,9 +91,9 @@ FieldManifest → NormalizedManifest → ValidatedFieldSpec
               → GenerationPlan → GeneratedArtifacts
 ```
 
-## Extensión prevista en Fase 2
+## Extensión implementada en H2.1
 
-H2.1 expondrá una fachada de factory sobre el pipeline, no el modelo interno:
+H2.1 expone una fachada de factory sobre el pipeline, no el modelo interno:
 
 ```mermaid
 flowchart LR
@@ -103,6 +106,7 @@ flowchart LR
 ```
 
 El tipo externo se genera antes de compilar y no contiene contexto runtime. La
-factory puede usar `std`; el módulo resultante conserva `no_std`, limbs privados
-y dispatch escalar estático. `KernelSet` y la elegibilidad ISA permanecen bajo
-control interno.
+factory usa `std`; el módulo resultante conserva `no_std`, limbs privados y
+dispatch escalar estático. `KernelSet` y la elegibilidad ISA permanecen bajo
+control interno. El fixture externo compila campos de grados 9 y 233 y actúa
+como prueba end-to-end de esta frontera.

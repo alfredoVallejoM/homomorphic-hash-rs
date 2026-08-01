@@ -1695,7 +1695,7 @@ un tipo Rust nominal, monomorfizado y sin coste adicional en el hot path.
 
 | Hito | Entrega | Dependencia |
 |---|---|---|
-| H2.1 | `BinaryFieldFactory` pública y consumidor externo portable | Fase 1 |
+| H2.1 ✅ | `BinaryFieldFactory` pública y consumidor externo portable | Fase 1 |
 | H2.2 | capacidades de CPU, catálogo ampliado y selección única | H2.1 |
 | H2.3 | backend x86 PCLMUL | H2.2 |
 | H2.4 | backend AArch64 PMULL | H2.2 |
@@ -1721,7 +1721,7 @@ generación estática. El dominio inicial permanece deliberadamente limitado a:
 - módulo mónico expresado por exponentes o bytes canónicos;
 - encoding little-endian ya congelado por el esquema v1.
 
-Dentro de ese dominio se soportarán grados 2..=4096. La factory emitirá los
+Dentro de ese dominio se soportan grados 2..=4096. La factory emite los
 tamaños literales de limbs, producto ancho y representación canónica, además de
 la máscara de padding. La reducción usará el plan completo generado y no
 quedará limitada a módulos cuyo tail cabe en un `u64`. Los perfiles 128/256
@@ -1732,7 +1732,7 @@ Contrato objetivo:
 
 ```rust
 let package = BinaryFieldFactory::builder()
-    .name("Gf2_233Custom")
+    .name("gf2_233_custom")
     .degree(233)
     .modulus_exponents([233, 74, 0])
     .build()?
@@ -1741,8 +1741,8 @@ let package = BinaryFieldFactory::builder()
 package.emit_rust(output_dir)?;
 ```
 
-También se soportará `BinaryFieldFactory::from_manifest(path)` para `build.rs`
-y CLI. La salida será código Rust determinista que declara un newtype nominal,
+También se soporta `BinaryFieldFactory::from_manifest(path)` para `build.rs`.
+La salida es código Rust determinista que declara un newtype nominal,
 implementa los traits algebraicos, adjunta identidad/certificado/planes y
 registra la estrategia portable sin exponer `KernelSet` o punteros de función.
 
@@ -1761,8 +1761,10 @@ Reglas de la frontera:
   explícito en un hito posterior.
 
 `BuiltinField` continúa identificando presets mantenidos y catálogos ISA
-internos. H2.1 añadirá un contrato generado seguro para campos externos; no se
-abrirá la construcción pública de catálogos raw.
+internos. Para portable, `Engine<F>` acepta la capability segura que la factory
+implementa para cada tipo y la raíz de composición crea internamente un
+`KernelSet` seguro. No se ha abierto la
+construcción pública de catálogos raw.
 
 Criterios de salida H2.1:
 
@@ -1774,6 +1776,12 @@ Criterios de salida H2.1:
 6. scalar y batch portable coinciden en todos los tamaños normativos;
 7. `no_std` del runtime generado compila sin activar el generador;
 8. no aparece `unsafe` ni asignación en sus operaciones.
+
+Estado: vertical implementado. El fixture externo genera GF(2⁹) y GF(2²³³),
+compila en `no_std`, contiene pruebas compile-fail y usa scalar y batch. Los
+presets atraviesan la factory para verificar identidad, aunque conservan sus
+especializaciones 128/256 mientras sigan ganando en codegen. El ABI de codegen
+v1 se documenta en ADR 0010.
 
 ## 6.2 `BackendId`
 
@@ -1922,7 +1930,7 @@ de layout y operaciones soportadas dentro del selector.
 ## 6.8 `EngineBuilder<F>`
 
 ```rust
-pub struct EngineBuilder<F: BuiltinField> {
+pub struct EngineBuilder<F: PortableField> {
     policy: ExecutionPolicy,
     expected_batch: Option<usize>,
     forced_backend: Option<BackendId>,

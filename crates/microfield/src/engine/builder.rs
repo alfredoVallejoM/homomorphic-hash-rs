@@ -2,7 +2,7 @@
 
 use core::{fmt, marker::PhantomData};
 
-use crate::{BackendId, BuiltinField, ScheduleKind};
+use crate::{__private::PortableField, BackendId, ScheduleKind};
 
 use super::{Engine, ExecutionPolicy};
 
@@ -32,14 +32,14 @@ impl fmt::Display for EngineBuildError {
 impl std::error::Error for EngineBuildError {}
 
 /// Builder that selects one batch strategy before execution.
-pub struct EngineBuilder<F: BuiltinField> {
+pub struct EngineBuilder<F: PortableField> {
     policy: ExecutionPolicy,
     expected_batch: Option<usize>,
     forced_backend: Option<BackendId>,
     field: PhantomData<F>,
 }
 
-impl<F: BuiltinField> EngineBuilder<F> {
+impl<F: PortableField> EngineBuilder<F> {
     /// Creates a builder using [`ExecutionPolicy::Auto`].
     #[must_use]
     pub const fn new() -> Self {
@@ -79,7 +79,7 @@ impl<F: BuiltinField> EngineBuilder<F> {
     /// Returns [`EngineBuildError`] when a forced backend is unavailable or no
     /// compiled strategy satisfies the requested scheduling policy.
     pub fn build(self) -> Result<Engine<F>, EngineBuildError> {
-        let kernels = F::__kernel_catalog().portable_kernels();
+        let kernels = F::__portable_strategy().kernels();
 
         if let Some(backend) = self.forced_backend
             && backend != BackendId::Portable
@@ -100,7 +100,7 @@ impl<F: BuiltinField> EngineBuilder<F> {
     }
 }
 
-impl<F: BuiltinField> Default for EngineBuilder<F> {
+impl<F: PortableField> Default for EngineBuilder<F> {
     fn default() -> Self {
         Self::new()
     }
