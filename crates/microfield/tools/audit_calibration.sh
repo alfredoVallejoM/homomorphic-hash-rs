@@ -174,7 +174,7 @@ while IFS=, read -r version field backend minimum automatic evidence improvement
   fi
 done < <(tail -n +2 "$table")
 
-if rg -q ',x86_vpclmul,[^,]+,true,' "$table"; then
+if grep -Eq ',x86_vpclmul,[^,]+,true,' "$table"; then
   x86_families="$(
     jq -r 'select(.environment.architecture == "x86_64") |
       select(any(.measurements[]; .backend == "x86_vpclmul")) |
@@ -186,7 +186,7 @@ if rg -q ',x86_vpclmul,[^,]+,true,' "$table"; then
   }
 fi
 
-if rg -q ',aarch64_pmull,[^,]+,true,' "$table"; then
+if grep -Eq ',aarch64_pmull,[^,]+,true,' "$table"; then
   arm_families="$(
     jq -r 'select(.environment.architecture == "aarch64") |
       select(any(.measurements[]; .backend == "aarch64_pmull")) |

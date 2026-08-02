@@ -8,8 +8,8 @@ inventory="crates/microfield/unsafe/unsafe-inventory-v1.sha256"
 sha256sum --check --strict "$inventory"
 
 mapfile -t unsafe_files < <(
-  rg -l 'unsafe fn|unsafe \{|unsafe impl|unsafe trait|unsafe extern|#\[unsafe\(' \
-    crates/microfield/src --glob '*.rs' | sort
+  find crates/microfield/src -type f -name '*.rs' -exec \
+    grep -El 'unsafe fn|unsafe \{|unsafe impl|unsafe trait|unsafe extern|#\[unsafe\(' {} + | sort
 )
 expected=(
   crates/microfield/src/backend/aarch64_pmull.rs
@@ -24,14 +24,14 @@ if [[ "${unsafe_files[*]}" != "${expected[*]}" ]]; then
   exit 1
 fi
 
-allow_count="$(rg -n '#\[allow\(unsafe_code\)\]' crates/microfield/src --glob '*.rs' | wc -l)"
+allow_count="$(grep -R -n -E --include='*.rs' '#\[allow\(unsafe_code\)\]' crates/microfield/src | wc -l)"
 if [[ "$allow_count" -ne 4 ]]; then
   echo "se esperaban exactamente cuatro excepciones allow(unsafe_code), hay $allow_count" >&2
   exit 1
 fi
 
 for source in "${expected[@]}"; do
-  if ! rg -q 'SAFETY:' "$source"; then
+  if ! grep -q 'SAFETY:' "$source"; then
     echo "la frontera $source carece de invariantes SAFETY documentadas" >&2
     exit 1
   fi
