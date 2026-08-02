@@ -113,14 +113,19 @@ jobs:
       - uses: actions/checkout@v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
-      - name: Verify deterministic artifact sets
+      - name: Verify deterministic artifact sets and external prime profiles
         shell: bash
         run: |
           set -euo pipefail
           for manifest in crates/microfield/fields/*.toml; do
-            cargo +stable run -q -p microfield --features generator \
-              --bin microfield-gen -- check "$manifest" \
-              --out crates/microfield/artifacts
+            if grep -q '^prime_schema_version[[:space:]]*=' "$manifest"; then
+              cargo +stable run -q -p microfield --features generator \
+                --bin microfield-gen -- prime-validate "$manifest"
+            else
+              cargo +stable run -q -p microfield --features generator \
+                --bin microfield-gen -- check "$manifest" \
+                --out crates/microfield/artifacts
+            fi
           done
       - name: Replay maintained prime certificates
         run: >-
