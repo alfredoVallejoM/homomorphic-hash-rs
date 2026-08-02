@@ -156,17 +156,19 @@ salida distinta por contrato de préstamos; las rutas `*_assign` expresan
 aliasing intencional.
 
 `BackendId` identifica solicitudes y diagnósticos, no disponibilidad. H2.4
-compila PCLMUL en x86-64 y H2.5 compila PMULL en AArch64; VPCLMUL sigue
-devolviendo `BackendNotCompiled`. ABI 3 registra el adapter ISA compatible para
-campos externos. Un campo ABI 1/2 continúa devolviendo
+compila PCLMUL en x86-64, H2.5 compila PMULL en AArch64 y H2.7 compila VPCLMUL
+en x86-64. ABI 3 registra los adapters ISA compatibles para campos externos.
+Un campo ABI 1/2 continúa devolviendo
 `BackendUnsupportedByField`. En todos los casos se distingue CPU sin capability
 (`BackendUnsupportedByCpu`) de campo sin perfil.
 
-PCLMUL mantenido participa en selección automática con el umbral medido. PMULL
-y todo perfil externo tienen `automatic_selection = false`: solo un backend
-forzado tras detección puede usarlos. `FixedSchedule` también respeta esta
-regla salvo que se fuerce el backend. Portable no recibe garantía fija porque
-su producto actual depende de los operandos.
+PCLMUL mantenido participa en selección automática con el umbral medido. PMULL,
+VPCLMUL y todo perfil externo tienen `automatic_selection = false`: solo un
+backend forzado tras detección puede usarlos. En VPCLMUL esta exclusión es una
+decisión medida: la ganancia GF(2¹²⁸) local no generaliza y las rutas de 256
+bits pierden frente a PCLMUL. `FixedSchedule` también respeta esta regla salvo
+que se fuerce el backend. Portable no recibe garantía fija porque su producto
+actual depende de los operandos.
 
 `EngineBuilder::build()` usa por defecto `CpuCapabilities::portable_only()` y
 nunca hace detección implícita. Con `std`, `EngineBuilder::detect()` captura una
@@ -183,9 +185,10 @@ aceptar cualquier slice, incluido el vacío.
 al backend seleccionado, al `FieldId`, al layout, a la longitud lógica/padded,
 al tile y al alineamiento. Sus campos son privados y no se serializa.
 
-H2.6 admite únicamente `PackedLayout::Aos`; los layouts SoA/híbridos se añadirán
-solo con un kernel capaz de ejecutarlos. Esto evita que el usuario pueda crear
-combinaciones campo/backend/layout parcialmente válidas.
+H2.6 admite `PackedLayout::Aos`. H2.7 añade `AosLanePairs` exclusivamente para
+VPCLMUL: dos elementos AoS forman una tesela, la longitud padded es par y el
+inicio se alinea a 32 bytes. El backend realiza el interleave en registros; no
+se exponen limbs ni cambia el layout de `F`.
 
 `PackedBatch<F>` requiere `alloc`. `PackedBatchView` y
 `PackedBatchViewMut` no lo requieren y toman prestado storage

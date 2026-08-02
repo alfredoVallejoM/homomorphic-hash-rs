@@ -43,7 +43,7 @@ struct TestUnsignedIsaProfile {
     layout: String,
     product: String,
     reduction_proof_digest: String,
-    backends: [String; 2],
+    backends: [String; 3],
     selection: String,
     schedule: String,
 }
@@ -51,21 +51,21 @@ struct TestUnsignedIsaProfile {
 const GOLDEN: [(&str, &str, &str, &str); 3] = [
     (
         "gf2_128_v1.toml",
-        "cf819f1bdc3feb90b660251db0a03f0e5313bca2590e749911d7fbf7881985fc",
+        "ae75864c0f0f6c9225081cea29f5eb5540eeadca65e9f32365a5ba3a0451d06a",
         "07545484d4a09b1d44c25d0a0042042046396f9b5e2467bc5b6b0d7a2c327220",
-        "b2283fd766420fd832fb6e3b8465c2e7f4800c4f82d60a5e7fb026bb700c196a",
+        "ef54d95d7c74efb0379731b8a9decf4df9d2b82265160f5cba16f44b26bf8428",
     ),
     (
         "gf2_256_alt_v1.toml",
-        "5a7699177fffb929db93400084f9fa8495c015bd4eb0da1b247ce538ce831487",
+        "a96a7b81eed149fc304699e281b6d6a3992ede874189200873c06b53f4e76e95",
         "f4a06836f946c87f3fda8f23889670e9182e3b23086cc7108a20879e3a5999e8",
-        "8faa30de1fdc110be2ef78cb8f8fb6bc403e08a2ab10921f000e4cde176d972c",
+        "cfd8dc7c2871653797612ec9ac1ecdbdab9241bfff1c5ea2350074833b618446",
     ),
     (
         "gf2_256_hh_v1.toml",
-        "f9752213c4cd64f851e6a9e89e4c1d1d557fe067cc6c8dbc9780c227fc8f23e4",
+        "fb66dc8580659491f347b8b2be878d2a068d6608e6f66db4bccdc3f1f7634945",
         "476cb23704fa07610dfdaad7b662c365208583f9a05e61e3e2809f96da9851f3",
-        "2d139e0faaca1199a10be73f37b5adaee78b4172f3a93dcfa0a20ffc160d0128",
+        "fc426405fe99bf648db5a63748fe8bab1002e55207e855f45d1e898beb5c6471",
     ),
 ];
 
@@ -111,6 +111,7 @@ fn product_reduction_and_identity_plans_have_frozen_shapes() {
             isa.backends(),
             &[
                 IsaProfileBackend::X86Pclmul,
+                IsaProfileBackend::X86Vpclmul,
                 IsaProfileBackend::Aarch64Pmull
             ]
         );

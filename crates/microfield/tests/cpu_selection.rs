@@ -22,6 +22,13 @@ fn detected_pclmul_available() -> bool {
     }
 }
 
+#[cfg(target_arch = "x86_64")]
+fn detected_vpclmul_available() -> bool {
+    std::arch::is_x86_feature_detected!("pclmulqdq")
+        && std::arch::is_x86_feature_detected!("avx2")
+        && std::arch::is_x86_feature_detected!("vpclmulqdq")
+}
+
 #[cfg(target_arch = "aarch64")]
 fn detected_pmull_available() -> bool {
     std::arch::is_aarch64_feature_detected!("neon")
@@ -107,6 +114,7 @@ fn portable_snapshot_is_an_explicit_deterministic_upper_bound() {
 }
 
 #[test]
+#[allow(clippy::similar_names, clippy::too_many_lines)]
 fn detection_selects_only_compiled_and_supported_backends() {
     for policy in [
         ExecutionPolicy::Auto,
@@ -153,10 +161,28 @@ fn detection_selects_only_compiled_and_supported_backends() {
         Err(EngineBuildError::BackendNotCompiled(BackendId::X86Pclmul))
     ));
 
+    let forced_vpclmul = EngineBuilder::<Gf2_128V1>::new()
+        .force_backend(BackendId::X86Vpclmul)
+        .detect();
+    #[cfg(target_arch = "x86_64")]
+    if detected_vpclmul_available() {
+        assert_eq!(
+            forced_vpclmul
+                .expect("detected VPCLMUL is compiled and certified")
+                .backend_id(),
+            BackendId::X86Vpclmul
+        );
+    } else {
+        assert!(matches!(
+            forced_vpclmul,
+            Err(EngineBuildError::BackendUnsupportedByCpu(
+                BackendId::X86Vpclmul
+            ))
+        ));
+    }
+    #[cfg(not(target_arch = "x86_64"))]
     assert!(matches!(
-        EngineBuilder::<Gf2_128V1>::new()
-            .force_backend(BackendId::X86Vpclmul)
-            .detect(),
+        forced_vpclmul,
         Err(EngineBuildError::BackendNotCompiled(BackendId::X86Vpclmul))
     ));
 

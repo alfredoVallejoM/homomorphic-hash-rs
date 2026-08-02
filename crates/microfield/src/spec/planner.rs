@@ -81,7 +81,7 @@ impl GenerationPlanner {
             layout: "polynomial-limbs-little-endian-v1",
             product: "clmul64-schoolbook-v1",
             reduction_proof_digest: reduction.proof_digest(),
-            backends: ["x86_pclmul", "aarch64_pmull"],
+            backends: ["x86_pclmul", "x86_vpclmul", "aarch64_pmull"],
             selection: "explicit_only",
             schedule: isa_schedule,
         };
@@ -146,7 +146,7 @@ struct IsaProfileDescriptor<'a> {
     layout: &'static str,
     product: &'static str,
     reduction_proof_digest: &'a str,
-    backends: [&'static str; 2],
+    backends: [&'static str; 3],
     selection: &'static str,
     schedule: IsaProfileSchedule,
 }

@@ -51,6 +51,8 @@ pub enum IsaProfileClass {
 pub enum IsaProfileBackend {
     /// x86-64 `PCLMULQDQ` operating on one 64-bit polynomial limb at a time.
     X86Pclmul,
+    /// x86-64 `VPCLMULQDQ` operating on two independent field values per tile.
+    X86Vpclmul,
     /// `AArch64` `PMULL` operating on one 64-bit polynomial limb at a time.
     Aarch64Pmull,
 }
@@ -90,7 +92,7 @@ pub struct VerifiedIsaProfile {
     layout: &'static str,
     product: &'static str,
     reduction_proof_digest: String,
-    backends: [IsaProfileBackend; 2],
+    backends: [IsaProfileBackend; 3],
     selection: IsaProfileSelection,
     schedule: IsaProfileSchedule,
     profile_digest: String,
@@ -123,7 +125,7 @@ impl VerifiedIsaProfile {
 
     /// Returns the ISA families whose generic adapters match this profile.
     #[must_use]
-    pub const fn backends(&self) -> &[IsaProfileBackend; 2] {
+    pub const fn backends(&self) -> &[IsaProfileBackend; 3] {
         &self.backends
     }
 
@@ -167,6 +169,7 @@ impl VerifiedIsaProfile {
             reduction_proof_digest,
             backends: [
                 IsaProfileBackend::X86Pclmul,
+                IsaProfileBackend::X86Vpclmul,
                 IsaProfileBackend::Aarch64Pmull,
             ],
             selection: IsaProfileSelection::ExplicitOnly,

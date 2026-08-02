@@ -1,16 +1,16 @@
 # Estado actual y siguiente plan
 
-Fecha de revisión: 1 de agosto de 2026.
+Fecha de revisión: 2 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
-H2.6 está implementado: campos mantenidos y externos pueden construir un
-`PackingPlan`, poseer un `PackedBatch` alineado o usar vistas sobre storage
-aportado. Las operaciones reutilizadas no asignan y rechazan backend, layout o
-longitud incompatibles antes de escribir. El layout v1 es únicamente AoS;
-SoA/híbrido se añadirá junto al backend H2.7 que pueda ejecutarlo. PMULL existe
-para presets y perfiles externos y permanece `explicit_only` hasta una medición
-reproducible en hardware ARM real; QEMU no se usa para afirmar rendimiento.
+H2.7 está implementado: presets y campos externos ABI 3 pueden forzar un
+backend VPCLMUL que procesa pares, trata tails y ejecuta owned o vistas sobre
+`PackedLayout::AosLanePairs`. El backend es correcto y está auditado en código
+máquina, pero permanece `explicit_only`: GF(2¹²⁸) solo gana modestamente en la
+CPU local y las dos rutas de 256 bits son más lentas que PCLMUL. PMULL también
+permanece `explicit_only` hasta ampliar su calibración en hardware ARM real.
+La política distingue así disponibilidad, corrección y rendimiento.
 
 La Fase 1 completa, H0–H4, está integrada en `origin/main`. H4 entró por
 fast-forward mediante `1f176ab`; el `main` resultante superó sus cinco jobs en
@@ -42,11 +42,12 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | ISA x86-64 | PCLMUL activo | presets automáticos medidos; perfiles externos explícitos |
 | ISA AArch64 | PMULL explícito | presets y ABI 3; calibración nativa pendiente |
 | Packed H2.6 | Implementado | owned `alloc`, vistas sin `alloc`, plan sellado y operaciones in-place |
-| Packing v1 | AoS ejecutable | SoA/híbrido diferido hasta el kernel H2.7 |
-| Frontera `unsafe` | Confinada | `deny` global, dos módulos ISA, storage alineado y test estructural |
+| ISA x86-64 H2.7 | VPCLMUL explícito | presets y ABI 3, pares, tails, in-place y `vzeroupper` |
+| Packing H2.7 | `Aos` + `AosLanePairs` | layout sellado, padding par y alineación 32 para VPCLMUL |
+| Frontera `unsafe` | Confinada | `deny` global, tres módulos ISA, storage alineado y test estructural |
 | ASan multi-ISA | Correcto local | presets y 11 tests externos en x86-64/AArch64 |
 | PMULL QEMU | Correcto | 3 tests mantenidos + 11 externos, también bajo ASan |
-| PMULL hardware | Pendiente | job ARM64 añadido; sin cifras ni selección automática aún |
+| PMULL hardware | Correcto funcional | job ARM64 real verde en `30716211486`; calibración pendiente |
 
 ## Decisiones H4/H2.3/H2.4 materializadas
 
@@ -66,18 +67,22 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
    con `std`; `portable_only` cubre `no_std`.
 9. Un backend forzado diferencia `BackendNotCompiled`,
    `BackendUnsupportedByField`, `BackendUnsupportedByCpu` y política.
-10. PCLMUL se registra en x86-64 y PMULL en AArch64. Los adapters genéricos
-    aceptan ABI 3; VPCLMUL permanece `BackendNotCompiled`.
+10. PCLMUL y VPCLMUL se registran en x86-64 y PMULL en AArch64. Los adapters
+    genéricos aceptan los tres backends mediante ABI 3.
 11. `automatic_selection` separa corrección de calibración: PCLMUL preset puede
-    entrar en `Auto`; PMULL y perfiles externos requieren `force_backend`.
+    entrar en `Auto`; PMULL, VPCLMUL y perfiles externos requieren
+    `force_backend`.
 12. El perfil autentica layout, producto, reducción, backends y schedule. La
     clasificación completa es fija en low-tail y dependiente de datos en
     sparse/dense, de modo que `FixedSchedule` no acepta una promesa falsa.
 13. `PackingPlan` solo lo construye `Engine`; fija backend, campo, layout,
     longitud, padding y alineamiento. `PackedBatch` owned y las vistas usan la
     misma operación de kernel sin repacking oculto.
-14. AoS es el único layout v1. No se estabilizan variantes SoA/híbridas antes
-    de que H2.7 tenga código ejecutable y mediciones del pipeline completo.
+14. `AosLanePairs` se asocia únicamente a VPCLMUL: conserva AoS dentro de una
+    tesela de dos, padding par y alineación 32. Ningún caller construye planes.
+15. VPCLMUL queda fuera de selección automática según medición: una ganancia
+    pequeña GF(2¹²⁸) no compensa la regresión clara de 256 bits ni permite una
+    regla universal por feature bits.
 
 La frontera se registra en
 [`ADR 0009`](adr/0009-portable-batch-engine.md).
@@ -88,11 +93,12 @@ El backend x86-64 y su frontera de seguridad se fijan en
 El puente externo y PMULL se fijan en
 [`ADR 0014`](adr/0014-verified-external-isa-profiles.md) y
 [`ADR 0015`](adr/0015-aarch64-pmull-backend.md). H2.6 se fija en
-[`ADR 0016`](adr/0016-persistent-packed-batches.md).
+[`ADR 0016`](adr/0016-persistent-packed-batches.md) y H2.7 en
+[`ADR 0017`](adr/0017-x86-vpclmul-lane-pairs.md).
 
 ## Cobertura
 
-La suite raíz x86-64 de Microfield contiene 134 tests de runtime y siete
+La suite raíz x86-64 de Microfield contiene 138 tests de runtime y siete
 doctests compile-fail; el feature de conteo añade dos tests. El target AArch64
 añade tres tests PMULL específicos. El consumidor generado añade 11 tests de
 runtime y dos compile-fail; la integración legada conserva tres tests. H4
@@ -154,12 +160,22 @@ externos, longitud cero, tails, todos los offsets de alineamiento, overflow,
 doctests impiden aliasing y serialización; el contador confirma cero
 asignaciones en operaciones owned reutilizadas y en toda la ruta de vistas.
 
+H2.7 añade cuatro gates públicos VPCLMUL. Recorren los tres presets, todos los
+bits de base y 20 tamaños con fronteras pares/impares hasta 16 384; comparan
+portable, PCLMUL y VPCLMUL, canarios, tails, in-place, errores transaccionales,
+owned, vistas, 32 offsets de alineamiento y padding. Los cinco perfiles externos
+cubren VPCLMUL sobre sparse, dense y low-tail. ASan ejecuta ambas fronteras x86,
+el contador confirma cero asignaciones y la auditoría exige `vpclmul*` más
+`vzeroupper` sin dispatch interno ni asignador.
+
 La matriz CI añade `portable` sin presets, `std + portable`, auditoría de
 ensamblado cruzada y un job nativo `ubuntu-24.04-arm` con diferencial PMULL,
-perfiles externos, asignaciones, Clippy y ASan. Localmente AArch64 se compiló y
-ejecutó bajo QEMU; la selección automática espera el resultado y la medición
-del job nativo. SageMath 10.7 bajo `laboratorio_np` regeneró los tres vectores
-mantenidos con diff byte a byte vacío.
+perfiles externos, asignaciones, Clippy y ASan. El run
+[`30716211486`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30716211486)
+pasó sobre hardware ARM64 real; localmente AArch64 también se compila y se usó
+QEMU como apoyo funcional. La selección automática espera todavía una medición
+Criterion nativa representativa. SageMath 10.7 bajo `laboratorio_np` regeneró
+los tres vectores mantenidos con diff byte a byte vacío.
 
 ## Rendimiento H4
 
@@ -257,10 +273,11 @@ portable, sin editar Microfield. H2.2 añade el optimizador portable estático y
 mantiene v1 como oráculo diferencial. H2.3 añade capabilities confiables,
 catálogo ampliado y selector inmutable. H2.4 añade PCLMUL. El puente ABI 3
 extiende perfiles verificados a campos externos y H2.5 añade PMULL en AArch64.
-H2.6 añade batches persistentes owned/prestados y almacenamiento alineado. El
-siguiente hito es H2.7, VPCLMUL y layouts de throughput; después sigue H2.8 con
-calibración multi-ISA. La calibración PMULL nativa es un gate de selección
-automática, no de disponibilidad explícita del backend.
+H2.6 añade batches persistentes owned/prestados y almacenamiento alineado. H2.7
+añade VPCLMUL y `AosLanePairs` sin degradar la selección automática. El siguiente
+hito es H2.8: calibración multi-CPU, cierre de seguridad, reproducibilidad,
+estabilidad runtime/codegen e informe final. La calibración nativa es un gate de
+selección automática, no de disponibilidad explícita de un backend.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no

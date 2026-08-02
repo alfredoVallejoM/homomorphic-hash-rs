@@ -55,10 +55,30 @@ where
         .detect()
         .expect("portable fallback is always compiled");
     let forced_isa = detected_forced_isa::<F>();
+    let forced_vpclmul = detected_forced_vpclmul::<F>();
 
     for &len in BATCH_SIZES {
-        benchmark_batch(criterion, name, bytes, len, portable, selected, forced_isa);
+        benchmark_batch(
+            criterion,
+            name,
+            bytes,
+            len,
+            portable,
+            selected,
+            forced_isa,
+            forced_vpclmul,
+        );
     }
+}
+
+fn detected_forced_vpclmul<F: BuiltinField>() -> Option<Engine<F>> {
+    #[cfg(target_arch = "x86_64")]
+    return Engine::<F>::builder()
+        .force_backend(BackendId::X86Vpclmul)
+        .detect()
+        .ok();
+    #[cfg(not(target_arch = "x86_64"))]
+    None
 }
 
 fn detected_forced_isa<F: BuiltinField>() -> Option<Engine<F>> {
@@ -76,6 +96,7 @@ fn detected_forced_isa<F: BuiltinField>() -> Option<Engine<F>> {
     None
 }
 
+#[allow(clippy::too_many_arguments, clippy::too_many_lines)]
 fn benchmark_batch<F>(
     criterion: &mut Criterion,
     name: &str,
@@ -84,6 +105,7 @@ fn benchmark_batch<F>(
     portable: Engine<F>,
     selected: Engine<F>,
     forced_isa: Option<Engine<F>>,
+    forced_vpclmul: Option<Engine<F>>,
 ) where
     F: BuiltinField + CanonicalEncoding + StaticField + core::fmt::Debug,
 {
@@ -104,6 +126,7 @@ fn benchmark_batch<F>(
     });
     let selected_name = match selected.backend_id() {
         BackendId::X86Pclmul => "mul_engine_x86_pclmul",
+        BackendId::X86Vpclmul => "mul_engine_x86_vpclmul",
         BackendId::Aarch64Pmull => "mul_engine_aarch64_pmull",
         _ => "mul_engine_selected_fallback",
     };
@@ -127,6 +150,15 @@ fn benchmark_batch<F>(
             });
         });
     }
+    if let Some(vpclmul) = forced_vpclmul {
+        group.bench_function("mul_engine_forced_x86_vpclmul", |bencher| {
+            bencher.iter(|| {
+                vpclmul
+                    .mul_into(black_box(&mut output), black_box(&lhs), black_box(&rhs))
+                    .expect("benchmark lengths are equal");
+            });
+        });
+    }
     group.bench_function("square_engine_portable", |bencher| {
         bencher.iter(|| {
             portable
@@ -136,6 +168,7 @@ fn benchmark_batch<F>(
     });
     let selected_square_name = match selected.backend_id() {
         BackendId::X86Pclmul => "square_engine_x86_pclmul",
+        BackendId::X86Vpclmul => "square_engine_x86_vpclmul",
         BackendId::Aarch64Pmull => "square_engine_aarch64_pmull",
         _ => "square_engine_selected_fallback",
     };
@@ -159,6 +192,15 @@ fn benchmark_batch<F>(
             });
         });
     }
+    if let Some(vpclmul) = forced_vpclmul {
+        group.bench_function("square_engine_forced_x86_vpclmul", |bencher| {
+            bencher.iter(|| {
+                vpclmul
+                    .square_into(black_box(&mut output), black_box(&lhs))
+                    .expect("benchmark lengths are equal");
+            });
+        });
+    }
     group.bench_function("add_direct", |bencher| {
         bencher.iter(|| direct_add(black_box(&mut output), black_box(&lhs), black_box(&rhs)));
     });
@@ -170,7 +212,59 @@ fn benchmark_batch<F>(
         });
     });
     benchmark_packed(&mut group, selected, &lhs, &rhs, &mut output);
+    if let Some(vpclmul) = forced_vpclmul {
+        benchmark_packed_vpclmul(&mut group, vpclmul, &lhs, &rhs, &mut output);
+    }
     group.finish();
+}
+
+fn benchmark_packed_vpclmul<F>(
+    group: &mut BenchmarkGroup<'_, WallTime>,
+    engine: Engine<F>,
+    lhs: &[F],
+    rhs: &[F],
+    output: &mut [F],
+) where
+    F: BuiltinField + StaticField,
+{
+    let mut packed_lhs = PackedBatch::from_aos(&engine, lhs).expect("valid packed lhs");
+    let mut packed_rhs = PackedBatch::from_aos(&engine, rhs).expect("valid packed rhs");
+    let mut packed_output = PackedBatch::new(&engine, lhs.len()).expect("valid packed output");
+
+    group.bench_function("vpclmul_pack_into_reused", |bencher| {
+        bencher.iter(|| {
+            packed_lhs
+                .pack_from(black_box(lhs))
+                .expect("benchmark length is fixed");
+        });
+    });
+    group.bench_function("vpclmul_mul_packed_reused", |bencher| {
+        bencher.iter(|| {
+            engine
+                .mul_packed_into(
+                    black_box(&mut packed_output),
+                    black_box(&packed_lhs),
+                    black_box(&packed_rhs),
+                )
+                .expect("benchmark plans are equal");
+        });
+    });
+    group.bench_function("vpclmul_pipeline_reused_pack_mul_unpack", |bencher| {
+        bencher.iter(|| {
+            packed_lhs
+                .pack_from(black_box(lhs))
+                .expect("benchmark length is fixed");
+            packed_rhs
+                .pack_from(black_box(rhs))
+                .expect("benchmark length is fixed");
+            engine
+                .mul_packed_into(&mut packed_output, &packed_lhs, &packed_rhs)
+                .expect("benchmark plans are equal");
+            packed_output
+                .unpack_into(black_box(&mut *output))
+                .expect("benchmark length is fixed");
+        });
+    });
 }
 
 fn benchmark_packed<F>(

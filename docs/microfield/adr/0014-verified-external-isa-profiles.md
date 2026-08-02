@@ -41,8 +41,9 @@ certificado, perfil, plan y fuente como una unidad.
 La fuente ABI 3 implementa el contrato oculto y seguro
 `VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>`. Solo entrega arrays por valor y una
 reducción segura. `VerifiedIsaStrategy` construye dentro del runtime las tablas
-x86 o AArch64; el consumidor no entrega intrinsics, funciones ni metadatos de
-CPU. `KernelCatalog` y `KernelSet` siguen sin constructor público raw.
+x86 o AArch64; desde H2.7 incluye PCLMUL, VPCLMUL y PMULL. El consumidor no
+entrega intrinsics, funciones ni metadatos de CPU. `KernelCatalog` y `KernelSet`
+siguen sin constructor público raw.
 
 Los perfiles externos nacen como `explicit_only`. Un backend forzado puede
 usarlos tras detección confiable, pero `Auto`, `LowLatency`, `Throughput` y
@@ -78,8 +79,9 @@ tipo matemáticamente incorrecto dentro de su propio crate.
 ## Evidencia
 
 El fixture externo genera grados 9, 10 denso, 128, 192 low-tail y 233. En x86 y
-AArch64 emulado compara producto, cuadrado e in-place ISA contra portable para
-las tres clases estructurales y tres familias de reducción. Los digests se
+AArch64 compara producto, cuadrado e in-place ISA contra portable para las tres
+clases estructurales y tres familias de reducción; x86 cubre PCLMUL y VPCLMUL.
+Los digests se
 recalculan de forma independiente; el módulo de grado 192
 \(x^{192}+x^7+x^2+x+1\) fue confirmado irreducible tanto por Rabin como por
 Sage. La regeneración de los tres bundles mantenidos produce diff vacío.

@@ -75,6 +75,40 @@ impl KernelMetadata {
         Self::isa::<F>(BackendId::X86Pclmul, 1, schedule, false)
     }
 
+    #[cfg(all(
+        feature = "portable",
+        feature = "builtin-fields",
+        target_arch = "x86_64"
+    ))]
+    pub(crate) const fn x86_vpclmul(minimum_batch: usize, automatic_selection: bool) -> Self {
+        Self {
+            backend: BackendId::X86Vpclmul,
+            minimum_batch,
+            preferred_multiple: 2,
+            required_alignment: 32,
+            supports_in_place: true,
+            requires_packing: true,
+            scratch_bytes_per_element: 0,
+            schedule: ScheduleKind::Fixed,
+            automatic_selection,
+        }
+    }
+
+    #[cfg(all(feature = "portable", target_arch = "x86_64"))]
+    pub(crate) const fn x86_vpclmul_explicit(schedule: ScheduleKind) -> Self {
+        Self {
+            backend: BackendId::X86Vpclmul,
+            minimum_batch: 2,
+            preferred_multiple: 2,
+            required_alignment: 32,
+            supports_in_place: true,
+            requires_packing: true,
+            scratch_bytes_per_element: 0,
+            schedule,
+            automatic_selection: false,
+        }
+    }
+
     #[cfg(all(feature = "portable", target_arch = "aarch64"))]
     pub(crate) const fn aarch64_pmull_explicit<F>(schedule: ScheduleKind) -> Self {
         Self::isa::<F>(BackendId::Aarch64Pmull, 1, schedule, false)
@@ -173,7 +207,11 @@ impl KernelMetadata {
         self.supports_in_place
     }
 
-    /// Reports whether values must be packed before execution.
+    /// Reports whether the backend has a native persistent packed layout.
+    ///
+    /// Ordinary slice entry points remain correct for any valid slice. Packing
+    /// supplies the alignment, tiling and initialized padding promised by the
+    /// backend metadata and avoids repeating that preparation across calls.
     #[must_use]
     pub const fn requires_packing(&self) -> bool {
         self.requires_packing

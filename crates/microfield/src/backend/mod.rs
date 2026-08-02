@@ -7,6 +7,10 @@ pub(crate) mod profile;
 #[allow(unsafe_code)]
 pub(crate) mod x86_pclmul;
 
+#[cfg(all(feature = "portable", target_arch = "x86_64"))]
+#[allow(unsafe_code)]
+pub(crate) mod x86_vpclmul;
+
 #[cfg(all(feature = "portable", target_arch = "aarch64"))]
 #[allow(unsafe_code)]
 pub(crate) mod aarch64_pmull;
@@ -21,7 +25,9 @@ pub(crate) const fn gf2_128_v1_catalog(
     let catalog = KernelCatalog::portable(portable);
     #[cfg(target_arch = "x86_64")]
     {
-        catalog.with_x86_pclmul(&x86_pclmul::GF2_128_V1_KERNELS)
+        catalog
+            .with_x86_pclmul(&x86_pclmul::GF2_128_V1_KERNELS)
+            .with_x86_vpclmul(&x86_vpclmul::GF2_128_V1_KERNELS)
     }
     #[cfg(target_arch = "aarch64")]
     {
@@ -40,7 +46,9 @@ pub(crate) const fn gf2_256_hh_v1_catalog(
     let catalog = KernelCatalog::portable(portable);
     #[cfg(target_arch = "x86_64")]
     {
-        catalog.with_x86_pclmul(&x86_pclmul::GF2_256_HH_V1_KERNELS)
+        catalog
+            .with_x86_pclmul(&x86_pclmul::GF2_256_HH_V1_KERNELS)
+            .with_x86_vpclmul(&x86_vpclmul::GF2_256_HH_V1_KERNELS)
     }
     #[cfg(target_arch = "aarch64")]
     {
@@ -59,7 +67,9 @@ pub(crate) const fn gf2_256_alt_v1_catalog(
     let catalog = KernelCatalog::portable(portable);
     #[cfg(target_arch = "x86_64")]
     {
-        catalog.with_x86_pclmul(&x86_pclmul::GF2_256_ALT_V1_KERNELS)
+        catalog
+            .with_x86_pclmul(&x86_pclmul::GF2_256_ALT_V1_KERNELS)
+            .with_x86_vpclmul(&x86_vpclmul::GF2_256_ALT_V1_KERNELS)
     }
     #[cfg(target_arch = "aarch64")]
     {

@@ -73,8 +73,8 @@ offset posible de la dirección base. Longitud cero no asigna ni requiere bytes.
 - Para AoS actual, packed aporta persistencia y alineamiento, no una afirmación
   de aceleración. Los benchmarks separan pack, unpack, kernel reutilizado y
   pipeline total.
-- H2.7 puede añadir un layout únicamente junto a un backend que lo ejecute y
-  después de medir el coste total.
+- H2.7 añade `AosLanePairs` únicamente junto al backend VPCLMUL y conserva su
+  selección explícita tras medir el coste total.
 - Cambiar de backend requiere repacking explícito; no hay conversión silenciosa.
 
 ## Evidencia exigida

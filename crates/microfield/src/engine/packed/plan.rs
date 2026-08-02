@@ -6,14 +6,18 @@ use crate::{BackendId, FieldId, KernelMetadata, StaticField};
 
 /// Physical representation used by a packed batch.
 ///
-/// H2.6 publishes only `AoS` because every executable backend currently consumes
-/// `AoS` directly. Lane-oriented layouts will be added with the backend that can
-/// execute them, rather than exposing partially valid states.
+/// Layout variants are introduced only with a backend that executes them.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[non_exhaustive]
 pub enum PackedLayout {
     /// Consecutive field elements in canonical Rust object layout.
     Aos,
+    /// Two consecutive `AoS` elements form one 128-bit VPCLMUL lane pair.
+    ///
+    /// Limbs remain private and local to each element. The plan guarantees an
+    /// even padded length and a 32-byte allocation start, while the backend
+    /// performs the register-level lane interleave.
+    AosLanePairs,
 }
 
 /// Immutable description of one packed allocation or borrowed view.
@@ -67,7 +71,11 @@ impl PackingPlan {
         Ok(Self {
             backend: metadata.backend(),
             field_id: F::spec().field_id(),
-            layout: PackedLayout::Aos,
+            layout: if metadata.backend() == BackendId::X86Vpclmul {
+                PackedLayout::AosLanePairs
+            } else {
+                PackedLayout::Aos
+            },
             logical_len,
             padded_len,
             tile_elements,

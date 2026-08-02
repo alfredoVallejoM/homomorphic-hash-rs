@@ -83,6 +83,7 @@ fn builder_is_deterministic_and_normalizes_exponent_order() {
         first.verified_isa_profile().backends(),
         &[
             IsaProfileBackend::X86Pclmul,
+            IsaProfileBackend::X86Vpclmul,
             IsaProfileBackend::Aarch64Pmull
         ]
     );

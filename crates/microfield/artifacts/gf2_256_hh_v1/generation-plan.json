@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "field_id": "6b62fea68b968fd4f8c39a4f69b78f714c80858b1d0f667ec5a63d4417b43ca8",
-  "artifact_id": "f9752213c4cd64f851e6a9e89e4c1d1d557fe067cc6c8dbc9780c227fc8f23e4",
+  "artifact_id": "fb66dc8580659491f347b8b2be878d2a068d6608e6f66db4bccdc3f1f7634945",
   "ir_version": 3,
   "target_family": "portable_with_verified_isa_profile",
   "product": {
@@ -4124,10 +4124,11 @@
     "reduction_proof_digest": "476cb23704fa07610dfdaad7b662c365208583f9a05e61e3e2809f96da9851f3",
     "backends": [
       "x86_pclmul",
+      "x86_vpclmul",
       "aarch64_pmull"
     ],
     "selection": "explicit_only",
     "schedule": "fixed",
-    "profile_digest": "f1084facc818ab2b2739c3d7c36c057ad514838d0c9989e5936d0def412006e6"
+    "profile_digest": "ea2c4ce19b04f1e9a905f6de469c36dcdda740356f072348a072bdc817fca524"
   }
 }

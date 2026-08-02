@@ -31,6 +31,8 @@ jobs:
         run: cargo +stable clippy -p microfield --all-features --all-targets -- -D warnings
       - name: Audit x86-64 PCLMUL assembly
         run: bash crates/microfield/tools/audit_x86_pclmul.sh
+      - name: Audit x86-64 VPCLMUL assembly
+        run: bash crates/microfield/tools/audit_x86_vpclmul.sh
       - name: Install AArch64 target for PMULL assembly audit
         run: rustup +stable target add aarch64-unknown-linux-gnu
       - name: Audit AArch64 PMULL assembly
@@ -122,19 +124,19 @@ jobs:
         run: cargo +nightly miri test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
 
   x86-asan:
-    name: x86-64 PCLMUL AddressSanitizer
+    name: x86-64 PCLMUL/VPCLMUL AddressSanitizer
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - name: Install nightly Rust with sources
         run: rustup toolchain install nightly --profile minimal --component rust-src
-      - name: Test audited PCLMUL boundary under ASan
+      - name: Test audited PCLMUL and VPCLMUL boundaries under ASan
         env:
           RUSTFLAGS: -Zsanitizer=address
           ASAN_OPTIONS: detect_leaks=0
         run: >-
           cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
-          -p microfield --all-features --test x86_pclmul
+          -p microfield --all-features --test x86_pclmul --test x86_vpclmul
           --test packed_batch --test packed_views
       - name: External profile PCLMUL AddressSanitizer
         env:

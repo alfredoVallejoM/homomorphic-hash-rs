@@ -21,6 +21,8 @@ where
 {
     #[cfg(all(feature = "portable", target_arch = "x86_64"))]
     x86_pclmul: KernelSet<F>,
+    #[cfg(all(feature = "portable", target_arch = "x86_64"))]
+    x86_vpclmul: KernelSet<F>,
     #[cfg(all(feature = "portable", target_arch = "aarch64"))]
     aarch64_pmull: KernelSet<F>,
     marker: PhantomData<fn() -> F>,
@@ -45,6 +47,8 @@ where
         Self {
             #[cfg(all(feature = "portable", target_arch = "x86_64"))]
             x86_pclmul: super::x86_pclmul::verified_kernel_set::<F, LIMBS, WIDE_LIMBS>(),
+            #[cfg(all(feature = "portable", target_arch = "x86_64"))]
+            x86_vpclmul: super::x86_vpclmul::verified_kernel_set::<F, LIMBS, WIDE_LIMBS>(),
             #[cfg(all(feature = "portable", target_arch = "aarch64"))]
             aarch64_pmull: super::aarch64_pmull::verified_kernel_set::<F, LIMBS, WIDE_LIMBS>(),
             marker: PhantomData,
@@ -60,7 +64,9 @@ where
         let catalog = KernelCatalog::portable(portable.kernels());
         #[cfg(all(feature = "portable", target_arch = "x86_64"))]
         {
-            catalog.with_x86_pclmul(&self.x86_pclmul)
+            catalog
+                .with_x86_pclmul(&self.x86_pclmul)
+                .with_x86_vpclmul(&self.x86_vpclmul)
         }
         #[cfg(all(feature = "portable", target_arch = "aarch64"))]
         {

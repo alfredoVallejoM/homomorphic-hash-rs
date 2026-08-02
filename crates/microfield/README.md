@@ -53,9 +53,14 @@ H2.6 añade batches persistentes. `Engine::packing_plan` fija backend, campo,
 layout, longitud y alineamiento; `PackedBatch<F>` posee storage bajo `alloc`, y
 `PackedBatchView(Mut)` usa `MaybeUninit<u8>` aportado por el consumidor sin
 heap. Pack/unpack son explícitos y las operaciones reutilizadas no asignan. El
-crate niega `unsafe` salvo en los dos adaptadores ISA y el único módulo de
-storage alineado auditado. El layout v1 es solo AoS; SoA/híbrido se difiere
-hasta el backend H2.7 que pueda ejecutarlo y justificar su coste total.
+storage alineado queda aislado y auditado.
+
+H2.7 añade VPCLMUL x86-64 para presets y perfiles externos ABI 3. El layout
+sellado `AosLanePairs` agrupa dos elementos, alinea a 32 bytes e inicializa una
+cola padded cuando hace falta. La auditoría exige `vpclmulqdq` y `vzeroupper`.
+El backend es forzable pero no automático: solo mostró una mejora modesta para
+GF(2¹²⁸) en la CPU local y perdió frente a PCLMUL en 256 bits. El crate niega
+`unsafe` salvo en los tres adaptadores ISA y el módulo de storage alineado.
 
 ```rust
 use microfield::{Engine, Field, Gf2_256HhV1, PackedBatch};

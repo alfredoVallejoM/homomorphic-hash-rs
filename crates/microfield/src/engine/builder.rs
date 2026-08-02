@@ -188,7 +188,7 @@ impl CompiledBackends {
     const fn current() -> Self {
         #[cfg(target_arch = "x86_64")]
         {
-            Self(Self::PORTABLE | Self::X86_PCLMUL)
+            Self(Self::PORTABLE | Self::X86_PCLMUL | Self::X86_VPCLMUL)
         }
         #[cfg(target_arch = "aarch64")]
         {

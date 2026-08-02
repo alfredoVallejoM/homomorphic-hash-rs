@@ -17,7 +17,7 @@
 | Capability Snapshot | `CpuCapabilities` | Separar detección confiable de ejecución | Una vez al construir |
 | Static Runtime Selector | `EngineBuilder` + `KernelCatalog` | Resolver build/campo/CPU/política antes del lote | Una vez al construir |
 | Verified Capability Profile | `VerifiedIsaProfile` + ABI 3 | Asociar layout/reducción a adapters ISA sin abrir el catálogo | Cero; solo metadata/codegen |
-| Architecture Adapter | `x86_pclmul` / `aarch64_pmull` | Confinar intrinsics y precondiciones ISA | Cero adicional dentro del kernel |
+| Architecture Adapter | `x86_pclmul` / `x86_vpclmul` / `aarch64_pmull` | Confinar intrinsics y precondiciones ISA | Cero adicional dentro del kernel |
 | Value Object | `PackingPlan` | Fijar backend/campo/layout/longitud sin setters | Una comparación por operación |
 | RAII / Resource Owner | `AlignedBuffer<F>` / `PackedBatch<F>` | Inicialización y liberación alineada verificables | Una asignación en construcción; cero al reutilizar |
 | Borrowed View | `PackedBatchView(Mut)` | Usar storage externo sin heap y expresar aliasing | Cero |
@@ -32,6 +32,7 @@
 | Capability Snapshot + Selector ✅ | `CpuCapabilities` + `EngineBuilder` | Preparar ISA sin detección en el hot path | Una vez |
 | Verified ISA Bridge ✅ | perfil generado + strategy opaca | Habilitar campos externos sin punteros ni claims externos | Una llamada por lote |
 | Persistent Packed Batch ✅ | `PackingPlan` + owned/vistas | Amortizar layout y conservar compatibilidad | Validación + una llamada; sin asignación al reutilizar |
+| Paired-Lane Strategy ✅ | `AosLanePairs` + `x86_vpclmul` | Procesar dos campos por registro sin exponer limbs | Una llamada por lote; packing persistente explícito |
 
 La factory es estática: produce código y un tipo nominal antes de compilar. No
 es un registro runtime ni una factoría de objetos `dyn Field`.

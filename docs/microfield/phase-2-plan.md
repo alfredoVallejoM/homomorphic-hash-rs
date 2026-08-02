@@ -448,7 +448,7 @@ entregar punteros, intrinsics, metadata arbitraria o claims desde el manifiesto.
   sparse/dense dependiente de datos;
 - ABI de codegen 3 con tamaños literales, extracción por valor y reducción
   segura generada;
-- `VerifiedIsaStrategy` opaca: construye PCLMUL o PMULL dentro de Microfield;
+- `VerifiedIsaStrategy` opaca: construye adapters ISA dentro de Microfield;
 - estrategia genérica schoolbook monomorfizada para grados 2..=4096;
 - `automatic_selection = false` hasta calibración por campo/objetivo;
 - compatibilidad runtime N-2 para fuente ABI 1..=3.
@@ -468,11 +468,11 @@ entregar punteros, intrinsics, metadata arbitraria o claims desde el manifiesto.
 
 ### Resultado
 
-Implementado. Todo campo válido del esquema v1 recibe un perfil estructural
-target-neutral; el target decide qué adaptador compila. El fixture externo usa
-PCLMUL en x86 y PMULL bajo AArch64 emulado para las tres reducciones. La
-autenticidad se liga al paquete mediante digests; la seguridad ISA permanece
-en el runtime. Véase
+Implementado y ampliado en H2.7. Todo campo válido del esquema v1 recibe un
+perfil estructural target-neutral; el target decide qué adapter compila. El
+fixture externo usa PCLMUL y VPCLMUL en x86 y PMULL en AArch64 para las tres
+reducciones. La autenticidad se liga al paquete mediante digests; la seguridad
+ISA permanece en el runtime. Véase
 [`ADR 0014`](adr/0014-verified-external-isa-profiles.md).
 
 ## H2.5 — AArch64 PMULL
@@ -546,6 +546,10 @@ La decisión y su frontera de seguridad están en
 
 ## H2.7 — VPCLMUL y throughput
 
+Estado: implementado y medido el 2 de agosto de 2026. El backend queda
+disponible mediante selección forzada y fuera de selección automática según la
+regla de aceptación de este hito.
+
 ### Propósito
 
 Evaluar producto paralelo por lanes para lotes grandes y persistentes.
@@ -566,6 +570,19 @@ incluido packing, con intervalo reproducible. Si no gana, permanece probado y
 forzable para diagnóstico o se compila fuera; nunca se selecciona por prestigio
 de la instrucción.
 
+### Resultado
+
+- `backend::x86_vpclmul` procesa dos campos por registro y cubre presets y ABI 3;
+- `PackedLayout::AosLanePairs` fija teselas de dos, padding par y alineación 32;
+- tails, in-place, vistas prestadas y owned son diferenciales contra portable;
+- el ELF exige `vpclmulqdq` y `vzeroupper`, sin dispatch interno ni asignador;
+- GF(2¹²⁸) solo muestra una mejora modesta a partir de la región de 64 en la
+  CPU local; ambos campos de 256 bits pierden ampliamente frente a PCLMUL;
+- `automatic_selection = false` conserva la política estable y eficiente.
+
+La decisión, cifras y frontera de seguridad están en
+[`ADR 0017`](adr/0017-x86-vpclmul-lane-pairs.md).
+
 ## H2.8 — Calibración, auditoría y cierre
 
 ### Propósito
@@ -583,6 +600,19 @@ Convertir implementaciones correctas en una política de producción trazable.
 - documentación de estabilidad de factory y ABI de codegen;
 - regeneración de presets mediante la factory pública;
 - informe final de Fase 2.
+
+### Partes ejecutables
+
+1. **H2.8.1 — Calibración multi-CPU:** capturar PCLMUL/VPCLMUL en al menos dos
+   familias x86-64 y PMULL en hardware ARM64, incluyendo pipeline packed.
+2. **H2.8.2 — Seguridad:** cerrar inventario comentado de cada `unsafe`, Miri
+   portable/storage y ASan nativo para las tres fronteras ISA.
+3. **H2.8.3 — Reproducibilidad:** versionar entorno, comandos, seeds y corpus
+   minimizado de pruebas diferenciales; añadir un gate de regresión no ruidoso.
+4. **H2.8.4 — Estabilidad:** congelar matriz runtime/codegen ABI, política de
+   `ArtifactId` y procedimiento de regeneración de presets.
+5. **H2.8.5 — Cierre:** ejecutar matriz completa, publicar informe final y
+   decidir con evidencia si alguna tabla automática puede ampliarse.
 
 ### Definición de terminado
 

@@ -92,9 +92,9 @@ CpuCapabilities → EngineBuilder → Engine inmutable
 bucles; la raíz del crate compone ambos; `engine` detecta solo cuando el
 consumidor llama a `detect`, selecciona una vez, valida y delega. Los presets
 conservan su catálogo sellado como frontera para slots ISA. Los campos externos
-ABI 1/2 heredan un catálogo portable. ABI 3 puede adjuntar PCLMUL/PMULL mediante
-un perfil generado: solo intercambia arrays por valor y reducción segura; los
-intrinsics y la detección siguen dentro del runtime.
+ABI 1/2 heredan un catálogo portable. ABI 3 puede adjuntar PCLMUL, VPCLMUL y
+PMULL mediante un perfil generado: solo intercambia arrays por valor y
+reducción segura; los intrinsics y la detección siguen dentro del runtime.
 
 `CpuCapabilities` es una instantánea confiable: detección real con `std` o
 `portable_only` también en `no_std`. Los bits ISA son privados. `Engine` no
@@ -103,17 +103,18 @@ almacena la instantánea y ninguna operación vuelve a detectar o seleccionar.
 Batch persistente H2.6:
 
 ```text
-Engine<F> → PackingPlan { backend, FieldId, AoS, len, padding, alignment }
+Engine<F> → PackingPlan { backend, FieldId, layout, len, padding, alignment }
           → PackedBatch<F>                     [owned, requiere alloc]
           → pack_into_storage(MaybeUninit<u8>) [vista, sin alloc]
           → validar planes → una llamada al KernelSet ya seleccionado
 ```
 
-El único layout público actual es AoS porque portable, PCLMUL y PMULL lo
-consumen directamente. SoA o híbrido no se publicará hasta existir un backend
-H2.7 que lo ejecute. `AlignedBuffer<F>` y el adapter de bytes viven en un solo
-módulo auditado; el resto de la API opera con referencias seguras. Los planes
-no se construyen ni serializan desde fuera y cambiar de backend exige repacking.
+Portable, PCLMUL y PMULL usan `Aos`. VPCLMUL usa `AosLanePairs`: conserva dos
+elementos AoS consecutivos por tesela, longitud padded par y alineación 32; el
+interleave ocurre dentro de registros. `AlignedBuffer<F>` y el adapter de bytes
+viven en un solo módulo auditado; el resto de la API opera con referencias
+seguras. Los planes no se construyen ni serializan desde fuera y cambiar de
+backend exige repacking.
 
 Generación:
 
@@ -168,19 +169,21 @@ Las familias low-tail, sparse y dense viven en helpers portables comunes. El
 tipo generado no almacena el plan ni consulta su clase de grado durante una
 operación.
 
-## Selector H2.3, perfiles ABI 3 y backends H2.4/H2.5
+## Selector H2.3, perfiles ABI 3 y backends H2.4/H2.5/H2.7
 
 `KernelCatalog` registra portable y tres slots opcionales. H2.4 activa PCLMUL
-en x86-64; H2.5 compila PMULL en AArch64. Los presets usan Karatsuba
-especializado. Los campos externos ABI 3 reciben adapters schoolbook seguros
-si su target los compila; ABI 1/2 siguen portable-only. VPCLMUL continúa no
-compilado.
+en x86-64; H2.5 compila PMULL en AArch64 y H2.7 compila VPCLMUL en x86-64. Los
+presets usan Karatsuba especializado. Los campos externos ABI 3 reciben
+adapters schoolbook seguros si su target los compila; ABI 1/2 siguen
+portable-only.
 
 `KernelMetadata::automatic_selection` distingue corrección de calibración.
 PCLMUL mantenido participa en `Auto` porque superó el gate medido; los perfiles
-externos y PMULL son `explicit_only`. Un `force_backend` sigue validando build,
-campo, CPU y política antes de ejecutar. Así un perfil correcto no se convierte
-en un claim de rendimiento universal.
+externos, PMULL y VPCLMUL son `explicit_only`. VPCLMUL procesa pares sobre
+`PackedLayout::AosLanePairs`, pero sus medidas locales no justifican sustituir
+PCLMUL de forma universal. Un `force_backend` sigue validando build, campo, CPU
+y política antes de ejecutar. Así un perfil correcto no se convierte en un
+claim de rendimiento universal.
 
 Un backend forzado se valida por build, compatibilidad del campo, CPU y
 política. Sin backend forzado, `Auto` usa `expected_batch`, `LowLatency` evita
@@ -195,4 +198,5 @@ la frontera `unsafe` y su evidencia se fijan en
 [`ADR 0013`](adr/0013-x86-pclmul-backend.md),
 [`ADR 0014`](adr/0014-verified-external-isa-profiles.md) y
 [`ADR 0015`](adr/0015-aarch64-pmull-backend.md). El batch persistente se fija
-en [`ADR 0016`](adr/0016-persistent-packed-batches.md).
+en [`ADR 0016`](adr/0016-persistent-packed-batches.md) y VPCLMUL en
+[`ADR 0017`](adr/0017-x86-vpclmul-lane-pairs.md).

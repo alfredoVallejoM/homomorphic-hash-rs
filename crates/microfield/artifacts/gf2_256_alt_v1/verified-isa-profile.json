@@ -10,9 +10,10 @@
   "reduction_proof_digest": "f4a06836f946c87f3fda8f23889670e9182e3b23086cc7108a20879e3a5999e8",
   "backends": [
     "x86_pclmul",
+    "x86_vpclmul",
     "aarch64_pmull"
   ],
   "selection": "explicit_only",
   "schedule": "fixed",
-  "profile_digest": "7c3275c93c37b9ce21296404ed7f501ed32966c274c90236c86d32e323cef71c"
+  "profile_digest": "6f85a1e91171ea53c3eb9c1ebc60e21c423cac6135710a09c86dea3a66a292b4"
 }

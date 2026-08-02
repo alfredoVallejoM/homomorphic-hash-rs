@@ -50,6 +50,21 @@ fn capability_detection_and_engine_selection_allocate_zero_times() {
     assert_allocation_info_is_zero(portable);
     assert_allocation_info_is_zero(detected);
 
+    #[cfg(target_arch = "x86_64")]
+    if std::arch::is_x86_feature_detected!("pclmulqdq")
+        && std::arch::is_x86_feature_detected!("avx2")
+        && std::arch::is_x86_feature_detected!("vpclmulqdq")
+    {
+        let forced = measure(|| {
+            let engine = Engine::<Gf2_256HhV1>::builder()
+                .force_backend(BackendId::X86Vpclmul)
+                .detect()
+                .expect("detected VPCLMUL is compiled and certified");
+            assert_eq!(engine.backend_id(), BackendId::X86Vpclmul);
+        });
+        assert_allocation_info_is_zero(forced);
+    }
+
     #[cfg(target_arch = "aarch64")]
     if std::arch::is_aarch64_feature_detected!("neon")
         && std::arch::is_aarch64_feature_detected!("pmull")
@@ -92,6 +107,18 @@ where
         &mut assigned,
     );
     assert_engine_allocates_zero(detected, &mut output, &lhs, &rhs, &mut assigned);
+
+    #[cfg(target_arch = "x86_64")]
+    if std::arch::is_x86_feature_detected!("pclmulqdq")
+        && std::arch::is_x86_feature_detected!("avx2")
+        && std::arch::is_x86_feature_detected!("vpclmulqdq")
+    {
+        let forced = Engine::<F>::builder()
+            .force_backend(BackendId::X86Vpclmul)
+            .detect()
+            .expect("the maintained field certifies VPCLMUL");
+        assert_engine_allocates_zero(forced, &mut output, &lhs, &rhs, &mut assigned);
+    }
 
     #[cfg(target_arch = "aarch64")]
     if std::arch::is_aarch64_feature_detected!("neon")

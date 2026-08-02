@@ -383,22 +383,46 @@ mod tests {
         assert_eq!(packed_actual, expected);
 
         #[cfg(target_arch = "x86_64")]
-        let (backend, available) = (
-            BackendId::X86Pclmul,
-            std::arch::is_x86_feature_detected!("pclmulqdq"),
-        );
-        #[cfg(target_arch = "aarch64")]
-        let (backend, available) = (
-            BackendId::Aarch64Pmull,
-            std::arch::is_aarch64_feature_detected!("neon")
-                && std::arch::is_aarch64_feature_detected!("pmull"),
-        );
-        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-        let (backend, available) = (BackendId::X86Pclmul, false);
-        if !available {
-            return;
+        {
+            if std::arch::is_x86_feature_detected!("pclmulqdq") {
+                assert_profile_backend(BackendId::X86Pclmul, lhs, rhs, expected_schedule, portable);
+            }
+            if std::arch::is_x86_feature_detected!("pclmulqdq")
+                && std::arch::is_x86_feature_detected!("avx2")
+                && std::arch::is_x86_feature_detected!("vpclmulqdq")
+            {
+                assert_profile_backend(
+                    BackendId::X86Vpclmul,
+                    lhs,
+                    rhs,
+                    expected_schedule,
+                    portable,
+                );
+            }
         }
+        #[cfg(target_arch = "aarch64")]
+        if std::arch::is_aarch64_feature_detected!("neon")
+            && std::arch::is_aarch64_feature_detected!("pmull")
+        {
+            assert_profile_backend(
+                BackendId::Aarch64Pmull,
+                lhs,
+                rhs,
+                expected_schedule,
+                portable,
+            );
+        }
+    }
 
+    fn assert_profile_backend<F>(
+        backend: BackendId,
+        lhs: &[F],
+        rhs: &[F],
+        expected_schedule: ScheduleKind,
+        portable: Engine<F>,
+    ) where
+        F: microfield::__private::PortableField + StaticField + core::fmt::Debug,
+    {
         let isa = Engine::<F>::builder()
             .force_backend(backend)
             .detect()
@@ -426,6 +450,10 @@ mod tests {
             ));
         }
 
+        let mut expected = std::vec![F::ZERO; lhs.len()];
+        portable
+            .mul_into(&mut expected, lhs, rhs)
+            .expect("equal lengths");
         let mut actual = std::vec![F::ZERO; lhs.len()];
         isa.mul_into(&mut actual, lhs, rhs).expect("equal lengths");
         assert_eq!(actual, expected);

@@ -24,7 +24,8 @@ Este harness separa:
 
 - algoritmo portable directo frente a fachada portable;
 - estrategia portable frente al backend seleccionado automáticamente;
-- estrategia ISA forzada —PCLMUL o PMULL— separada del selector automático;
+- estrategias ISA forzadas —PCLMUL, VPCLMUL o PMULL— separadas del selector
+  automático;
 - producto, cuadrado y suma en lotes 1, 8, 64 y 4096;
 - coste de validación y dispatch;
 - construcción con capabilities portables frente a detección `std`.
@@ -37,9 +38,8 @@ H2.6 añade al mismo harness, sin mezclar las muestras:
 - pipeline reutilizado `pack + kernel + unpack`;
 - pipeline completo `allocate + pack + kernel + unpack`.
 
-AoS packed actual no se presenta como aceleración: estas muestras fijan una
-línea base honesta para decidir en H2.7 si SoA/tiles y VPCLMUL amortizan su coste
-total.
+H2.7 añade muestras VPCLMUL directas y sobre `AosLanePairs`. El backend se
+mantiene explícito porque la medición local no justifica una selección universal.
 
 ## Línea base local H2
 
@@ -195,3 +195,43 @@ mul_packed_reused|pipeline_reused_pack_mul_unpack|\
 pipeline_owned_allocate_pack_mul_unpack)' \
   --warm-up-time 1 --measurement-time 2 --sample-size 20
 ```
+
+## Medición local H2.7
+
+Medición del 2 de agosto de 2026, rustc 1.96.0-nightly/LLVM 22.1.0, perfil
+`bench`, Linux 6.18.7 x86-64, Intel Core i7-13700HX y microcode `0x12f`.
+Criterion ejecutó 20–30 muestras con 1 s de warm-up y 1 s de medición.
+
+| Campo/lote/región | PCLMUL | VPCLMUL |
+|---|---:|---:|
+| GF(2¹²⁸)/8/kernel | 26,803–26,832 ns | 27,230–27,315 ns |
+| GF(2¹²⁸)/64/kernel | 206,27–210,00 ns | 201,33–201,52 ns |
+| GF(2¹²⁸)/64/pipeline reutilizado | 233,52–234,87 ns | 225,92–226,97 ns |
+| GF(2¹²⁸)/4096/kernel | 12,833–12,842 µs | 12,449–12,553 µs |
+| GF(2¹²⁸)/4096/pipeline reutilizado | 16,079–16,573 µs | 15,435–15,454 µs |
+| HH-256/4096/kernel | 38,664–38,732 µs | 52,694–52,948 µs |
+| Alt-256/4096/kernel | 39,260–39,430 µs | 54,064–54,395 µs |
+
+GF(2¹²⁸) presenta una región favorable modesta desde 64 elementos en esta CPU,
+pero VPCLMUL pierde aproximadamente 36–38 % en los campos de 256 bits. Por ello
+los tres presets permanecen `automatic_selection = false`; GF(2¹²⁸) publica 64
+como candidato local y los campos de 256 bits `usize::MAX`, sin restringir las
+longitudes válidas.
+
+Comandos reproducibles:
+
+```text
+cargo bench -p microfield --bench portable_batch -- \
+  'gf2_128_v1/batch/(8|64)/(mul_engine_forced_x86_(pclmul|vpclmul)|\
+pipeline_reused_pack_mul_unpack|vpclmul_pipeline_reused_pack_mul_unpack)' \
+  --sample-size 30 --warm-up-time 1 --measurement-time 1
+
+cargo bench -p microfield --bench portable_batch -- \
+  'gf2_256_hh_v1/batch/4096/mul_engine_forced' \
+  --sample-size 20 --warm-up-time 1 --measurement-time 1
+
+bash crates/microfield/tools/audit_x86_vpclmul.sh
+```
+
+La auditoría exige `vpclmul*` y `vzeroupper`, y rechaza dispatch indirecto o
+referencias al asignador dentro de los kernels.

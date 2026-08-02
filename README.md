@@ -27,8 +27,10 @@ campo externo validado reciba perfiles ISA verificados sin abrir catálogos ni
 punteros. H2.5 añade PMULL en AArch64 para presets y perfiles externos; queda
 en selección explícita hasta disponer de calibración reproducible en hardware
 ARM real. H2.6 incorpora `PackingPlan`, `PackedBatch` owned y vistas sobre
-storage externo alineado. El siguiente hito funcional es H2.7, VPCLMUL y
-layouts de throughput.
+storage externo alineado. H2.7 añade VPCLMUL y `AosLanePairs` para presets y
+campos ABI 3; queda forzable pero fuera de selección automática tras medir una
+regresión en 256 bits. El siguiente hito es H2.8, calibración, auditoría y cierre
+de Fase 2.
 
 ## Comandos
 
@@ -40,6 +42,7 @@ cargo check -p microfield --no-default-features --features portable,builtin-fiel
 cargo check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 cargo test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
 bash crates/microfield/tools/audit_aarch64_pmull.sh
+bash crates/microfield/tools/audit_x86_vpclmul.sh
 cargo test -p microfield --all-features --test packed_batch --test packed_views
 cargo test -p homomorphic-hash-rs --lib
 cargo test -p homomorphic-hash-rs --test microfield_compat
