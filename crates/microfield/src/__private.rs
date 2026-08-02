@@ -83,6 +83,14 @@ pub const MIN_CODEGEN_ABI_VERSION: u32 = 1;
 /// Newest generated-source ABI accepted by this runtime.
 pub const MAX_CODEGEN_ABI_VERSION: u32 = 3;
 
+/// ABI emitted by the current generator.
+pub const CURRENT_CODEGEN_ABI_VERSION: u32 = 3;
+
+const _: () = assert!(
+    CURRENT_CODEGEN_ABI_VERSION >= MIN_CODEGEN_ABI_VERSION
+        && CURRENT_CODEGEN_ABI_VERSION <= MAX_CODEGEN_ABI_VERSION
+);
+
 /// Reports whether generated source can safely call this runtime helper set.
 #[must_use]
 pub const fn supports_codegen_abi(version: u32) -> bool {
@@ -578,11 +586,22 @@ mod tests {
 
     #[test]
     fn codegen_abi_keeps_the_n_minus_one_window() {
-        assert!(super::supports_codegen_abi(1));
-        assert!(super::supports_codegen_abi(2));
-        assert!(super::supports_codegen_abi(3));
+        assert_eq!(super::MIN_CODEGEN_ABI_VERSION, 1);
+        assert_eq!(super::CURRENT_CODEGEN_ABI_VERSION, 3);
+        assert_eq!(super::MAX_CODEGEN_ABI_VERSION, 3);
+        for version in super::MIN_CODEGEN_ABI_VERSION..=super::MAX_CODEGEN_ABI_VERSION {
+            assert!(super::supports_codegen_abi(version));
+        }
         assert!(!super::supports_codegen_abi(0));
         assert!(!super::supports_codegen_abi(4));
+        assert!(!super::supports_codegen_abi(u32::MAX));
+
+        let matrix = include_str!("../abi/runtime-codegen-matrix-v1.csv");
+        assert_eq!(
+            matrix,
+            "runtime_series,min_codegen_abi,max_codegen_abi,current_codegen_abi,manifest_schema,artifact_schema,compatibility\n\
+             0.1.x,1,3,3,1,1,N_and_N_minus_1_or_longer\n"
+        );
     }
 
     #[test]

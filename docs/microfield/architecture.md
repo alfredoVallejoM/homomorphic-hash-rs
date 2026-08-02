@@ -192,6 +192,23 @@ priorizar la estrategia vectorial, `Throughput` prioriza caudal,
 `minimum_batch` solo es un umbral de selección automática: no reduce el dominio
 válido de longitudes.
 
+H2.8 convierte la decisión en una tabla versionada y la compila como
+`SelectionCalibration`; no existe lectura de perfiles en runtime. El flujo de
+calibración queda fuera del dominio:
+
+```mermaid
+flowchart LR
+    Criterion[Criterion + entorno] --> Capture[Captura SHA-256]
+    Capture --> Review[Revisión multi-familia]
+    Review --> Table[selection-table-v1.csv]
+    Table --> Const[Constantes privadas]
+    Const --> Catalog[KernelMetadata estática]
+```
+
+La CI valida tabla, perfiles e inventario `unsafe`, pero no toma decisiones a
+partir de latencias de un runner compartido. Promover un backend requiere un
+diff deliberado de tabla, tests del selector y ADR.
+
 La decisión completa está en
 [`ADR 0012`](adr/0012-cpu-capabilities-and-static-selector.md). El algoritmo,
 la frontera `unsafe` y su evidencia se fijan en
@@ -200,3 +217,5 @@ la frontera `unsafe` y su evidencia se fijan en
 [`ADR 0015`](adr/0015-aarch64-pmull-backend.md). El batch persistente se fija
 en [`ADR 0016`](adr/0016-persistent-packed-batches.md) y VPCLMUL en
 [`ADR 0017`](adr/0017-x86-vpclmul-lane-pairs.md).
+El cierre conservador y la tabla versionada se fijan en
+[`ADR 0018`](adr/0018-versioned-calibration-and-phase-2-closure.md).

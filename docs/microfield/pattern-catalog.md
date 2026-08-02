@@ -21,6 +21,9 @@
 | Value Object | `PackingPlan` | Fijar backend/campo/layout/longitud sin setters | Una comparación por operación |
 | RAII / Resource Owner | `AlignedBuffer<F>` / `PackedBatch<F>` | Inicialización y liberación alineada verificables | Una asignación en construcción; cero al reutilizar |
 | Borrowed View | `PackedBatchView(Mut)` | Usar storage externo sin heap y expresar aliasing | Cero |
+| Versioned Decision Table | `SelectionCalibration` + CSV v1 | Separar disponibilidad ISA de evidencia de rendimiento | Cero; constantes compiladas |
+| Audited Boundary Inventory | hashes de `unsafe` + gate estructural | Hacer explícita toda ampliación de confianza | Solo CI |
+| Persistent Differential Corpus | seeds/casos v1 | Reproducir y reducir fallos multi-ISA | Solo tests |
 
 ## Patrones planificados para Fase 2
 

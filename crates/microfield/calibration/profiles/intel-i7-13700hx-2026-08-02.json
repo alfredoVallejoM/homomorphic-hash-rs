@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "profile_id": "intel-i7-13700hx-2026-08-02",
+  "source_commit": "925a2d9a0c693c8057dc65a3e512df3d3ceb47f6",
+  "environment": {
+    "architecture": "x86_64",
+    "cpu_family": "intel-family-6-model-183",
+    "cpu_model": "Intel Core i7-13700HX",
+    "microcode": "0x12f",
+    "os": "Linux",
+    "kernel": "6.18.7",
+    "rustc": "1.96.0-nightly",
+    "llvm": "22.1.0",
+    "profile": "bench"
+  },
+  "criterion": {
+    "minimum_samples": 20,
+    "warm_up_seconds": 1,
+    "measurement_seconds": 1
+  },
+  "measurements": [
+    { "field": "gf2_128_v1", "operation": "mul", "region": "engine", "batch_len": 1, "backend": "portable", "lower_ns": 89.798, "upper_ns": 89.928 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "engine", "batch_len": 1, "backend": "x86_pclmul", "lower_ns": 4.7955, "upper_ns": 4.9803 },
+    { "field": "gf2_128_v1", "operation": "square", "region": "engine", "batch_len": 1, "backend": "portable", "lower_ns": 6.5390, "upper_ns": 6.6661 },
+    { "field": "gf2_128_v1", "operation": "square", "region": "engine", "batch_len": 1, "backend": "x86_pclmul", "lower_ns": 4.1649, "upper_ns": 4.2017 },
+    { "field": "gf2_256_hh_v1", "operation": "mul", "region": "engine", "batch_len": 1, "backend": "portable", "lower_ns": 376.41, "upper_ns": 380.92 },
+    { "field": "gf2_256_hh_v1", "operation": "mul", "region": "engine", "batch_len": 1, "backend": "x86_pclmul", "lower_ns": 11.245, "upper_ns": 11.265 },
+    { "field": "gf2_256_hh_v1", "operation": "square", "region": "engine", "batch_len": 1, "backend": "portable", "lower_ns": 10.858, "upper_ns": 10.932 },
+    { "field": "gf2_256_hh_v1", "operation": "square", "region": "engine", "batch_len": 1, "backend": "x86_pclmul", "lower_ns": 7.9176, "upper_ns": 8.1900 },
+    { "field": "gf2_256_alt_v1", "operation": "mul", "region": "engine", "batch_len": 1, "backend": "portable", "lower_ns": 359.07, "upper_ns": 361.97 },
+    { "field": "gf2_256_alt_v1", "operation": "mul", "region": "engine", "batch_len": 1, "backend": "x86_pclmul", "lower_ns": 11.269, "upper_ns": 11.368 },
+    { "field": "gf2_256_alt_v1", "operation": "square", "region": "engine", "batch_len": 1, "backend": "portable", "lower_ns": 10.749, "upper_ns": 10.776 },
+    { "field": "gf2_256_alt_v1", "operation": "square", "region": "engine", "batch_len": 1, "backend": "x86_pclmul", "lower_ns": 7.9207, "upper_ns": 7.9840 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "kernel", "batch_len": 8, "backend": "x86_pclmul", "lower_ns": 26.803, "upper_ns": 26.832 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "kernel", "batch_len": 8, "backend": "x86_vpclmul", "lower_ns": 27.230, "upper_ns": 27.315 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "kernel", "batch_len": 64, "backend": "x86_pclmul", "lower_ns": 206.27, "upper_ns": 210.00 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "kernel", "batch_len": 64, "backend": "x86_vpclmul", "lower_ns": 201.33, "upper_ns": 201.52 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "pipeline_reused", "batch_len": 64, "backend": "x86_pclmul", "lower_ns": 233.52, "upper_ns": 234.87 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "pipeline_reused", "batch_len": 64, "backend": "x86_vpclmul", "lower_ns": 225.92, "upper_ns": 226.97 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "kernel", "batch_len": 4096, "backend": "x86_pclmul", "lower_ns": 12833.0, "upper_ns": 12842.0 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "kernel", "batch_len": 4096, "backend": "x86_vpclmul", "lower_ns": 12449.0, "upper_ns": 12553.0 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "pipeline_reused", "batch_len": 4096, "backend": "x86_pclmul", "lower_ns": 16079.0, "upper_ns": 16573.0 },
+    { "field": "gf2_128_v1", "operation": "mul", "region": "pipeline_reused", "batch_len": 4096, "backend": "x86_vpclmul", "lower_ns": 15435.0, "upper_ns": 15454.0 },
+    { "field": "gf2_256_hh_v1", "operation": "mul", "region": "kernel", "batch_len": 4096, "backend": "x86_pclmul", "lower_ns": 38664.0, "upper_ns": 38732.0 },
+    { "field": "gf2_256_hh_v1", "operation": "mul", "region": "kernel", "batch_len": 4096, "backend": "x86_vpclmul", "lower_ns": 52694.0, "upper_ns": 52948.0 },
+    { "field": "gf2_256_alt_v1", "operation": "mul", "region": "kernel", "batch_len": 4096, "backend": "x86_pclmul", "lower_ns": 39260.0, "upper_ns": 39430.0 },
+    { "field": "gf2_256_alt_v1", "operation": "mul", "region": "kernel", "batch_len": 4096, "backend": "x86_vpclmul", "lower_ns": 54064.0, "upper_ns": 54395.0 }
+  ]
+}

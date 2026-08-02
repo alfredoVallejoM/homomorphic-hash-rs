@@ -78,7 +78,7 @@ mod builtins {
 
     const fn kernel_set<F: PclmulElement>() -> KernelSet<F> {
         KernelSet::new(
-            crate::KernelMetadata::x86_pclmul::<F>(1),
+            crate::KernelMetadata::x86_pclmul::<F>(crate::kernel::X86_PCLMUL),
             add::<F>,
             multiply::<F>,
             square::<F>,

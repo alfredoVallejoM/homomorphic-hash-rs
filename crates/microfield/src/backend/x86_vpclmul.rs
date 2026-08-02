@@ -28,11 +28,12 @@ mod builtins {
         kernel::KernelSet,
     };
 
-    pub(crate) static GF2_128_V1_KERNELS: KernelSet<Gf2_128V1> = kernel_set::<Gf2_128V1>(64, false);
+    pub(crate) static GF2_128_V1_KERNELS: KernelSet<Gf2_128V1> =
+        kernel_set::<Gf2_128V1>(crate::kernel::X86_VPCLMUL_128);
     pub(crate) static GF2_256_HH_V1_KERNELS: KernelSet<Gf2_256HhV1> =
-        kernel_set::<Gf2_256HhV1>(usize::MAX, false);
+        kernel_set::<Gf2_256HhV1>(crate::kernel::X86_VPCLMUL_256);
     pub(crate) static GF2_256_ALT_V1_KERNELS: KernelSet<Gf2_256AltV1> =
-        kernel_set::<Gf2_256AltV1>(usize::MAX, false);
+        kernel_set::<Gf2_256AltV1>(crate::kernel::X86_VPCLMUL_256);
 
     trait VpclmulElement: Field + Square {
         /// Multiplies two independent element pairs in the two AVX lanes.
@@ -113,11 +114,10 @@ mod builtins {
     impl_vpclmul_256!(Gf2_256AltV1);
 
     const fn kernel_set<F: VpclmulElement>(
-        minimum_batch: usize,
-        automatic_selection: bool,
+        calibration: crate::kernel::SelectionCalibration,
     ) -> KernelSet<F> {
         KernelSet::new(
-            crate::KernelMetadata::x86_vpclmul(minimum_batch, automatic_selection),
+            crate::KernelMetadata::x86_vpclmul(calibration),
             add::<F>,
             multiply::<F>,
             square::<F>,

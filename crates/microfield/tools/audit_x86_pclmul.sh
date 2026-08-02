@@ -35,9 +35,16 @@ test -s "$audit_dir/backend.asm"
 test -s "$audit_dir/kernels.asm"
 grep -Eq '\bpclmul[a-z0-9]*\b' "$audit_dir/backend.asm"
 
-if grep -Eq 'call[q]?[[:space:]].*\*|__rust_alloc|<.*alloc::' "$audit_dir/kernels.asm"; then
-  echo "el kernel PCLMUL contiene dispatch interno o una referencia al asignador" >&2
+if grep -Eq 'call[q]?[[:space:]].*\*|__rust_alloc|<.*alloc::|\b(idiv|div)[bwlq]?\b' \
+  "$audit_dir/kernels.asm"; then
+  echo "el kernel PCLMUL contiene dispatch interno, división o una referencia al asignador" >&2
   exit 1
 fi
 
-echo "auditoría PCLMUL correcta: instrucciones presentes; sin dispatch interno ni asignador"
+instruction_count="$(grep -Ec '^[[:space:]]*[[:xdigit:]]+:' "$audit_dir/kernels.asm")"
+if [[ "$instruction_count" -gt 4000 ]]; then
+  echo "el kernel PCLMUL supera el presupuesto estructural de 4000 instrucciones" >&2
+  exit 1
+fi
+
+echo "auditoría PCLMUL correcta: $instruction_count instrucciones; sin dispatch, división ni asignador"

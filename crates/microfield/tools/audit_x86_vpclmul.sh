@@ -36,9 +36,16 @@ test -s "$audit_dir/kernels.asm"
 grep -Eq '\bvpclmul[a-z0-9]*\b' "$audit_dir/backend.asm"
 grep -Eq '\bvzeroupper\b' "$audit_dir/kernels.asm"
 
-if grep -Eq 'call[q]?[[:space:]].*\*|__rust_alloc|<.*alloc::' "$audit_dir/kernels.asm"; then
-  echo "el kernel VPCLMUL contiene dispatch interno o una referencia al asignador" >&2
+if grep -Eq 'call[q]?[[:space:]].*\*|__rust_alloc|<.*alloc::|\b(idiv|div)[bwlq]?\b' \
+  "$audit_dir/kernels.asm"; then
+  echo "el kernel VPCLMUL contiene dispatch interno, división o una referencia al asignador" >&2
   exit 1
 fi
 
-echo "auditoría VPCLMUL correcta: instrucciones y vzeroupper presentes; sin dispatch interno ni asignador"
+instruction_count="$(grep -Ec '^[[:space:]]*[[:xdigit:]]+:' "$audit_dir/kernels.asm")"
+if [[ "$instruction_count" -gt 6000 ]]; then
+  echo "el kernel VPCLMUL supera el presupuesto estructural de 6000 instrucciones" >&2
+  exit 1
+fi
+
+echo "auditoría VPCLMUL correcta: $instruction_count instrucciones y vzeroupper; sin dispatch, división ni asignador"

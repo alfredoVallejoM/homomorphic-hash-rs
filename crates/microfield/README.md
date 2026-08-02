@@ -62,6 +62,14 @@ El backend es forzable pero no automático: solo mostró una mejora modesta para
 GF(2¹²⁸) en la CPU local y perdió frente a PCLMUL en 256 bits. El crate niega
 `unsafe` salvo en los tres adaptadores ISA y el módulo de storage alineado.
 
+H2.8 cierra la Fase 2 con una tabla estática de calibración v1. La tabla forma
+parte del código revisado pero se resuelve en compilación: no existe lookup,
+autotuning ni detección adicional en el hot path. Un corpus diferencial
+persistente prueba toda ISA disponible; un inventario SHA-256 obliga a revisar
+cualquier cambio en las cuatro fronteras `unsafe`; y la matriz de compatibilidad
+fija runtime ABI 1..=3 y codegen ABI 3. Los perfiles Criterion se capturan con
+entorno completo y nunca se promueven automáticamente desde CI.
+
 ```rust
 use microfield::{Engine, Field, Gf2_256HhV1, PackedBatch};
 
@@ -115,6 +123,8 @@ cargo check -p microfield --no-default-features --features portable,builtin-fiel
 cargo check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 cargo bench -p microfield --bench portable_batch
 cargo bench -p microfield --bench portable_codegen_optimizer
+bash crates/microfield/tools/audit_calibration.sh
+bash crates/microfield/tools/audit_unsafe_scope.sh
 ```
 
 Ejemplo:

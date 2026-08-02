@@ -11,7 +11,7 @@ use microfield::{
 };
 
 const BATCH_LEN: usize = 4096;
-const BATCH_SIZES: &[usize] = &[1, 8, 64, BATCH_LEN];
+const BATCH_SIZES: &[usize] = &[1, 2, 4, 8, 16, 32, 64, 256, 1024, BATCH_LEN, 16384];
 
 fn portable_batch(criterion: &mut Criterion) {
     benchmark_engine_construction(criterion);
@@ -212,10 +212,63 @@ fn benchmark_batch<F>(
         });
     });
     benchmark_packed(&mut group, selected, &lhs, &rhs, &mut output);
+    if let Some(isa) = forced_isa {
+        benchmark_forced_packed(&mut group, isa, &lhs, &rhs, &mut output);
+    }
     if let Some(vpclmul) = forced_vpclmul {
         benchmark_packed_vpclmul(&mut group, vpclmul, &lhs, &rhs, &mut output);
     }
     group.finish();
+}
+
+fn benchmark_forced_packed<F>(
+    group: &mut BenchmarkGroup<'_, WallTime>,
+    engine: Engine<F>,
+    lhs: &[F],
+    rhs: &[F],
+    output: &mut [F],
+) where
+    F: BuiltinField + StaticField,
+{
+    let prefix = match engine.backend_id() {
+        BackendId::X86Pclmul => "pclmul",
+        BackendId::Aarch64Pmull => "pmull",
+        _ => "forced_isa",
+    };
+    let mut packed_lhs = PackedBatch::from_aos(&engine, lhs).expect("valid packed lhs");
+    let mut packed_rhs = PackedBatch::from_aos(&engine, rhs).expect("valid packed rhs");
+    let mut packed_output = PackedBatch::new(&engine, lhs.len()).expect("valid packed output");
+
+    group.bench_function(format!("{prefix}_mul_packed_reused"), |bencher| {
+        bencher.iter(|| {
+            engine
+                .mul_packed_into(
+                    black_box(&mut packed_output),
+                    black_box(&packed_lhs),
+                    black_box(&packed_rhs),
+                )
+                .expect("benchmark plans are equal");
+        });
+    });
+    group.bench_function(
+        format!("{prefix}_pipeline_reused_pack_mul_unpack"),
+        |bencher| {
+            bencher.iter(|| {
+                packed_lhs
+                    .pack_from(black_box(lhs))
+                    .expect("benchmark length is fixed");
+                packed_rhs
+                    .pack_from(black_box(rhs))
+                    .expect("benchmark length is fixed");
+                engine
+                    .mul_packed_into(&mut packed_output, &packed_lhs, &packed_rhs)
+                    .expect("benchmark plans are equal");
+                packed_output
+                    .unpack_into(black_box(&mut *output))
+                    .expect("benchmark length is fixed");
+            });
+        },
+    );
 }
 
 fn benchmark_packed_vpclmul<F>(

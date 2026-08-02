@@ -295,16 +295,40 @@ fn maintained_presets_have_the_same_identity_through_the_factory() {
     use microfield::{Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1};
 
     let manifest_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("fields");
-    for (file, expected) in [
-        ("gf2_128_v1.toml", Gf2_128V1::spec().field_id()),
-        ("gf2_256_hh_v1.toml", Gf2_256HhV1::spec().field_id()),
-        ("gf2_256_alt_v1.toml", Gf2_256AltV1::spec().field_id()),
+    for (file, expected_spec) in [
+        ("gf2_128_v1.toml", Gf2_128V1::spec()),
+        ("gf2_256_hh_v1.toml", Gf2_256HhV1::spec()),
+        ("gf2_256_alt_v1.toml", Gf2_256AltV1::spec()),
     ] {
         let package = BinaryFieldFactory::from_manifest(manifest_root.join(file))
             .expect("maintained manifest")
             .generate()
             .expect("maintained modulus is certified");
-        assert_eq!(package.field_id(), expected, "identity drift in {file}");
+        assert_eq!(
+            package.field_id(),
+            expected_spec.field_id(),
+            "field identity drift in {file}"
+        );
+        assert_eq!(
+            package.artifact_id(),
+            expected_spec.artifact_id(),
+            "artifact identity drift in {file}"
+        );
+        for generated in package.artifacts().files() {
+            let committed = fs::read(
+                Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("artifacts")
+                    .join(package.field_name())
+                    .join(generated.relative_path()),
+            )
+            .expect("committed factory artifact");
+            assert_eq!(
+                generated.contents(),
+                committed,
+                "public factory drift in {file}/{}",
+                generated.relative_path()
+            );
+        }
         assert_eq!(
             package.portable_optimization().degree_class(),
             PortableDegreeClass::PowerOfTwoLimbAligned

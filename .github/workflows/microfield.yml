@@ -29,6 +29,12 @@ jobs:
         run: cargo +stable test -p microfield --all-features --test batch_allocations
       - name: Clippy
         run: cargo +stable clippy -p microfield --all-features --all-targets -- -D warnings
+      - name: Audit versioned calibration decisions
+        run: bash crates/microfield/tools/audit_calibration.sh
+      - name: Exercise calibration gate rejection paths
+        run: bash crates/microfield/tools/test_calibration_gate.sh
+      - name: Audit confined unsafe inventory
+        run: bash crates/microfield/tools/audit_unsafe_scope.sh
       - name: Audit x86-64 PCLMUL assembly
         run: bash crates/microfield/tools/audit_x86_pclmul.sh
       - name: Audit x86-64 VPCLMUL assembly
@@ -122,6 +128,11 @@ jobs:
           --features alloc,portable,builtin-fields --lib --test packed_batch
       - name: Miri generated optimizer paths
         run: cargo +nightly miri test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
+      - name: Miri H2.8 differential and ABI contracts
+        run: >-
+          cargo +nightly miri test -p microfield --no-default-features
+          --features generator,portable,builtin-fields
+          --test differential_corpus --test runtime_codegen_stability
 
   x86-asan:
     name: x86-64 PCLMUL/VPCLMUL AddressSanitizer
@@ -137,7 +148,7 @@ jobs:
         run: >-
           cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
           -p microfield --all-features --test x86_pclmul --test x86_vpclmul
-          --test packed_batch --test packed_views
+          --test packed_batch --test packed_views --test differential_corpus
       - name: External profile PCLMUL AddressSanitizer
         env:
           RUSTFLAGS: -Zsanitizer=address
@@ -157,7 +168,7 @@ jobs:
       - name: Differential PMULL suite on hardware
         run: >-
           cargo +stable test -p microfield --all-features --test aarch64_pmull
-          --test packed_batch --test packed_views
+          --test packed_batch --test packed_views --test differential_corpus
       - name: Generated external profiles on PMULL
         run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
       - name: Zero-allocation PMULL gate
@@ -178,6 +189,7 @@ jobs:
           cargo +nightly test -Zbuild-std --target aarch64-unknown-linux-gnu
           -p microfield --no-default-features --features std,portable,builtin-fields
           --test aarch64_pmull --test packed_batch --test packed_views
+          --test differential_corpus
       - name: External profile PMULL AddressSanitizer
         env:
           RUSTFLAGS: -Zsanitizer=address

@@ -41,6 +41,12 @@ H2.6 añade al mismo harness, sin mezclar las muestras:
 H2.7 añade muestras VPCLMUL directas y sobre `AosLanePairs`. El backend se
 mantiene explícito porque la medición local no justifica una selección universal.
 
+H2.8 amplía la matriz batch a 1, 2, 4, 8, 16, 32, 64, 256, 1024, 4096 y
+16384 elementos. Los pipelines packed forzados de PCLMUL y PMULL tienen nombres
+propios, de modo que un backend explícito puede calibrarse sin alterar el
+selector. La evidencia normalizada y la decisión compilada viven en
+`calibration/`.
+
 ## Línea base local H2
 
 Medición orientativa del 31 de julio de 2026, Rust 1.93.1, release, Linux
@@ -235,3 +241,32 @@ bash crates/microfield/tools/audit_x86_vpclmul.sh
 
 La auditoría exige `vpclmul*` y `vzeroupper`, y rechaza dispatch indirecto o
 referencias al asignador dentro de los kernels.
+
+## Cierre H2.8
+
+La tabla de selección v1 queda fijada así:
+
+| Backend | GF(2¹²⁸) | HH-256 | Alt-256 |
+|---|---|---|---|
+| PCLMUL | automático desde 1 | automático desde 1 | automático desde 1 |
+| VPCLMUL | candidato 64, explícito | sin cruce, explícito | sin cruce, explícito |
+| PMULL | explícito | explícito | explícito |
+
+Captura completa:
+
+```text
+crates/microfield/tools/capture_calibration.sh \
+  /tmp/microfield-calibration \
+  'gf2_(128_v1|256_hh_v1|256_alt_v1)/batch/(1|64|4096|16384)/mul'
+```
+
+El output contiene el comando exacto, `rustc -vV`, kernel, CPU, familia,
+microcode, `lscpu`, estimadores Criterion y `SHA256SUMS`. El workflow manual
+`.github/workflows/microfield-calibration.yml` ejecuta la captura sobre dos
+labels x86-64 y un runner ARM64 real.
+
+La CI ordinaria ejecuta `audit_calibration.sh`: valida schema, intervalos,
+unicidad, evidencia y el gate del 20 %, pero no compara tiempos medidos en
+runners compartidos. Para VPCLMUL o PMULL, una promoción automática exige dos
+familias de CPU distintas; subir un artefacto de workflow nunca modifica por sí
+solo la tabla.

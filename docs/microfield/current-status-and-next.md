@@ -4,13 +4,13 @@ Fecha de revisión: 2 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
-H2.7 está implementado: presets y campos externos ABI 3 pueden forzar un
-backend VPCLMUL que procesa pares, trata tails y ejecuta owned o vistas sobre
-`PackedLayout::AosLanePairs`. El backend es correcto y está auditado en código
-máquina, pero permanece `explicit_only`: GF(2¹²⁸) solo gana modestamente en la
-CPU local y las dos rutas de 256 bits son más lentas que PCLMUL. PMULL también
-permanece `explicit_only` hasta ampliar su calibración en hardware ARM real.
-La política distingue así disponibilidad, corrección y rendimiento.
+La Fase 2 está cerrada. H2.8 transforma la calibración, seguridad y
+compatibilidad en contratos versionados: tabla de selección v1 compilada como
+constantes, corpus diferencial persistente, inventario SHA-256 de `unsafe` y
+matriz runtime/codegen. PCLMUL permanece automático; VPCLMUL y PMULL son
+correctos y forzables, pero siguen `explicit_only` porque no existe todavía
+evidencia favorable en dos familias de CPU. Disponibilidad, corrección y
+rendimiento permanecen separados.
 
 La Fase 1 completa, H0–H4, está integrada en `origin/main`. H4 entró por
 fast-forward mediante `1f176ab`; el `main` resultante superó sus cinco jobs en
@@ -23,6 +23,7 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | Área | Estado | Evidencia |
 |---|---|---|
 | Fase 1 | Cerrada en `main` | `1f176ab`; cinco jobs verdes en `30703842091` |
+| Fase 2 | Cerrada conservadoramente | H2.1–H2.8; informe final y tabla de selección v1 |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
@@ -35,7 +36,7 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | ISA x86-64 | PCLMUL implementado | tres presets; producto, square, tails e in-place |
 | Factory H2.1 | Implementada | tipos externos nominales 2..=4096, Rabin y emisión atómica |
 | Optimizador H2.2 | Implementado | tres reducciones, square dedicado e Itoh–Tsujii |
-| ABI de codegen | Compatible 1..=3 | fuente nueva usa v3; fuentes v1/v2 se conservan |
+| ABI de codegen | Compatible 1..=3 | constante única emite v3; matriz versionada conserva v1/v2 |
 | Capabilities H2.3 | Implementado | snapshot no falsificable, detección x86-64/AArch64 y `portable_only` |
 | Selector H2.3 | Implementado | cinco políticas y errores separados por build/campo/CPU/política |
 | Perfiles externos | Implementados | grados 9, 10, 128, 192 y 233; tres clases y tres reducciones |
@@ -44,10 +45,12 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | Packed H2.6 | Implementado | owned `alloc`, vistas sin `alloc`, plan sellado y operaciones in-place |
 | ISA x86-64 H2.7 | VPCLMUL explícito | presets y ABI 3, pares, tails, in-place y `vzeroupper` |
 | Packing H2.7 | `Aos` + `AosLanePairs` | layout sellado, padding par y alineación 32 para VPCLMUL |
-| Frontera `unsafe` | Confinada | `deny` global, tres módulos ISA, storage alineado y test estructural |
+| Frontera `unsafe` | Confinada y autenticada | `deny` global, cuatro hashes revisados y test estructural |
 | ASan multi-ISA | Correcto local | presets y 11 tests externos en x86-64/AArch64 |
 | PMULL QEMU | Correcto | 3 tests mantenidos + 11 externos, también bajo ASan |
 | PMULL hardware | Correcto funcional | job ARM64 real verde en `30716211486`; calibración pendiente |
+| Calibración H2.8 | Tabla v1 correcta | 9 decisiones; captura Criterion x86/ARM; promoción multi-familia |
+| Corpus H2.8 | Persistente | 20 seeds/tamaños con reproducción hasta el primer índice divergente |
 
 ## Decisiones H4/H2.3/H2.4 materializadas
 
@@ -265,7 +268,7 @@ Salida: Fase 1 portable completa.
 El detalle consolidado está en
 [`phase-1-final-report.md`](phase-1-final-report.md).
 
-### Fase 2 en curso
+### Fase 2 cerrada
 
 H2.1 ha materializado `BinaryFieldFactory`: un consumidor puede declarar
 GF(2^m), validarlo y generar en `build.rs` un tipo nominal con scalar y batch
@@ -274,10 +277,19 @@ mantiene v1 como oráculo diferencial. H2.3 añade capabilities confiables,
 catálogo ampliado y selector inmutable. H2.4 añade PCLMUL. El puente ABI 3
 extiende perfiles verificados a campos externos y H2.5 añade PMULL en AArch64.
 H2.6 añade batches persistentes owned/prestados y almacenamiento alineado. H2.7
-añade VPCLMUL y `AosLanePairs` sin degradar la selección automática. El siguiente
-hito es H2.8: calibración multi-CPU, cierre de seguridad, reproducibilidad,
-estabilidad runtime/codegen e informe final. La calibración nativa es un gate de
-selección automática, no de disponibilidad explícita de un backend.
+añade VPCLMUL y `AosLanePairs` sin degradar la selección automática. H2.8
+cierra calibración, seguridad, reproducibilidad y estabilidad runtime/codegen.
+La evidencia insuficiente se representa como selección explícita, nunca como
+un threshold optimista. El informe consolidado está en
+[`phase-2-final-report.md`](phase-2-final-report.md).
+
+### Siguiente fase
+
+Fase 3 debe empezar por algoritmos batch de nivel superior: inversión mediante
+Montgomery trick con workspace explícito, Horner/productos especializados y
+cadenas estáticas por campo. No se reabrirán layout, encoding o identidad para
+introducirlos. La calibración adicional de PMULL/VPCLMUL puede avanzar en
+paralelo porque solo modifica la tabla privada de selección.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no

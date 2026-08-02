@@ -2,9 +2,9 @@
 title: "Especificación funcional de Microfield"
 subtitle: "Fases 0, 1 y 2: núcleo portable, factory binaria y backends x86-64/AArch64"
 author: "Plan de implementación derivado de Arquitectura desde primeros principios"
-date: "1 de agosto de 2026"
+date: "2 de agosto de 2026"
 lang: es-ES
-status: "fase-1-cerrada-fase-2-revisada"
+status: "fase-1-y-fase-2-cerradas"
 ---
 
 # Resumen ejecutivo
@@ -15,15 +15,14 @@ status: "fase-1-cerrada-fase-2-revisada"
 > neutral de kernels, puertos y adaptadores para el generador y una política
 > explícita de abstracciones de coste cero.
 
-> **Estado de implementación, 1 de agosto de 2026.** La Fase 1 está cerrada en
+> **Estado de implementación, 2 de agosto de 2026.** La Fase 1 está cerrada en
 > `main` mediante `95f82f5`. El esquema ejecutable v1 permanece limitado a
-> GF(2) en base polinómica con encoding `little`/`lsb0`. En la Fase 2, H2.1–H2.4
-> cubren factory estática, optimización portable, selector y PCLMUL. El puente
-> ABI 3 genera perfiles ISA verificados para campos externos y H2.5 implementa
-> PMULL en AArch64. H2.6 implementa batches persistentes, storage alineado y
-> vistas sin `alloc`; sigue H2.7, VPCLMUL/layouts de throughput. La calibración
-> PMULL en hardware real permanece pendiente antes de selección automática. `Prime`, `Normal`,
-> `Tower` y contextos dinámicos permanecen fuera del alcance.
+> GF(2) en base polinómica con encoding `little`/`lsb0`. La Fase 2, H2.1–H2.8,
+> está cerrada: factory estática, optimizador, selector, perfiles ABI 3,
+> PCLMUL, PMULL, packed batches, VPCLMUL y contratos de calibración/seguridad.
+> PCLMUL es automático; PMULL y VPCLMUL permanecen explícitos hasta superar el
+> gate multi-familia. `Prime`, `Normal`, `Tower` y contextos dinámicos
+> permanecen fuera del alcance.
 
 Este documento convierte `arquitectura_campos_finitos_vectorizados` en una
 especificación funcional implementable para sus tres fases iniciales:
@@ -1705,8 +1704,8 @@ un tipo Rust nominal, monomorfizado y sin coste adicional en el hot path.
 | Puente ABI 3 ✅ | perfiles ISA verificados para campos externos | H2.4 |
 | H2.5 ✅ | backend AArch64 PMULL | H2.3/Puente ABI 3 |
 | H2.6 ✅ | `PackedBatch`, storage alineado y vistas | H2.4/H2.5 |
-| H2.7 | VPCLMUL y layouts de throughput | H2.6 |
-| H2.8 | calibración, auditoría, CI multi-ISA y cierre | H2.4-H2.7 |
+| H2.7 ✅ | VPCLMUL y layouts de throughput | H2.6 |
+| H2.8 ✅ | calibración, auditoría, CI multi-ISA y cierre | H2.4-H2.7 |
 
 PCLMUL y PMULL son ramas independientes después de H2.3. VPCLMUL es
 condicional: puede quedar implementado pero no seleccionado si no demuestra
@@ -2516,6 +2515,10 @@ Objetivo del hito:
 - ninguna optimización se mantiene únicamente porque usa una instrucción más
   moderna.
 
+El objetivo PMULL de 2x no se interpreta como demostrado sin cifras nativas.
+La salida estable es conservar el backend correcto y forzable, pero excluido de
+`Auto`. La ausencia de evidencia nunca se convierte en una estimación.
+
 ## 6.26 Definición de terminado
 
 Fase 2 termina cuando:
@@ -2533,6 +2536,13 @@ Fase 2 termina cuando:
 - se publican benchmarks por CPU;
 - `PortableOnly` sigue funcionando;
 - la API pública no contiene tipos ISA.
+
+Estado H2.8: cerrado conservadoramente. La tabla v1 materializa nueve
+decisiones estáticas; PCLMUL mantiene su región publicada y PMULL/VPCLMUL quedan
+explícitos. La captura multi-runner produce perfiles candidatos con entorno y
+SHA-256, mientras la CI ordinaria valida contratos sin usar tiempos ruidosos.
+El inventario `unsafe`, el corpus diferencial y la matriz ABI completan los
+gates. Véase `docs/microfield/phase-2-final-report.md`.
 
 # 7. Procesos end-to-end
 

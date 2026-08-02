@@ -2,9 +2,9 @@
 
 Fecha de planificación: 1 de agosto de 2026.
 
-Estado: en curso. H2.1–H2.6 y el puente ABI 3 para perfiles externos están
-implementados. H2.7 es el siguiente hito. PMULL conserva selección explícita;
-la calibración nativa sigue siendo necesaria antes de habilitarlo en `Auto`.
+Estado: cerrada. H2.1–H2.8 y el puente ABI 3 están implementados. La tabla de
+selección v1 mantiene PCLMUL automático y PMULL/VPCLMUL explícitos; ampliar
+`Auto` exige nueva evidencia versionada, no reabrir la Fase 2.
 
 ## Objetivo ejecutivo
 
@@ -42,8 +42,8 @@ flowchart LR
     Bridge --> H25[H2.5 AArch64 PMULL]
     H24 --> H26[H2.6 PackedBatch]
     H25 --> H26
-    H26 --> H27[H2.7 VPCLMUL]
-    H24 --> H28[H2.8 Cierre]
+    H26 --> H27[H2.7 VPCLMUL ✅]
+    H24 --> H28[H2.8 Cierre ✅]
     H25 --> H28
     H26 --> H28
     H27 --> H28
@@ -627,6 +627,26 @@ Convertir implementaciones correctas en una política de producción trazable.
 - `PortableOnly` y `no_std` siguen verdes;
 - la API pública no expone tipos ISA ni catálogos raw;
 - benchmarks indican CPU, SO, microcódigo, Rust, flags e intervalo.
+
+### Resultado implementado
+
+1. **H2.8.1:** Criterion cubre la matriz normativa y separa kernel, fachada y
+   pipeline packed. `capture_calibration.sh` produce evidencia autocontenida y
+   el workflow manual la ejecuta sobre dos labels x86-64 y ARM64. La tabla v1
+   no amplía selección automática porque la diversidad favorable todavía no
+   alcanza el gate.
+2. **H2.8.2:** las cuatro fronteras `unsafe` tienen inventario SHA-256,
+   documentación de invariantes y gates Miri/ASan/ASM. Los audits rechazan
+   asignador, división, dispatch indirecto y crecimiento estructural anómalo.
+3. **H2.8.3:** schema/perfil Criterion v1, seeds persistentes y un corpus de 20
+   casos proporcionan reproducción determinista. La CI valida estructura y
+   decisiones, nunca latencia ruidosa del runner.
+4. **H2.8.4:** una constante única fija ABI emitido 3; la matriz congela runtime
+   1..=3 y los tests verifican la política de `FieldId`, `ArtifactId`, bundle y
+   regeneración pública de presets.
+5. **H2.8.5:** la matriz final y las limitaciones están publicadas en
+   [`phase-2-final-report.md`](phase-2-final-report.md). Fase 2 cierra con
+   PCLMUL automático y PMULL/VPCLMUL explícitos.
 
 ## Entregables documentales
 

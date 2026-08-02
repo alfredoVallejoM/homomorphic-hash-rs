@@ -116,8 +116,10 @@ La salida es fuente Rust previa a compilación, no un campo dinámico. El newtyp
 generado contiene exactamente `ceil(m / 64)` limbs privados y el encoding
 contiene `ceil(m / 8)` bytes. Los bits de padding se rechazan; los bytes
 polinómicos arbitrariamente anchos se reducen. La fuente actual usa ABI de
-codegen 3 y cada módulo comprueba su compatibilidad mediante una aserción
-`const`; el runtime conserva helpers ABI 1/2 y acepta el rango 1..=3.
+codegen 3, tomado de `CURRENT_CODEGEN_ABI_VERSION`, y cada módulo comprueba su
+compatibilidad mediante una aserción `const`; el runtime conserva helpers ABI
+1/2 y acepta el rango 1..=3. La matriz autoritativa está versionada en
+`abi/runtime-codegen-matrix-v1.csv`.
 `GeneratedFieldPackage::package_digest` autentica conjuntamente el digest del
 bundle de certificados/planes y los bytes exactos del módulo Rust.
 
@@ -178,6 +180,13 @@ diagnóstico, pero sus bits no tienen constructor público.
 `expected_batch` y `KernelMetadata::minimum_batch` son pistas de selección para
 `Auto`. No limitan las longitudes válidas: todo `KernelSet` registrado debe
 aceptar cualquier slice, incluido el vacío.
+
+H2.8 congela esos valores en `calibration/selection-table-v1.csv`. El runtime
+los materializa como `SelectionCalibration` privadas y constantes: no lee CSV,
+no consulta modelos de CPU y no añade branches al lote. Una promoción exige
+20 % de mejora conservadora, packing incluido y diversidad de familias. La CI
+valida perfiles/decisiones, pero los benchmarks se capturan fuera del gate
+ordinario para no confundir ruido del runner con una regresión funcional.
 
 ## Batch persistente
 

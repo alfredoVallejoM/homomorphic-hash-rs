@@ -29,8 +29,10 @@ en selección explícita hasta disponer de calibración reproducible en hardware
 ARM real. H2.6 incorpora `PackingPlan`, `PackedBatch` owned y vistas sobre
 storage externo alineado. H2.7 añade VPCLMUL y `AosLanePairs` para presets y
 campos ABI 3; queda forzable pero fuera de selección automática tras medir una
-regresión en 256 bits. El siguiente hito es H2.8, calibración, auditoría y cierre
-de Fase 2.
+regresión en 256 bits. H2.8 cierra la Fase 2 con tabla de selección versionada,
+corpus diferencial persistente, inventario hash de `unsafe`, captura Criterion
+multi-runner y matriz runtime/codegen. Solo PCLMUL participa en selección
+automática; PMULL y VPCLMUL continúan disponibles mediante selección explícita.
 
 ## Comandos
 
@@ -43,6 +45,8 @@ cargo check --manifest-path crates/microfield/test-fixtures/external-consumer/Ca
 cargo test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
 bash crates/microfield/tools/audit_aarch64_pmull.sh
 bash crates/microfield/tools/audit_x86_vpclmul.sh
+bash crates/microfield/tools/audit_calibration.sh
+bash crates/microfield/tools/audit_unsafe_scope.sh
 cargo test -p microfield --all-features --test packed_batch --test packed_views
 cargo test -p homomorphic-hash-rs --lib
 cargo test -p homomorphic-hash-rs --test microfield_compat
@@ -70,5 +74,7 @@ orden del siguiente hito están en
 `docs/microfield/current-status-and-next.md`. El resultado completo de la Fase
 1 se documenta en `docs/microfield/phase-1-final-report.md`.
 
-La Fase 2 revisada, comenzando por la factory pública de campos binarios, está
-en `docs/microfield/phase-2-plan.md`.
+El cierre, las garantías y las limitaciones de la Fase 2 están en
+`docs/microfield/phase-2-final-report.md`.
+
+El plan ejecutado de Fase 2 está en `docs/microfield/phase-2-plan.md`.

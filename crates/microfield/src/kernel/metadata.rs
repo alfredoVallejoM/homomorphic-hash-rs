@@ -61,12 +61,14 @@ impl KernelMetadata {
         feature = "builtin-fields",
         target_arch = "x86_64"
     ))]
-    pub(crate) const fn x86_pclmul<F>(minimum_batch: usize) -> Self {
+    pub(crate) const fn x86_pclmul<F>(
+        calibration: super::calibration::SelectionCalibration,
+    ) -> Self {
         Self::isa::<F>(
             BackendId::X86Pclmul,
-            minimum_batch,
+            calibration.minimum_batch(),
             ScheduleKind::Fixed,
-            true,
+            calibration.automatic_selection(),
         )
     }
 
@@ -80,17 +82,17 @@ impl KernelMetadata {
         feature = "builtin-fields",
         target_arch = "x86_64"
     ))]
-    pub(crate) const fn x86_vpclmul(minimum_batch: usize, automatic_selection: bool) -> Self {
+    pub(crate) const fn x86_vpclmul(calibration: super::calibration::SelectionCalibration) -> Self {
         Self {
             backend: BackendId::X86Vpclmul,
-            minimum_batch,
+            minimum_batch: calibration.minimum_batch(),
             preferred_multiple: 2,
             required_alignment: 32,
             supports_in_place: true,
             requires_packing: true,
             scratch_bytes_per_element: 0,
             schedule: ScheduleKind::Fixed,
-            automatic_selection,
+            automatic_selection: calibration.automatic_selection(),
         }
     }
 
@@ -111,7 +113,12 @@ impl KernelMetadata {
 
     #[cfg(all(feature = "portable", target_arch = "aarch64"))]
     pub(crate) const fn aarch64_pmull_explicit<F>(schedule: ScheduleKind) -> Self {
-        Self::isa::<F>(BackendId::Aarch64Pmull, 1, schedule, false)
+        Self::isa::<F>(
+            BackendId::Aarch64Pmull,
+            super::calibration::AARCH64_PMULL.minimum_batch(),
+            schedule,
+            super::calibration::AARCH64_PMULL.automatic_selection(),
+        )
     }
 
     #[cfg(all(
