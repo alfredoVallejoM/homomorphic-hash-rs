@@ -2,11 +2,17 @@
 
 #[cfg(all(
     feature = "portable",
-    any(feature = "builtin-fields", target_arch = "aarch64", test)
+    any(
+        feature = "builtin-fields",
+        feature = "prime-fields",
+        target_arch = "aarch64",
+        test
+    )
 ))]
 mod calibration;
 mod catalog;
 mod metadata;
+mod packed;
 
 #[cfg(all(
     feature = "portable",
@@ -21,6 +27,9 @@ pub(crate) use catalog::KernelSet;
 #[cfg(feature = "prime-fields")]
 pub use metadata::PrimeKernelMetadata;
 pub use metadata::{BackendId, KernelMetadata, ScheduleKind};
+pub(crate) use packed::PackedKernelSet;
+#[cfg(feature = "portable")]
+pub(crate) use packed::{PackedLaneKernels, PackedStorageKind};
 
 #[cfg(all(
     feature = "portable",

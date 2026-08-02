@@ -84,19 +84,68 @@ El adapter x86 nuevo contiene dos estrategias:
 
 - AVX2 para `Fp251V1`: widen byte→u16, producto/suma por lanes, Barrett de
   16 bits, compactación canónica y tails escalares;
-- BMI2 para `Fp256GenericV1`: producto multi-limb con `MULX` y REDC portable
-  compartido.
+- BMI2 radix-64: factory estático monomorfizado sobre
+  `VerifiedPrimeMontgomery64Field<N, 2N>` y estrategia opaca
+  `VerifiedPrimeIsaStrategy`; producto multi-limb con `MULX`, suma y REDC
+  branchless propiedad del runtime. Cada campo aporta únicamente constantes y
+  conversiones privadas. La prueba
+  del constructor ancho cubre 1, 2, 3 y 4 limbs; `Fp256GenericV1` es su primera
+  instancia mantenida y reutiliza REDC portable.
 
 AVX2 resultó rentable desde 64 elementos en el i7-13700HX medido y se publica
 con `minimum_batch = 64`. A 4096 elementos se observó aproximadamente un 10 %
-de mejora. BMI2 fue correcto pero entre 30 % y 64 % más lento según tamaño; se
-mantiene forzable para validación y experimentación, con
-`automatic_selection = false`. Esta diferencia materializa la regla de que
-disponibilidad ISA no equivale a preferencia.
+de mejora. BMI2 mantiene `automatic_selection = false`: la reescritura fija
+cerró gran parte de la distancia, pero el artefacto finalmente auditado aún
+quedó ligeramente por detrás en la región medida.
+Esto materializa la regla de que disponibilidad ISA no equivale a preferencia.
+
+La extensión F4.6-SIMD añadió después una ruta AVX2 específica para
+`FpGoldilocks64V1`: cuatro residuos `u64` por tesela, reconstrucción vectorial
+del producto de 128 bits y cuatro folds Solinas branchless. En el mismo
+i7-13700HX mejoró producto y square aproximadamente 25–33 % entre 4 y 16.384
+elementos sin degradar suma en la frontera, por lo que se selecciona
+automáticamente desde cuatro. También se incorporaron bridges AVX2 opacos para
+primos externos canónicos `u8`/`u16`; permanecen explícitos porque compatibilidad
+no aporta calibración y la conversión de layout puede dominar el coste.
+
+VPCLMUL procesa ahora dos pares independientes por iteración. Mejoró los casos
+GF(2^256) largos medidos, pero no supera a PCLMUL de forma suficientemente
+uniforme para entrar en `Auto`. El detalle, la batería diferencial y los
+límites están en [`phase-4-6-report.md`](phase-4-6-report.md).
+
+La condición general no es que el módulo tenga exactamente 64, 128 o 192 bits,
+sino que su representación Montgomery use `N` limbs radix 64. Esto permite que
+la generación de Fase 5 produzca candidatos BMI2 en crates consumidores sin
+exponer intrinsics ni punteros y sin duplicar algoritmos. La
+promoción continúa siendo por campo, backend y región medida: una forma de
+almacenamiento compatible no garantiza una optimización.
+
+La frontera externa se prueba con un `Fp17` definido en un integration test:
+el crate consumidor implementa el contrato const-genérico, obtiene la
+estrategia opaca, fuerza BMI2 y coincide con portable en los 289 pares posibles
+de suma y producto. Esto
+valida el puente que consumirá el codegen primo de Fase 5, sin adelantar todavía
+el manifiesto, assurance ni lockfile de esa fase.
+
+La revisión final reescribió también el scheduling completo. El producto ya no
+propaga carry con `while`: cada fila ejecuta `N` multiplicaciones y deposita su
+carry final. REDC ejecuta siempre `N × N` productos, barre todos los limbs de
+propagación y calcula siempre la resta final. Una máscara aislada tras una
+barrera de optimización evita que LLVM reconstruya una rama; la auditoría del ELF confirma operaciones bitwise y
+ningún salto condicional dentro del producto+REDC. BMI2 se declara por ello
+`Fixed`, y `FixedSchedule` lo acepta cuando se fuerza. Esto no amplía la promesa
+a tiempo constante integral ni a otros canales laterales.
+
+La remedición final obtuvo, como medianas orientativas: 19,426 ns portable
+frente a 19,861 ns BMI2 para 1 elemento; 1,0690 µs frente a 1,1484 µs para 64;
+y 284,86 µs frente a 298,13 µs para 16.384. BMI2 queda así aproximadamente
+entre 2 % y 7 % por detrás en estos puntos; no existe todavía una región de
+promoción estable.
 
 La auditoría de ensamblado exige `vpmullw`, `vpmulhuw`, `vpackuswb`,
-`vzeroupper` y `mulx`, y rechaza división, asignador o dispatch indirecto dentro
-del adapter.
+`vzeroupper`, 16 operaciones `mulx` por producto de cuatro limbs y ausencia de
+saltos condicionales dentro del producto+REDC. También rechaza división,
+asignador o dispatch indirecto dentro del adapter.
 
 ## Calidad y seguridad
 
@@ -111,7 +160,8 @@ La matriz CI incorpora:
 - cross-check AArch64 `no_std`;
 - MSRV 1.89;
 - Miri sobre campos primos portables;
-- ASan sobre AVX2/BMI2 y aritmética prima;
+- ASan sobre AVX2 Fp251/Goldilocks, bridges externos `u8`/`u16`, BMI2 y
+  aritmética prima;
 - Clippy/rustdoc sin warnings;
 - auditoría del inventario `unsafe` y del ensamblado x86.
 
@@ -139,11 +189,17 @@ conversión Montgomery, portable, fachada y backend forzado.
 - BMI2 no se promociona automáticamente mientras no gane en una región
   publicada.
 - No se anuncia backend primo AArch64 ni IFMA sin hardware y medición real.
+- Los bridges SIMD externos son forzables y no automáticos hasta disponer de
+  calibración versionada por campo; una futura representación runtime o packed
+  persistente deberá eliminar su conversión de tesela para aspirar a zero-copy.
 - No se implementa Tonelli–Shanks general; `SquareRootField` solo aparece en
   los campos con shortcut demostrado.
 - Los fallos históricos de ejemplos/benchmarks del paquete legado continúan
   fuera de esta fase y se abordarán en Fase 6.
 
-Con estos límites, la definición de terminado de Fase 4 queda satisfecha. El
-siguiente trabajo es Fase 5: generación y contextos externos con assurance,
-lock/bundle y caché segura.
+Con estos límites, la definición de terminado de Fase 4 queda satisfecha. Tras
+el cierre se completaron F4.6-SIMD y
+[`F4.7-PACKED-SIMD`](phase-4-7-final-report.md). Esta última aporta storage
+persistente `u8`/`u16`/`u32` previo a Fase 5. La generación y los contextos
+externos con assurance, lock/bundle y caché segura siguen perteneciendo a
+Fase 5.

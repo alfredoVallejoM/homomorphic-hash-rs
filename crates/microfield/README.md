@@ -80,8 +80,23 @@ Fase 4 incorpora tres campos primos mantenidos. `Fp251V1` usa un byte
 canónico, `FpGoldilocks64V1` selecciona Barrett tras compararlo con Solinas y
 `Fp256GenericV1` usa Montgomery CIOS de cuatro limbs privados. Los tres
 comparten `Engine`, packed batches e inversión batch. AVX2 para 251 es
-automático desde 64 elementos; BMI2 de 256 bits es correcto y forzable, pero no
-automático. Los certificados se reproducen con `verify-primes` y SageMath.
+automático desde 64 elementos y Goldilocks AVX2 desde 4. La extensión
+F4.6-SIMD aporta bridges AVX2 explícitos para campos externos canónicos de 8 y
+16 bits y procesa dos pares VPCLMUL por iteración. BMI2 usa un factory estático
+reutilizable por representaciones Montgomery de 1, 2, 3 o más limbs radix 64;
+el candidato de 256 bits usa carry fijo, corrección branchless y admite
+`FixedSchedule`; sigue
+sin ser automático porque la medición todavía lo sitúa ligeramente por detrás
+de portable. Los bridges externos permanecen explícitos hasta tener una
+calibración por campo. Los certificados se reproducen con `verify-primes` y
+SageMath.
+
+F4.7-PACKED-SIMD está implementada. Conserva lanes `u8`/`u16`/`u32` dentro de
+`PackedBatch<F>` y elimina conversiones entre operaciones repetidas, sin
+reinterpretar tipos externos. Añade suma packed, tamaño físico explícito,
+storage owned/prestado y Barrett AVX2 `u32`; los perfiles externos no se
+promueven automáticamente. La arquitectura, mediciones y límites quedan
+registrados en `../../docs/microfield/phase-4-7-final-report.md`.
 
 ```rust
 use microfield::{Engine, Field, Gf2_256HhV1, PackedBatch};

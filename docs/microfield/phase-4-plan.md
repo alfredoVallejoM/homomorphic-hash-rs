@@ -30,7 +30,7 @@ módulo primo, el grado y el encoding pertenecen a `FieldId`.
 | F4.2 | `Fp251V1` | aritmética exhaustiva y encoding de un byte | completado |
 | F4.3 | `FpGoldilocks64V1` | Solinas y Barrett contra `%` independiente | completado |
 | F4.4 | `Fp256GenericV1` | Montgomery CIOS portable de cuatro limbs | completado |
-| F4.5 | Batch e ISA | AVX2 rentable y BMI2 diferencial | completado |
+| F4.5 | Batch e ISA | AVX2 rentable; BMI2 radix-64 genérico y diferencial | completado |
 | F4.6 | Certificados, bundles y Sage | replay interno y corpus externo determinista | completado |
 | F4.7 | Calidad | `no_std`, Clippy, Miri, ASan y cero asignaciones | completado localmente; CI se valida tras push |
 | F4.8 | Rendimiento y documentación | medición por estrategia y selección conservadora | completado |
@@ -64,9 +64,12 @@ otra estructura favorable.
   reducción solo mediante `from_bytes_mod_order`.
 - Batch: los catálogos siguen sellados; `PrimeKernelMetadata` declara
   representación, reducción, rangos, lanes y packing.
-- ISA: AVX2 procesa 32 residuos de `Fp251V1` por tile; BMI2 aporta un backend
-  multi-limb verificable, pero no se selecciona automáticamente porque perdió
-  frente al portable en la CPU medida.
+- ISA: AVX2 procesa 32 residuos de `Fp251V1` por tile; el factory estático BMI2
+  acepta cualquier tipo generado `VerifiedPrimeMontgomery64Field<N, 2N>` y lo
+  encapsula en `VerifiedPrimeIsaStrategy`. La compatibilidad no lo selecciona
+  automáticamente: cada campo
+  necesita una calibración favorable y `Fp256GenericV1` perdió frente al
+  portable en la CPU medida.
 - IFMA: la representación permite una variante radix 52 futura, pero no se
   registra una implementación sin hardware, cobertura y ganancia medidas.
 
@@ -81,6 +84,12 @@ otra estructura favorable.
 - Fermat, inversa, raíz cuadrada y raíz canónica mínima donde aplica;
 - inversión batch con ceros en todos los tamaños normativos hasta 1024;
 - tails e in-place ISA de 0 a 1024 elementos;
+- producto `MULX` contra referencia para 64, 128, 192 y 256 bits, incluidos
+  todos los pares de bits de base;
+- aceptación de BMI2 forzado bajo `FixedSchedule`, sin promoción automática
+  mientras la calibración no supere el umbral de rendimiento;
+- compilación y ejecución de un tipo primo externo de un limb mediante la
+  estrategia opaca, sin acceso a intrinsics ni catálogos construibles;
 - corpus Sage de 24 casos con suma, resta, producto, square e inversa;
 - bundles autenticados por ruta, longitud y SHA-256;
 - cero asignaciones en rutas portables y seleccionadas.
@@ -96,3 +105,23 @@ como disponible.
 
 El cierre consolidado está en
 [`phase-4-final-report.md`](phase-4-final-report.md).
+
+## Extensión posterior F4.6-SIMD
+
+Tras el cierre se ejecutó una ampliación SIMD sin reabrir los contratos
+algebraicos. Añade Goldilocks AVX2 automático desde cuatro elementos, factories
+AVX2 explícitos para primos externos canónicos de 8/16 bits y un desenrollado
+de dos pares VPCLMUL. Fp251 conserva su implementación zero-copy porque el
+bridge independiente del layout fue sustancialmente más lento. El plan y las
+mediciones están en [`phase-4-6-plan.md`](phase-4-6-plan.md) y
+[`phase-4-6-report.md`](phase-4-6-report.md).
+
+## Extensión completada F4.7-PACKED-SIMD
+
+El identificador no sustituye al hito histórico F4.7 de calidad de la tabla
+anterior. Esta extensión convierte una vez campos externos a storage
+persistente `u8`/`u16`/`u32` y ejecuta kernels directamente sobre lanes entre
+operaciones. El ABI packed neutral no altera `KernelSet<F>` ordinario,
+Fp251/Goldilocks conservan sus rutas directas y todo perfil externo permanece
+explícito. Véanse [`phase-4-7-plan.md`](phase-4-7-plan.md) y el
+[`informe final`](phase-4-7-final-report.md); ADR 0025 está aceptado.

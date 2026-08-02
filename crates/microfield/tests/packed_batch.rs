@@ -126,6 +126,18 @@ fn assert_owned_engine<F: PackedField>(engine: Engine<F>) {
         assert_eq!(out.is_empty(), len == 0);
 
         engine
+            .add_packed_into(&mut out, &lhs, &rhs)
+            .expect("compatible plans");
+        let expected_sum: Vec<_> = lhs_values
+            .iter()
+            .zip(&rhs_values)
+            .map(|(left, right)| left.add(*right))
+            .collect();
+        let mut actual = vec![F::ZERO; len];
+        out.unpack_into(&mut actual).expect("matching output");
+        assert_eq!(actual, expected_sum);
+
+        engine
             .mul_packed_into(&mut out, &lhs, &rhs)
             .expect("compatible plans");
         let expected_product: Vec<_> = lhs_values
@@ -133,7 +145,6 @@ fn assert_owned_engine<F: PackedField>(engine: Engine<F>) {
             .zip(&rhs_values)
             .map(|(left, right)| left.mul(*right))
             .collect();
-        let mut actual = vec![F::ZERO; len];
         out.unpack_into(&mut actual).expect("matching output");
         assert_eq!(actual, expected_product);
 

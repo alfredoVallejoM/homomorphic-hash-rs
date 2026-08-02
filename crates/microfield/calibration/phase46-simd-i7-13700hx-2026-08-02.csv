@@ -1,0 +1,4 @@
+schema,field,backend,operation,batch_len,portable_lower_ns,portable_upper_ns,simd_lower_ns,simd_upper_ns,decision
+1,fp_goldilocks64_v1,x86_prime_avx2,mul,4,10.407,10.437,6.8671,6.8748,automatic_from_4
+1,fp_goldilocks64_v1,x86_prime_avx2,square,4,9.6481,9.8514,6.7253,6.7427,automatic_from_4
+1,fp_goldilocks64_v1,x86_prime_avx2,add,4,4.3101,4.3996,4.3095,4.3383,no_regression_at_threshold

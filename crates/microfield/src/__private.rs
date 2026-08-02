@@ -8,6 +8,11 @@
 
 use crate::{F2, Field, Square};
 
+#[cfg(feature = "prime-fields")]
+pub use crate::backend::prime_profile::{
+    VerifiedPrimeIsaStrategy, VerifiedPrimeSimd8Strategy, VerifiedPrimeSimd16Strategy,
+    VerifiedPrimeSimd32Strategy,
+};
 pub use crate::backend::profile::VerifiedIsaStrategy;
 
 /// Opaque, safe portable strategy generated for one statically defined field.
@@ -84,6 +89,87 @@ pub trait VerifiedBinaryIsaField<const LIMBS: usize, const WIDE_LIMBS: usize>:
 
     /// Applies the generated reduction plan to an ISA-produced wide value.
     fn __reduce_wide(wide: [u64; WIDE_LIMBS]) -> [u64; LIMBS];
+}
+
+/// Generated radix-64 Montgomery boundary used by prime-field ISA adapters.
+///
+/// The trait is public only for source emitted into a dependent crate. It does
+/// not expose a stable user contract: consumers receive an opaque strategy and
+/// cannot supply function pointers or call target-feature code directly.
+#[cfg(feature = "prime-fields")]
+pub trait VerifiedPrimeMontgomery64Field<const LIMBS: usize, const WIDE_LIMBS: usize>:
+    PortableField
+{
+    /// Canonical odd modulus used by the Microfield-owned reducer.
+    const __MODULUS: [u64; LIMBS];
+
+    /// `-p[0]^-1 mod 2^64` used to cancel each Montgomery row.
+    const __NEG_INV: u64;
+
+    /// Extracts the private Montgomery limbs by value.
+    fn __into_montgomery_limbs(self) -> [u64; LIMBS];
+
+    /// Reconstructs a value from already reduced Montgomery limbs.
+    fn __from_reduced_montgomery_limbs(limbs: [u64; LIMBS]) -> Self;
+}
+
+/// Generated canonical-byte boundary used by the generic AVX2 prime adapter.
+///
+/// The generator proves primality and the representation contract. Microfield
+/// owns the vector widening, Barrett reduction, tails and target-feature
+/// boundary, so generated code never contains intrinsics or function pointers.
+#[cfg(feature = "prime-fields")]
+pub trait VerifiedPrimeCanonical8Field: PortableField {
+    /// Odd canonical modulus. AVX2 widening supports moduli through 251.
+    const __MODULUS: u16;
+
+    /// `floor(2^16 / p)`, consumed by the Microfield-owned Barrett reducer.
+    const __BARRETT_RECIPROCAL: u16;
+
+    /// Extracts the canonical residue without exposing its storage layout.
+    fn __into_canonical_u8(self) -> u8;
+
+    /// Reconstructs a field value from a residue already proven below `p`.
+    fn __from_reduced_canonical_u8(value: u8) -> Self;
+}
+
+/// Generated canonical-`u16` boundary used by the generic AVX2 prime adapter.
+///
+/// Products are widened to 32-bit AVX2 lanes. The upper modulus bound is the
+/// largest 16-bit prime, ensuring every canonical product fits in one `u32`.
+#[cfg(feature = "prime-fields")]
+pub trait VerifiedPrimeCanonical16Field: PortableField {
+    /// Odd canonical modulus no greater than `65_521`.
+    const __MODULUS: u32;
+
+    /// `floor(2^32 / p)`, consumed by the Microfield-owned Barrett reducer.
+    const __BARRETT_RECIPROCAL: u32;
+
+    /// Extracts the canonical residue without exposing its storage layout.
+    fn __into_canonical_u16(self) -> u16;
+
+    /// Reconstructs a field value from a residue already proven below `p`.
+    fn __from_reduced_canonical_u16(value: u16) -> Self;
+}
+
+/// Generated canonical-`u32` boundary used by the experimental AVX2 adapter.
+///
+/// The reciprocal is `floor(2^64 / p)`. For canonical inputs, `x < p^2`
+/// proves a one-correction Barrett result and keeps every wide product below
+/// `2^64`. Promotion remains explicit until per-field calibration succeeds.
+#[cfg(feature = "prime-fields")]
+pub trait VerifiedPrimeCanonical32Field: PortableField {
+    /// Odd canonical modulus no greater than `4_294_967_291`.
+    const __MODULUS: u64;
+
+    /// `floor(2^64 / p)`, consumed by the Microfield-owned Barrett reducer.
+    const __BARRETT_RECIPROCAL: u64;
+
+    /// Extracts the canonical residue without exposing its storage layout.
+    fn __into_canonical_u32(self) -> u32;
+
+    /// Reconstructs a field value from a residue already proven below `p`.
+    fn __from_reduced_canonical_u32(value: u32) -> Self;
 }
 
 /// Oldest generated-source ABI accepted by this runtime.

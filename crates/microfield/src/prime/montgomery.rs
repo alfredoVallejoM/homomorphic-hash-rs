@@ -21,40 +21,41 @@ pub(crate) fn cmp_limbs(lhs: &[u64; 4], rhs: &[u64; 4]) -> Ordering {
 #[inline]
 #[must_use]
 pub(crate) fn add_mod_256(lhs: [u64; 4], rhs: [u64; 4], modulus: [u64; 4]) -> [u64; 4] {
-    let mut out = [0_u64; 4];
-    let mut carry = false;
-    for index in 0..4 {
-        let (sum, carry_a) = lhs[index].overflowing_add(rhs[index]);
-        let (sum, carry_b) = sum.overflowing_add(u64::from(carry));
-        out[index] = sum;
-        carry = carry_a || carry_b;
-    }
-    if carry || cmp_limbs(&out, &modulus) != Ordering::Less {
-        subtract_wrapping(out, modulus).0
-    } else {
-        out
-    }
+    add_mod(lhs, rhs, modulus)
+}
+
+/// Adds two canonical residues using a fixed carry chain and masked correction.
+#[inline]
+#[must_use]
+pub(crate) fn add_mod<const LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+) -> [u64; LIMBS] {
+    let (sum, carry) = add_wrapping(lhs, rhs);
+    let (reduced, borrow) = subtract_wrapping(sum, modulus);
+    // If the addition overflowed R, or the low limbs were at least p, the
+    // wrapped subtraction is the canonical residue. Both selectors are bits.
+    conditional_select(sum, reduced, carry | (borrow ^ 1))
 }
 
 #[inline]
 #[must_use]
 pub(crate) fn sub_mod_256(lhs: [u64; 4], rhs: [u64; 4], modulus: [u64; 4]) -> [u64; 4] {
     let (difference, borrow) = subtract_wrapping(lhs, rhs);
-    if borrow {
-        add_wrapping(difference, modulus).0
-    } else {
-        difference
-    }
+    let corrected = add_wrapping(difference, modulus).0;
+    conditional_select(difference, corrected, borrow)
 }
 
 #[inline]
 #[must_use]
 pub(crate) fn neg_mod_256(value: [u64; 4], modulus: [u64; 4]) -> [u64; 4] {
-    if value == [0; 4] {
-        value
-    } else {
-        subtract_wrapping(modulus, value).0
+    let negated = subtract_wrapping(modulus, value).0;
+    let mut aggregate = 0_u64;
+    for limb in value {
+        aggregate |= limb;
     }
+    conditional_select([0; 4], negated, nonzero_bit(aggregate))
 }
 
 #[must_use]
@@ -89,10 +90,28 @@ pub(crate) fn montgomery_reduce_wide_256(
     modulus: [u64; 4],
     neg_inv: u64,
 ) -> [u64; 4] {
-    let mut accumulator = [0_u64; 9];
-    accumulator[..8].copy_from_slice(&wide);
+    montgomery_reduce_wide::<4, 8>(wide, modulus, neg_inv)
+}
 
-    for outer in 0..4 {
+/// Reduces a double-width Montgomery product with value-independent control.
+///
+/// Both loop bounds depend only on the const-generic representation shape. A
+/// complete carry sweep is executed after every cancellation row, and the
+/// final conditional subtraction is implemented with a mask rather than a
+/// data-dependent branch.
+#[inline]
+#[must_use]
+pub(crate) fn montgomery_reduce_wide<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    wide: [u64; WIDE_LIMBS],
+    modulus: [u64; LIMBS],
+    neg_inv: u64,
+) -> [u64; LIMBS] {
+    assert!(LIMBS > 0);
+    assert!(WIDE_LIMBS == LIMBS * 2);
+
+    let mut accumulator = wide;
+    let mut high = 0_u64;
+    for outer in 0..LIMBS {
         let multiplier = accumulator[outer].wrapping_mul(neg_inv);
         let mut carry = 0_u64;
         for (inner, modulus_limb) in modulus.iter().copied().enumerate() {
@@ -103,24 +122,24 @@ pub(crate) fn montgomery_reduce_wide_256(
             accumulator[index] = combined as u64;
             carry = (combined >> 64) as u64;
         }
-        add_carry(&mut accumulator, outer + 4, carry);
-        debug_assert_eq!(accumulator[outer], 0);
+
+        let carry_index = outer + LIMBS;
+        let (sum, overflow) = accumulator[carry_index].overflowing_add(carry);
+        accumulator[carry_index] = sum;
+        let mut propagation = u64::from(overflow);
+        for limb in &mut accumulator[carry_index + 1..] {
+            let (sum, overflow) = limb.overflowing_add(propagation);
+            *limb = sum;
+            propagation = u64::from(overflow);
+        }
+        high = high.wrapping_add(propagation);
     }
 
-    let candidate = [
-        accumulator[4],
-        accumulator[5],
-        accumulator[6],
-        accumulator[7],
-    ];
-    if accumulator[8] != 0 || cmp_limbs(&candidate, &modulus) != Ordering::Less {
-        let (reduced, borrow) = subtract_wrapping(candidate, modulus);
-        let high = accumulator[8].wrapping_sub(u64::from(borrow));
-        debug_assert_eq!(high, 0);
-        reduced
-    } else {
-        candidate
-    }
+    let mut candidate = [0_u64; LIMBS];
+    candidate.copy_from_slice(&accumulator[LIMBS..]);
+    let (reduced, borrow) = subtract_wrapping(candidate, modulus);
+    let subtract = nonzero_bit(high) | (borrow ^ 1);
+    conditional_select(candidate, reduced, subtract)
 }
 
 #[must_use]
@@ -136,55 +155,60 @@ pub(crate) fn wide_product(lhs: [u64; 4], rhs: [u64; 4]) -> [u64; 8] {
             wide[index] = combined as u64;
             carry = (combined >> 64) as u64;
         }
-        add_carry_wide(&mut wide, left_index + 4, carry);
+        // Earlier rows end before this limb, so the row carry is stored once
+        // without a value-dependent propagation loop.
+        wide[left_index + 4] = carry;
     }
     wide
 }
 
-fn add_carry(accumulator: &mut [u64; 9], mut index: usize, mut carry: u64) {
-    while carry != 0 {
-        let (sum, overflow) = accumulator[index].overflowing_add(carry);
-        accumulator[index] = sum;
-        carry = u64::from(overflow);
-        index += 1;
-        debug_assert!(index <= accumulator.len());
-    }
-}
-
-fn add_carry_wide(accumulator: &mut [u64; 8], mut index: usize, mut carry: u64) {
-    while carry != 0 {
-        debug_assert!(index < accumulator.len());
-        let (sum, overflow) = accumulator[index].overflowing_add(carry);
-        accumulator[index] = sum;
-        carry = u64::from(overflow);
-        index += 1;
-    }
-}
-
 #[inline]
-fn subtract_wrapping(lhs: [u64; 4], rhs: [u64; 4]) -> ([u64; 4], bool) {
-    let mut out = [0_u64; 4];
-    let mut borrow = false;
-    for index in 0..4 {
+fn subtract_wrapping<const LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+) -> ([u64; LIMBS], u64) {
+    let mut out = [0_u64; LIMBS];
+    let mut borrow = 0_u64;
+    for index in 0..LIMBS {
         let (difference, borrow_a) = lhs[index].overflowing_sub(rhs[index]);
-        let (difference, borrow_b) = difference.overflowing_sub(u64::from(borrow));
+        let (difference, borrow_b) = difference.overflowing_sub(borrow);
         out[index] = difference;
-        borrow = borrow_a || borrow_b;
+        borrow = u64::from(borrow_a) | u64::from(borrow_b);
     }
     (out, borrow)
 }
 
 #[inline]
-fn add_wrapping(lhs: [u64; 4], rhs: [u64; 4]) -> ([u64; 4], bool) {
-    let mut out = [0_u64; 4];
-    let mut carry = false;
-    for index in 0..4 {
+fn add_wrapping<const LIMBS: usize>(lhs: [u64; LIMBS], rhs: [u64; LIMBS]) -> ([u64; LIMBS], u64) {
+    let mut out = [0_u64; LIMBS];
+    let mut carry = 0_u64;
+    for index in 0..LIMBS {
         let (sum, carry_a) = lhs[index].overflowing_add(rhs[index]);
-        let (sum, carry_b) = sum.overflowing_add(u64::from(carry));
+        let (sum, carry_b) = sum.overflowing_add(carry);
         out[index] = sum;
-        carry = carry_a || carry_b;
+        carry = u64::from(carry_a) | u64::from(carry_b);
     }
     (out, carry)
+}
+
+#[inline]
+fn conditional_select<const LIMBS: usize>(
+    keep: [u64; LIMBS],
+    replace: [u64; LIMBS],
+    choice: u64,
+) -> [u64; LIMBS] {
+    let opaque_choice = core::hint::black_box(choice & 1);
+    let mask = opaque_choice.wrapping_neg();
+    let mut selected = [0_u64; LIMBS];
+    for index in 0..LIMBS {
+        selected[index] = keep[index] ^ (mask & (keep[index] ^ replace[index]));
+    }
+    selected
+}
+
+#[inline]
+const fn nonzero_bit(value: u64) -> u64 {
+    (value | value.wrapping_neg()) >> 63
 }
 
 #[cfg(test)]
@@ -220,6 +244,20 @@ mod tests {
         let encoded = to_montgomery_256(minus_one, R2, MODULUS, NEG_INV);
         assert_eq!(from_montgomery_256(encoded, MODULUS, NEG_INV), minus_one);
         assert_eq!(montgomery_mul_256(R, R, MODULUS, NEG_INV), R);
+    }
+
+    #[test]
+    fn masked_modular_corrections_cover_overflow_borrow_and_zero() {
+        let one = [1, 0, 0, 0];
+        let zero = [0; 4];
+        let minus_one = subtract_wrapping(MODULUS, one).0;
+        let minus_two = subtract_wrapping(MODULUS, [2, 0, 0, 0]).0;
+
+        // This sum crosses the 256-bit radix because p is greater than 2^255.
+        assert_eq!(add_mod_256(minus_one, minus_one, MODULUS), minus_two);
+        assert_eq!(sub_mod_256(zero, minus_one, MODULUS), one);
+        assert_eq!(neg_mod_256(zero, MODULUS), zero);
+        assert_eq!(neg_mod_256(minus_one, MODULUS), one);
     }
 
     #[test]

@@ -50,4 +50,14 @@ duplicate="$(new_case duplicate)"
 tail -n 1 "$duplicate/selection-table-v1.csv" >> "$duplicate/selection-table-v1.csv"
 expect_rejected "$duplicate" "decisión duplicada"
 
-echo "autopruebas de calibración correctas: cuatro mutaciones inválidas rechazadas"
+invalid_goldilocks="$(new_case invalid-goldilocks)"
+sed -i 's/,mul,4,/,mul,8,/' \
+  "$invalid_goldilocks/phase46-simd-i7-13700hx-2026-08-02.csv"
+expect_rejected "$invalid_goldilocks" "umbral Goldilocks distinto del compilado"
+
+invalid_packed="$(new_case invalid-packed)"
+sed -i 's/,16384,13426,13832,3573.9,3651.6,/,16384,13426,13832,3573.9,13000,/' \
+  "$invalid_packed/phase47-packed-i7-13700hx-2026-08-02.csv"
+expect_rejected "$invalid_packed" "ganancia packed inferior al gate declarado"
+
+echo "autopruebas de calibración correctas: seis mutaciones inválidas rechazadas"

@@ -5,6 +5,18 @@ Este directorio separa disponibilidad ISA de elegibilidad automática.
 `profiles/` contiene evidencia Criterion normalizada y `schema-v1.json` fija
 su contrato.
 
+`phase46-simd-i7-13700hx-2026-08-02.csv` conserva la calibración suplementaria
+de Goldilocks AVX2. El test de `kernel::calibration` y
+`audit_calibration.sh` enlazan sus tres intervalos con el umbral automático
+compilado de cuatro elementos.
+
+`phase47-packed-i7-13700hx-2026-08-02.csv` compara el bridge genérico directo
+con lanes `u16` persistentes para un perfil externo de módulo 65521. Desde 64
+hasta 16384 elementos supera conservadoramente el 20 % y amortiza pack, una
+operación y unpack. Una tesela de 16 requiere nueve operaciones en el peor
+extremo. La evidencia habilita la API packed explícita, pero no promoción
+automática de campos externos.
+
 Una fila `automatic_selection=false` no deshabilita el backend: permite
 forzarlo después de una detección real de CPU, pero impide que `Auto`,
 `LowLatency` o `Throughput` lo elijan sin consentimiento.

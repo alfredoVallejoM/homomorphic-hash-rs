@@ -3152,7 +3152,7 @@ nominales:
 2. `FpGoldilocks64V1`, residuo canónico de palabra y reducciones Solinas y
    Barrett verificadas;
 3. `Fp256GenericV1`, primo determinista de 256 bits en Montgomery CIOS y
-   backend BMI2 explícito.
+   primera instancia del backend BMI2 radix-64 genérico.
 
 `PrimeField`, `SquareRootField`, `PrimeRepresentationKind`, los planes de
 reducción y `PrimeKernelMetadata` forman contratos segregados. Los limbs,
@@ -3166,16 +3166,66 @@ del runtime sin depender de Sage. SageMath aporta un segundo oráculo y un corpu
 determinista para suma, resta, producto, cuadrado e inversa.
 
 La selección conserva la política de estabilidad: AVX2 para 251 entra en
-`Auto` desde 64 elementos porque gana en la región medida. BMI2 de 256 bits es
-correcto y forzable, pero permanece fuera de `Auto` al resultar más lento que
-portable. IFMA y un backend primo AArch64 no se anuncian sin hardware,
-cobertura y medición reproducible.
+`Auto` desde 64 elementos porque gana en la región medida. La extensión
+F4.6-SIMD incorpora Goldilocks AVX2 de cuatro lanes, automático desde 4 tras
+medir producto, square y suma; ofrece además factories AVX2 explícitos para
+perfiles externos canónicos `u8`/`u16`. El puerto
+público-oculto `VerifiedPrimeMontgomery64Field<N, 2N>` y la estrategia opaca
+`VerifiedPrimeIsaStrategy` permiten formar candidatos BMI2 seguros para tipos
+mantenidos o generados externamente con 64, 128, 192, 256 bits de almacenamiento
+y anchuras posteriores, sin duplicar el producto `MULX`. Esto prueba
+compatibilidad, no velocidad: la promoción permanece ligada a cada campo y
+región medida. BMI2 de 256 bits es correcto y forzable, publica
+`Fixed` tras sustituir carry y corrección por recorridos completos y selección
+branchless. `FixedSchedule` lo acepta, pero permanece fuera de `Auto` porque la
+remedición no acredita una ventaja estable superior al 3 %. IFMA y un backend
+primo AArch64 no se anuncian sin hardware, cobertura y medición reproducible.
+
+VPCLMUL ejecuta dos pares independientes por iteración para mejorar ILP. Las
+mejoras largas observadas en GF(2²⁵⁶) no bastan para desplazar PCLMUL de forma
+estable, por lo que sigue fuera de `Auto`. La generalización AVX2 externa no
+presupone zero-copy: Fp251 conserva el kernel especializado porque convertir
+cada valor mediante el bridge resultó mucho más lento. Compatibilidad,
+representación y promoción medida permanecen como decisiones separadas.
 
 La factory TOML v1 no se amplía retrospectivamente: acepta solo campos
 binarios. La factory de primos externos, junto a assurance demostrado/probable,
-lock y contextos, abre la Fase 5. El plan y el informe autoritativos están en
+lock y contextos, abrirá la Fase 5 tras el cierre de F4.7-PACKED-SIMD. El plan y el
+informe autoritativos están en
 `docs/microfield/phase-4-plan.md` y
-`docs/microfield/phase-4-final-report.md`.
+`docs/microfield/phase-4-final-report.md`. La extensión está especificada en
+`docs/microfield/phase-4-6-plan.md`, `docs/microfield/phase-4-6-report.md` y ADR
+0024.
+
+## 20.1 Extensión completada F4.7-PACKED-SIMD
+
+Antes de abrir la generación prima externa de Fase 5 se ha desarrollado un
+puente persistente por lanes. El bridge AVX2 directo de F4.6 sigue siendo el
+fallback seguro para `&[F]`, mientras `PackedBatch<F>` puede almacenar
+internamente residuos `u8`, `u16` o `u32` y ejecutar una cadena sin volver a
+convertir cada elemento.
+
+La arquitectura añade un ABI `kernel::packed` neutral, storage tagged privado
+y codecs estáticos `F ↔ Lane` usados únicamente al entrar y salir. No se
+reinterpretará memoria externa ni se expondrán lanes. Fp251 y Goldilocks
+conservan sus kernels AoS directos especializados. Los candidatos externos
+siguen fuera de `Auto`, aunque el pipeline reutilizado sea favorable.
+
+El orden ejecutado ha sido:
+
+1. baseline y ADR propuesto;
+2. ABI packed y metadata de storage;
+3. owned/vistas alineadas para `u8`/`u16`;
+4. migración de kernels genéricos sin codecs dentro del loop;
+5. candidato `u32` con Barrett vectorial;
+6. cinco operaciones packed y pipelines repetidos;
+7. calibración, Miri/ASan/ASM, compatibilidad e informe final.
+
+`u64` genérico, AArch64 primo, AVX-512 e IFMA permanecen fuera. El plan
+autoritativo, la matriz de tests y los gates cuantitativos están en
+`docs/microfield/phase-4-7-plan.md`; ADR 0025 está aceptado después de superar
+el prototipo, la corrección y la medición. El resultado completo está en
+`docs/microfield/phase-4-7-final-report.md`.
 
 # Referencias técnicas
 

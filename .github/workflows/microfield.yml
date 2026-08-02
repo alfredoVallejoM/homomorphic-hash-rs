@@ -81,6 +81,10 @@ jobs:
       - run: cargo +stable check -p microfield --no-default-features --features portable,prime-fields
       - run: cargo +stable check -p microfield --no-default-features --features alloc,portable,builtin-fields
       - run: cargo +stable check -p microfield --no-default-features --features alloc,portable,prime-fields
+      - name: no_std unit tests with binary and prime fields
+        run: >-
+          cargo +stable test -p microfield --no-default-features
+          --features alloc,portable,builtin-fields,prime-fields --lib
       - run: cargo +stable check -p microfield --no-default-features --features std,portable
       - run: cargo +stable check -p microfield --no-default-features --features generator
       - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable
@@ -162,9 +166,19 @@ jobs:
         run: >-
           cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
           -p microfield --all-features --test x86_pclmul --test x86_vpclmul
-          --test x86_prime --test prime_fields --test prime_artifacts
+          --test x86_prime --test external_prime_bmi2_bridge
+          --test external_prime_avx2_bridge
+          --test prime_fields --test prime_artifacts
           --test packed_batch --test packed_views --test differential_corpus
           --test phase3_algorithms
+      - name: Test generic BMI2 limb shapes under ASan
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
+          -p microfield --all-features --lib
+          backend::x86_prime::tests::bmi2_product_builder_covers_64_128_192_and_256_bit_shapes
       - name: External profile PCLMUL AddressSanitizer
         env:
           RUSTFLAGS: -Zsanitizer=address

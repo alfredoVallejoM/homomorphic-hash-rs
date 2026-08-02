@@ -238,6 +238,9 @@ fn assert_engine_allocates_zero<F: microfield::BuiltinField + StaticField + Inve
     let mut unpacked = output.to_vec();
     let packed_allocations = measure(|| {
         engine
+            .add_packed_into(&mut packed_out, &packed_lhs, &packed_rhs)
+            .expect("matching plans");
+        engine
             .mul_packed_into(&mut packed_out, &packed_lhs, &packed_rhs)
             .expect("matching plans");
         engine

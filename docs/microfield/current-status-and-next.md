@@ -7,11 +7,25 @@ Fecha de revisión: 2 de agosto de 2026.
 Actualización de Fase 4: la fase de campos primos está cerrada localmente.
 `Fp251V1`, `FpGoldilocks64V1` y `Fp256GenericV1` están certificados, poseen
 encoding canónico estricto y funcionan con los algoritmos y `Engine` existentes.
-El portable incluye Native, Barrett, Solinas y Montgomery CIOS. AVX2 para 251
-se selecciona desde 64 elementos; BMI2 multi-limb es forzable pero no automático
-porque la medición no justificó promoverlo. El corpus Sage, bundles, cero
+El portable incluye Native, Barrett, Solinas y Montgomery CIOS. La extensión
+F4.6-SIMD mantiene AVX2 zero-copy para 251 desde 64 elementos, añade Goldilocks
+AVX2 automático desde 4 y ofrece bridges AVX2 explícitos para primos externos
+canónicos de 8 y 16 bits. BMI2 se generalizó a cualquier contrato
+Montgomery radix 64, pero la instancia de 256 bits es forzable y no automática
+porque la medición no justificó promoverla. Carry y corrección se reescribieron
+con iteraciones fijas y selección branchless; BMI2 publica ahora `Fixed` y pasa
+una auditoría ASM específica. El corpus Sage, bundles, cero
 asignaciones, `no_std`, Miri/ASan y auditoría ASM forman el cierre. El detalle
-está en [`phase-4-final-report.md`](phase-4-final-report.md).
+está en [`phase-4-final-report.md`](phase-4-final-report.md) y la ampliación
+SIMD en [`phase-4-6-report.md`](phase-4-6-report.md).
+
+F4.7-PACKED-SIMD está completada localmente. Separa el layout lógico `F` del
+storage persistente `u8`/`u16`/`u32`: los bridges externos convierten una vez,
+ejecutan pipelines de cinco operaciones sin repacking y convierten de vuelta
+solo al salir. El bridge `u32` queda correcto y explícito; la evidencia de
+aceleración publicada corresponde a `u16`, que supera conservadoramente el
+58 % desde 64 elementos en la máquina calibrada. El cierre y sus límites están
+en [`phase-4-7-final-report.md`](phase-4-7-final-report.md).
 
 Actualización de Fase 3: los algoritmos derivados están implementados y
 cerrados localmente. Existen inversión batch tolerante a cero, máscara compacta,
@@ -47,7 +61,8 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | Fase 1 | Cerrada en `main` | `1f176ab`; cinco jobs verdes en `30703842091` |
 | Fase 2 | Cerrada conservadoramente | H2.1–H2.8; informe final y tabla de selección v1 |
 | Fase 3 | Cerrada y publicada | algoritmos derivados, IR v4, Miri/ASan y benchmark |
-| Fase 4 | Cerrada localmente | tres primos, certificados, Sage, portable, AVX2/BMI2 |
+| Fase 4 | Cerrada, corregida y ampliada | tres primos, certificados, Sage, Goldilocks/Fp251 AVX2 y bridges SIMD/BMI2 genéricos |
+| F4.7-PACKED-SIMD | Completada localmente | ABI packed por lanes, storage persistente, SIMD `u8`/`u16`, candidato `u32` y calibración adversaria |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
@@ -307,13 +322,13 @@ La evidencia insuficiente se representa como selección explícita, nunca como
 un threshold optimista. El informe consolidado está en
 [`phase-2-final-report.md`](phase-2-final-report.md).
 
-### Siguiente fase
+### Siguiente corte
 
-Fase 4 está cerrada. El siguiente corte es F5.0/F5.1: formalizar el manifiesto
-primo externo, `ValidationAssurance`, lock/bundle y emisión estática nominal.
-Después se abordarán caché concurrente y contextos runtime con validación
-amortizada. Ningún contexto dinámico alterará los tipos mantenidos ni el
-dispatch escalar.
+Fase 4 permanece cerrada en sus contratos algebraicos y F4.7-PACKED-SIMD ha
+terminado el puente persistente previo a la generación. El siguiente corte es
+F5.0/F5.1 con manifiesto primo externo,
+`ValidationAssurance`, lock/bundle y emisión estática nominal. Ningún contexto
+dinámico alterará los tipos mantenidos ni el dispatch escalar.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no
@@ -322,4 +337,6 @@ garantías. Entorno, intervalos y comando están en
 
 El orden, los gates y los entregables cerrados están en
 [`phase-4-plan.md`](phase-4-plan.md) y
-[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md).
+[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md). La secuencia ejecutada está
+en [`phase-4-7-plan.md`](phase-4-7-plan.md) y sus resultados en
+[`phase-4-7-final-report.md`](phase-4-7-final-report.md).

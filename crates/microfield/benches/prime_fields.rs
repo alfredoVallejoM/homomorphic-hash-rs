@@ -5,15 +5,17 @@
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 use microfield::{
     BackendId, CanonicalEncoding, CpuCapabilities, Engine, Field, Fp251V1, Fp256GenericV1,
-    FpGoldilocks64V1, Invert, PrimeField, Square,
+    FpGoldilocks64V1, Invert, PackedBatch, PrimeField, Square,
 };
 
 const BATCH_SIZES: &[usize] = &[1, 4, 16, 32, 64, 256, 1024, 4096, 16_384];
+const GOLDILOCKS_BATCH_SIZES: &[usize] = &[1, 2, 3, 4, 5, 7, 8, 9, 15, 16, 17, 64, 4096, 16_384];
 
 fn prime_fields(criterion: &mut Criterion) {
     scalar(criterion);
     goldilocks_reductions(criterion);
     fp251_batch(criterion);
+    goldilocks_batch(criterion);
     fp256_batch(criterion);
     montgomery_conversion(criterion);
 }
@@ -84,6 +86,49 @@ fn fp251_batch(criterion: &mut Criterion) {
             group.bench_with_input(BenchmarkId::new("avx2_mul", len), &len, |b, _| {
                 b.iter(|| avx2.mul_into(black_box(&mut out), black_box(&lhs), black_box(&rhs)));
             });
+            let packed_lhs = PackedBatch::from_aos(&avx2, &lhs).expect("packed lhs");
+            let packed_rhs = PackedBatch::from_aos(&avx2, &rhs).expect("packed rhs");
+            let mut packed_out = PackedBatch::new(&avx2, len).expect("packed output");
+            group.bench_with_input(BenchmarkId::new("avx2_packed_mul", len), &len, |b, _| {
+                b.iter(|| {
+                    avx2.mul_packed_into(
+                        black_box(&mut packed_out),
+                        black_box(&packed_lhs),
+                        black_box(&packed_rhs),
+                    )
+                });
+            });
+            group.bench_with_input(BenchmarkId::new("avx2_packed_square", len), &len, |b, _| {
+                b.iter(|| {
+                    avx2.square_packed_into(black_box(&mut packed_out), black_box(&packed_lhs))
+                });
+            });
+            group.bench_with_input(BenchmarkId::new("avx2_packed_add", len), &len, |b, _| {
+                b.iter(|| {
+                    avx2.add_packed_into(
+                        black_box(&mut packed_out),
+                        black_box(&packed_lhs),
+                        black_box(&packed_rhs),
+                    )
+                });
+            });
+        }
+
+        group.bench_with_input(BenchmarkId::new("portable_square", len), &len, |b, _| {
+            b.iter(|| portable.square_into(black_box(&mut out), black_box(&lhs)));
+        });
+        if let Some(avx2) = avx2 {
+            group.bench_with_input(BenchmarkId::new("avx2_square", len), &len, |b, _| {
+                b.iter(|| avx2.square_into(black_box(&mut out), black_box(&lhs)));
+            });
+        }
+        group.bench_with_input(BenchmarkId::new("portable_add", len), &len, |b, _| {
+            b.iter(|| portable.add_into(black_box(&mut out), black_box(&lhs), black_box(&rhs)));
+        });
+        if let Some(avx2) = avx2 {
+            group.bench_with_input(BenchmarkId::new("avx2_add", len), &len, |b, _| {
+                b.iter(|| avx2.add_into(black_box(&mut out), black_box(&lhs), black_box(&rhs)));
+            });
         }
     }
     group.finish();
@@ -111,6 +156,50 @@ fn fp256_batch(criterion: &mut Criterion) {
         if let Some(bmi2) = bmi2 {
             group.bench_with_input(BenchmarkId::new("bmi2_mul", len), &len, |b, _| {
                 b.iter(|| bmi2.mul_into(black_box(&mut out), black_box(&lhs), black_box(&rhs)));
+            });
+        }
+    }
+    group.finish();
+}
+
+fn goldilocks_batch(criterion: &mut Criterion) {
+    let portable = Engine::<FpGoldilocks64V1>::portable();
+    let capabilities = CpuCapabilities::detect();
+    let avx2 = capabilities.has_x86_avx2().then(|| {
+        Engine::<FpGoldilocks64V1>::builder()
+            .capabilities(capabilities)
+            .force_backend(BackendId::X86PrimeAvx2)
+            .build()
+            .expect("detected AVX2")
+    });
+    let mut group = criterion.benchmark_group("phase46/batch/fp_goldilocks64_v1");
+    for &len in GOLDILOCKS_BATCH_SIZES {
+        group.throughput(Throughput::Elements(len as u64));
+        let lhs = values::<FpGoldilocks64V1>(len, 0x243f_6a88_85a3_08d3);
+        let rhs = values::<FpGoldilocks64V1>(len, 0x1319_8a2e_0370_7344);
+        let mut out = vec![FpGoldilocks64V1::ZERO; len];
+        group.bench_with_input(BenchmarkId::new("portable_mul", len), &len, |b, _| {
+            b.iter(|| portable.mul_into(black_box(&mut out), black_box(&lhs), black_box(&rhs)));
+        });
+        if let Some(avx2) = avx2 {
+            group.bench_with_input(BenchmarkId::new("avx2_mul", len), &len, |b, _| {
+                b.iter(|| avx2.mul_into(black_box(&mut out), black_box(&lhs), black_box(&rhs)));
+            });
+        }
+        group.bench_with_input(BenchmarkId::new("portable_square", len), &len, |b, _| {
+            b.iter(|| portable.square_into(black_box(&mut out), black_box(&lhs)));
+        });
+        if let Some(avx2) = avx2 {
+            group.bench_with_input(BenchmarkId::new("avx2_square", len), &len, |b, _| {
+                b.iter(|| avx2.square_into(black_box(&mut out), black_box(&lhs)));
+            });
+        }
+        group.bench_with_input(BenchmarkId::new("portable_add", len), &len, |b, _| {
+            b.iter(|| portable.add_into(black_box(&mut out), black_box(&lhs), black_box(&rhs)));
+        });
+        if let Some(avx2) = avx2 {
+            group.bench_with_input(BenchmarkId::new("avx2_add", len), &len, |b, _| {
+                b.iter(|| avx2.add_into(black_box(&mut out), black_box(&lhs), black_box(&rhs)));
             });
         }
     }

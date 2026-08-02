@@ -4,7 +4,7 @@ use crate::Field;
 #[cfg(feature = "portable")]
 use crate::Square;
 
-use super::KernelMetadata;
+use super::{KernelMetadata, PackedKernelSet};
 
 pub(crate) type BinaryKernel<F> = fn(out: &mut [F], lhs: &[F], rhs: &[F]);
 pub(crate) type UnaryKernel<F> = fn(out: &mut [F], values: &[F]);
@@ -20,6 +20,7 @@ pub(crate) struct KernelSet<F: Field> {
     pub(crate) square: UnaryKernel<F>,
     pub(crate) multiply_assign: BinaryAssignKernel<F>,
     pub(crate) square_assign: UnaryAssignKernel<F>,
+    pub(crate) packed: PackedKernelSet<F>,
 }
 
 impl<F: Field> KernelSet<F> {
@@ -38,7 +39,18 @@ impl<F: Field> KernelSet<F> {
             square,
             multiply_assign,
             square_assign,
+            packed: PackedKernelSet::Aos,
         }
+    }
+
+    #[cfg_attr(
+        not(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64")),
+        allow(dead_code)
+    )]
+    #[must_use]
+    pub(crate) const fn with_packed(mut self, packed: PackedKernelSet<F>) -> Self {
+        self.packed = packed;
+        self
     }
 }
 

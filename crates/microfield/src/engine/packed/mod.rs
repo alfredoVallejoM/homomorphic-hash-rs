@@ -33,12 +33,13 @@ mod owned;
 
 use core::mem::MaybeUninit;
 
-use crate::{__private::PortableField, StaticField};
+use crate::{__private::PortableField, StaticField, kernel::PackedKernelSet};
 
 #[cfg(feature = "alloc")]
 pub use owned::PackedBatch;
 pub use plan::{PackError, PackedLayout, PackingPlan};
 pub use view::{PackedBatchView, PackedBatchViewMut};
+use view::{PackedStorageMut, PackedStorageRef};
 
 use super::Engine;
 
@@ -50,7 +51,22 @@ impl<F: PortableField + StaticField> Engine<F> {
     /// Returns [`PackError`] if size computation overflows or backend metadata
     /// contains an invalid alignment.
     pub fn packing_plan(&self, len: usize) -> Result<PackingPlan, PackError> {
-        PackingPlan::build::<F>(self.metadata(), len)
+        PackingPlan::build::<F>(self.kernels, len)
+    }
+
+    /// Adds persistent owned batches without repacking or allocation.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PackError`] before writing when plans are incompatible.
+    #[cfg(feature = "alloc")]
+    pub fn add_packed_into(
+        &self,
+        out: &mut PackedBatch<F>,
+        lhs: &PackedBatch<F>,
+        rhs: &PackedBatch<F>,
+    ) -> Result<(), PackError> {
+        self.add_packed_view_into(&mut out.as_view_mut(), &lhs.as_view(), &rhs.as_view())
     }
 
     /// Multiplies persistent owned batches without repacking or allocation.
@@ -109,6 +125,53 @@ impl<F: PortableField + StaticField> Engine<F> {
         self.square_packed_view_assign(&mut values.as_view_mut())
     }
 
+    /// Adds borrowed persistent views without allocation or transcoding.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PackError`] before writing when plans are incompatible.
+    pub fn add_packed_view_into(
+        &self,
+        out: &mut PackedBatchViewMut<'_, F>,
+        lhs: &PackedBatchView<'_, F>,
+        rhs: &PackedBatchView<'_, F>,
+    ) -> Result<(), PackError> {
+        self.validate_plans(&[out.plan(), lhs.plan(), rhs.plan()])?;
+        match (
+            &self.kernels.packed,
+            &mut out.storage,
+            &lhs.storage,
+            &rhs.storage,
+        ) {
+            (
+                PackedKernelSet::Aos,
+                PackedStorageMut::Aos(out),
+                PackedStorageRef::Aos(lhs),
+                PackedStorageRef::Aos(rhs),
+            ) => (self.kernels.add)(out, lhs, rhs),
+            (
+                PackedKernelSet::CanonicalU8(kernels),
+                PackedStorageMut::CanonicalU8 { values: out, .. },
+                PackedStorageRef::CanonicalU8 { values: lhs, .. },
+                PackedStorageRef::CanonicalU8 { values: rhs, .. },
+            ) => (kernels.add)(out, lhs, rhs),
+            (
+                PackedKernelSet::CanonicalU16(kernels),
+                PackedStorageMut::CanonicalU16 { values: out, .. },
+                PackedStorageRef::CanonicalU16 { values: lhs, .. },
+                PackedStorageRef::CanonicalU16 { values: rhs, .. },
+            ) => (kernels.add)(out, lhs, rhs),
+            (
+                PackedKernelSet::CanonicalU32(kernels),
+                PackedStorageMut::CanonicalU32 { values: out, .. },
+                PackedStorageRef::CanonicalU32 { values: lhs, .. },
+                PackedStorageRef::CanonicalU32 { values: rhs, .. },
+            ) => (kernels.add)(out, lhs, rhs),
+            _ => return Err(PackError::IncompatiblePlan),
+        }
+        Ok(())
+    }
+
     /// Multiplies borrowed packed views without allocation.
     ///
     /// # Errors
@@ -121,7 +184,38 @@ impl<F: PortableField + StaticField> Engine<F> {
         rhs: &PackedBatchView<'_, F>,
     ) -> Result<(), PackError> {
         self.validate_plans(&[out.plan(), lhs.plan(), rhs.plan()])?;
-        (self.kernels.multiply)(out.values, lhs.values, rhs.values);
+        match (
+            &self.kernels.packed,
+            &mut out.storage,
+            &lhs.storage,
+            &rhs.storage,
+        ) {
+            (
+                PackedKernelSet::Aos,
+                PackedStorageMut::Aos(out),
+                PackedStorageRef::Aos(lhs),
+                PackedStorageRef::Aos(rhs),
+            ) => (self.kernels.multiply)(out, lhs, rhs),
+            (
+                PackedKernelSet::CanonicalU8(kernels),
+                PackedStorageMut::CanonicalU8 { values: out, .. },
+                PackedStorageRef::CanonicalU8 { values: lhs, .. },
+                PackedStorageRef::CanonicalU8 { values: rhs, .. },
+            ) => (kernels.multiply)(out, lhs, rhs),
+            (
+                PackedKernelSet::CanonicalU16(kernels),
+                PackedStorageMut::CanonicalU16 { values: out, .. },
+                PackedStorageRef::CanonicalU16 { values: lhs, .. },
+                PackedStorageRef::CanonicalU16 { values: rhs, .. },
+            ) => (kernels.multiply)(out, lhs, rhs),
+            (
+                PackedKernelSet::CanonicalU32(kernels),
+                PackedStorageMut::CanonicalU32 { values: out, .. },
+                PackedStorageRef::CanonicalU32 { values: lhs, .. },
+                PackedStorageRef::CanonicalU32 { values: rhs, .. },
+            ) => (kernels.multiply)(out, lhs, rhs),
+            _ => return Err(PackError::IncompatiblePlan),
+        }
         Ok(())
     }
 
@@ -136,7 +230,27 @@ impl<F: PortableField + StaticField> Engine<F> {
         values: &PackedBatchView<'_, F>,
     ) -> Result<(), PackError> {
         self.validate_plans(&[out.plan(), values.plan()])?;
-        (self.kernels.square)(out.values, values.values);
+        match (&self.kernels.packed, &mut out.storage, &values.storage) {
+            (PackedKernelSet::Aos, PackedStorageMut::Aos(out), PackedStorageRef::Aos(values)) => {
+                (self.kernels.square)(out, values);
+            }
+            (
+                PackedKernelSet::CanonicalU8(kernels),
+                PackedStorageMut::CanonicalU8 { values: out, .. },
+                PackedStorageRef::CanonicalU8 { values, .. },
+            ) => (kernels.square)(out, values),
+            (
+                PackedKernelSet::CanonicalU16(kernels),
+                PackedStorageMut::CanonicalU16 { values: out, .. },
+                PackedStorageRef::CanonicalU16 { values, .. },
+            ) => (kernels.square)(out, values),
+            (
+                PackedKernelSet::CanonicalU32(kernels),
+                PackedStorageMut::CanonicalU32 { values: out, .. },
+                PackedStorageRef::CanonicalU32 { values, .. },
+            ) => (kernels.square)(out, values),
+            _ => return Err(PackError::IncompatiblePlan),
+        }
         Ok(())
     }
 
@@ -151,7 +265,27 @@ impl<F: PortableField + StaticField> Engine<F> {
         rhs: &PackedBatchView<'_, F>,
     ) -> Result<(), PackError> {
         self.validate_plans(&[lhs.plan(), rhs.plan()])?;
-        (self.kernels.multiply_assign)(lhs.values, rhs.values);
+        match (&self.kernels.packed, &mut lhs.storage, &rhs.storage) {
+            (PackedKernelSet::Aos, PackedStorageMut::Aos(lhs), PackedStorageRef::Aos(rhs)) => {
+                (self.kernels.multiply_assign)(lhs, rhs);
+            }
+            (
+                PackedKernelSet::CanonicalU8(kernels),
+                PackedStorageMut::CanonicalU8 { values: lhs, .. },
+                PackedStorageRef::CanonicalU8 { values: rhs, .. },
+            ) => (kernels.multiply_assign)(lhs, rhs),
+            (
+                PackedKernelSet::CanonicalU16(kernels),
+                PackedStorageMut::CanonicalU16 { values: lhs, .. },
+                PackedStorageRef::CanonicalU16 { values: rhs, .. },
+            ) => (kernels.multiply_assign)(lhs, rhs),
+            (
+                PackedKernelSet::CanonicalU32(kernels),
+                PackedStorageMut::CanonicalU32 { values: lhs, .. },
+                PackedStorageRef::CanonicalU32 { values: rhs, .. },
+            ) => (kernels.multiply_assign)(lhs, rhs),
+            _ => return Err(PackError::IncompatiblePlan),
+        }
         Ok(())
     }
 
@@ -166,7 +300,24 @@ impl<F: PortableField + StaticField> Engine<F> {
         values: &mut PackedBatchViewMut<'_, F>,
     ) -> Result<(), PackError> {
         self.validate_plans(&[values.plan()])?;
-        (self.kernels.square_assign)(values.values);
+        match (&self.kernels.packed, &mut values.storage) {
+            (PackedKernelSet::Aos, PackedStorageMut::Aos(values)) => {
+                (self.kernels.square_assign)(values);
+            }
+            (
+                PackedKernelSet::CanonicalU8(kernels),
+                PackedStorageMut::CanonicalU8 { values, .. },
+            ) => (kernels.square_assign)(values),
+            (
+                PackedKernelSet::CanonicalU16(kernels),
+                PackedStorageMut::CanonicalU16 { values, .. },
+            ) => (kernels.square_assign)(values),
+            (
+                PackedKernelSet::CanonicalU32(kernels),
+                PackedStorageMut::CanonicalU32 { values, .. },
+            ) => (kernels.square_assign)(values),
+            _ => return Err(PackError::IncompatiblePlan),
+        }
         Ok(())
     }
 
@@ -219,6 +370,22 @@ pub fn pack_into_storage<'a, F: PortableField + StaticField>(
     values: &[F],
 ) -> Result<PackedBatchViewMut<'a, F>, PackError> {
     let plan = engine.packing_plan(values.len())?;
-    let values = storage::initialize_storage(storage, &plan, values)?;
-    Ok(PackedBatchViewMut { values, plan })
+    let storage = match engine.kernels.packed {
+        PackedKernelSet::Aos => {
+            PackedStorageMut::Aos(storage::initialize_aos_storage(storage, &plan, values)?)
+        }
+        PackedKernelSet::CanonicalU8(kernels) => PackedStorageMut::CanonicalU8 {
+            values: storage::initialize_lane_storage(storage, &plan, values, 0_u8, kernels.pack)?,
+            kernels,
+        },
+        PackedKernelSet::CanonicalU16(kernels) => PackedStorageMut::CanonicalU16 {
+            values: storage::initialize_lane_storage(storage, &plan, values, 0_u16, kernels.pack)?,
+            kernels,
+        },
+        PackedKernelSet::CanonicalU32(kernels) => PackedStorageMut::CanonicalU32 {
+            values: storage::initialize_lane_storage(storage, &plan, values, 0_u32, kernels.pack)?,
+            kernels,
+        },
+    };
+    Ok(PackedBatchViewMut { storage, plan })
 }

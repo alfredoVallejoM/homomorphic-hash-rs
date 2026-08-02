@@ -150,9 +150,22 @@ fn assert_views<F: PackedField>() {
             pack_into_storage(&engine, &mut assign_storage, &lhs_values).expect("assign pack");
 
         engine
-            .mul_packed_view_into(&mut out, &lhs.as_view(), &rhs.as_view())
+            .add_packed_view_into(&mut out, &lhs.as_view(), &rhs.as_view())
             .expect("compatible plans");
         let mut actual = vec![F::ZERO; len];
+        out.unpack_into(&mut actual).expect("matching output");
+        assert_eq!(
+            actual,
+            lhs_values
+                .iter()
+                .zip(&rhs_values)
+                .map(|(left, right)| left.add(*right))
+                .collect::<Vec<_>>()
+        );
+
+        engine
+            .mul_packed_view_into(&mut out, &lhs.as_view(), &rhs.as_view())
+            .expect("compatible plans");
         out.unpack_into(&mut actual).expect("matching output");
         let expected: Vec<_> = lhs_values
             .iter()

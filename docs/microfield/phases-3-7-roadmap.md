@@ -12,15 +12,27 @@ benchmarks. Véase [phase-3-plan.md](phase-3-plan.md).
 ## Fase 4 — cerrada
 
 Los tres campos primos, planes Native/Barrett/Solinas/Montgomery, certificados,
-corpus Sage, batch y adapters AVX2/BMI2 están implementados. AVX2 para 251 es
-automático desde su región medida; BMI2 permanece explícito porque no ganó al
-portable. Véanse [phase-4-plan.md](phase-4-plan.md) y
-[phase-4-final-report.md](phase-4-final-report.md).
+corpus Sage, batch y adapters AVX2/BMI2 están implementados. AVX2 para 251 y
+Goldilocks es automático desde sus respectivas regiones medidas; los bridges
+AVX2 `u8`/`u16` para perfiles externos y BMI2 permanecen explícitos. VPCLMUL
+está desenrollado pero tampoco se promueve sin una victoria estable sobre
+PCLMUL. Véanse [phase-4-plan.md](phase-4-plan.md),
+[phase-4-final-report.md](phase-4-final-report.md) y
+[phase-4-6-report.md](phase-4-6-report.md).
+
+## F4.7-PACKED-SIMD — completada antes de Fase 5
+
+Convierte una vez campos primos externos a lanes persistentes y ejecuta
+pipelines `u8`/`u16`/`u32` sin repacking. `u32` queda correcto y explícito; no
+se le atribuye aceleración sin calibración propia. No reabre la aritmética de
+Fase 4 ni sustituye su antiguo hito F4.7 de calidad. Véanse
+[phase-4-7-plan.md](phase-4-7-plan.md) e
+[informe final](phase-4-7-final-report.md).
 
 ## Fase 5 — generación y contextos externos
 
-Es la siguiente fase. El puente estático de campos binarios externos ya existe.
-La fase se concentra en
+Comienza después de F4.7-PACKED-SIMD. El puente estático de campos binarios
+externos ya existe. La fase se concentra en
 bundle/lock, caché concurrente segura, CLI independiente y, después, contextos
 dinámicos con checks amortizados. Su primer corte extiende la factory a campos
 primos externos y hace visible `Proven` frente a `ProbablePrime`. Los registros

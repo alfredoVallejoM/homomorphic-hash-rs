@@ -121,6 +121,23 @@ impl PrimeWideProduct for Fp251V1 {
     }
 }
 
+#[cfg(feature = "portable")]
+impl crate::__private::VerifiedPrimeCanonical8Field for Fp251V1 {
+    const __MODULUS: u16 = MODULUS;
+    const __BARRETT_RECIPROCAL: u16 = (65_536_u32 / MODULUS as u32) as u16;
+
+    #[inline]
+    fn __into_canonical_u8(self) -> u8 {
+        self.0
+    }
+
+    #[inline]
+    fn __from_reduced_canonical_u8(value: u8) -> Self {
+        debug_assert!(u16::from(value) < MODULUS);
+        Self(value)
+    }
+}
+
 impl PrimeFieldSpec for Fp251V1 {
     const LIMBS: usize = 1;
     const MODULUS: &'static [u64] = &MODULUS_LIMBS;

@@ -121,18 +121,6 @@ impl Fp256GenericV1 {
             NEG_INV,
         ))
     }
-
-    #[cfg(all(feature = "portable", target_arch = "x86_64"))]
-    pub(crate) const fn into_montgomery_limbs(self) -> [u64; 4] {
-        self.0
-    }
-
-    #[cfg(all(feature = "portable", target_arch = "x86_64"))]
-    pub(crate) fn reduce_isa_product(wide: [u64; 8]) -> Self {
-        Self(crate::prime::montgomery_reduce_wide_256(
-            wide, MODULUS, NEG_INV,
-        ))
-    }
 }
 
 impl Field for Fp256GenericV1 {
@@ -175,6 +163,22 @@ impl PrimeWideProduct for Fp256GenericV1 {
     #[inline]
     fn mul_wide(self, rhs: Self) -> Self::Wide {
         crate::prime::wide_product(self.0, rhs.0)
+    }
+}
+
+#[cfg(feature = "portable")]
+impl crate::__private::VerifiedPrimeMontgomery64Field<4, 8> for Fp256GenericV1 {
+    const __MODULUS: [u64; 4] = MODULUS;
+    const __NEG_INV: u64 = NEG_INV;
+
+    #[inline]
+    fn __into_montgomery_limbs(self) -> [u64; 4] {
+        self.0
+    }
+
+    #[inline]
+    fn __from_reduced_montgomery_limbs(limbs: [u64; 4]) -> Self {
+        Self(limbs)
     }
 }
 

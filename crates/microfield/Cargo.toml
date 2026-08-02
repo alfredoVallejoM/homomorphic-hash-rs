@@ -45,6 +45,12 @@ path = "benches/prime_fields.rs"
 harness = false
 required-features = ["portable", "prime-fields"]
 
+[[bench]]
+name = "persistent_prime_bridge"
+path = "benches/persistent_prime_bridge.rs"
+harness = false
+required-features = ["std", "portable", "prime-fields"]
+
 [features]
 default = ["std", "portable", "builtin-fields", "prime-fields"]
 std = ["alloc"]

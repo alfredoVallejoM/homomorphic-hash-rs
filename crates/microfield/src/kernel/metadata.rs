@@ -209,12 +209,21 @@ impl KernelMetadata {
     }
 
     #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
-    pub(crate) const fn x86_prime_avx2<F>(minimum_batch: usize) -> Self {
+    pub(crate) const fn x86_prime_avx2(minimum_batch: usize) -> Self {
+        Self::x86_prime_avx2_lanes(minimum_batch, 32)
+    }
+
+    #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
+    pub(crate) const fn x86_prime_avx2_lanes(
+        minimum_batch: usize,
+        preferred_multiple: usize,
+    ) -> Self {
+        assert!(preferred_multiple > 0);
         Self {
             backend: BackendId::X86PrimeAvx2,
             minimum_batch,
-            preferred_multiple: 16,
-            required_alignment: core::mem::align_of::<F>(),
+            preferred_multiple,
+            required_alignment: 32,
             supports_in_place: true,
             requires_packing: false,
             scratch_bytes_per_element: 0,
@@ -225,7 +234,44 @@ impl KernelMetadata {
     }
 
     #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
-    pub(crate) const fn x86_prime_bmi2<F>(minimum_batch: usize) -> Self {
+    pub(crate) const fn x86_prime_goldilocks_avx2<F>() -> Self {
+        let calibration = super::calibration::X86_PRIME_AVX2_GOLDILOCKS;
+        Self {
+            backend: BackendId::X86PrimeAvx2,
+            minimum_batch: calibration.minimum_batch(),
+            preferred_multiple: 4,
+            required_alignment: core::mem::align_of::<F>(),
+            supports_in_place: true,
+            requires_packing: false,
+            scratch_bytes_per_element: 0,
+            schedule: ScheduleKind::Fixed,
+            automatic_selection: calibration.automatic_selection(),
+            prime: None,
+        }
+    }
+
+    #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
+    pub(crate) const fn x86_prime_avx2_candidate(
+        minimum_batch: usize,
+        preferred_multiple: usize,
+    ) -> Self {
+        assert!(preferred_multiple > 0);
+        Self {
+            backend: BackendId::X86PrimeAvx2,
+            minimum_batch,
+            preferred_multiple,
+            required_alignment: 32,
+            supports_in_place: true,
+            requires_packing: false,
+            scratch_bytes_per_element: 0,
+            schedule: ScheduleKind::Fixed,
+            automatic_selection: false,
+            prime: None,
+        }
+    }
+
+    #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
+    pub(crate) const fn x86_prime_bmi2_candidate<F>(minimum_batch: usize) -> Self {
         Self {
             backend: BackendId::X86PrimeBmi2,
             minimum_batch,

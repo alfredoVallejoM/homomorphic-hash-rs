@@ -78,6 +78,40 @@ impl StaticFieldSpec {
         }
     }
 
+    /// Constructs prime-field metadata emitted by a certified generator.
+    ///
+    /// This compatibility boundary exists so generated source in downstream
+    /// crates can retain truthful field identity while using persistent batch
+    /// plans. Handwritten callers must not use it to claim certification.
+    #[doc(hidden)]
+    #[must_use]
+    #[allow(clippy::too_many_arguments)]
+    pub const fn __from_generated_prime(
+        field_id: FieldId,
+        artifact_id: ArtifactId,
+        name: &'static str,
+        characteristic_decimal: &'static str,
+        characteristic_small: Option<u64>,
+        degree: u32,
+        canonical_bytes: u16,
+        descriptor_json: &'static [u8],
+        certificate_json: &'static [u8],
+    ) -> Self {
+        Self {
+            field_id,
+            artifact_id,
+            name,
+            characteristic: Characteristic::__from_generated(
+                characteristic_decimal,
+                characteristic_small,
+            ),
+            degree,
+            canonical_bytes,
+            descriptor_json,
+            certificate_json,
+        }
+    }
+
     /// Returns the stable field identity.
     #[must_use]
     pub const fn field_id(&self) -> FieldId {

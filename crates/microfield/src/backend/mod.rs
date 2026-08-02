@@ -1,6 +1,8 @@
 //! Execution-strategy adapters.
 
 pub(crate) mod portable;
+#[cfg(feature = "prime-fields")]
+pub(crate) mod prime_profile;
 pub(crate) mod profile;
 
 #[cfg(all(feature = "portable", target_arch = "x86_64"))]
@@ -114,7 +116,15 @@ pub(crate) const fn fp251_v1_catalog(
 pub(crate) const fn fp_goldilocks64_v1_catalog(
     portable: &'static crate::kernel::KernelSet<FpGoldilocks64V1>,
 ) -> KernelCatalog<FpGoldilocks64V1> {
-    KernelCatalog::portable(portable)
+    let catalog = KernelCatalog::portable(portable);
+    #[cfg(target_arch = "x86_64")]
+    {
+        catalog.with_x86_prime_avx2(&x86_prime::FP_GOLDILOCKS_AVX2_KERNELS)
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        catalog
+    }
 }
 
 #[cfg(all(feature = "portable", feature = "prime-fields"))]

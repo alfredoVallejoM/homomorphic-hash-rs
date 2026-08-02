@@ -12,8 +12,14 @@ rendimiento deben coincidir antes de selección automática.
 
 AVX2 para `Fp251V1` es automático desde 64 elementos. BMI2 para
 `Fp256GenericV1` es correcto y forzable, pero no automático porque fue más
-lento que el producto portable `u128`/CIOS en la CPU de referencia. Goldilocks
-conserva portable hasta que un backend medido gane incluyendo reducción.
+lento que el producto portable `u128`/CIOS en la CPU de referencia. La
+extensión registrada en ADR 0024 incorpora Goldilocks AVX2 automático desde
+cuatro elementos tras medir producto, square y suma incluyendo reducción.
+
+La corrección de cierre queda desarrollada en ADR 0023: BMI2 usa un factory
+estático genérico para cualquier representación Montgomery radix 64, pero
+compatibilidad estructural y promoción automática permanecen separadas.
+ADR 0024 aplica la misma separación a los perfiles AVX2 canónicos `u8`/`u16`.
 
 `PrimeKernelMetadata` autentica representación, reducción, rangos de entrada y
 salida, lanes y necesidad de packing. `Engine` sigue seleccionando una vez y
@@ -25,6 +31,11 @@ ejecutando una llamada indirecta por lote.
 seguros solo son registrables después de detección AVX2/BMI2; las cargas y
 stores se acotan por tiles y los tails permanecen escalares. ASan, diferencial,
 inventario SHA-256 y auditoría de instrucciones forman el gate conjunto.
+
+ADR 0023 sustituye las cadenas variables por recorridos completos y selección
+sin ramas. BMI2 publica por ello `ScheduleKind::Fixed` y `FixedSchedule` puede
+forzarlo. No se deriva una afirmación integral de constant-time únicamente a
+partir de esta propiedad ni de `MULX`.
 
 ## Consecuencias
 

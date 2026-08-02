@@ -7,6 +7,8 @@ cd "$repo_root"
 calibration="${MICROFIELD_CALIBRATION_DIR:-crates/microfield/calibration}"
 table="$calibration/selection-table-v1.csv"
 profiles=("$calibration"/profiles/*.json)
+phase46="$calibration/phase46-simd-i7-13700hx-2026-08-02.csv"
+phase47="$calibration/phase47-packed-i7-13700hx-2026-08-02.csv"
 
 if [[ "$(head -n 1 "$table")" != \
   "selection_table_version,field,backend,minimum_batch,automatic_selection,evidence_profile,conservative_improvement_percent,reason" ]]; then
@@ -19,6 +21,71 @@ if [[ "$row_count" -ne 9 ]]; then
   echo "la tabla debe contener exactamente nueve decisiones, contiene $row_count" >&2
   exit 1
 fi
+
+if [[ "$(head -n 1 "$phase46")" != \
+  "schema,field,backend,operation,batch_len,portable_lower_ns,portable_upper_ns,simd_lower_ns,simd_upper_ns,decision" ]]; then
+  echo "cabecera inesperada en la calibración F4.6-SIMD" >&2
+  exit 1
+fi
+
+awk -F, '
+  NR == 1 { next }
+  NF != 10 { exit 10 }
+  $1 != 1 || $2 != "fp_goldilocks64_v1" || $3 != "x86_prime_avx2" || $5 != 4 { exit 11 }
+  $6 <= 0 || $7 < $6 || $8 <= 0 || $9 < $8 { exit 12 }
+  $4 == "mul" || $4 == "square" {
+    gain = 100 * ($6 - $9) / $6
+    if (gain < 20) { exit 13 }
+    arithmetic += 1
+    next
+  }
+  $4 == "add" {
+    regression = 100 * ($9 - $6) / $6
+    if (regression > 3) { exit 14 }
+    additions += 1
+    next
+  }
+  { exit 15 }
+  END {
+    if (arithmetic != 2 || additions != 1) { exit 16 }
+  }
+' "$phase46" || {
+  echo "la calibración F4.6-SIMD no acredita el umbral Goldilocks AVX2" >&2
+  exit 1
+}
+
+if [[ "$(head -n 1 "$phase47")" != \
+  "schema,field,backend,operation,batch_len,direct_lower_ns,direct_upper_ns,packed_lower_ns,packed_upper_ns,pack_lower_ns,pack_upper_ns,unpack_lower_ns,unpack_upper_ns,conservative_gain_percent,break_even_operations,decision" ]]; then
+  echo "cabecera inesperada en la calibración F4.7-PACKED-SIMD" >&2
+  exit 1
+fi
+
+awk -F, '
+  NR == 1 { next }
+  NF != 16 { exit 20 }
+  $1 != 1 || $2 != "external_fp65521" || $3 != "x86_prime_avx2_packed" || $4 != "mul" { exit 21 }
+  $6 <= 0 || $7 < $6 || $8 <= 0 || $9 < $8 || $10 <= 0 || $11 < $10 || $12 <= 0 || $13 < $12 { exit 22 }
+  {
+    gain = 100 * ($6 - $9) / $6
+    if ($14 > gain || gain - $14 > 0.11) { exit 23 }
+    denominator = $6 - $9
+    if (denominator <= 0) { exit 24 }
+    ratio = ($11 + $13) / denominator
+    break_even = int(ratio)
+    if (break_even < ratio) { break_even += 1 }
+    if ($15 != break_even) { exit 25 }
+    if ($5 == 16) {
+      if ($15 != 9 || $16 != "explicit_break_even") { exit 26 }
+    } else if (gain < 20 || $15 != 1 || $16 != "explicit_persistent_profile") {
+      exit 27
+    }
+    rows += 1
+  }
+  END { if (rows != 6) { exit 28 } }
+' "$phase47" || {
+  echo "la calibración F4.7 no acredita el bridge persistente explícito" >&2
+  exit 1
+}
 
 duplicates="$(tail -n +2 "$table" | cut -d, -f2,3 | sort | uniq -d)"
 if [[ -n "$duplicates" ]]; then
@@ -198,4 +265,4 @@ if grep -Eq ',aarch64_pmull,[^,]+,true,' "$table"; then
   }
 fi
 
-echo "calibración v1 correcta: nueve decisiones, perfiles válidos y promoción conservadora"
+echo "calibración correcta: decisiones binarias, Goldilocks AVX2 y bridge packed F4.7 auditados"

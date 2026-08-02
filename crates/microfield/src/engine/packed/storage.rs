@@ -91,7 +91,7 @@ unsafe impl<F: Copy + Send> Send for AlignedBuffer<F> {}
 unsafe impl<F: Copy + Sync> Sync for AlignedBuffer<F> {}
 
 /// Aligns, initializes and types a region inside caller-provided byte storage.
-pub(super) fn initialize_storage<'a, F: Field>(
+pub(super) fn initialize_aos_storage<'a, F: Field>(
     storage: &'a mut [MaybeUninit<u8>],
     plan: &PackingPlan,
     values: &[F],
@@ -141,9 +141,72 @@ pub(super) fn initialize_storage<'a, F: Field>(
     Ok(unsafe { slice::from_raw_parts_mut(typed, plan.padded_len()) })
 }
 
+/// Aligns and initializes primitive lane storage before running a safe codec.
+pub(super) fn initialize_lane_storage<'a, F: Field, T: Copy>(
+    storage: &'a mut [MaybeUninit<u8>],
+    plan: &PackingPlan,
+    values: &[F],
+    zero: T,
+    pack: fn(&mut [T], &[F]),
+) -> Result<&'a mut [T], PackError> {
+    if values.len() != plan.logical_len() {
+        return Err(PackError::LengthMismatch {
+            expected: plan.logical_len(),
+            actual: values.len(),
+        });
+    }
+    if plan.padded_len() == 0 {
+        return Ok(&mut []);
+    }
+
+    let expected_bytes = plan
+        .padded_len()
+        .checked_mul(core::mem::size_of::<T>())
+        .ok_or(PackError::SizeOverflow)?;
+    if expected_bytes != plan.data_bytes() {
+        return Err(PackError::IncompatiblePlan);
+    }
+
+    let base = storage.as_mut_ptr().cast::<u8>();
+    let offset = base.align_offset(plan.alignment());
+    if offset == usize::MAX {
+        return Err(PackError::InvalidAlignment {
+            alignment: plan.alignment(),
+        });
+    }
+    let required = offset
+        .checked_add(expected_bytes)
+        .ok_or(PackError::SizeOverflow)?;
+    if storage.len() < required {
+        return Err(PackError::InsufficientStorage {
+            required,
+            provided: storage.len(),
+        });
+    }
+
+    // SAFETY: `plan.alignment()` is at least `align_of::<T>()`; the capacity
+    // check proves every slot lies within the exclusive byte storage.
+    let typed = unsafe { base.add(offset).cast::<T>() };
+    for index in 0..plan.padded_len() {
+        // SAFETY: every index is within the region proven above. Initializing
+        // all slots precedes construction of a typed reference.
+        unsafe { typed.add(index).write(zero) };
+    }
+    // SAFETY: all slots are initialized valid `T` values and the byte region
+    // remains exclusively borrowed for the returned slice lifetime.
+    let lanes = unsafe { slice::from_raw_parts_mut(typed, plan.padded_len()) };
+    pack(lanes, values);
+    Ok(lanes)
+}
+
 #[cfg(all(test, feature = "alloc"))]
 mod tests {
-    use super::AlignedBuffer;
+    use alloc::vec;
+    use core::mem::MaybeUninit;
+
+    use crate::{Field, Gf2_128V1, KernelMetadata, kernel::KernelSet};
+
+    use super::{AlignedBuffer, initialize_lane_storage};
 
     #[test]
     fn owned_buffer_honors_supported_alignments_and_initializes_every_slot() {
@@ -167,4 +230,79 @@ mod tests {
         fn assert_send_sync<T: Send + Sync>() {}
         assert_send_sync::<AlignedBuffer<u64>>();
     }
+
+    #[test]
+    fn primitive_lane_storage_is_aligned_initialized_and_padding_safe() {
+        let kernels = KernelSet::new(
+            KernelMetadata::for_packing_test(4, 32),
+            field_binary,
+            field_binary,
+            field_unary,
+            field_binary_assign,
+            field_unary_assign,
+        )
+        .with_packed(crate::kernel::PackedKernelSet::CanonicalU16(
+            crate::kernel::PackedLaneKernels::new(
+                pack_u16,
+                unpack_u16,
+                lane_binary,
+                lane_binary,
+                lane_unary,
+                lane_binary_assign,
+                lane_unary_assign,
+            ),
+        ));
+        let plan = crate::engine::packed::PackingPlan::build::<Gf2_128V1>(&kernels, 3).unwrap();
+        assert_eq!(plan.padded_len(), 4);
+        assert_eq!(plan.data_bytes(), 8);
+
+        for offset in 0..plan.alignment() {
+            let mut bytes =
+                vec![MaybeUninit::new(0xa5_u8); plan.data_bytes() + plan.alignment() * 2];
+            let lanes = initialize_lane_storage(
+                &mut bytes[offset..],
+                &plan,
+                &[Gf2_128V1::ZERO; 3],
+                0_u16,
+                pack_u16,
+            )
+            .unwrap();
+            assert_eq!(lanes, &[1, 2, 3, 0]);
+            assert_eq!(lanes.as_ptr().addr() % 32, 0);
+        }
+    }
+
+    fn field_binary(out: &mut [Gf2_128V1], lhs: &[Gf2_128V1], _rhs: &[Gf2_128V1]) {
+        out.copy_from_slice(lhs);
+    }
+
+    fn field_unary(out: &mut [Gf2_128V1], values: &[Gf2_128V1]) {
+        out.copy_from_slice(values);
+    }
+
+    fn field_binary_assign(_lhs: &mut [Gf2_128V1], _rhs: &[Gf2_128V1]) {}
+
+    fn field_unary_assign(_values: &mut [Gf2_128V1]) {}
+
+    fn pack_u16(out: &mut [u16], values: &[Gf2_128V1]) {
+        for (index, output) in out.iter_mut().take(values.len()).enumerate() {
+            *output = u16::try_from(index + 1).unwrap();
+        }
+    }
+
+    fn unpack_u16(out: &mut [Gf2_128V1], _values: &[u16]) {
+        out.fill(Gf2_128V1::ZERO);
+    }
+
+    fn lane_binary(out: &mut [u16], lhs: &[u16], _rhs: &[u16]) {
+        out.copy_from_slice(lhs);
+    }
+
+    fn lane_unary(out: &mut [u16], values: &[u16]) {
+        out.copy_from_slice(values);
+    }
+
+    fn lane_binary_assign(_lhs: &mut [u16], _rhs: &[u16]) {}
+
+    fn lane_unary_assign(_values: &mut [u16]) {}
 }

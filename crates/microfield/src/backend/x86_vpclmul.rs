@@ -146,17 +146,32 @@ mod builtins {
 
     #[target_feature(enable = "pclmulqdq,avx2,vpclmulqdq")]
     unsafe fn multiply_impl<F: VpclmulElement>(out: &mut [F], lhs: &[F], rhs: &[F]) {
-        let pair_count = lhs.len() / 2;
-        for pair in 0..pair_count {
-            let index = pair * 2;
+        let mut index = 0;
+        while index + 4 <= lhs.len() {
+            let first = unsafe {
+                F::multiply_vpclmul([lhs[index], lhs[index + 1]], [rhs[index], rhs[index + 1]])
+            };
+            let second = unsafe {
+                F::multiply_vpclmul(
+                    [lhs[index + 2], lhs[index + 3]],
+                    [rhs[index + 2], rhs[index + 3]],
+                )
+            };
+            out[index] = first[0];
+            out[index + 1] = first[1];
+            out[index + 2] = second[0];
+            out[index + 3] = second[1];
+            index += 4;
+        }
+        if index + 2 <= lhs.len() {
             let product = unsafe {
                 F::multiply_vpclmul([lhs[index], lhs[index + 1]], [rhs[index], rhs[index + 1]])
             };
             out[index] = product[0];
             out[index + 1] = product[1];
+            index += 2;
         }
-        if !lhs.len().is_multiple_of(2) {
-            let index = lhs.len() - 1;
+        if index < lhs.len() {
             let product =
                 unsafe { F::multiply_vpclmul([lhs[index], F::ZERO], [rhs[index], F::ZERO]) };
             out[index] = product[0];
@@ -173,15 +188,23 @@ mod builtins {
 
     #[target_feature(enable = "pclmulqdq,avx2,vpclmulqdq")]
     unsafe fn square_impl<F: VpclmulElement>(out: &mut [F], values: &[F]) {
-        let pair_count = values.len() / 2;
-        for pair in 0..pair_count {
-            let index = pair * 2;
+        let mut index = 0;
+        while index + 4 <= values.len() {
+            let first = unsafe { F::square_vpclmul([values[index], values[index + 1]]) };
+            let second = unsafe { F::square_vpclmul([values[index + 2], values[index + 3]]) };
+            out[index] = first[0];
+            out[index + 1] = first[1];
+            out[index + 2] = second[0];
+            out[index + 3] = second[1];
+            index += 4;
+        }
+        if index + 2 <= values.len() {
             let squared = unsafe { F::square_vpclmul([values[index], values[index + 1]]) };
             out[index] = squared[0];
             out[index + 1] = squared[1];
+            index += 2;
         }
-        if !values.len().is_multiple_of(2) {
-            let index = values.len() - 1;
+        if index < values.len() {
             let squared = unsafe { F::square_vpclmul([values[index], F::ZERO]) };
             out[index] = squared[0];
         }
@@ -197,17 +220,32 @@ mod builtins {
 
     #[target_feature(enable = "pclmulqdq,avx2,vpclmulqdq")]
     unsafe fn multiply_assign_impl<F: VpclmulElement>(lhs: &mut [F], rhs: &[F]) {
-        let pair_count = lhs.len() / 2;
-        for pair in 0..pair_count {
-            let index = pair * 2;
+        let mut index = 0;
+        while index + 4 <= lhs.len() {
+            let first = unsafe {
+                F::multiply_vpclmul([lhs[index], lhs[index + 1]], [rhs[index], rhs[index + 1]])
+            };
+            let second = unsafe {
+                F::multiply_vpclmul(
+                    [lhs[index + 2], lhs[index + 3]],
+                    [rhs[index + 2], rhs[index + 3]],
+                )
+            };
+            lhs[index] = first[0];
+            lhs[index + 1] = first[1];
+            lhs[index + 2] = second[0];
+            lhs[index + 3] = second[1];
+            index += 4;
+        }
+        if index + 2 <= lhs.len() {
             let product = unsafe {
                 F::multiply_vpclmul([lhs[index], lhs[index + 1]], [rhs[index], rhs[index + 1]])
             };
             lhs[index] = product[0];
             lhs[index + 1] = product[1];
+            index += 2;
         }
-        if !lhs.len().is_multiple_of(2) {
-            let index = lhs.len() - 1;
+        if index < lhs.len() {
             let product =
                 unsafe { F::multiply_vpclmul([lhs[index], F::ZERO], [rhs[index], F::ZERO]) };
             lhs[index] = product[0];
@@ -223,15 +261,23 @@ mod builtins {
 
     #[target_feature(enable = "pclmulqdq,avx2,vpclmulqdq")]
     unsafe fn square_assign_impl<F: VpclmulElement>(values: &mut [F]) {
-        let pair_count = values.len() / 2;
-        for pair in 0..pair_count {
-            let index = pair * 2;
+        let mut index = 0;
+        while index + 4 <= values.len() {
+            let first = unsafe { F::square_vpclmul([values[index], values[index + 1]]) };
+            let second = unsafe { F::square_vpclmul([values[index + 2], values[index + 3]]) };
+            values[index] = first[0];
+            values[index + 1] = first[1];
+            values[index + 2] = second[0];
+            values[index + 3] = second[1];
+            index += 4;
+        }
+        if index + 2 <= values.len() {
             let squared = unsafe { F::square_vpclmul([values[index], values[index + 1]]) };
             values[index] = squared[0];
             values[index + 1] = squared[1];
+            index += 2;
         }
-        if !values.len().is_multiple_of(2) {
-            let index = values.len() - 1;
+        if index < values.len() {
             let squared = unsafe { F::square_vpclmul([values[index], F::ZERO]) };
             values[index] = squared[0];
         }
@@ -292,27 +338,45 @@ unsafe fn verified_multiply_impl<F, const LIMBS: usize, const WIDE_LIMBS: usize>
 ) where
     F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
 {
-    let pair_count = lhs.len() / 2;
-    for pair in 0..pair_count {
-        let index = pair * 2;
-        let wide = unsafe {
-            wide_product_schoolbook_pair::<LIMBS, WIDE_LIMBS>(
-                [lhs[index].__into_limbs(), lhs[index + 1].__into_limbs()],
-                [rhs[index].__into_limbs(), rhs[index + 1].__into_limbs()],
+    let mut index = 0;
+    while index + 4 <= lhs.len() {
+        let first = unsafe {
+            verified_product_pair::<F, LIMBS, WIDE_LIMBS>(
+                [lhs[index], lhs[index + 1]],
+                [rhs[index], rhs[index + 1]],
             )
         };
-        out[index] = F::__from_reduced_limbs(F::__reduce_wide(wide[0]));
-        out[index + 1] = F::__from_reduced_limbs(F::__reduce_wide(wide[1]));
+        let second = unsafe {
+            verified_product_pair::<F, LIMBS, WIDE_LIMBS>(
+                [lhs[index + 2], lhs[index + 3]],
+                [rhs[index + 2], rhs[index + 3]],
+            )
+        };
+        out[index] = first[0];
+        out[index + 1] = first[1];
+        out[index + 2] = second[0];
+        out[index + 3] = second[1];
+        index += 4;
     }
-    if !lhs.len().is_multiple_of(2) {
-        let index = lhs.len() - 1;
-        let wide = unsafe {
-            wide_product_schoolbook_pair::<LIMBS, WIDE_LIMBS>(
-                [lhs[index].__into_limbs(), [0; LIMBS]],
-                [rhs[index].__into_limbs(), [0; LIMBS]],
+    if index + 2 <= lhs.len() {
+        let product = unsafe {
+            verified_product_pair::<F, LIMBS, WIDE_LIMBS>(
+                [lhs[index], lhs[index + 1]],
+                [rhs[index], rhs[index + 1]],
             )
         };
-        out[index] = F::__from_reduced_limbs(F::__reduce_wide(wide[0]));
+        out[index] = product[0];
+        out[index + 1] = product[1];
+        index += 2;
+    }
+    if index < lhs.len() {
+        let product = unsafe {
+            verified_product_pair::<F, LIMBS, WIDE_LIMBS>(
+                [lhs[index], F::ZERO],
+                [rhs[index], F::ZERO],
+            )
+        };
+        out[index] = product[0];
     }
     _mm256_zeroupper();
 }
@@ -334,27 +398,32 @@ unsafe fn verified_square_impl<F, const LIMBS: usize, const WIDE_LIMBS: usize>(
 ) where
     F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
 {
-    let pair_count = values.len() / 2;
-    for pair in 0..pair_count {
-        let index = pair * 2;
-        let wide = unsafe {
-            wide_square_schoolbook_pair::<LIMBS, WIDE_LIMBS>([
-                values[index].__into_limbs(),
-                values[index + 1].__into_limbs(),
-            ])
+    let mut index = 0;
+    while index + 4 <= values.len() {
+        let first = unsafe {
+            verified_square_pair::<F, LIMBS, WIDE_LIMBS>([values[index], values[index + 1]])
         };
-        out[index] = F::__from_reduced_limbs(F::__reduce_wide(wide[0]));
-        out[index + 1] = F::__from_reduced_limbs(F::__reduce_wide(wide[1]));
+        let second = unsafe {
+            verified_square_pair::<F, LIMBS, WIDE_LIMBS>([values[index + 2], values[index + 3]])
+        };
+        out[index] = first[0];
+        out[index + 1] = first[1];
+        out[index + 2] = second[0];
+        out[index + 3] = second[1];
+        index += 4;
     }
-    if !values.len().is_multiple_of(2) {
-        let index = values.len() - 1;
-        let wide = unsafe {
-            wide_square_schoolbook_pair::<LIMBS, WIDE_LIMBS>([
-                values[index].__into_limbs(),
-                [0; LIMBS],
-            ])
+    if index + 2 <= values.len() {
+        let squared = unsafe {
+            verified_square_pair::<F, LIMBS, WIDE_LIMBS>([values[index], values[index + 1]])
         };
-        out[index] = F::__from_reduced_limbs(F::__reduce_wide(wide[0]));
+        out[index] = squared[0];
+        out[index + 1] = squared[1];
+        index += 2;
+    }
+    if index < values.len() {
+        let squared =
+            unsafe { verified_square_pair::<F, LIMBS, WIDE_LIMBS>([values[index], F::ZERO]) };
+        out[index] = squared[0];
     }
     _mm256_zeroupper();
 }
@@ -378,27 +447,45 @@ unsafe fn verified_multiply_assign_impl<F, const LIMBS: usize, const WIDE_LIMBS:
 ) where
     F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
 {
-    let pair_count = lhs.len() / 2;
-    for pair in 0..pair_count {
-        let index = pair * 2;
-        let wide = unsafe {
-            wide_product_schoolbook_pair::<LIMBS, WIDE_LIMBS>(
-                [lhs[index].__into_limbs(), lhs[index + 1].__into_limbs()],
-                [rhs[index].__into_limbs(), rhs[index + 1].__into_limbs()],
+    let mut index = 0;
+    while index + 4 <= lhs.len() {
+        let first = unsafe {
+            verified_product_pair::<F, LIMBS, WIDE_LIMBS>(
+                [lhs[index], lhs[index + 1]],
+                [rhs[index], rhs[index + 1]],
             )
         };
-        lhs[index] = F::__from_reduced_limbs(F::__reduce_wide(wide[0]));
-        lhs[index + 1] = F::__from_reduced_limbs(F::__reduce_wide(wide[1]));
+        let second = unsafe {
+            verified_product_pair::<F, LIMBS, WIDE_LIMBS>(
+                [lhs[index + 2], lhs[index + 3]],
+                [rhs[index + 2], rhs[index + 3]],
+            )
+        };
+        lhs[index] = first[0];
+        lhs[index + 1] = first[1];
+        lhs[index + 2] = second[0];
+        lhs[index + 3] = second[1];
+        index += 4;
     }
-    if !lhs.len().is_multiple_of(2) {
-        let index = lhs.len() - 1;
-        let wide = unsafe {
-            wide_product_schoolbook_pair::<LIMBS, WIDE_LIMBS>(
-                [lhs[index].__into_limbs(), [0; LIMBS]],
-                [rhs[index].__into_limbs(), [0; LIMBS]],
+    if index + 2 <= lhs.len() {
+        let product = unsafe {
+            verified_product_pair::<F, LIMBS, WIDE_LIMBS>(
+                [lhs[index], lhs[index + 1]],
+                [rhs[index], rhs[index + 1]],
             )
         };
-        lhs[index] = F::__from_reduced_limbs(F::__reduce_wide(wide[0]));
+        lhs[index] = product[0];
+        lhs[index + 1] = product[1];
+        index += 2;
+    }
+    if index < lhs.len() {
+        let product = unsafe {
+            verified_product_pair::<F, LIMBS, WIDE_LIMBS>(
+                [lhs[index], F::ZERO],
+                [rhs[index], F::ZERO],
+            )
+        };
+        lhs[index] = product[0];
     }
     _mm256_zeroupper();
 }
@@ -418,29 +505,73 @@ unsafe fn verified_square_assign_impl<F, const LIMBS: usize, const WIDE_LIMBS: u
 ) where
     F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
 {
-    let pair_count = values.len() / 2;
-    for pair in 0..pair_count {
-        let index = pair * 2;
-        let wide = unsafe {
-            wide_square_schoolbook_pair::<LIMBS, WIDE_LIMBS>([
-                values[index].__into_limbs(),
-                values[index + 1].__into_limbs(),
-            ])
+    let mut index = 0;
+    while index + 4 <= values.len() {
+        let first = unsafe {
+            verified_square_pair::<F, LIMBS, WIDE_LIMBS>([values[index], values[index + 1]])
         };
-        values[index] = F::__from_reduced_limbs(F::__reduce_wide(wide[0]));
-        values[index + 1] = F::__from_reduced_limbs(F::__reduce_wide(wide[1]));
+        let second = unsafe {
+            verified_square_pair::<F, LIMBS, WIDE_LIMBS>([values[index + 2], values[index + 3]])
+        };
+        values[index] = first[0];
+        values[index + 1] = first[1];
+        values[index + 2] = second[0];
+        values[index + 3] = second[1];
+        index += 4;
     }
-    if !values.len().is_multiple_of(2) {
-        let index = values.len() - 1;
-        let wide = unsafe {
-            wide_square_schoolbook_pair::<LIMBS, WIDE_LIMBS>([
-                values[index].__into_limbs(),
-                [0; LIMBS],
-            ])
+    if index + 2 <= values.len() {
+        let squared = unsafe {
+            verified_square_pair::<F, LIMBS, WIDE_LIMBS>([values[index], values[index + 1]])
         };
-        values[index] = F::__from_reduced_limbs(F::__reduce_wide(wide[0]));
+        values[index] = squared[0];
+        values[index + 1] = squared[1];
+        index += 2;
+    }
+    if index < values.len() {
+        let squared =
+            unsafe { verified_square_pair::<F, LIMBS, WIDE_LIMBS>([values[index], F::ZERO]) };
+        values[index] = squared[0];
     }
     _mm256_zeroupper();
+}
+
+#[inline]
+unsafe fn verified_product_pair<F, const LIMBS: usize, const WIDE_LIMBS: usize>(
+    lhs: [F; 2],
+    rhs: [F; 2],
+) -> [F; 2]
+where
+    F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
+{
+    let wide = unsafe {
+        wide_product_schoolbook_pair::<LIMBS, WIDE_LIMBS>(
+            [lhs[0].__into_limbs(), lhs[1].__into_limbs()],
+            [rhs[0].__into_limbs(), rhs[1].__into_limbs()],
+        )
+    };
+    [
+        F::__from_reduced_limbs(F::__reduce_wide(wide[0])),
+        F::__from_reduced_limbs(F::__reduce_wide(wide[1])),
+    ]
+}
+
+#[inline]
+unsafe fn verified_square_pair<F, const LIMBS: usize, const WIDE_LIMBS: usize>(
+    values: [F; 2],
+) -> [F; 2]
+where
+    F: crate::__private::VerifiedBinaryIsaField<LIMBS, WIDE_LIMBS>,
+{
+    let wide = unsafe {
+        wide_square_schoolbook_pair::<LIMBS, WIDE_LIMBS>([
+            values[0].__into_limbs(),
+            values[1].__into_limbs(),
+        ])
+    };
+    [
+        F::__from_reduced_limbs(F::__reduce_wide(wide[0])),
+        F::__from_reduced_limbs(F::__reduce_wide(wide[1])),
+    ]
 }
 
 #[target_feature(enable = "pclmulqdq,avx2,vpclmulqdq")]

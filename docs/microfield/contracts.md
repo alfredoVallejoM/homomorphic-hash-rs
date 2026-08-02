@@ -215,13 +215,18 @@ Un campo ABI 1/2 continúa devolviendo
 `BackendUnsupportedByField`. En todos los casos se distingue CPU sin capability
 (`BackendUnsupportedByCpu`) de campo sin perfil.
 
-PCLMUL mantenido participa en selección automática con el umbral medido. PMULL,
-VPCLMUL y todo perfil externo tienen `automatic_selection = false`: solo un
-backend forzado tras detección puede usarlos. En VPCLMUL esta exclusión es una
-decisión medida: la ganancia GF(2¹²⁸) local no generaliza y las rutas de 256
-bits pierden frente a PCLMUL. `FixedSchedule` también respeta esta regla salvo
-que se fuerce el backend. Portable no recibe garantía fija porque su producto
-actual depende de los operandos.
+PCLMUL mantenido participa en selección automática con el umbral medido. Los
+backends primos mantenidos hacen lo mismo solo en su región certificada:
+`Fp251V1` AVX2 desde 64 elementos y `FpGoldilocks64V1` AVX2 desde 4. PMULL,
+VPCLMUL, BMI2 primo y todo perfil externo tienen
+`automatic_selection = false`: solo un backend forzado tras detección puede
+usarlos. Los perfiles externos canónicos `u8`/`u16` pueden recibir un candidato
+AVX2 opaco, pero no heredan la calibración de los campos mantenidos. En
+VPCLMUL la exclusión es una decisión medida: el desenrollado mejora rutas
+GF(2²⁵⁶) largas, pero no supera a PCLMUL de forma estable en la región conjunta.
+`FixedSchedule` también respeta esta regla salvo que se fuerce el backend.
+Portable no recibe garantía fija porque su producto actual depende de los
+operandos.
 
 `EngineBuilder::build()` usa por defecto `CpuCapabilities::portable_only()` y
 nunca hace detección implícita. Con `std`, `EngineBuilder::detect()` captura una
@@ -247,19 +252,33 @@ al tile y al alineamiento. Sus campos son privados y no se serializa.
 
 H2.6 admite `PackedLayout::Aos`. H2.7 añade `AosLanePairs` exclusivamente para
 VPCLMUL: dos elementos AoS forman una tesela, la longitud padded es par y el
-inicio se alinea a 32 bytes. El backend realiza el interleave en registros; no
-se exponen limbs ni cambia el layout de `F`.
+inicio se alinea a 32 bytes. F4.7 añade `CanonicalU8`, `CanonicalU16` y
+`CanonicalU32` para storage persistente de perfiles primos. El backend realiza
+el interleave o trabaja sobre lanes privadas; no se exponen limbs ni cambia el
+layout de `F`.
 
 `PackedBatch<F>` requiere `alloc`. `PackedBatchView` y
 `PackedBatchViewMut` no lo requieren y toman prestado storage
 `MaybeUninit<u8>` mediante `pack_into_storage`. `required_packed_bytes` incluye
 el peor slack de alineamiento; longitud cero requiere cero bytes. Todo slot
-padded se inicializa con `F::ZERO` antes de exponer una referencia tipada.
+padded se inicializa antes de exponer una referencia tipada: con `F::ZERO` para
+AoS o con la lane canónica cero para storage primo.
 
-Producto y cuadrado packed tienen rutas distintas out-of-place e in-place. Una
-operación valida todos los planes y el backend antes de escribir, y después
-realiza una llamada al kernel seleccionado sobre la región padded. No asigna,
-no hace repacking, no detecta CPU ni selecciona estrategia durante la operación.
+`PackingPlan::element_size()` conserva el tamaño lógico de `F` por
+compatibilidad. `physical_element_size()` y `data_bytes()` describen el storage
+real. El plan recibe el layout desde la estrategia packed del `KernelSet`; no
+lo infiere solo de `BackendId`.
+
+Suma, producto y cuadrado packed tienen rutas out-of-place; producto y cuadrado
+ofrecen además sus variantes in-place. Una operación valida todos los planes y
+el backend antes de escribir, y después realiza una llamada al kernel
+seleccionado sobre la región padded. No asigna, no hace repacking, no detecta
+CPU ni selecciona estrategia durante la operación.
+
+Los codecs `F ↔ u8/u16/u32` son funciones seguras y monomorfizadas. Los
+perfiles AVX2 externos siguen siendo explícitos. Admitir una anchura física
+demuestra compatibilidad y corrección, no autoriza selección automática ni
+transfiere la calibración entre módulos.
 
 Los préstamos expresan aliasing: una vista mutable conserva el préstamo
 exclusivo del storage y no puede coexistir de forma segura con otra vista sobre
@@ -289,3 +308,19 @@ los valores. El perfil ABI 3 publica `schedule = fixed` solamente para
 `low_tail_fold`; `sparse_term_fold` y `dense_word_fold` publican
 `schedule = data_dependent`, pues su reducción inspecciona bits del producto.
 `FixedSchedule` respeta esa clasificación incluso ante selección explícita.
+
+Los campos Montgomery con `N` limbs de 64 bits pueden implementar el puerto
+público-oculto `VerifiedPrimeMontgomery64Field<N, 2N>` y obtener una
+`VerifiedPrimeIsaStrategy` opaca. Intrinsics, función kernel y catálogo mutable
+permanecen dentro de Microfield. El campo entrega únicamente módulo, inversa y
+conversiones de limbs; el runtime es dueño de suma, producto ancho, carry, REDC
+y corrección. Esta elegibilidad no es una certificación de rendimiento. Cada
+`KernelSet` necesita una decisión de promoción propia; el candidato de
+`Fp256GenericV1` conserva `automatic_selection = false`.
+
+BMI2 se clasifica como `ScheduleKind::Fixed`: producto y REDC usan iteraciones
+determinadas por `N`, recorren por completo cada cadena de carry y seleccionan
+la resta final sin ramas dependientes del valor. La auditoría de release exige
+16 `MULX` y ausencia de saltos condicionales en el producto+REDC mantenido de
+cuatro limbs. `FixedSchedule` puede forzarlo, pero esta propiedad no equivale a
+una garantía criptográfica integral de tiempo constante.

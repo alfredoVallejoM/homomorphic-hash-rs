@@ -40,8 +40,21 @@ asignaciones ocultas ni nuevas fronteras `unsafe`.
 La Fase 4 añade `Fp251V1`, `FpGoldilocks64V1` y `Fp256GenericV1`. Los tres
 campos tienen certificados reproducibles, encoding canónico, algoritmos
 portables, bundles autenticados y vectores Sage. AVX2 acelera los lotes de 251
-desde la región medida; BMI2 multi-limb queda disponible de forma explícita al
-no superar al portable. La factory de primos externos se reserva para Fase 5.
+desde 64 elementos y Goldilocks desde 4. La extensión F4.6-SIMD añade además
+bridges AVX2 explícitos para primos externos canónicos `u8`/`u16` y desenrolla
+dos pares VPCLMUL; BMI2 dispone de un factory interno genérico para
+representaciones Montgomery radix 64, con carry fijo y corrección branchless.
+Es compatible con `FixedSchedule`, pero queda explícito porque aún pierde
+ligeramente frente a portable en el build auditado. Los bridges externos no se
+promueven sin calibración propia. La factory completa de primos externos se
+reserva para Fase 5.
+
+F4.7-PACKED-SIMD está implementada: `PackedBatch<F>` puede conservar storage
+privado `u8`/`u16`/`u32`, ejecutar cinco operaciones sin repacking y convertir
+solo al entrar y salir. El perfil externo `u16` supera conservadoramente el
+58 % desde 64 elementos; los perfiles externos permanecen explícitos. El ABI
+batch ordinario y los kernels especializados no cambiaron. El siguiente corte
+es Fase 5, generación certificada de perfiles primos externos.
 
 ## Comandos
 
@@ -91,7 +104,10 @@ El cierre, las garantías y las limitaciones de la Fase 2 están en
 
 El plan ejecutado de Fase 2 está en `docs/microfield/phase-2-plan.md`.
 
-El cierre de Fase 3 está en `docs/microfield/phase-3-final-report.md` y el de
-Fase 4 en `docs/microfield/phase-4-final-report.md`. El roadmap
+El cierre de Fase 3 está en `docs/microfield/phase-3-final-report.md`, el de
+Fase 4 en `docs/microfield/phase-4-final-report.md` y la ampliación SIMD en
+`docs/microfield/phase-4-6-report.md`. La planificación y el cierre del storage
+SIMD persistente están en `docs/microfield/phase-4-7-plan.md` y
+`docs/microfield/phase-4-7-final-report.md`. El roadmap
 corregido incluye la rehabilitación del legado y canonización de grafos dentro
 de Fase 6 en `docs/microfield/phases-3-7-roadmap.md`.

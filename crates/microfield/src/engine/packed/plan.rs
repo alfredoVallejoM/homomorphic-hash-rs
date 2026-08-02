@@ -2,7 +2,10 @@
 
 use core::{fmt, mem};
 
-use crate::{BackendId, FieldId, KernelMetadata, StaticField};
+use crate::{
+    BackendId, FieldId, StaticField,
+    kernel::{KernelSet, PackedStorageKind},
+};
 
 /// Physical representation used by a packed batch.
 ///
@@ -18,6 +21,12 @@ pub enum PackedLayout {
     /// even padded length and a 32-byte allocation start, while the backend
     /// performs the register-level lane interleave.
     AosLanePairs,
+    /// Canonical residues stored as independent `u8` SIMD lanes.
+    CanonicalU8,
+    /// Canonical residues stored as independent `u16` SIMD lanes.
+    CanonicalU16,
+    /// Canonical residues stored as independent `u32` SIMD lanes.
+    CanonicalU32,
 }
 
 /// Immutable description of one packed allocation or borrowed view.
@@ -34,21 +43,50 @@ pub struct PackingPlan {
     tile_elements: usize,
     limb_count: usize,
     element_size: usize,
+    physical_element_size: usize,
     alignment: usize,
     data_bytes: usize,
 }
 
 impl PackingPlan {
     pub(super) fn build<F: StaticField>(
-        metadata: &KernelMetadata,
+        kernels: &KernelSet<F>,
         logical_len: usize,
     ) -> Result<Self, PackError> {
+        let metadata = &kernels.metadata;
         let element_size = mem::size_of::<F>();
         if element_size == 0 {
             return Err(PackError::ZeroSizedField);
         }
 
-        let alignment = metadata.required_alignment().max(mem::align_of::<F>());
+        let (layout, physical_element_size, physical_alignment) =
+            match kernels.packed.storage_kind() {
+                PackedStorageKind::Aos => (
+                    if metadata.backend() == BackendId::X86Vpclmul {
+                        PackedLayout::AosLanePairs
+                    } else {
+                        PackedLayout::Aos
+                    },
+                    element_size,
+                    mem::align_of::<F>(),
+                ),
+                PackedStorageKind::CanonicalU8 => (
+                    PackedLayout::CanonicalU8,
+                    mem::size_of::<u8>(),
+                    mem::align_of::<u8>(),
+                ),
+                PackedStorageKind::CanonicalU16 => (
+                    PackedLayout::CanonicalU16,
+                    mem::size_of::<u16>(),
+                    mem::align_of::<u16>(),
+                ),
+                PackedStorageKind::CanonicalU32 => (
+                    PackedLayout::CanonicalU32,
+                    mem::size_of::<u32>(),
+                    mem::align_of::<u32>(),
+                ),
+            };
+        let alignment = metadata.required_alignment().max(physical_alignment);
         if !alignment.is_power_of_two() {
             return Err(PackError::InvalidAlignment { alignment });
         }
@@ -63,7 +101,7 @@ impl PackingPlan {
                 .ok_or(PackError::SizeOverflow)?
         };
         let data_bytes = padded_len
-            .checked_mul(element_size)
+            .checked_mul(physical_element_size)
             .ok_or(PackError::SizeOverflow)?;
         let degree = F::spec().degree() as usize;
         let limb_count = degree.checked_add(63).ok_or(PackError::SizeOverflow)? / 64;
@@ -71,16 +109,13 @@ impl PackingPlan {
         Ok(Self {
             backend: metadata.backend(),
             field_id: F::spec().field_id(),
-            layout: if metadata.backend() == BackendId::X86Vpclmul {
-                PackedLayout::AosLanePairs
-            } else {
-                PackedLayout::Aos
-            },
+            layout,
             logical_len,
             padded_len,
             tile_elements,
             limb_count,
             element_size,
+            physical_element_size,
             alignment,
             data_bytes,
         })
@@ -132,6 +167,15 @@ impl PackingPlan {
     #[must_use]
     pub const fn element_size(&self) -> usize {
         self.element_size
+    }
+
+    /// Returns the size of one physical packed lane in bytes.
+    ///
+    /// This differs from [`Self::element_size`] for canonical lane bridges
+    /// whose external field type has a larger or opaque object layout.
+    #[must_use]
+    pub const fn physical_element_size(&self) -> usize {
+        self.physical_element_size
     }
 
     /// Returns the required start alignment in bytes.
@@ -232,24 +276,52 @@ mod tests {
     #[test]
     fn planner_rounds_tiles_and_checks_every_size_operation() {
         let metadata = KernelMetadata::for_packing_test(4, 64);
-        let plan = PackingPlan::build::<Gf2_128V1>(&metadata, 5).expect("valid plan");
+        let kernels = crate::kernel::KernelSet::new(
+            metadata,
+            test_binary,
+            test_binary,
+            test_unary,
+            test_binary_assign,
+            test_unary_assign,
+        );
+        let plan = PackingPlan::build::<Gf2_128V1>(&kernels, 5).expect("valid plan");
         assert_eq!(plan.layout(), PackedLayout::Aos);
         assert_eq!(plan.logical_len(), 5);
         assert_eq!(plan.padded_len(), 8);
         assert_eq!(plan.tile_elements(), 4);
         assert_eq!(plan.limb_count(), 2);
         assert_eq!(plan.element_size(), 16);
+        assert_eq!(plan.physical_element_size(), 16);
         assert_eq!(plan.alignment(), 64);
         assert_eq!(plan.data_bytes(), 128);
 
         assert_eq!(
-            PackingPlan::build::<Gf2_128V1>(&metadata, usize::MAX),
+            PackingPlan::build::<Gf2_128V1>(&kernels, usize::MAX),
             Err(PackError::SizeOverflow)
         );
-        let invalid = KernelMetadata::for_packing_test(1, 24);
+        let invalid = crate::kernel::KernelSet::new(
+            KernelMetadata::for_packing_test(1, 24),
+            test_binary,
+            test_binary,
+            test_unary,
+            test_binary_assign,
+            test_unary_assign,
+        );
         assert_eq!(
             PackingPlan::build::<Gf2_128V1>(&invalid, 1),
             Err(PackError::InvalidAlignment { alignment: 24 })
         );
     }
+
+    fn test_binary(out: &mut [Gf2_128V1], lhs: &[Gf2_128V1], _rhs: &[Gf2_128V1]) {
+        out.copy_from_slice(lhs);
+    }
+
+    fn test_unary(out: &mut [Gf2_128V1], values: &[Gf2_128V1]) {
+        out.copy_from_slice(values);
+    }
+
+    fn test_binary_assign(_lhs: &mut [Gf2_128V1], _rhs: &[Gf2_128V1]) {}
+
+    fn test_unary_assign(_values: &mut [Gf2_128V1]) {}
 }
