@@ -3142,6 +3142,41 @@ firmas algebraicas coinciden, el canonizador continuará con comparación
 estructural exacta. El desarrollo detallado se pospone hasta Fase 6 y queda
 trazado en `docs/microfield/phases-3-7-roadmap.md`.
 
+# 20. Fase 4 implementada: campos primos
+
+La arquitectura soporta ya característica prima sin modificar `Field`, el
+elemento binario ni los algoritmos derivados. Se mantienen tres tipos
+nominales:
+
+1. `Fp251V1`, residuo canónico de un byte y backend AVX2;
+2. `FpGoldilocks64V1`, residuo canónico de palabra y reducciones Solinas y
+   Barrett verificadas;
+3. `Fp256GenericV1`, primo determinista de 256 bits en Montgomery CIOS y
+   backend BMI2 explícito.
+
+`PrimeField`, `SquareRootField`, `PrimeRepresentationKind`, los planes de
+reducción y `PrimeKernelMetadata` forman contratos segregados. Los limbs,
+productos anchos, valores Montgomery y estados lazy siguen privados. El
+producto ancho se separa de la reducción mediante un trait interno estático;
+no existe `dyn Trait` ni dispatch en operaciones escalares.
+
+Cada campo posee `FieldId`, `ArtifactId`, certificado y bundle. El primo
+genérico se reproduce desde una semilla pública; Pocklington se verifica dentro
+del runtime sin depender de Sage. SageMath aporta un segundo oráculo y un corpus
+determinista para suma, resta, producto, cuadrado e inversa.
+
+La selección conserva la política de estabilidad: AVX2 para 251 entra en
+`Auto` desde 64 elementos porque gana en la región medida. BMI2 de 256 bits es
+correcto y forzable, pero permanece fuera de `Auto` al resultar más lento que
+portable. IFMA y un backend primo AArch64 no se anuncian sin hardware,
+cobertura y medición reproducible.
+
+La factory TOML v1 no se amplía retrospectivamente: acepta solo campos
+binarios. La factory de primos externos, junto a assurance demostrado/probable,
+lock y contextos, abre la Fase 5. El plan y el informe autoritativos están en
+`docs/microfield/phase-4-plan.md` y
+`docs/microfield/phase-4-final-report.md`.
+
 # Referencias técnicas
 
 1. Rust Project,

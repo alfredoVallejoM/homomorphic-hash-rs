@@ -7,8 +7,8 @@ mod pow;
 mod traits;
 
 pub use base::F2;
-pub use metadata::StaticFieldSpec;
+pub use metadata::{Characteristic, StaticFieldSpec};
 pub use traits::{
-    BinaryPolynomialField, CanonicalEncoding, ExtensionField, Field, Invert, Pow, Square,
-    StaticField,
+    BinaryPolynomialField, CanonicalEncoding, ExtensionField, Field, Invert, Pow, PrimeField,
+    Square, SquareRootField, StaticField,
 };

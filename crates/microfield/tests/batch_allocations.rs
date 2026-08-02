@@ -14,6 +14,9 @@ use microfield::{
     required_packed_bytes,
 };
 
+#[cfg(feature = "prime-fields")]
+use microfield::{Fp251V1, Fp256GenericV1, FpGoldilocks64V1, PrimeField};
+
 #[test]
 fn every_available_batch_operation_allocates_zero_times() {
     assert_zero_allocations::<Gf2_128V1, 16>();
@@ -80,6 +83,43 @@ fn capability_detection_and_engine_selection_allocate_zero_times() {
         });
         assert_allocation_info_is_zero(forced);
     }
+}
+
+#[cfg(feature = "prime-fields")]
+#[test]
+fn every_prime_batch_route_allocates_zero_times() {
+    assert_prime_zero_allocations::<Fp251V1>();
+    assert_prime_zero_allocations::<FpGoldilocks64V1>();
+    assert_prime_zero_allocations::<Fp256GenericV1>();
+}
+
+#[cfg(feature = "prime-fields")]
+fn assert_prime_zero_allocations<F>()
+where
+    F: microfield::BuiltinField
+        + CanonicalEncoding
+        + StaticField
+        + PrimeField
+        + Invert
+        + core::fmt::Debug,
+{
+    const LEN: usize = 64;
+    let lhs = vec![F::from_bytes_mod_order(&[0xa5; 48]); LEN];
+    let rhs = vec![F::from_bytes_mod_order(&[0x3c; 48]); LEN];
+    let mut output = vec![F::ZERO; LEN];
+    let mut assigned = lhs.clone();
+    let detected = Engine::<F>::builder()
+        .expected_batch(LEN)
+        .detect()
+        .expect("portable or a certified prime ISA backend must be available");
+    assert_engine_allocates_zero(
+        Engine::<F>::portable(),
+        &mut output,
+        &lhs,
+        &rhs,
+        &mut assigned,
+    );
+    assert_engine_allocates_zero(detected, &mut output, &lhs, &rhs, &mut assigned);
 }
 
 fn assert_zero_allocations<F, const BYTES: usize>()

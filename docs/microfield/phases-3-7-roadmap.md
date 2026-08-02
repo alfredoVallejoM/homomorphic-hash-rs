@@ -9,21 +9,23 @@ actuales, catálogo sellado y generación ABI v3.
 Algoritmos derivados, workspace tipado, IR de inversión verificado y
 benchmarks. Véase [phase-3-plan.md](phase-3-plan.md).
 
-## Fase 4 — campos primos
+## Fase 4 — cerrada
 
-1. congelar campos de aceptación y certificados de primalidad;
-2. separar entero canónico, representación interna y rango lazy;
-3. `Fp251V1`, Goldilocks y un primo multi-limb sin forma especial;
-4. portable antes de BMI2/ADX, PMULL/NEON o IFMA;
-5. reutilizar los planes de Fase 3 sin introducir supuestos de característica
-   dos.
+Los tres campos primos, planes Native/Barrett/Solinas/Montgomery, certificados,
+corpus Sage, batch y adapters AVX2/BMI2 están implementados. AVX2 para 251 es
+automático desde su región medida; BMI2 permanece explícito porque no ganó al
+portable. Véanse [phase-4-plan.md](phase-4-plan.md) y
+[phase-4-final-report.md](phase-4-final-report.md).
 
 ## Fase 5 — generación y contextos externos
 
-El puente estático de campos externos ya existe. La fase se concentra en
+Es la siguiente fase. El puente estático de campos binarios externos ya existe.
+La fase se concentra en
 bundle/lock, caché concurrente segura, CLI independiente y, después, contextos
-dinámicos con checks amortizados. Los registros de `Engine` externos siguen
-siendo generados y sellados; el consumidor no escribe catálogos raw.
+dinámicos con checks amortizados. Su primer corte extiende la factory a campos
+primos externos y hace visible `Proven` frente a `ProbablePrime`. Los registros
+de `Engine` externos siguen siendo generados y sellados; el consumidor no
+escribe catálogos raw.
 
 ## Fase 6 — legado, firmas estructurales y canonización de grafos
 

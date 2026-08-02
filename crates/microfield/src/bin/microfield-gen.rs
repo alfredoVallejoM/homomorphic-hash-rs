@@ -56,8 +56,25 @@ fn run(mut arguments: Vec<String>) -> Result<ExitCode, CliError> {
         "emit" | "all" => command_emit(generator, arguments, json),
         "check" => command_check(generator, arguments, json),
         "vectors" => command_vectors(generator, arguments),
+        "verify-primes" => command_verify_primes(&arguments, json),
         _ => Err(CliError::Usage(format!("unknown command `{command}`"))),
     }
+}
+
+fn command_verify_primes(arguments: &[String], json: bool) -> Result<ExitCode, CliError> {
+    if !arguments.is_empty() {
+        return Err(CliError::Usage(
+            "verify-primes does not accept positional arguments".to_owned(),
+        ));
+    }
+    microfield::verify_builtin_prime_certificates()
+        .map_err(|error| CliError::Output(error.to_string()))?;
+    if json {
+        println!("{{\"ok\":true,\"certificates\":3}}");
+    } else {
+        println!("three maintained prime certificates verified");
+    }
+    Ok(ExitCode::SUCCESS)
 }
 
 fn command_normalize(
@@ -244,6 +261,7 @@ fn print_help() {
          microfield-gen emit MANIFEST --out DIRECTORY [--json]\n  \
          microfield-gen check MANIFEST --out DIRECTORY [--json]\n  \
          microfield-gen vectors MANIFEST [--oracle-json FILE | --sage PATH] [--out FILE]\n  \
+         microfield-gen verify-primes [--json]\n  \
          microfield-gen all MANIFEST --out DIRECTORY [--json]\n",
         version = env!("CARGO_PKG_VERSION")
     );

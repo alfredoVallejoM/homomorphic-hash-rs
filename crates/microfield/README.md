@@ -1,6 +1,6 @@
 # Microfield
 
-Núcleo portable para campos finitos binarios con abstracciones de coste cero.
+Núcleo portable para campos finitos binarios y primos con abstracciones de coste cero.
 
 La Fase 1 portable está completa e integrada. El paquete incluye:
 
@@ -60,13 +60,13 @@ sellado `AosLanePairs` agrupa dos elementos, alinea a 32 bytes e inicializa una
 cola padded cuando hace falta. La auditoría exige `vpclmulqdq` y `vzeroupper`.
 El backend es forzable pero no automático: solo mostró una mejora modesta para
 GF(2¹²⁸) en la CPU local y perdió frente a PCLMUL en 256 bits. El crate niega
-`unsafe` salvo en los tres adaptadores ISA y el módulo de storage alineado.
+`unsafe` salvo en los cuatro adaptadores ISA y el módulo de storage alineado.
 
 H2.8 cierra la Fase 2 con una tabla estática de calibración v1. La tabla forma
 parte del código revisado pero se resuelve en compilación: no existe lookup,
 autotuning ni detección adicional en el hot path. Un corpus diferencial
 persistente prueba toda ISA disponible; un inventario SHA-256 obliga a revisar
-cualquier cambio en las cuatro fronteras `unsafe`; y la matriz de compatibilidad
+cualquier cambio en las cinco fronteras `unsafe`; y la matriz de compatibilidad
 fija runtime ABI 1..=3 y codegen ABI 3. Los perfiles Criterion se capturan con
 entorno completo y nunca se promueven automáticamente desde CI.
 
@@ -75,6 +75,13 @@ tolerante a cero con máscara compacta y workspace tipado, scans prefijo/sufijo,
 Horner en dos orientaciones, `mul_add_into` y potencias fijas. Los planes son
 inmutables y backend-bound; las rutas prestadas funcionan sin `alloc`. El IR v4
 describe y verifica simbólicamente la cadena Itoh–Tsujii realmente ejecutada.
+
+Fase 4 incorpora tres campos primos mantenidos. `Fp251V1` usa un byte
+canónico, `FpGoldilocks64V1` selecciona Barrett tras compararlo con Solinas y
+`Fp256GenericV1` usa Montgomery CIOS de cuatro limbs privados. Los tres
+comparten `Engine`, packed batches e inversión batch. AVX2 para 251 es
+automático desde 64 elementos; BMI2 de 256 bits es correcto y forzable, pero no
+automático. Los certificados se reproducen con `verify-primes` y SageMath.
 
 ```rust
 use microfield::{Engine, Field, Gf2_256HhV1, PackedBatch};
@@ -126,12 +133,15 @@ cargo test -p microfield --features generator --all-targets
 cargo test -p microfield --all-features --doc
 cargo clippy -p microfield --all-features --all-targets -- -D warnings
 cargo check -p microfield --no-default-features --features portable,builtin-fields
+cargo check -p microfield --no-default-features --features portable,prime-fields
 cargo check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 cargo bench -p microfield --bench portable_batch
 cargo bench -p microfield --bench portable_codegen_optimizer
 cargo bench -p microfield --bench derived_algorithms
+cargo bench -p microfield --bench prime_fields
 bash crates/microfield/tools/audit_calibration.sh
 bash crates/microfield/tools/audit_unsafe_scope.sh
+bash crates/microfield/tools/audit_x86_prime.sh
 ```
 
 Ejemplo:

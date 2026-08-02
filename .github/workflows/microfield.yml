@@ -39,6 +39,8 @@ jobs:
         run: bash crates/microfield/tools/audit_x86_pclmul.sh
       - name: Audit x86-64 VPCLMUL assembly
         run: bash crates/microfield/tools/audit_x86_vpclmul.sh
+      - name: Audit x86-64 prime-field assembly
+        run: bash crates/microfield/tools/audit_x86_prime.sh
       - name: Install AArch64 target for PMULL assembly audit
         run: rustup +stable target add aarch64-unknown-linux-gnu
       - name: Audit AArch64 PMULL assembly
@@ -75,11 +77,15 @@ jobs:
       - run: cargo +stable check -p microfield --no-default-features --features builtin-fields
       - run: cargo +stable check -p microfield --no-default-features --features portable
       - run: cargo +stable check -p microfield --no-default-features --features portable,builtin-fields
+      - run: cargo +stable check -p microfield --no-default-features --features prime-fields
+      - run: cargo +stable check -p microfield --no-default-features --features portable,prime-fields
       - run: cargo +stable check -p microfield --no-default-features --features alloc,portable,builtin-fields
+      - run: cargo +stable check -p microfield --no-default-features --features alloc,portable,prime-fields
       - run: cargo +stable check -p microfield --no-default-features --features std,portable
       - run: cargo +stable check -p microfield --no-default-features --features generator
       - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable
       - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable,builtin-fields
+      - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable,prime-fields
       - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features std,portable,builtin-fields
       - name: External ABI 3 scalar-only no_std
         run: cargo +stable check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
@@ -112,6 +118,10 @@ jobs:
               --bin microfield-gen -- check "$manifest" \
               --out crates/microfield/artifacts
           done
+      - name: Replay maintained prime certificates
+        run: >-
+          cargo +stable run -q -p microfield --features generator
+          --bin microfield-gen -- verify-primes --json
 
   miri:
     name: Miri runtime
@@ -133,6 +143,10 @@ jobs:
           cargo +nightly miri test -p microfield --no-default-features
           --features generator,portable,builtin-fields
           --test differential_corpus --test runtime_codegen_stability
+      - name: Miri Phase 4 portable prime fields
+        run: >-
+          cargo +nightly miri test -p microfield --no-default-features
+          --features portable,prime-fields --test prime_fields
 
   x86-asan:
     name: x86-64 PCLMUL/VPCLMUL AddressSanitizer
@@ -141,13 +155,14 @@ jobs:
       - uses: actions/checkout@v6
       - name: Install nightly Rust with sources
         run: rustup toolchain install nightly --profile minimal --component rust-src
-      - name: Test audited PCLMUL and VPCLMUL boundaries under ASan
+      - name: Test audited x86 binary and prime boundaries under ASan
         env:
           RUSTFLAGS: -Zsanitizer=address
           ASAN_OPTIONS: detect_leaks=0
         run: >-
           cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
           -p microfield --all-features --test x86_pclmul --test x86_vpclmul
+          --test x86_prime --test prime_fields --test prime_artifacts
           --test packed_batch --test packed_views --test differential_corpus
           --test phase3_algorithms
       - name: External profile PCLMUL AddressSanitizer
@@ -170,7 +185,7 @@ jobs:
         run: >-
           cargo +stable test -p microfield --all-features --test aarch64_pmull
           --test packed_batch --test packed_views --test differential_corpus
-          --test phase3_algorithms
+          --test phase3_algorithms --test prime_fields --test prime_artifacts
       - name: Generated external profiles on PMULL
         run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
       - name: Zero-allocation PMULL gate
@@ -182,7 +197,7 @@ jobs:
       - name: Build benchmark harness on real hardware
         run: >-
           cargo +stable bench -p microfield --bench portable_batch
-          --bench derived_algorithms --no-run
+          --bench derived_algorithms --bench prime_fields --no-run
       - name: Install nightly Rust with sources
         run: rustup toolchain install nightly --profile minimal --component rust-src
       - name: PMULL AddressSanitizer
@@ -191,9 +206,9 @@ jobs:
           ASAN_OPTIONS: detect_leaks=0
         run: >-
           cargo +nightly test -Zbuild-std --target aarch64-unknown-linux-gnu
-          -p microfield --no-default-features --features std,portable,builtin-fields
+          -p microfield --no-default-features --features std,portable,builtin-fields,prime-fields
           --test aarch64_pmull --test packed_batch --test packed_views
-          --test differential_corpus --test phase3_algorithms
+          --test differential_corpus --test phase3_algorithms --test prime_fields
       - name: External profile PMULL AddressSanitizer
         env:
           RUSTFLAGS: -Zsanitizer=address

@@ -18,7 +18,12 @@ pub(crate) use calibration::{SelectionCalibration, X86_PCLMUL, X86_VPCLMUL_128, 
 pub use catalog::BuiltinField;
 pub use catalog::KernelCatalog;
 pub(crate) use catalog::KernelSet;
+#[cfg(feature = "prime-fields")]
+pub use metadata::PrimeKernelMetadata;
 pub use metadata::{BackendId, KernelMetadata, ScheduleKind};
 
-#[cfg(all(feature = "portable", feature = "builtin-fields"))]
+#[cfg(all(
+    feature = "portable",
+    any(feature = "builtin-fields", feature = "prime-fields")
+))]
 pub(crate) use catalog::sealed;

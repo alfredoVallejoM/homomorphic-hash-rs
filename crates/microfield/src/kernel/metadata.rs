@@ -1,5 +1,80 @@
 //! Backend-independent kernel capabilities and scheduling metadata.
 
+#[cfg(feature = "prime-fields")]
+use crate::{PrimeReductionKind, PrimeRepresentationKind, RangeContract};
+
+/// Auditable representation and range metadata for a prime-field kernel.
+#[cfg(feature = "prime-fields")]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct PrimeKernelMetadata {
+    representation: PrimeRepresentationKind,
+    reduction: PrimeReductionKind,
+    input_range: RangeContract,
+    output_range: RangeContract,
+    lanes: u16,
+    requires_packing: bool,
+}
+
+#[cfg(feature = "prime-fields")]
+impl PrimeKernelMetadata {
+    /// Creates certified kernel metadata without exposing arithmetic constants.
+    #[doc(hidden)]
+    #[must_use]
+    pub const fn __from_generated(
+        representation: PrimeRepresentationKind,
+        reduction: PrimeReductionKind,
+        input_range: RangeContract,
+        output_range: RangeContract,
+        lanes: u16,
+        requires_packing: bool,
+    ) -> Self {
+        Self {
+            representation,
+            reduction,
+            input_range,
+            output_range,
+            lanes,
+            requires_packing,
+        }
+    }
+
+    /// Returns the representation expected by the kernel.
+    #[must_use]
+    pub const fn representation(self) -> PrimeRepresentationKind {
+        self.representation
+    }
+
+    /// Returns the reduction family.
+    #[must_use]
+    pub const fn reduction(self) -> PrimeReductionKind {
+        self.reduction
+    }
+
+    /// Returns the accepted input range.
+    #[must_use]
+    pub const fn input_range(self) -> RangeContract {
+        self.input_range
+    }
+
+    /// Returns the canonical output range.
+    #[must_use]
+    pub const fn output_range(self) -> RangeContract {
+        self.output_range
+    }
+
+    /// Returns the independent residues processed per vector tile.
+    #[must_use]
+    pub const fn lanes(self) -> u16 {
+        self.lanes
+    }
+
+    /// Reports whether the kernel requires a persistent packed layout.
+    #[must_use]
+    pub const fn requires_packing(self) -> bool {
+        self.requires_packing
+    }
+}
+
 /// Stable identifier for a batch execution backend.
 ///
 /// An identifier does not claim that the backend was compiled or is available
@@ -15,6 +90,10 @@ pub enum BackendId {
     X86Vpclmul,
     /// `AArch64` polynomial multiplication backend.
     Aarch64Pmull,
+    /// x86-64 AVX2 backend processing independent prime residues.
+    X86PrimeAvx2,
+    /// x86-64 BMI2 backend for multi-limb prime products.
+    X86PrimeBmi2,
 }
 
 /// Input-dependent scheduling property of a kernel strategy.
@@ -39,6 +118,8 @@ pub struct KernelMetadata {
     scratch_bytes_per_element: usize,
     schedule: ScheduleKind,
     automatic_selection: bool,
+    #[cfg(feature = "prime-fields")]
+    prime: Option<PrimeKernelMetadata>,
 }
 
 impl KernelMetadata {
@@ -53,6 +134,8 @@ impl KernelMetadata {
             scratch_bytes_per_element: 0,
             schedule: ScheduleKind::DataDependent,
             automatic_selection: true,
+            #[cfg(feature = "prime-fields")]
+            prime: None,
         }
     }
 
@@ -93,6 +176,8 @@ impl KernelMetadata {
             scratch_bytes_per_element: 0,
             schedule: ScheduleKind::Fixed,
             automatic_selection: calibration.automatic_selection(),
+            #[cfg(feature = "prime-fields")]
+            prime: None,
         }
     }
 
@@ -108,6 +193,8 @@ impl KernelMetadata {
             scratch_bytes_per_element: 0,
             schedule,
             automatic_selection: false,
+            #[cfg(feature = "prime-fields")]
+            prime: None,
         }
     }
 
@@ -119,6 +206,38 @@ impl KernelMetadata {
             schedule,
             super::calibration::AARCH64_PMULL.automatic_selection(),
         )
+    }
+
+    #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
+    pub(crate) const fn x86_prime_avx2<F>(minimum_batch: usize) -> Self {
+        Self {
+            backend: BackendId::X86PrimeAvx2,
+            minimum_batch,
+            preferred_multiple: 16,
+            required_alignment: core::mem::align_of::<F>(),
+            supports_in_place: true,
+            requires_packing: false,
+            scratch_bytes_per_element: 0,
+            schedule: ScheduleKind::Fixed,
+            automatic_selection: true,
+            prime: None,
+        }
+    }
+
+    #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
+    pub(crate) const fn x86_prime_bmi2<F>(minimum_batch: usize) -> Self {
+        Self {
+            backend: BackendId::X86PrimeBmi2,
+            minimum_batch,
+            preferred_multiple: 1,
+            required_alignment: core::mem::align_of::<F>(),
+            supports_in_place: true,
+            requires_packing: false,
+            scratch_bytes_per_element: 0,
+            schedule: ScheduleKind::Fixed,
+            automatic_selection: false,
+            prime: None,
+        }
     }
 
     #[cfg(all(
@@ -141,6 +260,8 @@ impl KernelMetadata {
             scratch_bytes_per_element: 0,
             schedule,
             automatic_selection,
+            #[cfg(feature = "prime-fields")]
+            prime: None,
         }
     }
 
@@ -160,6 +281,8 @@ impl KernelMetadata {
             scratch_bytes_per_element: 0,
             schedule,
             automatic_selection: true,
+            #[cfg(feature = "prime-fields")]
+            prime: None,
         }
     }
 
@@ -178,6 +301,8 @@ impl KernelMetadata {
             scratch_bytes_per_element: 0,
             schedule: ScheduleKind::Fixed,
             automatic_selection: false,
+            #[cfg(feature = "prime-fields")]
+            prime: None,
         }
     }
 
@@ -243,5 +368,20 @@ impl KernelMetadata {
     #[must_use]
     pub const fn automatic_selection(&self) -> bool {
         self.automatic_selection
+    }
+
+    /// Attaches certified prime-field representation and range metadata.
+    #[cfg(feature = "prime-fields")]
+    #[must_use]
+    pub(crate) const fn with_prime(mut self, prime: PrimeKernelMetadata) -> Self {
+        self.prime = Some(prime);
+        self
+    }
+
+    /// Returns prime-specific metadata when this is a prime-field strategy.
+    #[cfg(feature = "prime-fields")]
+    #[must_use]
+    pub const fn prime(&self) -> Option<&PrimeKernelMetadata> {
+        self.prime.as_ref()
     }
 }

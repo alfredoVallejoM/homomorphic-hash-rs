@@ -12,6 +12,7 @@ fn unsafe_code_is_confined_to_isa_adapters_and_packed_storage() {
 
     let pclmul = source.join("backend/x86_pclmul.rs");
     let vpclmul = source.join("backend/x86_vpclmul.rs");
+    let x86_prime = source.join("backend/x86_prime.rs");
     let pmull = source.join("backend/aarch64_pmull.rs");
     let packed_storage = source.join("engine/packed/storage.rs");
     let backend_module = source.join("backend/mod.rs");
@@ -35,8 +36,12 @@ fn unsafe_code_is_confined_to_isa_adapters_and_packed_storage() {
             {
                 unsafe_sites += 1;
                 assert!(
-                    path == pclmul || path == vpclmul || path == pmull || path == packed_storage,
-                    "unsafe code escaped the four audited boundaries: {}",
+                    path == pclmul
+                        || path == vpclmul
+                        || path == x86_prime
+                        || path == pmull
+                        || path == packed_storage,
+                    "unsafe code escaped the five audited boundaries: {}",
                     path.display()
                 );
             }
@@ -56,8 +61,8 @@ fn unsafe_code_is_confined_to_isa_adapters_and_packed_storage() {
         "the gate must observe the audited wrapper"
     );
     assert_eq!(
-        allow_sites, 4,
-        "exactly four audited module exceptions are allowed"
+        allow_sites, 5,
+        "exactly five audited module exceptions are allowed"
     );
     let root = fs::read_to_string(source.join("lib.rs")).expect("crate root must be readable");
     assert!(root.contains("#![deny(unsafe_code)]"));

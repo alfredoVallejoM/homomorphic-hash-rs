@@ -1,5 +1,37 @@
 # Contratos técnicos v1
 
+## Campos primos de Fase 4
+
+| Nombre | Característica | Representación | Bytes |
+|---|---:|---|---:|
+| `Fp251V1` | 251 | canónica `u8` | 1 |
+| `FpGoldilocks64V1` | (2^{64}-2^{32}+1) | canónica `u64` | 8 |
+| `Fp256GenericV1` | primo congelado de 256 bits | Montgomery, 4×`u64` privados | 32 |
+
+`PrimeField` no expone módulo en limbs, (R), reducción ni rango lazy.
+`from_canonical_integer` rechaza todo entero fuera de `[0,p)` y
+`from_bytes_mod_order` es la única frontera mínima que reduce explícitamente.
+El encoding es little-endian de longitud exacta.
+
+`PrimeFieldSpec` y `PrimeWideProduct` son internos. `RangeContract` autentica
+los límites de un kernel; `Reduced`, `Lazy2` y `Lazy4` no implementan encoding
+ni cruzan la API. Native, Barrett, Solinas y Montgomery poseen planes
+inmutables verificables. El plan y la representación pertenecen a `ArtifactId`,
+no a `FieldId`.
+
+Identidades congeladas:
+
+| Campo | `FieldId` |
+|---|---|
+| `Fp251V1` | `aef78c79e5e5e929ee046a199df8eab46633a4ea7cabf66480fe2d7909d678da` |
+| `FpGoldilocks64V1` | `db27c832ee2b9e87ae66e00657a20cf705132730f5ac43e3f7031f9bb1e272ac` |
+| `Fp256GenericV1` | `60cbdb42c3d6efbc7158144f6a42d015a708ca15ae47e5156204660f97681e8e` |
+
+Los certificados mantenidos son demostrativos: división completa o
+Pocklington. El corpus Sage se regenera desde una semilla pública y se contrasta
+con cada operación pública. La factory TOML v1 sigue siendo binaria; los campos
+primos externos se incorporarán con un schema y assurance explícitos en Fase 5.
+
 ## Algoritmos derivados de Fase 3
 
 `BatchPlan<F>` autentica operación, revisión, longitud, backend y `FieldId`.

@@ -1,4 +1,4 @@
-//! Portable binary finite fields built from zero-cost abstractions.
+//! Portable finite fields built from zero-cost abstractions.
 //!
 //! The crate publishes stable capability contracts, field identities, the
 //! base field [`F2`], maintained portable extensions, statically selected
@@ -22,6 +22,8 @@ mod binary;
 mod engine;
 mod generated;
 mod kernel;
+#[cfg(feature = "prime-fields")]
+mod prime;
 
 const fn portable_kernel_set<F>() -> kernel::KernelSet<F>
 where
@@ -71,10 +73,12 @@ pub use engine::{
 };
 pub use error::{BatchError, DecodeError};
 pub use field::{
-    BinaryPolynomialField, CanonicalEncoding, ExtensionField, F2, Field, Invert, Pow, Square,
-    StaticField, StaticFieldSpec,
+    BinaryPolynomialField, CanonicalEncoding, Characteristic, ExtensionField, F2, Field, Invert,
+    Pow, PrimeField, Square, SquareRootField, StaticField, StaticFieldSpec,
 };
 pub use id::{ArtifactBundleDigest, ArtifactId, FieldId};
+#[cfg(feature = "prime-fields")]
+pub use kernel::PrimeKernelMetadata;
 pub use kernel::{BackendId, KernelMetadata, ScheduleKind};
 
 #[doc(hidden)]
@@ -86,3 +90,14 @@ pub use kernel::BuiltinField;
 
 #[cfg(feature = "builtin-fields")]
 pub use generated::{Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1};
+
+#[cfg(feature = "prime-fields")]
+pub use generated::{Fp251V1, Fp256GenericV1, FpGoldilocks64V1};
+
+#[cfg(feature = "prime-fields")]
+pub use prime::{
+    BarrettPlan, MontgomeryAlgorithm, MontgomeryPlan, PrimeCertificateError,
+    PrimeExponentiationCost, PrimeExponentiationPlan, PrimeReductionKind, PrimeReductionPlan,
+    PrimeRepresentationKind, RangeContract, RangeProofError, SignedPowerOfTwo, SolinasPlan,
+    verify_builtin_prime_certificates,
+};

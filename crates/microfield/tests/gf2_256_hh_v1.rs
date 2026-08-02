@@ -47,6 +47,7 @@ fn public_contract_layout_metadata_and_formatting_are_frozen() {
     );
     assert_eq!(Gf2_256HhV1::spec().name(), "gf2_256_hh_v1");
     assert_eq!(Gf2_256HhV1::spec().characteristic(), 2);
+    assert_eq!(Gf2_256HhV1::spec().characteristic().decimal(), "2");
     assert_eq!(Gf2_256HhV1::spec().canonical_bytes(), 32);
 
     assert_eq!(Gf2_256HhV1::ZERO.to_string(), "0".repeat(64));

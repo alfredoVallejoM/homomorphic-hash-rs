@@ -4,6 +4,15 @@ Fecha de revisión: 2 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
+Actualización de Fase 4: la fase de campos primos está cerrada localmente.
+`Fp251V1`, `FpGoldilocks64V1` y `Fp256GenericV1` están certificados, poseen
+encoding canónico estricto y funcionan con los algoritmos y `Engine` existentes.
+El portable incluye Native, Barrett, Solinas y Montgomery CIOS. AVX2 para 251
+se selecciona desde 64 elementos; BMI2 multi-limb es forzable pero no automático
+porque la medición no justificó promoverlo. El corpus Sage, bundles, cero
+asignaciones, `no_std`, Miri/ASan y auditoría ASM forman el cierre. El detalle
+está en [`phase-4-final-report.md`](phase-4-final-report.md).
+
 Actualización de Fase 3: los algoritmos derivados están implementados y
 cerrados localmente. Existen inversión batch tolerante a cero, máscara compacta,
 workspace tipado, scans, las dos orientaciones de Horner, `mul_add_into` y
@@ -37,7 +46,8 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 |---|---|---|
 | Fase 1 | Cerrada en `main` | `1f176ab`; cinco jobs verdes en `30703842091` |
 | Fase 2 | Cerrada conservadoramente | H2.1–H2.8; informe final y tabla de selección v1 |
-| Fase 3 | Cerrada localmente | algoritmos derivados, IR v4, Miri/ASan y benchmark |
+| Fase 3 | Cerrada y publicada | algoritmos derivados, IR v4, Miri/ASan y benchmark |
+| Fase 4 | Cerrada localmente | tres primos, certificados, Sage, portable, AVX2/BMI2 |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
@@ -59,7 +69,7 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | Packed H2.6 | Implementado | owned `alloc`, vistas sin `alloc`, plan sellado y operaciones in-place |
 | ISA x86-64 H2.7 | VPCLMUL explícito | presets y ABI 3, pares, tails, in-place y `vzeroupper` |
 | Packing H2.7 | `Aos` + `AosLanePairs` | layout sellado, padding par y alineación 32 para VPCLMUL |
-| Frontera `unsafe` | Confinada y autenticada | `deny` global, cuatro hashes revisados y test estructural |
+| Frontera `unsafe` | Confinada y autenticada | `deny` global, cinco hashes revisados y test estructural |
 | ASan multi-ISA | Correcto local | presets y 11 tests externos en x86-64/AArch64 |
 | PMULL QEMU | Correcto | 3 tests mantenidos + 11 externos, también bajo ASan |
 | PMULL hardware | Correcto funcional | job ARM64 real verde en `30716211486`; calibración pendiente |
@@ -167,8 +177,8 @@ H2.5 replica la suite normativa para PMULL: todos los bits de base, 17 tamaños
 hasta 16 384, tres presets, canarios, in-place y errores transaccionales. QEMU
 8.2 `-cpu max` ejecuta los tres tests específicos y los 11 externos; ambos
 conjuntos pasan además bajo AddressSanitizer. El test de alcance recorre `src`
-y, tras H2.7, permite exactamente cuatro excepciones `unsafe`: tres adapters
-ISA y el único módulo de storage alineado.
+y, tras Fase 4, permite exactamente cinco excepciones `unsafe`: cuatro
+adapters ISA y el único módulo de storage alineado.
 
 H2.6 añade cuatro tests owned, cinco tests de vistas y dos unit tests de
 planner/storage. Cubre los tres presets, backend ISA detectado, cinco perfiles
@@ -299,16 +309,17 @@ un threshold optimista. El informe consolidado está en
 
 ### Siguiente fase
 
-Fase 3 está cerrada. El siguiente corte es F4.0: congelar campos primos,
-certificados y representación antes de implementar `Fp251V1`, Goldilocks y un
-primo multi-limb. Los algoritmos de Fase 3 se reutilizarán sin duplicación y
-servirán como test arquitectónico de que no estaban acoplados a GF(2^m).
+Fase 4 está cerrada. El siguiente corte es F5.0/F5.1: formalizar el manifiesto
+primo externo, `ValidationAssurance`, lock/bundle y emisión estática nominal.
+Después se abordarán caché concurrente y contextos runtime con validación
+amortizada. Ningún contexto dinámico alterará los tipos mantenidos ni el
+dispatch escalar.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no
 garantías. Entorno, intervalos y comando están en
 [`portable-optimizer.md`](portable-optimizer.md).
 
-El orden, los gates y los entregables están en
-[`phase-3-plan.md`](phase-3-plan.md) y
+El orden, los gates y los entregables cerrados están en
+[`phase-4-plan.md`](phase-4-plan.md) y
 [`phases-3-7-roadmap.md`](phases-3-7-roadmap.md).

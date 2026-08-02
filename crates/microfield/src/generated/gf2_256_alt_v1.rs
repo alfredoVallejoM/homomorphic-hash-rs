@@ -17,7 +17,7 @@ static SPEC: StaticFieldSpec = StaticFieldSpec {
     field_id: FieldId::from_bytes(constants::FIELD_ID),
     artifact_id: ArtifactId::from_bytes(constants::ARTIFACT_ID),
     name: constants::FIELD_NAME,
-    characteristic: 2,
+    characteristic: crate::Characteristic::__from_generated("2", Some(2)),
     degree: 256,
     canonical_bytes: 32,
     descriptor_json: include_bytes!("../../artifacts/gf2_256_alt_v1/descriptor.json"),

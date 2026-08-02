@@ -6,6 +6,7 @@
 flowchart LR
     Field[field / id / error]
     Binary[binary]
+    Prime[prime]
     Kernel[kernel]
     Backend[backend]
     Generated[generated]
@@ -14,8 +15,10 @@ flowchart LR
     Algorithms[algorithms]
 
     Field --> Binary
+    Field --> Prime
     Field --> Kernel
     Binary --> Backend
+    Prime --> Backend
     Kernel --> Backend
     Field --> Generated
     Binary --> Generated
@@ -38,6 +41,11 @@ concretos. La raíz de composición interna construye la estrategia portable y e
 motor conserva una referencia a su tabla estática; ni el tipo de campo ni el consumidor
 entregan punteros.
 
+`prime` contiene producto ancho, reducción y planes estáticos de
+característica prima. No depende de `engine` ni de adapters ISA. Los newtypes
+primos viven en `generated` igual que los binarios y entregan sus contratos
+internos mediante monomorfización.
+
 ## Generador
 
 ```mermaid
@@ -57,6 +65,7 @@ argumentos CLI ni procesos externos.
 ## Reglas verificables
 
 - `field` no importa `binary`, `kernel`, `engine` ni `backend`.
+- `field` tampoco conoce representaciones Montgomery ni módulos primos.
 - `binary` no importa `engine` ni `backend`.
 - `engine` no importa módulos de arquitectura.
 - `generated` no depende de `spec`.
@@ -64,7 +73,7 @@ argumentos CLI ni procesos externos.
 - Todo runtime portable compila con `no_std`.
 - La aritmética portable conserva cero `unsafe`; el crate usa
   `deny(unsafe_code)` y solo `backend::x86_pclmul`,
-  `backend::x86_vpclmul`, `backend::aarch64_pmull` y
+  `backend::x86_vpclmul`, `backend::x86_prime`, `backend::aarch64_pmull` y
   `engine::packed::storage` reciben excepciones locales auditadas.
 
 ## Flujos
@@ -84,6 +93,20 @@ El value object vive en `generated`; `binary` concentra algoritmos
 independientes de API. Cada tipo aporta únicamente identidad nominal,
 metadatos y una estrategia estática privada. El macro interno elimina
 boilerplate de delegación, pero no genera matemáticas distintas por campo.
+
+Escalar primo:
+
+```text
+Fp251V1 / FpGoldilocks64V1 / Fp256GenericV1
+  → PrimeFieldSpec + PrimeWideProduct privados
+  → producto ancho fijo
+  → Native / Solinas / Montgomery CIOS
+  → representación normalizada
+  → encoding canónico solo en la frontera
+```
+
+El `FieldId` no depende de esta ruta. Los planes de reducción y la
+representación sí quedan ligados por `ArtifactId`.
 
 Batch:
 

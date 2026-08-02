@@ -10,19 +10,23 @@ use crate::{
 
 use super::{Engine, ExecutionPolicy};
 
-const AUTO_ORDER: [BackendId; 4] = [
+const AUTO_ORDER: [BackendId; 6] = [
+    BackendId::X86PrimeAvx2,
     BackendId::X86Vpclmul,
+    BackendId::X86PrimeBmi2,
     BackendId::X86Pclmul,
     BackendId::Aarch64Pmull,
     BackendId::Portable,
 ];
-const LOW_LATENCY_ORDER: [BackendId; 4] = [
+const LOW_LATENCY_ORDER: [BackendId; 6] = [
+    BackendId::X86PrimeBmi2,
     BackendId::X86Pclmul,
     BackendId::Aarch64Pmull,
+    BackendId::X86PrimeAvx2,
     BackendId::X86Vpclmul,
     BackendId::Portable,
 ];
-const THROUGHPUT_ORDER: [BackendId; 4] = AUTO_ORDER;
+const THROUGHPUT_ORDER: [BackendId; 6] = AUTO_ORDER;
 
 /// Failure while selecting an immutable execution engine.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -177,18 +181,26 @@ impl<F: PortableField> Default for EngineBuilder<F> {
 }
 
 #[derive(Clone, Copy)]
-struct CompiledBackends(u8);
+struct CompiledBackends(u16);
 
 impl CompiledBackends {
-    const PORTABLE: u8 = 1 << 0;
-    const X86_PCLMUL: u8 = 1 << 1;
-    const X86_VPCLMUL: u8 = 1 << 2;
-    const AARCH64_PMULL: u8 = 1 << 3;
+    const PORTABLE: u16 = 1 << 0;
+    const X86_PCLMUL: u16 = 1 << 1;
+    const X86_VPCLMUL: u16 = 1 << 2;
+    const AARCH64_PMULL: u16 = 1 << 3;
+    const X86_PRIME_AVX2: u16 = 1 << 4;
+    const X86_PRIME_BMI2: u16 = 1 << 5;
 
     const fn current() -> Self {
         #[cfg(target_arch = "x86_64")]
         {
-            Self(Self::PORTABLE | Self::X86_PCLMUL | Self::X86_VPCLMUL)
+            Self(
+                Self::PORTABLE
+                    | Self::X86_PCLMUL
+                    | Self::X86_VPCLMUL
+                    | Self::X86_PRIME_AVX2
+                    | Self::X86_PRIME_BMI2,
+            )
         }
         #[cfg(target_arch = "aarch64")]
         {
@@ -206,13 +218,15 @@ impl CompiledBackends {
             BackendId::X86Pclmul => Self::X86_PCLMUL,
             BackendId::X86Vpclmul => Self::X86_VPCLMUL,
             BackendId::Aarch64Pmull => Self::AARCH64_PMULL,
+            BackendId::X86PrimeAvx2 => Self::X86_PRIME_AVX2,
+            BackendId::X86PrimeBmi2 => Self::X86_PRIME_BMI2,
         };
         self.0 & bit != 0
     }
 
     #[cfg(test)]
     const fn from_test_mask(mask: u8) -> Self {
-        Self(mask & 0x0f)
+        Self((mask & 0x0f) as u16)
     }
 }
 
@@ -413,28 +427,29 @@ mod tests {
 
     fn catalog(mask: u8) -> KernelCatalog<TestField> {
         let mut catalog = KernelCatalog::portable(&PORTABLE);
-        if mask & CompiledBackends::X86_PCLMUL != 0 {
+        if mask & 0b0010 != 0 {
             catalog = catalog.with_x86_pclmul(&PCLMUL);
         }
-        if mask & CompiledBackends::X86_VPCLMUL != 0 {
+        if mask & 0b0100 != 0 {
             catalog = catalog.with_x86_vpclmul(&VPCLMUL);
         }
-        if mask & CompiledBackends::AARCH64_PMULL != 0 {
+        if mask & 0b1000 != 0 {
             catalog = catalog.with_aarch64_pmull(&PMULL);
         }
         catalog
     }
 
     fn capabilities(architecture: Architecture, mask: u8) -> CpuCapabilities {
-        CpuCapabilities::from_test_parts(architecture, mask)
+        CpuCapabilities::from_test_parts(architecture, u16::from(mask))
     }
 
     fn field_contains(mask: u8, backend: BackendId) -> bool {
         match backend {
             BackendId::Portable => true,
-            BackendId::X86Pclmul => mask & CompiledBackends::X86_PCLMUL != 0,
-            BackendId::X86Vpclmul => mask & CompiledBackends::X86_VPCLMUL != 0,
-            BackendId::Aarch64Pmull => mask & CompiledBackends::AARCH64_PMULL != 0,
+            BackendId::X86Pclmul => mask & 0b0010 != 0,
+            BackendId::X86Vpclmul => mask & 0b0100 != 0,
+            BackendId::Aarch64Pmull => mask & 0b1000 != 0,
+            BackendId::X86PrimeAvx2 | BackendId::X86PrimeBmi2 => false,
         }
     }
 

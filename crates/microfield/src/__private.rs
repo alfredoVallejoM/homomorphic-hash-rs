@@ -25,6 +25,15 @@ impl<F: Field + Square> PortableStrategy<F> {
         }
     }
 
+    /// Constructs the portable loops with certified prime-kernel metadata.
+    #[cfg(feature = "prime-fields")]
+    #[must_use]
+    pub const fn new_prime(metadata: crate::PrimeKernelMetadata) -> Self {
+        Self {
+            kernels: crate::backend::portable::prime_kernel_set::<F>(metadata),
+        }
+    }
+
     #[cfg_attr(not(feature = "portable"), allow(dead_code))]
     pub(crate) const fn kernels(&self) -> &crate::kernel::KernelSet<F> {
         &self.kernels

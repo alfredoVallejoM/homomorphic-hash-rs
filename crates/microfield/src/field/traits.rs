@@ -1,6 +1,6 @@
 //! Small public traits following interface segregation.
 
-use super::{StaticFieldSpec, pow::pow_vartime};
+use super::{Characteristic, StaticFieldSpec, pow::pow_vartime};
 use crate::DecodeError;
 
 /// Core field operations required by generic algebra.
@@ -81,6 +81,46 @@ pub trait CanonicalEncoding: Field {
     /// Encodes the element canonically.
     #[must_use]
     fn to_canonical(self) -> Self::Repr;
+}
+
+/// Capability implemented by fields whose characteristic is a prime modulus.
+pub trait PrimeField: Field + CanonicalEncoding {
+    /// Significant bits in the prime modulus.
+    const MODULUS_BITS: u32;
+    /// Largest `c` for which every integer below `2^c` is canonical.
+    const CAPACITY_BITS: u32;
+
+    /// Returns the exact prime characteristic.
+    #[must_use]
+    fn characteristic_descriptor() -> &'static Characteristic;
+
+    /// Decodes one canonical integer without modular reduction.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DecodeError`] when the integer is outside `[0, p)` or has an
+    /// invalid canonical representation.
+    fn from_canonical_integer(repr: &Self::Repr) -> Result<Self, DecodeError> {
+        Self::from_canonical(repr)
+    }
+
+    /// Encodes the canonical integer, regardless of private representation.
+    #[must_use]
+    fn to_canonical_integer(self) -> Self::Repr {
+        self.to_canonical()
+    }
+
+    /// Reduces arbitrary little-endian bytes modulo the characteristic.
+    #[must_use]
+    fn from_bytes_mod_order(bytes_le: &[u8]) -> Self;
+}
+
+/// Optional capability for a deterministic square root.
+pub trait SquareRootField: Field {
+    /// Returns the root with the smaller canonical integer, or `None` for a
+    /// quadratic non-residue.
+    #[must_use]
+    fn sqrt(self) -> Option<Self>;
 }
 
 /// A field represented as an extension of a base field.

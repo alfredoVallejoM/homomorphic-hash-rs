@@ -54,6 +54,8 @@ pub struct KernelCatalog<F: Field> {
     x86_pclmul: Option<&'static KernelSet<F>>,
     x86_vpclmul: Option<&'static KernelSet<F>>,
     aarch64_pmull: Option<&'static KernelSet<F>>,
+    x86_prime_avx2: Option<&'static KernelSet<F>>,
+    x86_prime_bmi2: Option<&'static KernelSet<F>>,
 }
 
 impl<F: Field> KernelCatalog<F> {
@@ -67,6 +69,8 @@ impl<F: Field> KernelCatalog<F> {
             x86_pclmul: None,
             x86_vpclmul: None,
             aarch64_pmull: None,
+            x86_prime_avx2: None,
+            x86_prime_bmi2: None,
         }
     }
 
@@ -103,6 +107,28 @@ impl<F: Field> KernelCatalog<F> {
         self
     }
 
+    #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
+    #[must_use]
+    pub(crate) const fn with_x86_prime_avx2(mut self, kernels: &'static KernelSet<F>) -> Self {
+        assert!(matches!(
+            kernels.metadata.backend(),
+            super::BackendId::X86PrimeAvx2
+        ));
+        self.x86_prime_avx2 = Some(kernels);
+        self
+    }
+
+    #[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
+    #[must_use]
+    pub(crate) const fn with_x86_prime_bmi2(mut self, kernels: &'static KernelSet<F>) -> Self {
+        assert!(matches!(
+            kernels.metadata.backend(),
+            super::BackendId::X86PrimeBmi2
+        ));
+        self.x86_prime_bmi2 = Some(kernels);
+        self
+    }
+
     #[cfg(feature = "portable")]
     pub(crate) const fn get(&self, backend: super::BackendId) -> Option<&'static KernelSet<F>> {
         match backend {
@@ -110,6 +136,8 @@ impl<F: Field> KernelCatalog<F> {
             super::BackendId::X86Pclmul => self.x86_pclmul,
             super::BackendId::X86Vpclmul => self.x86_vpclmul,
             super::BackendId::Aarch64Pmull => self.aarch64_pmull,
+            super::BackendId::X86PrimeAvx2 => self.x86_prime_avx2,
+            super::BackendId::X86PrimeBmi2 => self.x86_prime_bmi2,
         }
     }
 }

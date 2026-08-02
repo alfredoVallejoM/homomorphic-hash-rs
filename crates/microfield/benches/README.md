@@ -1,5 +1,17 @@
 # Benchmarks
 
+`prime_fields` separa la evidencia de Fase 4:
+
+```text
+cargo bench -p microfield --bench prime_fields
+cargo bench -p microfield --bench prime_fields -- phase4/reduction/goldilocks
+```
+
+Mide add/mul/square/invert escalares, Solinas frente a Barrett, conversiones
+Montgomery y batch portable/AVX2/BMI2 en 1..=16384 elementos. Un backend
+forzado aparece aunque no sea automático; ello permite registrar corrección y
+coste sin convertir disponibilidad en preferencia.
+
 `derived_algorithms` mide por separado inversas escalares frente a inversión
 batch prestada, scans, ambas orientaciones de Horner y tablas de potencias. No
 incluye asignación ni construcción de buffers dentro de la muestra.

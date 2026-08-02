@@ -1,0 +1,14 @@
+{
+  "schema": 2,
+  "characteristic": "251",
+  "degree": 1,
+  "basis": {
+    "kind": "prime"
+  },
+  "modulus": "251",
+  "encoding": {
+    "byte_order": "little",
+    "integer": "canonical",
+    "bytes": 1
+  }
+}

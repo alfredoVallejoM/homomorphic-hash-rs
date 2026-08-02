@@ -3,7 +3,7 @@
 Este repositorio contiene dos paquetes con ciclos de vida independientes:
 
 - `homomorphic-hash-rs`, el prototipo legado de hashes y agregación topológica;
-- `microfield`, el nuevo núcleo de campos finitos binarios portable.
+- `microfield`, el nuevo núcleo portable de campos finitos binarios y primos.
 
 `microfield` se desarrolla como un paquete único dentro del workspace. Sus
 fronteras internas siguen SOLID, dispatch estático en operaciones escalares y
@@ -37,6 +37,12 @@ La Fase 3 incorpora inversión batch tolerante a cero, scans, Horner batch,
 potencias fijas, workspaces tipados e IR v4 de inversión verificado. No añade
 asignaciones ocultas ni nuevas fronteras `unsafe`.
 
+La Fase 4 añade `Fp251V1`, `FpGoldilocks64V1` y `Fp256GenericV1`. Los tres
+campos tienen certificados reproducibles, encoding canónico, algoritmos
+portables, bundles autenticados y vectores Sage. AVX2 acelera los lotes de 251
+desde la región medida; BMI2 multi-limb queda disponible de forma explícita al
+no superar al portable. La factory de primos externos se reserva para Fase 5.
+
 ## Comandos
 
 ```text
@@ -44,10 +50,12 @@ cargo test -p microfield --features generator --all-targets
 cargo test -p microfield --all-features --doc
 cargo clippy -p microfield --all-features --all-targets -- -D warnings
 cargo check -p microfield --no-default-features --features portable,builtin-fields
+cargo check -p microfield --no-default-features --features portable,prime-fields
 cargo check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 cargo test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
 bash crates/microfield/tools/audit_aarch64_pmull.sh
 bash crates/microfield/tools/audit_x86_vpclmul.sh
+bash crates/microfield/tools/audit_x86_prime.sh
 bash crates/microfield/tools/audit_calibration.sh
 bash crates/microfield/tools/audit_unsafe_scope.sh
 cargo test -p microfield --all-features --test packed_batch --test packed_views
@@ -58,6 +66,7 @@ cargo test -p homomorphic-hash-rs --test microfield_compat
 ```text
 cargo run -p microfield --features generator --bin microfield-gen -- \
   validate crates/microfield/fields/gf2_256_hh_v1.toml
+cargo run -p microfield --features generator --bin microfield-gen -- verify-primes --json
 ```
 
 ```rust
@@ -82,6 +91,7 @@ El cierre, las garantías y las limitaciones de la Fase 2 están en
 
 El plan ejecutado de Fase 2 está en `docs/microfield/phase-2-plan.md`.
 
-El cierre de Fase 3 está en `docs/microfield/phase-3-final-report.md`. El roadmap
+El cierre de Fase 3 está en `docs/microfield/phase-3-final-report.md` y el de
+Fase 4 en `docs/microfield/phase-4-final-report.md`. El roadmap
 corregido incluye la rehabilitación del legado y canonización de grafos dentro
 de Fase 6 en `docs/microfield/phases-3-7-roadmap.md`.

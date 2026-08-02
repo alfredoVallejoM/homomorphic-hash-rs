@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$repo_root"
 
-inventory="crates/microfield/unsafe/unsafe-inventory-v1.sha256"
+inventory="crates/microfield/unsafe/unsafe-inventory-v2.sha256"
 sha256sum --check --strict "$inventory"
 
 mapfile -t unsafe_files < <(
@@ -14,6 +14,7 @@ mapfile -t unsafe_files < <(
 expected=(
   crates/microfield/src/backend/aarch64_pmull.rs
   crates/microfield/src/backend/x86_pclmul.rs
+  crates/microfield/src/backend/x86_prime.rs
   crates/microfield/src/backend/x86_vpclmul.rs
   crates/microfield/src/engine/packed/storage.rs
 )
@@ -25,8 +26,8 @@ if [[ "${unsafe_files[*]}" != "${expected[*]}" ]]; then
 fi
 
 allow_count="$(grep -R -n -E --include='*.rs' '#\[allow\(unsafe_code\)\]' crates/microfield/src | wc -l)"
-if [[ "$allow_count" -ne 4 ]]; then
-  echo "se esperaban exactamente cuatro excepciones allow(unsafe_code), hay $allow_count" >&2
+if [[ "$allow_count" -ne 5 ]]; then
+  echo "se esperaban exactamente cinco excepciones allow(unsafe_code), hay $allow_count" >&2
   exit 1
 fi
 
@@ -37,4 +38,4 @@ for source in "${expected[@]}"; do
   fi
 done
 
-echo "inventario unsafe v1 correcto: cuatro fronteras, hashes revisados e invariantes SAFETY"
+echo "inventario unsafe v2 correcto: cinco fronteras, hashes revisados e invariantes SAFETY"

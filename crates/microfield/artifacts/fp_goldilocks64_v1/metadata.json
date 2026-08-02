@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "field_name": "fp_goldilocks64_v1",
+  "field_id": "db27c832ee2b9e87ae66e00657a20cf705132730f5ac43e3f7031f9bb1e272ac",
+  "artifact_id": "5de756cce03a1fe635939544390b2eb169737acd8663c76eb2e929fd3bb0dc7a",
+  "generator_version": "0.1.0",
+  "reproducible": true
+}

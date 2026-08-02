@@ -3,7 +3,7 @@ name = "microfield"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.89"
-description = "Portable binary finite-field core with zero-cost abstractions"
+description = "Portable finite-field core with zero-cost abstractions"
 publish = false
 autobins = false
 
@@ -39,13 +39,20 @@ path = "benches/derived_algorithms.rs"
 harness = false
 required-features = ["portable", "builtin-fields"]
 
+[[bench]]
+name = "prime_fields"
+path = "benches/prime_fields.rs"
+harness = false
+required-features = ["portable", "prime-fields"]
+
 [features]
-default = ["std", "portable", "builtin-fields"]
+default = ["std", "portable", "builtin-fields", "prime-fields"]
 std = ["alloc"]
 alloc = []
 portable = []
 builtin-fields = []
-generator = ["std", "dep:serde", "dep:serde_json", "dep:sha2", "dep:toml"]
+prime-fields = []
+generator = ["std", "prime-fields", "dep:serde", "dep:serde_json", "dep:sha2", "dep:toml"]
 count-allocations = ["std", "dep:allocation-counter"]
 
 [dependencies]
