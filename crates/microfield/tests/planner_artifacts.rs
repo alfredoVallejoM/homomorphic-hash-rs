@@ -18,6 +18,7 @@ use microfield::spec::{
         PortableReductionStrategy,
     },
 };
+use microfield::{BinaryPolynomialField, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1, Invert, Square};
 use sha2::{Digest, Sha256};
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -51,21 +52,21 @@ struct TestUnsignedIsaProfile {
 const GOLDEN: [(&str, &str, &str, &str); 3] = [
     (
         "gf2_128_v1.toml",
-        "ae75864c0f0f6c9225081cea29f5eb5540eeadca65e9f32365a5ba3a0451d06a",
+        "872b55354bb91e13ca649f6907d0825cc1cfa055ceabd174d4e5b7debd3350cf",
         "07545484d4a09b1d44c25d0a0042042046396f9b5e2467bc5b6b0d7a2c327220",
-        "ef54d95d7c74efb0379731b8a9decf4df9d2b82265160f5cba16f44b26bf8428",
+        "044f11d5b8060e73067130b8f6ef2b4ca8d4af0facb4f1aebb3cb0afa6252f9d",
     ),
     (
         "gf2_256_alt_v1.toml",
-        "a96a7b81eed149fc304699e281b6d6a3992ede874189200873c06b53f4e76e95",
+        "88ac0bd22696d02bc0f5522701d5398b160f8fa9f539419217a0b30572a228c3",
         "f4a06836f946c87f3fda8f23889670e9182e3b23086cc7108a20879e3a5999e8",
-        "cfd8dc7c2871653797612ec9ac1ecdbdab9241bfff1c5ea2350074833b618446",
+        "cae73003c73508f262576d806bc0337fce625ab56d9f48b80bbaa3b610ff742c",
     ),
     (
         "gf2_256_hh_v1.toml",
-        "fb66dc8580659491f347b8b2be878d2a068d6608e6f66db4bccdc3f1f7634945",
+        "342b422453b4f67f56b44cdcffa7b3fa68024c8de6efbf74a14ba36d63b25e64",
         "476cb23704fa07610dfdaad7b662c365208583f9a05e61e3e2809f96da9851f3",
-        "fc426405fe99bf648db5a63748fe8bab1002e55207e855f45d1e898beb5c6471",
+        "a4ed4dfa7557810b8fb4c281a58d166b54082486b034becc6b830aaa95de5e4f",
     ),
 ];
 
@@ -79,6 +80,9 @@ fn product_reduction_and_identity_plans_have_frozen_shapes() {
         let plan = generator.plan(&validated).expect("plan derives");
         let descriptor = validated.normalized().descriptor();
         let degree = descriptor.degree();
+
+        assert_eq!(plan.schema_version(), 2);
+        assert_eq!(plan.ir_version(), 4);
 
         assert_eq!(plan.artifact_id().to_string(), artifact_id);
         assert_eq!(plan.product().limb_bits(), 64);
@@ -155,23 +159,44 @@ fn inversion_schedule_reaches_exact_fermat_exponent() {
             .expect("frozen manifest validates");
         let plan = generator.plan(&validated).expect("plan derives");
         let degree = validated.normalized().descriptor().degree();
-        let mut exponent_le_bits = vec![true];
-
-        for step in plan.inversion().steps() {
-            match step {
-                ExponentiationStep::Square { count } => {
-                    for _ in 0..*count {
-                        exponent_le_bits.insert(0, false);
-                    }
-                }
-                ExponentiationStep::MultiplyBase => add_one(&mut exponent_le_bits),
-            }
+        let inversion = plan.inversion();
+        inversion
+            .verify_symbolically()
+            .expect("generated Itoh--Tsujii chain verifies");
+        assert_eq!(inversion.algorithm(), "itoh-tsujii-binary-v1");
+        assert_eq!(inversion.degree(), degree);
+        assert_eq!(inversion.cost().squares(), degree - 1);
+        assert_eq!(inversion.cost().saved_values(), 1);
+        assert!(inversion.cost().multiplications() < degree / 4);
+        assert!(
+            inversion
+                .steps()
+                .iter()
+                .any(|step| matches!(step, ExponentiationStep::MultiplySaved))
+        );
+        match file {
+            "gf2_128_v1.toml" => assert_chain_evaluation::<Gf2_128V1>(inversion),
+            "gf2_256_alt_v1.toml" => assert_chain_evaluation::<Gf2_256AltV1>(inversion),
+            "gf2_256_hh_v1.toml" => assert_chain_evaluation::<Gf2_256HhV1>(inversion),
+            _ => unreachable!("golden manifest list is closed"),
         }
+    }
+}
 
-        assert_eq!(plan.inversion().steps().len(), degree * 2 - 3);
-        assert_eq!(exponent_le_bits.len(), degree);
-        assert!(!exponent_le_bits[0]);
-        assert!(exponent_le_bits[1..].iter().all(|bit| *bit));
+fn assert_chain_evaluation<F>(plan: &microfield::spec::model::ExponentiationPlan)
+where
+    F: BinaryPolynomialField + Square + Invert + core::fmt::Debug,
+{
+    for seed in 1_u64..=32 {
+        let mut bytes = [0_u8; 40];
+        bytes[..8].copy_from_slice(&seed.wrapping_mul(0x9e37_79b9_7f4a_7c15).to_le_bytes());
+        let value = F::from_polynomial_bytes_mod(&bytes);
+        let value = if value.is_zero() { F::ONE } else { value };
+        assert_eq!(
+            plan.evaluate_reference(value)
+                .expect("verified chain evaluates"),
+            value.invert().expect("test value is non-zero")
+        );
     }
 }
 
@@ -292,16 +317,6 @@ fn artifact_renderer_rejects_a_plan_from_another_field() {
         ArtifactGenerator.generate(&field_128, &wrong_plan),
         Err(GenerationError::MismatchedPlan)
     ));
-}
-
-fn add_one(bits: &mut Vec<bool>) {
-    for bit in bits.iter_mut() {
-        *bit = !*bit;
-        if *bit {
-            return;
-        }
-    }
-    bits.push(true);
 }
 
 fn assert_artifact_directory(artifacts: &GeneratedArtifacts, root: &Path) {

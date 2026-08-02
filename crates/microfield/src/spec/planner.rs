@@ -6,14 +6,14 @@ use crate::spec::{
     error::GenerationError,
     identity::{artifact_id, isa_profile_digest, proof_digest},
     model::{
-        ExponentiationPlan, ExponentiationStep, FoldStep, GenerationPlan, IsaProfileClass,
-        IsaProfileSchedule, PortableDegreeClass, PortableReductionStrategy, ProductPlan,
-        ReductionPlan, ValidatedFieldSpec, VerifiedIsaProfile,
+        ExponentiationPlan, FoldStep, GenerationPlan, IsaProfileClass, IsaProfileSchedule,
+        PortableDegreeClass, PortableReductionStrategy, ProductPlan, ReductionPlan,
+        ValidatedFieldSpec, VerifiedIsaProfile,
     },
     optimizer::PortableOptimizer,
 };
 
-/// Stateless planner for the portable version-3 intermediate representation.
+/// Stateless planner for the portable version-4 intermediate representation.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct GenerationPlanner;
 
@@ -53,13 +53,10 @@ impl GenerationPlanner {
             .map_err(|error| GenerationError::Serialization(error.to_string()))?;
         let reduction = ReductionPlan::new(2 * degree, degree, steps, proof_digest(&step_bytes));
 
-        let mut inversion_steps = Vec::with_capacity(2 * degree - 3);
-        for _ in 0..degree - 2 {
-            inversion_steps.push(ExponentiationStep::Square { count: 1 });
-            inversion_steps.push(ExponentiationStep::MultiplyBase);
-        }
-        inversion_steps.push(ExponentiationStep::Square { count: 1 });
-        let inversion = ExponentiationPlan::new(inversion_steps);
+        let inversion = ExponentiationPlan::new_itoh_tsujii_binary(degree);
+        inversion
+            .verify_symbolically()
+            .map_err(|error| GenerationError::InvalidInversionPlan(error.to_string()))?;
         let portable_optimization = PortableOptimizer::plan(validated);
         let profile_class = match portable_optimization.degree_class() {
             PortableDegreeClass::PowerOfTwoLimbAligned => IsaProfileClass::PowerOfTwoLimbAligned,
@@ -98,10 +95,10 @@ impl GenerationPlanner {
         );
 
         let artifact_descriptor = ArtifactDescriptor {
-            schema: 1,
+            schema: 2,
             field_id: validated.field_id(),
             generator_version: env!("CARGO_PKG_VERSION"),
-            ir_version: 3,
+            ir_version: 4,
             target_family: "portable_with_verified_isa_profile",
             build,
             portable_optimization: &portable_optimization,

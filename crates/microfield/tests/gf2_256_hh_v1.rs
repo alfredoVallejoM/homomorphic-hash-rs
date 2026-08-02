@@ -43,7 +43,7 @@ fn public_contract_layout_metadata_and_formatting_are_frozen() {
     );
     assert_eq!(
         Gf2_256HhV1::spec().artifact_id().to_string(),
-        "fb66dc8580659491f347b8b2be878d2a068d6608e6f66db4bccdc3f1f7634945"
+        "342b422453b4f67f56b44cdcffa7b3fa68024c8de6efbf74a14ba36d63b25e64"
     );
     assert_eq!(Gf2_256HhV1::spec().name(), "gf2_256_hh_v1");
     assert_eq!(Gf2_256HhV1::spec().characteristic(), 2);

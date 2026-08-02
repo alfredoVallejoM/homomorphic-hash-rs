@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "artifact_id": "a96a7b81eed149fc304699e281b6d6a3992ede874189200873c06b53f4e76e95",
-  "bundle_digest": "cfd8dc7c2871653797612ec9ac1ecdbdab9241bfff1c5ea2350074833b618446",
+  "artifact_id": "88ac0bd22696d02bc0f5522701d5398b160f8fa9f539419217a0b30572a228c3",
+  "bundle_digest": "cae73003c73508f262576d806bc0337fce625ab56d9f48b80bbaa3b610ff742c",
   "files": [
     {
       "path": "certificate.json",
@@ -15,18 +15,18 @@
     },
     {
       "path": "field.rs",
-      "bytes": 758,
-      "sha256": "3a0a58fd1fa4322734ab0b1b80039394e24a9a24391966984d0a5691d723fbce"
+      "bytes": 751,
+      "sha256": "3808b2a0977c96c4d1f1ab2b1dd5d3fcd082e2c3bf924d822e1631a2337b0700"
     },
     {
       "path": "generation-plan.json",
-      "bytes": 67268,
-      "sha256": "d0696e4d5384f3477b73524ebe3249e90d1340631056277ca263edd32fb5f0be"
+      "bytes": 38754,
+      "sha256": "1eeb9f24984688fdc4378bed447c54512fdd1c9123ad16da69a4f1a81dd47538"
     },
     {
       "path": "metadata.json",
       "bytes": 275,
-      "sha256": "5c7fc68e2ce73766fae93067bf6c49490c27a7864fe1edafd04b49f5f765e813"
+      "sha256": "07ef3559016efcd3fb95596bea5e50ee0374ff3fff30ae06be3848a1971f719e"
     },
     {
       "path": "normalized.toml",

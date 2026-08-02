@@ -1,5 +1,24 @@
 # Contratos técnicos v1
 
+## Algoritmos derivados de Fase 3
+
+`BatchPlan<F>` autentica operación, revisión, longitud, backend y `FieldId`.
+`WorkspaceLayout` declara elementos tipados, words de máscara, alineamiento,
+soporte in-place y comportamiento de asignación.
+
+La inversión batch es tolerante a cero: un bit de máscara solo se activa para
+un valor invertible; cero produce cero. Cualquier error de shape, máscara,
+workspace o backend ocurre antes de modificar salida. El mismo contrato
+transaccional rige scans, Horner y `mul_add_into`.
+
+Los coeficientes de Horner están en orden de grado ascendente. Cero
+coeficientes es un shape inválido; cero puntos o cero polinomios es un lote
+vacío válido. `CoefficientLayout` impide transposiciones implícitas.
+
+El IR v4 de inversión se verifica simbólicamente contra `2^degree-2` antes de
+la emisión. Cambiarlo altera `ArtifactId`, no `FieldId`; codegen ABI permanece
+en v3.
+
 ## Campos mantenidos
 
 | Nombre | Módulo | Bytes |

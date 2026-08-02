@@ -1,8 +1,8 @@
 //! Portable binary finite fields built from zero-cost abstractions.
 //!
-//! The current milestone publishes the stable capability contracts, field
-//! identifiers, the base field [`F2`] and three maintained portable extension
-//! fields.
+//! The crate publishes stable capability contracts, field identities, the
+//! base field [`F2`], maintained portable extensions, statically selected
+//! batch kernels and allocation-free derived algorithms.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(unsafe_code)]
@@ -13,6 +13,8 @@ extern crate alloc;
 #[doc(hidden)]
 pub mod __private;
 
+#[cfg(feature = "portable")]
+mod algorithms;
 mod backend;
 #[cfg(feature = "builtin-fields")]
 mod binary;
@@ -49,6 +51,16 @@ pub mod generator {
     };
 }
 
+#[cfg(feature = "portable")]
+pub use algorithms::{
+    AlgorithmFamily, AlgorithmId, AllocationBehavior, BatchInvertError, BatchInvertPlan,
+    BatchInvertRequirements, BatchInvertWorkspace, BatchPlan, BitMaskError, BitMaskViewMut,
+    CoefficientLayout, HornerError, ManyPointsHornerPlan, ManyPolynomialsHornerPlan, OperationKind,
+    PowerTableError, ProductScanPlan, ScanDirection, ScanError, ScanMode, WorkspaceError,
+    WorkspaceLayout, fill_fixed_base_powers, required_mask_words,
+};
+#[cfg(all(feature = "portable", feature = "alloc"))]
+pub use algorithms::{BitMask, FixedBasePowers, OwnedBatchInvertWorkspace};
 #[cfg(all(feature = "portable", feature = "alloc"))]
 pub use engine::PackedBatch;
 #[cfg(feature = "portable")]

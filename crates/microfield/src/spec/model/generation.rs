@@ -2,12 +2,15 @@
 
 use std::{
     collections::BTreeSet,
+    fmt,
     path::{Component, Path},
 };
 
 use serde::Serialize;
 
-use crate::{ArtifactBundleDigest, ArtifactId, FieldId, spec::error::GenerationError};
+use crate::{
+    ArtifactBundleDigest, ArtifactId, Field, FieldId, Square, spec::error::GenerationError,
+};
 
 /// Degree shape used by the deterministic portable optimizer.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
@@ -377,6 +380,8 @@ impl ReductionPlan {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(tag = "operation", rename_all = "snake_case")]
 pub enum ExponentiationStep {
+    /// Copy the accumulator into the plan's single saved-value slot.
+    SaveAccumulator,
     /// Square the accumulator a fixed number of times.
     Square {
         /// Fixed repetition count.
@@ -384,29 +389,286 @@ pub enum ExponentiationStep {
     },
     /// Multiply the accumulator by the original base.
     MultiplyBase,
+    /// Multiply the accumulator by the saved-value slot.
+    MultiplySaved,
 }
 
-/// Fixed schedule computing `a^(2^degree - 2)`.
+/// Exact abstract cost of a fixed exponentiation plan.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+pub struct ExponentiationCost {
+    multiplications: usize,
+    squares: usize,
+    saved_values: usize,
+}
+
+impl ExponentiationCost {
+    /// Returns the number of field multiplications.
+    #[must_use]
+    pub const fn multiplications(self) -> usize {
+        self.multiplications
+    }
+
+    /// Returns the number of dedicated field squares.
+    #[must_use]
+    pub const fn squares(self) -> usize {
+        self.squares
+    }
+
+    /// Returns the maximum number of simultaneously saved intermediate values.
+    #[must_use]
+    pub const fn saved_values(self) -> usize {
+        self.saved_values
+    }
+}
+
+/// Symbolic invariant failure in a fixed exponentiation plan.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[non_exhaustive]
+pub enum ExponentiationVerificationError {
+    /// Binary extension inversion requires degree at least two.
+    InvalidDegree {
+        /// Rejected extension degree.
+        degree: usize,
+    },
+    /// A multiplication read the saved-value slot before initialization.
+    SavedValueUninitialized {
+        /// Zero-based operation index.
+        operation: usize,
+    },
+    /// Symbolic exponent storage sizing overflowed.
+    SizeOverflow,
+    /// The final exponent was not exactly `2^degree - 2`.
+    IncorrectExponent {
+        /// Expected binary extension degree.
+        degree: usize,
+        /// Significant bits in the exponent produced by the plan.
+        actual_bits: usize,
+    },
+}
+
+impl fmt::Display for ExponentiationVerificationError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InvalidDegree { degree } => {
+                write!(
+                    formatter,
+                    "binary inversion degree must be >= 2, got {degree}"
+                )
+            }
+            Self::SavedValueUninitialized { operation } => write!(
+                formatter,
+                "operation {operation} reads the saved-value slot before initialization"
+            ),
+            Self::SizeOverflow => formatter.write_str("symbolic exponent size overflow"),
+            Self::IncorrectExponent {
+                degree,
+                actual_bits,
+            } => write!(
+                formatter,
+                "chain does not compute 2^{degree}-2 (actual significant bits: {actual_bits})"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for ExponentiationVerificationError {}
+
+/// Fixed, symbolically verified schedule computing `a^(2^degree - 2)`.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct ExponentiationPlan {
     algorithm: &'static str,
     exponent: &'static str,
+    degree: usize,
     steps: Vec<ExponentiationStep>,
+    cost: ExponentiationCost,
 }
 
 impl ExponentiationPlan {
+    /// Returns the stable algorithm family name.
+    #[must_use]
+    pub const fn algorithm(&self) -> &str {
+        self.algorithm
+    }
+
+    /// Returns the binary extension degree targeted by this schedule.
+    #[must_use]
+    pub const fn degree(&self) -> usize {
+        self.degree
+    }
+
     /// Returns the fixed, branch-free operation schedule.
     #[must_use]
     pub fn steps(&self) -> &[ExponentiationStep] {
         &self.steps
     }
 
-    pub(crate) fn new(steps: Vec<ExponentiationStep>) -> Self {
-        Self {
-            algorithm: "binary-fixed-chain-v1",
-            exponent: "2^degree-2",
-            steps,
+    /// Returns exact abstract operation counts for this schedule.
+    #[must_use]
+    pub const fn cost(&self) -> ExponentiationCost {
+        self.cost
+    }
+
+    /// Verifies initialization order and the exact Fermat exponent.
+    ///
+    /// # Errors
+    ///
+    /// Returns a typed invariant error when the schedule is malformed.
+    pub fn verify_symbolically(&self) -> Result<(), ExponentiationVerificationError> {
+        if self.degree < 2 {
+            return Err(ExponentiationVerificationError::InvalidDegree {
+                degree: self.degree,
+            });
         }
+
+        let mut accumulator = vec![true];
+        let mut saved = None;
+        for (operation, step) in self.steps.iter().enumerate() {
+            match step {
+                ExponentiationStep::SaveAccumulator => saved = Some(accumulator.clone()),
+                ExponentiationStep::Square { count } => {
+                    let new_len = accumulator
+                        .len()
+                        .checked_add(*count)
+                        .ok_or(ExponentiationVerificationError::SizeOverflow)?;
+                    let mut shifted = Vec::with_capacity(new_len);
+                    shifted.resize(*count, false);
+                    shifted.extend_from_slice(&accumulator);
+                    accumulator = shifted;
+                }
+                ExponentiationStep::MultiplyBase => add_exponents(&mut accumulator, &[true])?,
+                ExponentiationStep::MultiplySaved => {
+                    let saved = saved.as_deref().ok_or(
+                        ExponentiationVerificationError::SavedValueUninitialized { operation },
+                    )?;
+                    add_exponents(&mut accumulator, saved)?;
+                }
+            }
+        }
+
+        trim_exponent(&mut accumulator);
+        let correct = accumulator.len() == self.degree
+            && !accumulator[0]
+            && accumulator[1..].iter().all(|bit| *bit);
+        if !correct {
+            return Err(ExponentiationVerificationError::IncorrectExponent {
+                degree: self.degree,
+                actual_bits: accumulator.len(),
+            });
+        }
+        Ok(())
+    }
+
+    /// Evaluates this abstract chain using field operations.
+    ///
+    /// Zero handling remains the inversion caller's responsibility; this
+    /// method evaluates the exponent program exactly as written.
+    ///
+    /// # Errors
+    ///
+    /// Returns the same structural errors as [`Self::verify_symbolically`].
+    pub fn evaluate_reference<F: Field + Square>(
+        &self,
+        value: F,
+    ) -> Result<F, ExponentiationVerificationError> {
+        self.verify_symbolically()?;
+        let mut accumulator = value;
+        let mut saved = None;
+        for (operation, step) in self.steps.iter().enumerate() {
+            match step {
+                ExponentiationStep::SaveAccumulator => saved = Some(accumulator),
+                ExponentiationStep::Square { count } => {
+                    for _ in 0..*count {
+                        accumulator = accumulator.square();
+                    }
+                }
+                ExponentiationStep::MultiplyBase => accumulator = accumulator.mul(value),
+                ExponentiationStep::MultiplySaved => {
+                    let saved =
+                        saved.ok_or(ExponentiationVerificationError::SavedValueUninitialized {
+                            operation,
+                        })?;
+                    accumulator = accumulator.mul(saved);
+                }
+            }
+        }
+        Ok(accumulator)
+    }
+
+    pub(crate) fn new_itoh_tsujii_binary(degree: usize) -> Self {
+        let target = degree - 1;
+        let highest_bit = usize::BITS as usize - 1 - target.leading_zeros() as usize;
+        let mut block = 1_usize;
+        let mut steps = Vec::new();
+
+        for bit_index in (0..highest_bit).rev() {
+            steps.push(ExponentiationStep::SaveAccumulator);
+            steps.push(ExponentiationStep::Square { count: block });
+            steps.push(ExponentiationStep::MultiplySaved);
+            block *= 2;
+            if (target >> bit_index) & 1 != 0 {
+                steps.push(ExponentiationStep::Square { count: 1 });
+                steps.push(ExponentiationStep::MultiplyBase);
+                block += 1;
+            }
+        }
+        steps.push(ExponentiationStep::Square { count: 1 });
+
+        let cost = exponentiation_cost(&steps);
+        Self {
+            algorithm: "itoh-tsujii-binary-v1",
+            exponent: "2^degree-2",
+            degree,
+            steps,
+            cost,
+        }
+    }
+}
+
+fn exponentiation_cost(steps: &[ExponentiationStep]) -> ExponentiationCost {
+    let mut multiplications = 0;
+    let mut squares = 0;
+    let mut saved_values = 0;
+    for step in steps {
+        match step {
+            ExponentiationStep::SaveAccumulator => saved_values = 1,
+            ExponentiationStep::Square { count } => squares += count,
+            ExponentiationStep::MultiplyBase | ExponentiationStep::MultiplySaved => {
+                multiplications += 1;
+            }
+        }
+    }
+    ExponentiationCost {
+        multiplications,
+        squares,
+        saved_values,
+    }
+}
+
+fn add_exponents(
+    accumulator: &mut Vec<bool>,
+    rhs: &[bool],
+) -> Result<(), ExponentiationVerificationError> {
+    let required = accumulator
+        .len()
+        .max(rhs.len())
+        .checked_add(1)
+        .ok_or(ExponentiationVerificationError::SizeOverflow)?;
+    accumulator.resize(required, false);
+    let mut carry = false;
+    for (index, output) in accumulator.iter_mut().enumerate() {
+        let left = *output;
+        let right = rhs.get(index).copied().unwrap_or(false);
+        let sum = u8::from(left) + u8::from(right) + u8::from(carry);
+        *output = sum & 1 == 1;
+        carry = sum >= 2;
+    }
+    trim_exponent(accumulator);
+    Ok(())
+}
+
+fn trim_exponent(exponent: &mut Vec<bool>) {
+    while exponent.len() > 1 && exponent.last() == Some(&false) {
+        exponent.pop();
     }
 }
 
@@ -426,6 +688,18 @@ pub struct GenerationPlan {
 }
 
 impl GenerationPlan {
+    /// Returns the serialized generation-plan schema version.
+    #[must_use]
+    pub const fn schema_version(&self) -> u32 {
+        self.schema
+    }
+
+    /// Returns the intermediate-representation version.
+    #[must_use]
+    pub const fn ir_version(&self) -> u32 {
+        self.ir_version
+    }
+
     /// Returns the semantic field identity.
     #[must_use]
     pub const fn field_id(&self) -> FieldId {
@@ -478,10 +752,10 @@ impl GenerationPlan {
         verified_isa_profile: VerifiedIsaProfile,
     ) -> Self {
         Self {
-            schema: 1,
+            schema: 2,
             field_id,
             artifact_id,
-            ir_version: 3,
+            ir_version: 4,
             target_family: "portable_with_verified_isa_profile",
             product,
             reduction,
@@ -602,7 +876,10 @@ impl GeneratedArtifacts {
 
 #[cfg(test)]
 mod tests {
-    use super::{GeneratedArtifacts, GeneratedFile};
+    use super::{
+        ExponentiationCost, ExponentiationPlan, ExponentiationStep,
+        ExponentiationVerificationError, GeneratedArtifacts, GeneratedFile,
+    };
     use crate::{ArtifactBundleDigest, ArtifactId, FieldId, spec::error::GenerationError};
 
     #[test]
@@ -631,6 +908,53 @@ mod tests {
                 files
             ),
             Err(GenerationError::DuplicateArtifactPath(path)) if path == "same"
+        ));
+    }
+
+    #[test]
+    fn itoh_tsujii_chains_verify_across_schema_degree_range() {
+        for degree in [2, 3, 4, 5, 7, 8, 31, 64, 127, 128, 255, 256, 4096] {
+            let plan = ExponentiationPlan::new_itoh_tsujii_binary(degree);
+            plan.verify_symbolically().expect("chain must verify");
+            assert_eq!(plan.cost().squares(), degree - 1);
+        }
+    }
+
+    #[test]
+    fn symbolic_verifier_rejects_uninitialized_saved_slot() {
+        let plan = ExponentiationPlan {
+            algorithm: "invalid-test",
+            exponent: "2^degree-2",
+            degree: 3,
+            steps: vec![ExponentiationStep::MultiplySaved],
+            cost: ExponentiationCost {
+                multiplications: 1,
+                squares: 0,
+                saved_values: 0,
+            },
+        };
+        assert_eq!(
+            plan.verify_symbolically(),
+            Err(ExponentiationVerificationError::SavedValueUninitialized { operation: 0 })
+        );
+    }
+
+    #[test]
+    fn symbolic_verifier_rejects_incorrect_exponent() {
+        let plan = ExponentiationPlan {
+            algorithm: "invalid-test",
+            exponent: "2^degree-2",
+            degree: 3,
+            steps: vec![ExponentiationStep::Square { count: 1 }],
+            cost: ExponentiationCost {
+                multiplications: 0,
+                squares: 1,
+                saved_values: 0,
+            },
+        };
+        assert!(matches!(
+            plan.verify_symbolically(),
+            Err(ExponentiationVerificationError::IncorrectExponent { degree: 3, .. })
         ));
     }
 }

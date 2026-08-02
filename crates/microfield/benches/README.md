@@ -1,5 +1,14 @@
 # Benchmarks
 
+`derived_algorithms` mide por separado inversas escalares frente a inversión
+batch prestada, scans, ambas orientaciones de Horner y tablas de potencias. No
+incluye asignación ni construcción de buffers dentro de la muestra.
+
+```text
+cargo bench -p microfield --bench derived_algorithms
+cargo bench -p microfield --bench derived_algorithms -- phase3/inversion
+```
+
 El harness Criterion cubre los tres campos públicos:
 
 ```text

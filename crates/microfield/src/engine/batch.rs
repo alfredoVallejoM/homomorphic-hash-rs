@@ -37,3 +37,21 @@ pub(super) fn validate_binary_assign<F>(lhs: &[F], rhs: &[F]) -> Result<(), Batc
     }
     Ok(())
 }
+
+#[inline]
+pub(super) fn validate_ternary<F>(
+    out: &[F],
+    lhs: &[F],
+    rhs: &[F],
+    addend: &[F],
+) -> Result<(), BatchError> {
+    validate_binary(out, lhs, rhs)?;
+    if out.len() != addend.len() {
+        return Err(BatchError::LengthMismatch {
+            out: out.len(),
+            lhs: addend.len(),
+            rhs: None,
+        });
+    }
+    Ok(())
+}

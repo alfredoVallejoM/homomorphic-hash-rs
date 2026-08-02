@@ -11,6 +11,7 @@ flowchart LR
     Generated[generated]
     Engine[engine]
     Packed[engine::packed]
+    Algorithms[algorithms]
 
     Field --> Binary
     Field --> Kernel
@@ -23,7 +24,14 @@ flowchart LR
     Kernel --> Engine
     Field --> Packed
     Engine --> Packed
+    Field --> Algorithms
+    Engine --> Algorithms
 ```
+
+`algorithms` contiene planes derivados, máscaras y workspaces tipados. No
+importa backends ni intrinsics: recibe un `Engine<F>` ya seleccionado y lo liga
+al plan mediante `BackendId`. Inversión batch y scans con dependencias se
+mantienen estáticos; Horner reutiliza las primitivas batch del engine.
 
 Las flechas significan «puede depender de». `Engine` no conoce backends
 concretos. La raíz de composición interna construye la estrategia portable y el
@@ -56,8 +64,8 @@ argumentos CLI ni procesos externos.
 - Todo runtime portable compila con `no_std`.
 - La aritmética portable conserva cero `unsafe`; el crate usa
   `deny(unsafe_code)` y solo `backend::x86_pclmul`,
-  `backend::aarch64_pmull` y `engine::packed::storage` reciben excepciones
-  locales auditadas.
+  `backend::x86_vpclmul`, `backend::aarch64_pmull` y
+  `engine::packed::storage` reciben excepciones locales auditadas.
 
 ## Flujos
 
@@ -87,6 +95,20 @@ CpuCapabilities → EngineBuilder → Engine inmutable
                                   ↓ validación de slices
                                   una llamada indirecta → backend seleccionado
 ```
+
+Derivados:
+
+```text
+Engine<F> seleccionado + FieldId + longitud
+  → BatchPlan<F> inmutable
+  → validación completa de backend/shape/workspace
+  → algoritmo sin asignación
+  → salida y máscara completamente inicializadas
+```
+
+El workspace de inversión es `&mut [F]`; no existe reinterpretación raw ni
+alineamiento declarado por el consumidor. Los helpers owned viven detrás de
+`alloc` y no cambian la ruta prestada.
 
 `kernel` define el ABI neutral y metadatos; `backend::portable` implementa los
 bucles; la raíz del crate compone ambos; `engine` detecta solo cuando el

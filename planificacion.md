@@ -3080,7 +3080,8 @@ El repositorio contendrá un único paquete coherente capaz de:
 12. publicar la región de rendimiento de cada kernel;
 13. compilar tipos generados y portable en `no_std`.
 
-La biblioteca estará preparada para Fase 3, pero todavía no prometerá:
+Al cierre de Fase 2 la biblioteca quedó preparada para Fase 3, pero todavía no
+prometía:
 
 - inversión batch;
 - Itoh-Tsujii optimizado;
@@ -3088,6 +3089,58 @@ La biblioteca estará preparada para Fase 3, pero todavía no prometerá:
 - campos primos;
 - contextos dinámicos;
 - firmas algebraicas.
+
+La sección 18 materializa después inversión batch, Itoh–Tsujii verificado y
+Horner. Campos primos, contextos dinámicos y firmas permanecen en fases
+posteriores.
+
+# 18. Fase 3 implementada: algoritmos derivados
+
+La Fase 3 queda materializada sobre la arquitectura cerrada en Fase 2:
+
+1. IR v4 de inversión Itoh–Tsujii con verificación simbólica obligatoria;
+2. `BitMask` compacta y vista prestada;
+3. inversión batch tolerante a cero con un único inverso escalar;
+4. workspace tipado, reutilizable y naturalmente alineado;
+5. scans prefijo/sufijo, inclusivos y exclusivos;
+6. Horner para un polinomio/muchos puntos y muchos polinomios/un punto;
+7. layout de coeficientes explícito y sin transposición oculta;
+8. `mul_add_into` como operación derivada;
+9. tablas de potencias de base fija, prestadas y owned;
+10. planes inmutables ligados a `FieldId`, `BackendId` y longitud.
+
+Las rutas prestadas funcionan en `no_std` sin `alloc`, no detectan CPU, no
+crean hilos y no amplían el inventario `unsafe`. Toda validación ocurre antes
+de modificar la salida. La evidencia, los tests y los límites están en
+`docs/microfield/phase-3-plan.md`.
+
+# 19. Enriquecimiento vinculante de Fase 6
+
+Fase 6 ya no queda limitada a firmas algebraicas nuevas. Comenzará por la
+completación, corrección y extensión de todo el código legado mantenido,
+aplicándolo sobre los campos y engines de `microfield`. Se congelarán primero
+vectores y semántica; se conservará compatibilidad solo cuando esté demostrada,
+y se retirarán afirmaciones criptográficas o probatorias injustificadas.
+
+Esta ampliación sustituye expresamente la decisión `ARCH-109` de la
+especificación externa de Fases 3–7. La canonización entra en el programa, pero
+no en el núcleo algebraico: el dominio de grafos dependerá de `microfield`, y
+`field`, `kernel`, `backend` y los encodings canónicos de elementos no
+dependerán de grafos.
+
+La fase incluye también un track de canonización de grafos:
+
+1. especificación exacta del modelo de grafo y su encoding;
+2. algoritmo determinista de individualización–refinamiento con forma canónica;
+3. certificado o replay verificable de decisiones;
+4. pruebas exhaustivas de re-etiquetado e isomorfismo en tamaños pequeños;
+5. oráculo externo y casos con grandes grupos de automorfismos;
+6. uso opcional de firmas de campo como heurística de refinamiento.
+
+La corrección no dependerá de una ausencia supuesta de colisiones. Si dos
+firmas algebraicas coinciden, el canonizador continuará con comparación
+estructural exacta. El desarrollo detallado se pospone hasta Fase 6 y queda
+trazado en `docs/microfield/phases-3-7-roadmap.md`.
 
 # Referencias técnicas
 

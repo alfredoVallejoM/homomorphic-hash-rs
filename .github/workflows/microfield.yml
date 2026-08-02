@@ -149,6 +149,7 @@ jobs:
           cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
           -p microfield --all-features --test x86_pclmul --test x86_vpclmul
           --test packed_batch --test packed_views --test differential_corpus
+          --test phase3_algorithms
       - name: External profile PCLMUL AddressSanitizer
         env:
           RUSTFLAGS: -Zsanitizer=address
@@ -169,6 +170,7 @@ jobs:
         run: >-
           cargo +stable test -p microfield --all-features --test aarch64_pmull
           --test packed_batch --test packed_views --test differential_corpus
+          --test phase3_algorithms
       - name: Generated external profiles on PMULL
         run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
       - name: Zero-allocation PMULL gate
@@ -178,7 +180,9 @@ jobs:
       - name: Audit native PMULL assembly
         run: bash crates/microfield/tools/audit_aarch64_pmull.sh
       - name: Build benchmark harness on real hardware
-        run: cargo +stable bench -p microfield --bench portable_batch --no-run
+        run: >-
+          cargo +stable bench -p microfield --bench portable_batch
+          --bench derived_algorithms --no-run
       - name: Install nightly Rust with sources
         run: rustup toolchain install nightly --profile minimal --component rust-src
       - name: PMULL AddressSanitizer
@@ -189,7 +193,7 @@ jobs:
           cargo +nightly test -Zbuild-std --target aarch64-unknown-linux-gnu
           -p microfield --no-default-features --features std,portable,builtin-fields
           --test aarch64_pmull --test packed_batch --test packed_views
-          --test differential_corpus
+          --test differential_corpus --test phase3_algorithms
       - name: External profile PMULL AddressSanitizer
         env:
           RUSTFLAGS: -Zsanitizer=address

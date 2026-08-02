@@ -8,8 +8,10 @@
 
 use allocation_counter::{AllocationInfo, measure};
 use microfield::{
-    BackendId, CanonicalEncoding, CpuCapabilities, Engine, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1,
-    PackedBatch, StaticField, pack_into_storage, required_packed_bytes,
+    BackendId, BatchInvertWorkspace, BitMaskViewMut, CanonicalEncoding, CoefficientLayout,
+    CpuCapabilities, Engine, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1, Invert, PackedBatch,
+    StaticField, fill_fixed_base_powers, pack_into_storage, required_mask_words,
+    required_packed_bytes,
 };
 
 #[test]
@@ -82,7 +84,7 @@ fn capability_detection_and_engine_selection_allocate_zero_times() {
 
 fn assert_zero_allocations<F, const BYTES: usize>()
 where
-    F: microfield::BuiltinField + CanonicalEncoding + StaticField + core::fmt::Debug,
+    F: microfield::BuiltinField + CanonicalEncoding + StaticField + Invert + core::fmt::Debug,
 {
     const LEN: usize = 64;
 
@@ -132,13 +134,19 @@ where
     }
 }
 
-fn assert_engine_allocates_zero<F: microfield::BuiltinField + StaticField>(
+fn assert_engine_allocates_zero<F: microfield::BuiltinField + StaticField + Invert>(
     engine: Engine<F>,
     output: &mut [F],
     lhs: &[F],
     rhs: &[F],
     assigned: &mut [F],
 ) {
+    let mut prefixes = vec![F::ZERO; lhs.len()];
+    let mut mask_words = vec![0_u64; required_mask_words(lhs.len()).expect("bounded mask")];
+    let coefficients = [lhs[0], rhs[0], lhs[1]];
+    let polynomial_coefficients = vec![lhs[0], rhs[0], lhs[1], rhs[1]];
+    let mut polynomial_outputs = vec![F::ZERO; 2];
+    let mut powers = vec![F::ZERO; lhs.len()];
     let allocations = measure(|| {
         engine
             .add_into(output, lhs, rhs)
@@ -153,6 +161,33 @@ fn assert_engine_allocates_zero<F: microfield::BuiltinField + StaticField>(
             .mul_assign(assigned, rhs)
             .expect("equal lengths are valid");
         engine.square_assign(assigned);
+        engine
+            .mul_add_into(output, lhs, rhs, assigned)
+            .expect("equal lengths are valid");
+        engine
+            .prefix_products_into(output, lhs)
+            .expect("equal lengths are valid");
+        engine
+            .suffix_products_into(output, lhs)
+            .expect("equal lengths are valid");
+        engine
+            .horner_many_points_into(output, &coefficients, lhs)
+            .expect("valid Horner shape");
+        engine
+            .horner_many_polynomials_into(
+                &mut polynomial_outputs,
+                &polynomial_coefficients,
+                2,
+                CoefficientLayout::PolynomialMajor,
+                lhs[0],
+            )
+            .expect("valid polynomial matrix");
+        let mut workspace = BatchInvertWorkspace::new(&mut prefixes);
+        let mut mask = BitMaskViewMut::new(&mut mask_words, lhs.len()).expect("exact mask");
+        engine
+            .invert_batch_into(output, lhs, &mut mask, &mut workspace)
+            .expect("non-zero input batch is invertible");
+        fill_fixed_base_powers(&mut powers, lhs[0]);
     });
     assert_allocation_info_is_zero(allocations);
 

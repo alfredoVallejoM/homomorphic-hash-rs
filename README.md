@@ -33,6 +33,9 @@ regresión en 256 bits. H2.8 cierra la Fase 2 con tabla de selección versionada
 corpus diferencial persistente, inventario hash de `unsafe`, captura Criterion
 multi-runner y matriz runtime/codegen. Solo PCLMUL participa en selección
 automática; PMULL y VPCLMUL continúan disponibles mediante selección explícita.
+La Fase 3 incorpora inversión batch tolerante a cero, scans, Horner batch,
+potencias fijas, workspaces tipados e IR v4 de inversión verificado. No añade
+asignaciones ocultas ni nuevas fronteras `unsafe`.
 
 ## Comandos
 
@@ -78,3 +81,7 @@ El cierre, las garantías y las limitaciones de la Fase 2 están en
 `docs/microfield/phase-2-final-report.md`.
 
 El plan ejecutado de Fase 2 está en `docs/microfield/phase-2-plan.md`.
+
+El cierre de Fase 3 está en `docs/microfield/phase-3-final-report.md`. El roadmap
+corregido incluye la rehabilitación del legado y canonización de grafos dentro
+de Fase 6 en `docs/microfield/phases-3-7-roadmap.md`.

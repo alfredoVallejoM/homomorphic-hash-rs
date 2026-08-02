@@ -4,6 +4,19 @@ Fecha de revisión: 2 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
+Actualización de Fase 3: los algoritmos derivados están implementados y
+cerrados localmente. Existen inversión batch tolerante a cero, máscara compacta,
+workspace tipado, scans, las dos orientaciones de Horner, `mul_add_into` y
+potencias fijas. El planner usa schema 2/IR v4 y verifica simbólicamente la
+cadena Itoh–Tsujii exacta antes de calcular artefactos. La ruta prestada pasa
+el gate de cero asignaciones y no amplía `unsafe`.
+
+La planificación Fases 3–7 se corrigió en
+[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md). En particular, Fase 6
+comenzará con la rehabilitación completa del legado sobre campos `microfield`
+y contendrá un track exacto de canonización de grafos; las firmas algebraicas
+solo podrán acelerar refinamiento, nunca decidir isomorfismo por sí solas.
+
 La Fase 2 está cerrada. H2.8 transforma la calibración, seguridad y
 compatibilidad en contratos versionados: tabla de selección v1 compilada como
 constantes, corpus diferencial persistente, inventario SHA-256 de `unsafe` y
@@ -24,6 +37,7 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 |---|---|---|
 | Fase 1 | Cerrada en `main` | `1f176ab`; cinco jobs verdes en `30703842091` |
 | Fase 2 | Cerrada conservadoramente | H2.1–H2.8; informe final y tabla de selección v1 |
+| Fase 3 | Cerrada localmente | algoritmos derivados, IR v4, Miri/ASan y benchmark |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
@@ -101,7 +115,7 @@ El puente externo y PMULL se fijan en
 
 ## Cobertura
 
-La suite raíz x86-64 de Microfield contiene 138 tests de runtime y siete
+La suite raíz x86-64 de Microfield contiene 164 tests de runtime y siete
 doctests compile-fail; el feature de conteo añade dos tests. El target AArch64
 añade tres tests PMULL específicos. El consumidor generado añade 11 tests de
 runtime y dos compile-fail; la integración legada conserva tres tests. H4
@@ -153,8 +167,8 @@ H2.5 replica la suite normativa para PMULL: todos los bits de base, 17 tamaños
 hasta 16 384, tres presets, canarios, in-place y errores transaccionales. QEMU
 8.2 `-cpu max` ejecuta los tres tests específicos y los 11 externos; ambos
 conjuntos pasan además bajo AddressSanitizer. El test de alcance recorre `src`
-y permite exactamente tres excepciones `unsafe`: dos adapters ISA y el único
-módulo de storage alineado.
+y, tras H2.7, permite exactamente cuatro excepciones `unsafe`: tres adapters
+ISA y el único módulo de storage alineado.
 
 H2.6 añade cuatro tests owned, cinco tests de vistas y dos unit tests de
 planner/storage. Cubre los tres presets, backend ISA detectado, cinco perfiles
@@ -285,11 +299,10 @@ un threshold optimista. El informe consolidado está en
 
 ### Siguiente fase
 
-Fase 3 debe empezar por algoritmos batch de nivel superior: inversión mediante
-Montgomery trick con workspace explícito, Horner/productos especializados y
-cadenas estáticas por campo. No se reabrirán layout, encoding o identidad para
-introducirlos. La calibración adicional de PMULL/VPCLMUL puede avanzar en
-paralelo porque solo modifica la tabla privada de selección.
+Fase 3 está cerrada. El siguiente corte es F4.0: congelar campos primos,
+certificados y representación antes de implementar `Fp251V1`, Goldilocks y un
+primo multi-limb. Los algoritmos de Fase 3 se reutilizarán sin duplicación y
+servirán como test arquitectónico de que no estaban acoplados a GF(2^m).
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no
@@ -297,4 +310,5 @@ garantías. Entorno, intervalos y comando están en
 [`portable-optimizer.md`](portable-optimizer.md).
 
 El orden, los gates y los entregables están en
-[`phase-2-plan.md`](phase-2-plan.md).
+[`phase-3-plan.md`](phase-3-plan.md) y
+[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md).

@@ -70,6 +70,12 @@ cualquier cambio en las cuatro fronteras `unsafe`; y la matriz de compatibilidad
 fija runtime ABI 1..=3 y codegen ABI 3. Los perfiles Criterion se capturan con
 entorno completo y nunca se promueven automáticamente desde CI.
 
+Fase 3 añade algoritmos derivados sin ampliar la frontera ISA: inversión batch
+tolerante a cero con máscara compacta y workspace tipado, scans prefijo/sufijo,
+Horner en dos orientaciones, `mul_add_into` y potencias fijas. Los planes son
+inmutables y backend-bound; las rutas prestadas funcionan sin `alloc`. El IR v4
+describe y verifica simbólicamente la cadena Itoh–Tsujii realmente ejecutada.
+
 ```rust
 use microfield::{Engine, Field, Gf2_256HhV1, PackedBatch};
 
@@ -123,6 +129,7 @@ cargo check -p microfield --no-default-features --features portable,builtin-fiel
 cargo check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 cargo bench -p microfield --bench portable_batch
 cargo bench -p microfield --bench portable_codegen_optimizer
+cargo bench -p microfield --bench derived_algorithms
 bash crates/microfield/tools/audit_calibration.sh
 bash crates/microfield/tools/audit_unsafe_scope.sh
 ```

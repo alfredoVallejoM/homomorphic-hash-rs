@@ -161,6 +161,30 @@ impl<F: PortableField> Engine<F> {
     pub fn square_assign(&self, values: &mut [F]) {
         (self.kernels.square_assign)(values);
     }
+
+    /// Computes `lhs[i] * rhs[i] + addend[i]` into distinct output.
+    ///
+    /// This is a field operation fusion contract, not a claim that the target
+    /// ISA provides a native FMA instruction.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BatchError::LengthMismatch`] before writing when any slice
+    /// length differs.
+    #[inline]
+    pub fn mul_add_into(
+        &self,
+        out: &mut [F],
+        lhs: &[F],
+        rhs: &[F],
+        addend: &[F],
+    ) -> Result<(), BatchError> {
+        batch::validate_ternary(out, lhs, rhs, addend)?;
+        for (((output, left), right), addition) in out.iter_mut().zip(lhs).zip(rhs).zip(addend) {
+            *output = left.mul(*right).add(*addition);
+        }
+        Ok(())
+    }
 }
 
 impl<F: PortableField> Default for Engine<F> {
