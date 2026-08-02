@@ -107,7 +107,7 @@ pub(crate) fn montgomery_reduce_wide<const LIMBS: usize, const WIDE_LIMBS: usize
     neg_inv: u64,
 ) -> [u64; LIMBS] {
     assert!(LIMBS > 0);
-    assert!(WIDE_LIMBS == LIMBS * 2);
+    assert_eq!(WIDE_LIMBS, LIMBS * 2);
 
     let mut accumulator = wide;
     let mut high = 0_u64;
