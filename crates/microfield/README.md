@@ -98,6 +98,14 @@ storage owned/prestado y Barrett AVX2 `u32`; los perfiles externos no se
 promueven automáticamente. La arquitectura, mediciones y límites quedan
 registrados en `../../docs/microfield/phase-4-7-final-report.md`.
 
+Fase 5 añade campos externos primos y contextos runtime sin contaminar el
+camino estático. `PrimeFieldFactory` prueba `u64` determinísticamente o
+reejecuta Pocklington multi-limb, genera un newtype `u8`/`u16`/`u32` o
+Montgomery, y publica bundle, lock y vectores reproducibles. `DynField` soporta
+binarios y primos, `DynBatch` amortiza la identidad y `generate_static`
+preserva `FieldId`; un `ProbablePrime` nunca autoriza fuente. Detalles en
+`../../docs/microfield/phase-5-final-report.md`.
+
 ```rust
 use microfield::{Engine, Field, Gf2_256HhV1, PackedBatch};
 
@@ -135,6 +143,30 @@ package.emit_rust(std::env::var_os("OUT_DIR").ok_or("OUT_DIR")?)?;
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
+```rust
+# #[cfg(feature = "generator")]
+# fn generated() -> Result<(), Box<dyn std::error::Error>> {
+let package = microfield::generator::PrimeFieldFactory::builder()
+    .name("fp65521_external")
+    .modulus("65521")
+    .build()?
+    .generate()?;
+assert_eq!(package.type_name(), "Fp65521External");
+# Ok(()) }
+```
+
+```rust
+# #[cfg(feature = "dynamic")]
+# fn dynamic() -> Result<(), Box<dyn std::error::Error>> {
+let field = microfield::DynField::builder("gf2_8_runtime")
+    .binary(8, vec![8, 4, 3, 1, 0])
+    .build()?;
+let value = field.decode(&[0x53])?;
+let inverse = field.invert(&value)?;
+assert_eq!(field.mul(&value, &inverse)?, field.one());
+# Ok(()) }
+```
+
 La configuración Cargo completa y los contratos de actualización están en
 [`docs/microfield/binary-field-factory.md`](../../docs/microfield/binary-field-factory.md).
 
@@ -145,6 +177,8 @@ cuando dos campos tienen el mismo cardinal.
 ```text
 cargo test -p microfield
 cargo test -p microfield --features generator --all-targets
+cargo test -p microfield --features generator,dynamic --test phase5_generator
+cargo test -p microfield --features dynamic --test phase5_dynamic
 cargo test -p microfield --all-features --doc
 cargo clippy -p microfield --all-features --all-targets -- -D warnings
 cargo check -p microfield --no-default-features --features portable,builtin-fields
@@ -166,4 +200,6 @@ microfield-gen validate fields/gf2_256_hh_v1.toml
 microfield-gen plan fields/gf2_256_hh_v1.toml
 microfield-gen all fields/gf2_256_hh_v1.toml --out artifacts
 microfield-gen check fields/gf2_256_hh_v1.toml --out artifacts
+microfield-gen prime-generate fields/fp65521_external_v1.toml --out generated
+microfield-gen prime-check fields/fp65521_external_v1.toml --out generated
 ```

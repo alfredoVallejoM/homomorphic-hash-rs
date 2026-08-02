@@ -367,6 +367,7 @@ checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
 name = "homomorphic-hash-rs"
 version = "0.1.0"
 dependencies = [
+ "allocation-counter",
  "bincode",
  "criterion",
  "csv",
@@ -376,6 +377,9 @@ dependencies = [
  "rand",
  "rayon",
  "serde",
+ "serde_json",
+ "sha2",
+ "structural-field-fixture",
  "ureq",
 ]
 
@@ -558,6 +562,9 @@ version = "0.1.0"
 dependencies = [
  "allocation-counter",
  "criterion",
+ "num-bigint",
+ "num-integer",
+ "num-traits",
  "serde",
  "serde_json",
  "sha2",
@@ -572,6 +579,25 @@ checksum = "1fa76a2c86f704bdb222d66965fb3d63269ce38518b83cb0575fca855ebb6316"
 dependencies = [
  "adler2",
  "simd-adler32",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c89e69e7e0f03bea5ef08013795c25018e101932225a656383bd384495ecc367"
+dependencies = [
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
+name = "num-integer"
+version = "0.1.46"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7969661fd2958a5cb096e56c8e1ad0444ac2bbcd0061bd28660485a44879858f"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -906,6 +932,13 @@ name = "stable_deref_trait"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
+
+[[package]]
+name = "structural-field-fixture"
+version = "0.0.0"
+dependencies = [
+ "microfield",
+]
 
 [[package]]
 name = "subtle"

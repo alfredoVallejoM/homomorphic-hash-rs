@@ -98,6 +98,19 @@ impl BinaryFieldFactory {
         })
     }
 
+    /// Parses an in-memory schema-v1 manifest through the canonical pipeline.
+    ///
+    /// # Errors
+    ///
+    /// Returns the same strict parsing error as [`Self::from_manifest`].
+    pub fn from_manifest_toml(source: &str) -> Result<Self, BinaryFieldFactoryError> {
+        let manifest = FieldManifest::parse_toml(source).map_err(PipelineError::from)?;
+        Ok(Self {
+            manifest,
+            maximum_degree: super::model::SCHEMA_V1_MAXIMUM_DEGREE,
+        })
+    }
+
     /// Certifies the modulus, derives immutable plans and renders one module.
     ///
     /// # Errors

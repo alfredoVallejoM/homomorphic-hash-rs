@@ -15,9 +15,15 @@ pub mod __private;
 
 #[cfg(feature = "portable")]
 mod algorithms;
+#[cfg(any(feature = "generator", feature = "dynamic"))]
+mod assurance;
 mod backend;
 #[cfg(feature = "builtin-fields")]
 mod binary;
+#[cfg(all(feature = "dynamic", feature = "generator"))]
+mod bridge;
+#[cfg(feature = "dynamic")]
+mod dynamic;
 #[cfg(feature = "portable")]
 mod engine;
 mod generated;
@@ -49,9 +55,21 @@ pub mod generator {
     };
     pub use crate::spec::{
         BinaryFieldFactory, BinaryFieldFactoryBuilder, BinaryFieldFactoryError,
-        GeneratedFieldPackage,
+        GeneratedFieldPackage, GeneratedPrimeFieldPackage, GenerationLimits, GenerationProfile,
+        MicrofieldLock, NormalizedPrimeManifest, PocklingtonCertificate, PocklingtonFactor,
+        PrimeArtifactCache, PrimeCachePolicy, PrimeFieldFactory, PrimeFieldFactoryBuilder,
+        PrimeFieldFactoryError, PrimeFieldManifest, PrimeManifestError, PrimeRepresentationProfile,
+        PrimeValidationError, ValidatedPrimeField,
     };
 }
+
+#[cfg(all(feature = "dynamic", feature = "generator"))]
+pub use bridge::{StaticExportError, StaticExportPackage};
+#[cfg(feature = "dynamic")]
+pub use dynamic::{
+    DynBatch, DynBatchError, DynElement, DynEngine, DynFamilyKind, DynField, DynFieldBuilder,
+    DynFieldError, DynLimbStorage, DynValidationLimits, SpecializationLevel,
+};
 
 #[cfg(feature = "portable")]
 pub use algorithms::{
@@ -63,6 +81,8 @@ pub use algorithms::{
 };
 #[cfg(all(feature = "portable", feature = "alloc"))]
 pub use algorithms::{BitMask, FixedBasePowers, OwnedBatchInvertWorkspace};
+#[cfg(any(feature = "generator", feature = "dynamic"))]
+pub use assurance::{PocklingtonCertificate, PocklingtonFactor, ValidationAssurance};
 #[cfg(all(feature = "portable", feature = "alloc"))]
 pub use engine::PackedBatch;
 #[cfg(feature = "portable")]

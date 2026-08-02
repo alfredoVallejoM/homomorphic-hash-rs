@@ -1,17 +1,9 @@
-use homomorphic_hash_rs::harness::runner::BenchmarkRunner;
-use std::path::Path;
 use std::fs::{self, File};
 use std::io::Write;
-use homomorphic_hash_rs::domains::chemistry::demo4_thermodynamic::Demo4ThermodynamicLimit;
+use std::path::Path;
 
-// 1. IMPORT FROM THE NEW MODULAR SYSTEM
-use homomorphic_hash_rs::domains::chemistry::demo1_invariance::{
-    Demo1Level1Positional, Demo1Level2Symmetry, Demo1Level3Massive
-};
-use homomorphic_hash_rs::domains::chemistry::demo2_isomer_resolution::{
-    Demo2Level1Alkanes, Demo2Level2Aromatic, Demo2Level3WLParadox, Demo2Level4MassivePubChem
-};
-use homomorphic_hash_rs::domains::chemistry::demo3_hts_shield::Demo3HTSShield;
+use homomorphic_hash_rs::domains::chemistry::demo4_thermodynamic::Demo4ThermodynamicLimit;
+use homomorphic_hash_rs::harness::runner::BenchmarkRunner;
 
 // =========================================================================
 // INDUSTRIAL DATASET MANAGER
@@ -32,17 +24,21 @@ impl DatasetManager {
     }
 
     fn fetch_and_clean(sources: Vec<DatasetSource>, output_path: &str) {
-        if Path::new(output_path).exists() { return; }
+        if Path::new(output_path).exists() {
+            return;
+        }
         let mut success = false;
 
         for source in sources {
             match ureq::get(source.url).call() {
-                Ok(mut res) => {
-                    let response_text = res.body_mut().read_to_string().unwrap();
+                Ok(res) => {
+                    let response_text = res.into_string().unwrap();
                     let mut out_file = File::create(output_path).unwrap();
 
                     for (i, line) in response_text.lines().enumerate() {
-                        if source.has_header && i == 0 { continue; }
+                        if source.has_header && i == 0 {
+                            continue;
+                        }
                         let parts: Vec<&str> = line.split(',').collect();
                         if parts.len() > source.smiles_col_idx {
                             let smiles = parts[source.smiles_col_idx].trim().trim_matches('"');
@@ -53,11 +49,13 @@ impl DatasetManager {
                     }
                     success = true;
                     break;
-                },
+                }
                 Err(_) => continue,
             }
         }
-        if !success { panic!("CRITICAL: Network mirrors failed for {}", output_path); }
+        if !success {
+            panic!("CRITICAL: Network mirrors failed for {}", output_path);
+        }
     }
 
     pub fn prepare_all_datasets() -> (String, String, String) {
@@ -82,7 +80,11 @@ impl DatasetManager {
             DatasetSource { url: "https://raw.githubusercontent.com/wengong-jin/icml18-jtnn/master/data/zinc/train.txt", smiles_col_idx: 0, has_header: false }
         ], hts_1m_path);
 
-        (massive_path.to_string(), isomers_path.to_string(), hts_1m_path.to_string())
+        (
+            massive_path.to_string(),
+            isomers_path.to_string(),
+            hts_1m_path.to_string(),
+        )
     }
 }
 
@@ -91,7 +93,7 @@ impl DatasetManager {
 // =========================================================================
 fn main() {
     println!("🧪 INITIALIZING SCIENTIFIC PIPELINE");
-    let (massive_path, isomers_path, hts_1m_path) = DatasetManager::prepare_all_datasets();
+    let (_massive_path, _isomers_path, _hts_1m_path) = DatasetManager::prepare_all_datasets();
     let mut runner = BenchmarkRunner::new();
     /*
     // REGISTER DEMO 1 (Invariance Levels 1, 2, 3)
@@ -110,7 +112,7 @@ fn main() {
     runner.add_experiment(Box::new(Demo3HTSShield::new(&hts_1m_path)));
     */
     println!(">>> REGISTERING DEMO 4: THERMODYNAMIC LIMIT (O(V+E) Asymptotics)");
-runner.add_experiment(Box::new(Demo4ThermodynamicLimit::new()));
+    runner.add_experiment(Box::new(Demo4ThermodynamicLimit::new()));
     // Global log routed directly to the results folder
     runner.ignite("data/chemistry/results/telemetry_global_harness.csv");
     println!("✅ FULL PIPELINE COMPLETE. Check data/chemistry/results/ for specific telemetry.");

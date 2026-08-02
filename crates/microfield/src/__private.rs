@@ -192,6 +192,114 @@ pub const fn supports_codegen_abi(version: u32) -> bool {
     version >= MIN_CODEGEN_ABI_VERSION && version <= MAX_CODEGEN_ABI_VERSION
 }
 
+/// Adds two canonical prime residues with a fixed carry schedule.
+#[cfg(feature = "prime-fields")]
+#[inline]
+#[must_use]
+pub fn prime_add_mod<const LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+) -> [u64; LIMBS] {
+    crate::prime::add_mod(lhs, rhs, modulus)
+}
+
+/// Subtracts two canonical prime residues with masked correction.
+#[cfg(feature = "prime-fields")]
+#[inline]
+#[must_use]
+pub fn prime_sub_mod<const LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+) -> [u64; LIMBS] {
+    crate::prime::sub_mod(lhs, rhs, modulus)
+}
+
+/// Negates a canonical prime residue without a value-dependent branch.
+#[cfg(feature = "prime-fields")]
+#[inline]
+#[must_use]
+pub fn prime_neg_mod<const LIMBS: usize>(
+    value: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+) -> [u64; LIMBS] {
+    crate::prime::neg_mod(value, modulus)
+}
+
+/// Multiplies two radix-64 Montgomery residues.
+#[cfg(feature = "prime-fields")]
+#[inline]
+#[must_use]
+pub fn prime_montgomery_mul<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+    neg_inv: u64,
+) -> [u64; LIMBS] {
+    crate::prime::montgomery_mul::<LIMBS, WIDE_LIMBS>(lhs, rhs, modulus, neg_inv)
+}
+
+/// Converts a canonical residue to radix-64 Montgomery representation.
+#[cfg(feature = "prime-fields")]
+#[inline]
+#[must_use]
+pub fn prime_to_montgomery<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    value: [u64; LIMBS],
+    r2: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+    neg_inv: u64,
+) -> [u64; LIMBS] {
+    crate::prime::to_montgomery::<LIMBS, WIDE_LIMBS>(value, r2, modulus, neg_inv)
+}
+
+/// Converts a radix-64 Montgomery residue to its canonical limbs.
+#[cfg(feature = "prime-fields")]
+#[inline]
+#[must_use]
+pub fn prime_from_montgomery<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    value: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+    neg_inv: u64,
+) -> [u64; LIMBS] {
+    crate::prime::from_montgomery::<LIMBS, WIDE_LIMBS>(value, modulus, neg_inv)
+}
+
+/// Decodes little-endian canonical bytes into private radix limbs.
+#[cfg(feature = "prime-fields")]
+#[must_use]
+pub fn prime_decode_limbs<const LIMBS: usize>(bytes: &[u8]) -> [u64; LIMBS] {
+    let mut limbs = [0_u64; LIMBS];
+    for (index, byte) in bytes.iter().copied().enumerate() {
+        if index / 8 < LIMBS {
+            limbs[index / 8] |= u64::from(byte) << ((index % 8) * 8);
+        }
+    }
+    limbs
+}
+
+/// Encodes private radix limbs as little-endian canonical bytes.
+#[cfg(feature = "prime-fields")]
+pub fn prime_encode_limbs<const LIMBS: usize>(limbs: [u64; LIMBS], out: &mut [u8]) {
+    for (index, byte) in out.iter_mut().enumerate() {
+        *byte = ((limbs[index / 8] >> ((index % 8) * 8)) & 0xff) as u8;
+    }
+}
+
+/// Reports whether one limb vector is strictly below another.
+#[cfg(feature = "prime-fields")]
+#[must_use]
+pub fn prime_limbs_less_than<const LIMBS: usize>(lhs: &[u64; LIMBS], rhs: &[u64; LIMBS]) -> bool {
+    let mut index = LIMBS;
+    while index > 0 {
+        index -= 1;
+        if lhs[index] != rhs[index] {
+            return lhs[index] < rhs[index];
+        }
+    }
+    false
+}
+
 #[inline]
 #[must_use]
 pub fn add<const LIMBS: usize>(lhs: [u64; LIMBS], rhs: [u64; LIMBS]) -> [u64; LIMBS] {

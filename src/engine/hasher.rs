@@ -2,9 +2,10 @@ use crate::algebra::traits::FiniteField;
 use crate::topology::traits::HomomorphicAggregator;
 use std::marker::PhantomData;
 
-/// Universal Topological Hasher.
-/// Zero-Cost Abstraction state machine. The compiler monomorphizes this struct
-/// specifically for the chosen `FiniteField` and `HomomorphicAggregator`.
+/// Legacy state-machine facade over [`HomomorphicAggregator`].
+///
+/// It remains monomorphized, but carries no field/encoder/signature identity.
+/// New code should store one of the identified types in [`crate::structural`].
 pub struct TopoHasher<F: FiniteField, A: HomomorphicAggregator<F>> {
     state: F,
     element_count: usize,
@@ -22,8 +23,7 @@ impl<F: FiniteField, A: HomomorphicAggregator<F>> TopoHasher<F, A> {
         }
     }
 
-    /// Injects external entropy into the macroscopic topology.
-    /// Branchless operation at the hasher level.
+    /// Embeds and aggregates one byte string.
     #[inline(always)]
     pub fn update(&mut self, data: &[u8]) {
         let element = A::embed_to_field(data);
@@ -31,9 +31,15 @@ impl<F: FiniteField, A: HomomorphicAggregator<F>> TopoHasher<F, A> {
         self.element_count += 1;
     }
 
-    /// Finalizes the topology and crystalizes the Galois Signature.
+    /// Returns the legacy field state without metadata.
     #[inline(always)]
     pub fn finalize(self) -> F {
         self.state
+    }
+}
+
+impl<F: FiniteField, A: HomomorphicAggregator<F>> Default for TopoHasher<F, A> {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -1,0 +1,16 @@
+prime_schema_version = 1
+
+[prime]
+name = "fp_goldilocks_external_v1"
+modulus = "18446744069414584321"
+
+[encoding]
+byte_order = "little"
+integer = "canonical"
+canonical_bytes = 8
+
+[validation]
+assurance = "proven"
+
+[build]
+profile = "multi_backend"

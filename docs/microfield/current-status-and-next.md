@@ -4,6 +4,24 @@ Fecha de revisión: 2 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
+F6.0–F6.8 están completados localmente. La aritmética legacy de
+`GaloisSignature256` delega en `microfield`; `structural` implementa firmas
+aditivas, secuenciales, bidireccionales y de multiconjunto simple/multievaluado
+con identidad completa, contadores, factores cero, wire canónico y operaciones
+masivas transaccionales. La API cubre tipos mantenidos, perfiles externos
+generados y contextos runtime detrás de `dynamic-fields`; estático y dinámico
+producen el mismo wire cuando el campo y parámetros son iguales. Las antiguas
+“pruebas de inclusión” quedan correctamente clasificadas como residuos
+algebraicos. El canonizador histórico y sus heurísticas continúan congelados.
+La discusión F6.G0 ya ha cerrado y F6.G0–G2 implementan ahora
+un modelo CSR por incidencias, etiquetado rápido genérico, perfiles F251 y
+externos, huella híbrida SHA-256 y salida exacta únicamente para particiones
+discretas. Véanse
+[`phase-6-legacy-audit.md`](phase-6-legacy-audit.md),
+[`phase-6-pre-canon-plan.md`](phase-6-pre-canon-plan.md) y el
+[`informe pre-canon`](phase-6-pre-canon-final-report.md), junto con
+[`phase-6-fast-graph.md`](phase-6-fast-graph.md).
+
 Actualización de Fase 4: la fase de campos primos está cerrada localmente.
 `Fp251V1`, `FpGoldilocks64V1` y `Fp256GenericV1` están certificados, poseen
 encoding canónico estricto y funcionan con los algoritmos y `Engine` existentes.
@@ -35,10 +53,12 @@ cadena Itoh–Tsujii exacta antes de calcular artefactos. La ruta prestada pasa
 el gate de cero asignaciones y no amplía `unsafe`.
 
 La planificación Fases 3–7 se corrigió en
-[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md). En particular, Fase 6
-comenzará con la rehabilitación completa del legado sobre campos `microfield`
-y contendrá un track exacto de canonización de grafos; las firmas algebraicas
-solo podrán acelerar refinamiento, nunca decidir isomorfismo por sí solas.
+[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md). La Fase 6 está cerrada: ha
+rehabilitado el legado sobre campos `microfield`, mantiene firmas y etiquetas
+lineales como primitiva componible, recomienda el discriminador global v2 y
+reserva la búsqueda exacta optativa y acotada para las simetrías. Las firmas
+algebraicas, SHA-256, invariantes globales, motivos y bundles multi-campo
+reducen colisiones, pero no deciden isomorfismo por igualdad.
 
 La Fase 2 está cerrada. H2.8 transforma la calibración, seguridad y
 compatibilidad en contratos versionados: tabla de selección v1 compilada como
@@ -63,6 +83,11 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | Fase 3 | Cerrada y publicada | algoritmos derivados, IR v4, Miri/ASan y benchmark |
 | Fase 4 | Cerrada, corregida y ampliada | tres primos, certificados, Sage, Goldilocks/Fp251 AVX2 y bridges SIMD/BMI2 genéricos |
 | F4.7-PACKED-SIMD | Completada localmente | ABI packed por lanes, storage persistente, SIMD `u8`/`u16`, candidato `u32` y calibración adversaria |
+| Fase 5 | Cerrada localmente | factory prima, assurance, bundles, contextos dinámicos y puente estático |
+| F6.0–F6.8 | Completada localmente | auditoría legacy, cinco firmas, campos generados/runtime, identidades, tracking, residual y wire schema 1 |
+| F6.G0–G2 | Completada localmente | CSR relacional, motor lineal multi-campo, F251, SHA-256 invariante y salida discreta exacta |
+| F6.G3 | Completo localmente | preparación/workspace, batch AVX2 medido, paralelismo determinista y migración del canonizador legado |
+| F6.G4–G7 | Completada localmente | incrementalidad, degeneración, exacto por componentes, perfil global v2 y corpus externo |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
@@ -288,10 +313,11 @@ de coordinación antes de uso concurrente.
 
 ### Fuera de alcance
 
-El paquete legado conserva 447 tests correctos, pero sus benchmarks y ejemplos
-históricos impiden todavía `cargo check --workspace --all-targets`; también hay
-formato legado pendiente. La matriz aislada de Microfield y compatibilidad no
-está afectada.
+Los auto-benches históricos inválidos se han retirado de los targets
+mantenidos sin borrar su fuente. El canonizador, Bloom y spectral históricos se
+mantienen como legado experimental; el motor nuevo no incorpora índices de
+entrada ni expansión de hiperaristas a cliques. La ausencia observada de
+colisiones no constituye evidencia de canonización.
 
 ## Siguiente orden
 
@@ -322,13 +348,35 @@ La evidencia insuficiente se representa como selección explícita, nunca como
 un threshold optimista. El informe consolidado está en
 [`phase-2-final-report.md`](phase-2-final-report.md).
 
-### Siguiente corte
+### Fases 5 y 6 cerradas tras F6.G7; Fase 7 es el siguiente corte
 
-Fase 4 permanece cerrada en sus contratos algebraicos y F4.7-PACKED-SIMD ha
-terminado el puente persistente previo a la generación. El siguiente corte es
-F5.0/F5.1 con manifiesto primo externo,
-`ValidationAssurance`, lock/bundle y emisión estática nominal. Ningún contexto
-dinámico alterará los tipos mantenidos ni el dispatch escalar.
+La generación prima externa, assurance probado/probable, bundle/lock, caché,
+CLI, contextos dinámicos y puente dinámico→estático están implementados sin
+alterar tipos mantenidos ni dispatch escalar. Los cuatro perfiles de aceptación
+compilan en un consumidor y SageMath 10.7 valida sus vectores.
+
+F6.0–F6.8 inventariaron, generalizaron y migraron la parte algebraica del legado.
+F6.G0–G4 añaden modelo exacto, etiquetador rápido, preparación/workspaces,
+SoA/AVX2 explícito, paralelismo determinista e incrementalidad. F6.G5 separa
+aliasing de campo y degeneración local, identifica evidencia multi-campo y
+valida familias regulares con un oráculo exhaustivo y SageMath. F6.G6 incorpora
+canonización exacta opt-in con presupuesto de nodos y estado retenido,
+publicando `BudgetExhausted` sin candidato cuando no completa el árbol. Los
+límites prácticos detectados obligaron a F6.G7: `analyze_discriminating` añade
+un descriptor global exacto y motivos acotados; la canonización se descompone
+por componentes. El corpus fijado valida 1.253 clases del Graph Atlas, 188
+moléculas MUTAG, email-Eu-core y el hipergrafo diseasome. Los cierres están en
+[`phase-6-g3-final-report.md`](phase-6-g3-final-report.md) y
+[`phase-6-g4-final-report.md`](phase-6-g4-final-report.md), con el informe final
+en [`phase-6-g5-g6-final-report.md`](phase-6-g5-g6-final-report.md).
+El cierre acumulado está en
+[`phase-6-final-report.md`](phase-6-final-report.md).
+La corrección v2 está en
+[`phase-6-g7-final-report.md`](phase-6-g7-final-report.md).
+
+El siguiente trabajo es Fase 7. Debe partir de los contratos ya cerrados y no
+introducir FFT, torres, reconciliación o adapters de aplicación dentro del hot
+path de campos o grafos.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no

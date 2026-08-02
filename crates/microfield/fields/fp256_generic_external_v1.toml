@@ -1,0 +1,156 @@
+prime_schema_version = 1
+
+[prime]
+name = "fp256_generic_external_v1"
+modulus = "71319327679048415160211920703270965766974670828100238494590001805011376932671"
+
+[encoding]
+byte_order = "little"
+integer = "canonical"
+canonical_bytes = 32
+
+[validation]
+assurance = "proven"
+
+[certificate]
+algorithm = "pocklington-v1"
+known_factor_product = "23984823528925228172706521638692258396210"
+cofactor = "2973518966818275755463563954254353527"
+
+[[certificate.factors]]
+prime = 2
+exponent = 1
+witness = 3
+
+[[certificate.factors]]
+prime = 3
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 5
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 7
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 11
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 13
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 17
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 19
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 23
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 29
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 31
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 37
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 41
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 43
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 47
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 53
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 59
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 61
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 67
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 71
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 73
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 79
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 83
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 89
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 97
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 101
+exponent = 1
+witness = 2
+
+[[certificate.factors]]
+prime = 103
+exponent = 1
+witness = 2
+
+[build]
+profile = "multi_backend"

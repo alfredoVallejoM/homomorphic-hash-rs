@@ -48,7 +48,7 @@ impl fmt::Debug for FieldId {
     }
 }
 
-#[cfg(feature = "generator")]
+#[cfg(any(feature = "generator", feature = "dynamic"))]
 impl serde::Serialize for FieldId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -104,7 +104,7 @@ impl fmt::Debug for ArtifactId {
     }
 }
 
-#[cfg(feature = "generator")]
+#[cfg(any(feature = "generator", feature = "dynamic"))]
 impl serde::Serialize for ArtifactId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -156,7 +156,7 @@ impl fmt::Debug for ArtifactBundleDigest {
     }
 }
 
-#[cfg(feature = "generator")]
+#[cfg(any(feature = "generator", feature = "dynamic"))]
 impl serde::Serialize for ArtifactBundleDigest {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

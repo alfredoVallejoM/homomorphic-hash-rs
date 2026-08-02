@@ -29,8 +29,30 @@ Identidades congeladas:
 
 Los certificados mantenidos son demostrativos: división completa o
 Pocklington. El corpus Sage se regenera desde una semilla pública y se contrasta
-con cada operación pública. La factory TOML v1 sigue siendo binaria; los campos
-primos externos se incorporarán con un schema y assurance explícitos en Fase 5.
+con cada operación pública. La factory TOML binaria v1 permanece cerrada;
+Fase 5 añade un schema primo v1 separado, assurance explícito y Pocklington
+replayable sin reinterpretar documentos binarios.
+
+## Contratos externos de Fase 5
+
+`ValidationAssurance::Proven` es el único estado que permite emitir un tipo
+estático. `ProbablePrime { rounds }` es visible, exportable y exclusivamente
+runtime. Para módulos mayores que `u64`, `Proven` exige certificado
+Pocklington: reconstrucción de factores, cota de raíz, Fermat y gcd.
+
+`PrimeFieldFactory` selecciona storage canónico `u8`/`u16`/`u32` hasta los
+límites de sus bridges AVX2 y Montgomery radix-64 después. El perfil forma
+parte de `ArtifactId`; módulo, base y encoding forman `FieldId`. Todo adapter
+ISA externo es explícito hasta calibración concreta.
+
+`MicrofieldLock` cubre identidades, versión, manifiesto, representación,
+templates y digests de payload. La caché verifica el lock al leer y no actúa
+como autoridad matemática.
+
+`DynElement` conserva `FieldId` y storage privado; `DynBatch` valida una vez al
+construirse y `DynEngine` valida contexto/longitudes una vez por operación. El
+nivel publicado es `GenericPortable`. `generate_static` vuelve a certificar el
+manifiesto exportado y exige igualdad de `FieldId`.
 
 ## Algoritmos derivados de Fase 3
 
@@ -324,3 +346,31 @@ la resta final sin ramas dependientes del valor. La auditoría de release exige
 16 `MULX` y ausencia de saltos condicionales en el producto+REDC mantenido de
 cuatro limbs. `FixedSchedule` puede forzarlo, pero esta propiedad no equivale a
 una garantía criptográfica integral de tiempo constante.
+
+## Firmas estructurales sobre campos
+
+`structural` pertenece al paquete consumidor raíz, no al núcleo `microfield`.
+Sus contratos aceptan cualquier `F` que implemente las capacidades requeridas:
+
+- aditiva: `Field + CanonicalEncoding + StaticField`;
+- secuencia: añade `Pow + Invert` por residuales;
+- secuencia bidireccional: añade `Pow`;
+- multiconjunto simple: añade `Invert` por residuales;
+- multiconjunto multievaluado: no exige inversión.
+
+Los métodos `*_element` existen únicamente junto a
+`CanonicalElementEncoder`: así la ingestión directa conserva exactamente la
+misma identidad que el decoding canónico y no finge haber aplicado otro
+encoder. Los métodos de lote son transaccionales frente a todos los errores
+representables.
+
+Con `dynamic-fields`, tipos separados aceptan `DynField`/`DynElement`. Todo
+elemento, base y offset se valida contra el `FieldId` del contexto. Esta ruta
+puede asignar y ejecutar aritmética runtime; no altera el layout, bounds ni
+ensamblado de los tipos estáticos.
+
+`BidirectionalSequenceSignature` almacena `H(xs)`, `H(reverse(xs))` y longitud.
+`MultiEvaluationMultisetSignature<F,E,K>` exige `K > 0` y offsets distintos;
+almacena un producto no nulo y contador de ceros por punto. Ambas conservan
+composición exacta por particiones, pero siguen siendo fingerprints finitos:
+no autentican, no prueban pertenencia y no deciden igualdad estructural.

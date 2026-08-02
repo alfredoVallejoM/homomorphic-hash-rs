@@ -3128,19 +3128,20 @@ no en el núcleo algebraico: el dominio de grafos dependerá de `microfield`, y
 `field`, `kernel`, `backend` y los encodings canónicos de elementos no
 dependerán de grafos.
 
-La fase incluye también un track de canonización de grafos:
+La fase incluye también un track de análisis estructural de grafos:
 
 1. especificación exacta del modelo de grafo y su encoding;
-2. algoritmo determinista de individualización–refinamiento con forma canónica;
-3. certificado o replay verificable de decisiones;
-4. pruebas exhaustivas de re-etiquetado e isomorfismo en tamaños pequeños;
-5. oráculo externo y casos con grandes grupos de automorfismos;
-6. uso opcional de firmas de campo como heurística de refinamiento.
+2. algoritmo determinista de etiquetado y firma lineal por ronda;
+3. perfiles sobre F251 y cualquier campo estático generado;
+4. huella híbrida de firma algebraica más SHA-256 invariante;
+5. pruebas masivas de renumeración y casos estructuralmente adversariales;
+6. canonización exacta únicamente como perfil optativo con presupuesto.
 
-La corrección no dependerá de una ausencia supuesta de colisiones. Si dos
-firmas algebraicas coinciden, el canonizador continuará con comparación
-estructural exacta. El desarrollo detallado se pospone hasta Fase 6 y queda
-trazado en `docs/microfield/phases-3-7-roadmap.md`.
+La corrección no dependerá de una ausencia supuesta de colisiones. La igualdad
+de firmas, incluso acompañada por SHA-256, seguirá siendo una huella y no una
+prueba de isomorfismo. El desarrollo detallado está trazado en
+`docs/microfield/phases-3-7-roadmap.md` y
+`docs/microfield/phase-6-fast-graph.md`.
 
 # 20. Fase 4 implementada: campos primos
 
@@ -3226,6 +3227,184 @@ autoritativo, la matriz de tests y los gates cuantitativos están en
 `docs/microfield/phase-4-7-plan.md`; ADR 0025 está aceptado después de superar
 el prototipo, la corrección y la medición. El resultado completo está en
 `docs/microfield/phase-4-7-final-report.md`.
+
+# 21. Fase 5 implementada: generación externa y contextos dinámicos
+
+La apertura a campos externos queda completada sin convertir el núcleo en una
+factory virtual. El schema binario v1 permanece cerrado y se añade un schema
+primo v1 separado. `ValidationAssurance` distingue prueba determinista de
+probable primalidad; únicamente `Proven` autoriza fuente Rust.
+
+`PrimeFieldFactory` genera tipos nominales canónicos `u8`, `u16`, `u32` o
+Montgomery radix-64 según el módulo. Cada paquete contiene descriptor,
+certificado, plan, vectores, fuente, `microfield.lock`, índice y README. La
+publicación es transaccional y la caché inmutable verifica digests en lectura.
+Los bridges AVX2/BMI2 son seguros y explícitos hasta calibración por campo.
+
+La ruta runtime añade `DynField`, `DynElement`, storage inline hasta ocho
+limbs, `DynBatch` y `DynEngine`. Rabin valida campos binarios; Miller–Rabin
+determinista o Pocklington prueba primos; probable permanece etiquetado. Los
+checks nominales se amortizan por lote. El puente `generate_static` reejecuta
+la certificación y comprueba igualdad de `FieldId`.
+
+SageMath 10.7 ha validado los cuatro perfiles externos de aceptación. La
+arquitectura, gates y límites se congelan en
+`docs/microfield/phase-5-plan.md`, ADR 0026 y
+`docs/microfield/phase-5-final-report.md`.
+
+# 22. Fase 6 implementada antes de canonización: firmas estructurales
+
+F6.0–F6.8 completan el inventario, corrección, generalización y migración de la parte algebraica
+del legado. `GaloisSignature256` preserva su layout y encoding, pero delega en
+`Gf2_256HhV1`; ya no existe una segunda implementación del mismo campo.
+`FiniteField`, `TopoHasher` y los agregadores antiguos permanecen como adapters
+de compatibilidad.
+
+El módulo `structural` introduce una API genérica sobre campos estáticos:
+
+1. `StructuralEncoder<F>` y encoders canónico, binario y primo;
+2. `EncoderId` y `SignatureId` para ligar campo, encoder, ley y parámetros;
+3. `AdditiveSignature` para suma y paridad con contador;
+4. `SequenceSignature` para Horner con longitud y concatenación exactas;
+5. `MultisetSignature` para producto con cardinalidad y factores cero;
+6. `TrackedSequence` y `TrackedMultiset` cuando se requiere orden o pertenencia
+   reales;
+7. `AlgebraicResidual` para relaciones inversas, sin llamarlas pruebas;
+8. wire `MFSG` schema 1 con parsing estricto;
+9. ingestión masiva transaccional y ruta inline sin asignaciones.
+10. ingestión directa de elementos para consumidores que ya trabajan en `F`;
+11. prueba de extensibilidad mediante un GF(2⁹) externo generado en build time;
+12. adapters `dynamic-fields` sobre `DynField`, separados de la ruta estática y
+    wire-compatibles para un mismo `FieldId`;
+13. `BidirectionalSequenceSignature` con Horner forward/reverse;
+14. `MultiEvaluationMultisetSignature<F, E, K>` con puntos distintos y conteo
+    de factores cero independiente por evaluación;
+15. equivalentes dinámicos con puntos runtime validados.
+
+El propósito queda fijado: son hashes homomórficos no criptográficos. Una
+evaluación pequeña puede capturar leyes útiles y combinar particiones, pero no
+es inyectiva ni autentica el historial. `crypto_mode` solo conserva código
+fuente antiguo y no promete tiempo constante o seguridad.
+
+La auditoría completa está en `docs/microfield/phase-6-legacy-audit.md`, la
+arquitectura ejecutada en `docs/microfield/phase-6-pre-canon-plan.md` y la
+decisión semántica en ADR 0027 y la frontera de generalización en ADR 0028.
+F6.G0–G2 añaden posteriormente `IncidenceGraph`,
+`FastGraphLabeler<F, E, K>`, el perfil F251, campos externos generados y el
+canal híbrido SHA-256 documentado en
+`docs/microfield/phase-6-fast-graph.md`. El nombre del canonizador legado
+permanece como compatibilidad, pero su implementación delega en el motor F251
+nuevo; la búsqueda exacta no entra en el hot path.
+
+# 23. F6.G0–G6: motor rápido, incrementalidad y canonización exacta acotada
+
+La discusión de grafos corrige la prioridad inicial: la búsqueda canónica
+potencialmente exponencial no será el flujo predeterminado. El producto central
+es `FastGraphLabeler<F, E, K>`, un etiquetador invariante por renumeración con
+coste `O(K R (V + I))`.
+
+`IncidenceGraph` normaliza en CSR un multigrafo dirigido relacional. Etiquetas,
+roles, dirección, bucles y multiplicidades se conservan exactamente. Las
+hiperaristas son nodos auxiliares y cuestan linealmente en su aridad. El adapter
+`from_legacy_topology` permite migración sin seguir expandiendo cláusulas a
+cliques.
+
+F251 se conserva como especialización prioritaria mediante
+`F251GraphLabeler<K>`. `FastGraphLabeler` también acepta campos binarios,
+primos mantenidos y cualquier tipo estático producido por la factory, con
+parámetros derivados o explícitos ligados a `GraphSignatureId`.
+
+El perfil `Fast` conserva los productos y contadores de cero de cada ronda;
+`combine_disjoint` produce exactamente la firma de la unión disjunta sin
+reprocesar sus componentes. Los perfiles adaptativos no exponen esa ley porque
+pueden detenerse bajo calendarios diferentes.
+
+Las capacidades públicas son:
+
+1. `Fast`, con rondas fijas y predecibles;
+2. `Robust`, con estabilización de partición y máximo estricto;
+3. `try_canonicalize`, que solo emite forma exacta si todas las clases son
+   unitarias y devuelve `SymmetryRemaining` en caso contrario;
+4. `diagnose_degeneracy`, que separa aliasing finito y ambigüedad exacta local;
+5. `MultiFieldGraphEvidenceBuilder`, que identifica conjuntos heterogéneos de
+   evidencia sin afirmar isomorfismo;
+6. `canonicalize_exact`, opt-in y con presupuesto explícito.
+
+`analyze_hybrid` añade un segundo canal SHA-256 calculado sobre histogramas
+invariantes de todas las rondas, etiquetas exactas y relaciones refinadas. No
+se calcula sobre índices ni sobre la firma de campo sola. La pareja reduce
+colisiones globales cuando los descriptores adicionales difieren, pero no se
+presenta como prueba de isomorfismo.
+
+Las primeras mediciones release con F251, tres lanes y cuatro rondas alcanzan
+entre 28,5 y 32,7 M incidencias-ronda/s para 16.384 vértices. El modo híbrido
+queda entre 8,53 y 9,34 M/s y GF(2²⁵⁶) alrededor de 155–157 K/s en el mismo
+flujo. Son cifras locales; establecen F251 como candidato prioritario y
+SHA-256 como opt-in.
+
+F6.G3 queda ejecutado: `PreparedGraph` y `GraphWorkspace` separan preparación
+de ejecución, precalculan constantes afines y permiten vistas prestadas sin
+asignaciones en el camino secuencial caliente. La comparación completa muestra
+que SoA+AVX2 acelera el caso monohilo, mientras AoS+Rayon domina en grafos
+grandes del host auditado; ambas estrategias son explícitas y producen bytes
+idénticos. `CellularGaloisCanonizer` se ha convertido en fachada sobre el mismo
+motor F251 y las pruebas de su antigua recurrencia se han sustituido por
+contratos del puente mantenido. F6.G4 queda también ejecutado:
+`IncrementalGraphState` conserva las capas de ronda, audita el nuevo CSR,
+recalcula únicamente el cono afectado y publica firma, partición y componentes
+de forma transaccional. Los benchmarks locales observan aproximadamente
+`2,0–2,5×` para una etiqueta y `1,6–2,1×` para una arista frente a recomputación
+completa.
+
+F6.G5 queda ejecutado con un diagnóstico exacto que distingue aliasing de campo
+de ambigüedad 1-WL, un umbral público de alta regularidad y bundles multi-campo
+ligados a `GraphEvidenceProfileId`. El corpus prueba desde seis vértices que
+`C6` y `C3 ⊔ C3` comparten firma local en F251, GF(2²⁵⁶) y SHA híbrido sin ser
+isomorfos. SageMath 10.7 confirma 35 pares entre 6 y 40 vértices; 128
+normalizaciones aleatorias y los universos completos de cuatro y cinco
+vértices aportan oráculos diferenciales adicionales. El par fuertemente
+regular Shrikhande/torres 4×4 cubre además la degeneración extrema de parámetros
+`(16,6,2,2)`.
+
+F6.G6 queda ejecutado mediante `canonicalize_exact`: ruta rápida para una
+partición discreta y DFS iterativo de individualización–refinamiento para las
+simetrías. `CanonicalSearchBudget` limita nodos y estado retenido. Solo un árbol
+completo produce `Exact`; cualquier límite produce `BudgetExhausted` sin forma
+parcial. Esta búsqueda es opt-in y no modifica `analyze`, batch ni incremental.
+Con ello la Fase 6 queda cerrada. El informe consolidado está en
+`docs/microfield/phase-6-final-report.md`; el detalle de los dos últimos cortes
+está en `docs/microfield/phase-6-g5-g6-final-report.md`.
+
+# 24. F6.G7: corrección del discriminador global y corpus externo
+
+El cierre anterior se reabre porque la colisión `C6`/`C3 ⊔ C3`, aunque estaba
+diagnosticada, hacía insuficiente la firma local como producto principal de
+clasificación. Se mantiene `FastGraphSignature` v1 para compatibilidad,
+composición y latencia mínima, y se introduce un perfil v2 recomendado.
+
+`GlobalGraphProfile` incorpora componentes débiles, SCC, tamaños, tipos y
+etiquetas, relaciones/roles, grados, multiplicidades, bucles, soporte simple y
+rango cíclico. La serialización exacta interna etiquetas y relaciones una vez;
+la igualdad no depende del SHA-256 que la identifica. Así `C6` y `C3 ⊔ C3` se
+separan antes de cualquier búsqueda.
+
+`GraphDiscriminationPolicy::Adaptive` añade triángulos y `K4` para grafos con
+particiones altamente regulares. Una cota de trabajo invariante decide la
+admisión; si no cabe, `SkippedBudget` no contiene resultados parciales. Esto
+separa Shrikhande de torres 4×4 (`K4=0` frente a `K4=8`). Comparar perfiles v2
+solo devuelve `Different` o `Indistinguishable`.
+
+`canonicalize_exact` descompone componentes débiles, consume el presupuesto de
+nodos restante por componente, ordena formas exactas y publica solo al
+completar toda la unidad de trabajo.
+
+La prueba externa queda separada de `cargo test`: un manifiesto con URL,
+SHA-256, licencia y cita alimenta un fetcher atómico/offline. El corpus cubre
+1.253 clases del Graph Atlas hasta siete vértices, 188 moléculas MUTAG, la red
+dirigida etiquetada email-Eu-core y el hipergrafo biológico diseasome. La Fase 6
+se vuelve a cerrar únicamente tras superar este corpus, las suites locales,
+Clippy/rustdoc y los benchmarks de coste aislado. El detalle está en
+`docs/microfield/phase-6-g7-final-report.md` y ADR 0030.
 
 # Referencias técnicas
 

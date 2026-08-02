@@ -14,7 +14,10 @@ pub trait TopologicalMask {
     fn is_subset_of(&self, other: &Self) -> bool;
 }
 
-/// Physical implementation optimized for AVX2 (256-bit).
+/// Fixed 256-bit compatibility mask.
+///
+/// Its current operations are scalar bitwise expressions which the compiler
+/// may vectorize; the type makes no unconditional AVX2 claim.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(align(32))]
 pub struct TopoBloomMask(pub [u64; 4]);

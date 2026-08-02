@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::algebra::traits::FiniteField;
     use crate::GaloisSignature256;
 

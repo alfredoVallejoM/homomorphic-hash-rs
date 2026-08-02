@@ -1,18 +1,18 @@
-use std::time::Instant;
+use rand::Rng;
+use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
-use rayon::prelude::*;
-use serde::{Serialize, Deserialize};
-use rand::Rng;
+use std::time::Instant;
 
 use crate::algebra::galois_256::GaloisSignature256;
-use crate::engine::hasher::TopoHasher;
-use crate::topology::multiset::MultisetAggregator;
-use crate::topology::bloom_l1::{TopologicalMask, TopoBloomMask};
+use crate::domains::chemistry::smiles_parser::SmilesParser;
 use crate::engine::canonizer::{CellularGaloisCanonizer, TopologyProvider};
-use crate::domains::chemistry::smiles_parser::{SmilesParser, MolecularComplex};
-use crate::harness::experiment::{ScientificExperiment, ExperimentOutcome};
+use crate::engine::hasher::TopoHasher;
+use crate::harness::experiment::{ExperimentOutcome, ScientificExperiment};
 use crate::harness::telemetry::TelemetryRecord;
+use crate::topology::bloom_l1::{TopoBloomMask, TopologicalMask};
+use crate::topology::multiset::MultisetAggregator;
 
 // =========================================================================
 // DEMONSTRATION 3: HIGH-THROUGHPUT SCREENING (Q1 Level Experimental Design)
@@ -39,7 +39,7 @@ fn generate_32byte_l1_mask<T: TopologyProvider>(provider: &T) -> TopoBloomMask {
         if let Some(state) = provider.initial_state(v) {
             let mut bytes = [0u8; 32];
             for (i, &word) in state.0.iter().enumerate() {
-                bytes[i*8..(i+1)*8].copy_from_slice(&word.to_le_bytes());
+                bytes[i * 8..(i + 1) * 8].copy_from_slice(&word.to_le_bytes());
             }
             hasher.update(&bytes);
         } else {
@@ -57,7 +57,7 @@ fn generate_32byte_l1_mask<T: TopologyProvider>(provider: &T) -> TopoBloomMask {
                     if let Some(u_state) = provider.initial_state(u) {
                         let mut bytes = [0u8; 32];
                         for (i, &word) in u_state.0.iter().enumerate() {
-                            bytes[i*8..(i+1)*8].copy_from_slice(&word.to_le_bytes());
+                            bytes[i * 8..(i + 1) * 8].copy_from_slice(&word.to_le_bytes());
                         }
                         hasher.update(&bytes);
                     } else {
@@ -102,21 +102,30 @@ struct SyntheticGraph {
 }
 
 impl TopologyProvider for SyntheticGraph {
-    fn num_variables(&self) -> usize { self.num_v }
-    fn num_clauses(&self) -> usize { self.edges.len() }
+    fn num_variables(&self) -> usize {
+        self.num_v
+    }
+    fn num_clauses(&self) -> usize {
+        self.edges.len()
+    }
     fn variables_in_clause(&self, c: usize) -> Vec<usize> {
         vec![self.edges[c].0, self.edges[c].1]
     }
     fn clauses_for_variable(&self, v: usize) -> Vec<usize> {
-        self.edges.iter().enumerate()
+        self.edges
+            .iter()
+            .enumerate()
             .filter(|(_, &(a, b))| a == v || b == v)
-            .map(|(i, _)| i).collect()
+            .map(|(i, _)| i)
+            .collect()
     }
     fn initial_state(&self, v: usize) -> Option<GaloisSignature256> {
         // Mock atomic mass for synthetic graphs. Default is Carbon (6).
         let mut mass = 6u8;
         if let Some((mut_v, mut_mass)) = self.mutated_node {
-            if v == mut_v { mass = mut_mass; }
+            if v == mut_v {
+                mass = mut_mass;
+            }
         }
         let mut buffer = [0u8; 32];
         buffer[0] = mass;
@@ -127,33 +136,53 @@ impl TopologyProvider for SyntheticGraph {
 impl SyntheticGraph {
     fn linear_chain(length: usize) -> Self {
         let mut edges = Vec::new();
-        for i in 0..length.saturating_sub(1) { edges.push((i, i + 1)); }
-        Self { num_v: length, edges, mutated_node: None }
+        for i in 0..length.saturating_sub(1) {
+            edges.push((i, i + 1));
+        }
+        Self {
+            num_v: length,
+            edges,
+            mutated_node: None,
+        }
     }
 
     fn macrocycle(length: usize) -> Self {
         let mut edges = Vec::new();
         if length > 2 {
-            for i in 0..length { edges.push((i, (i + 1) % length)); }
+            for i in 0..length {
+                edges.push((i, (i + 1) % length));
+            }
         }
-        Self { num_v: length, edges, mutated_node: None }
+        Self {
+            num_v: length,
+            edges,
+            mutated_node: None,
+        }
     }
 
     fn erdos_renyi_alien(v: usize, p: f64) -> Self {
         let mut edges = Vec::new();
         let mut rng = rand::thread_rng();
         for i in 0..v {
-            for j in (i+1)..v {
-                if rng.gen::<f64>() < p { edges.push((i, j)); }
+            for j in (i + 1)..v {
+                if rng.gen::<f64>() < p {
+                    edges.push((i, j));
+                }
             }
         }
-        Self { num_v: v, edges, mutated_node: None }
+        Self {
+            num_v: v,
+            edges,
+            mutated_node: None,
+        }
     }
 
     fn betti_stress_graph(v: usize, target_e: usize) -> Self {
         let mut edges = Vec::new();
         // Start with a spanning tree to ensure connectedness (E = V - 1)
-        for i in 1..v { edges.push((i - 1, i)); }
+        for i in 1..v {
+            edges.push((i - 1, i));
+        }
 
         let mut rng = rand::thread_rng();
         let mut current_e = edges.len();
@@ -167,7 +196,11 @@ impl SyntheticGraph {
                 current_e += 1;
             }
         }
-        Self { num_v: v, edges, mutated_node: None }
+        Self {
+            num_v: v,
+            edges,
+            mutated_node: None,
+        }
     }
 
     fn steroid_with_sliding_heteroatom(v_count: usize, mutated_pos: usize) -> Self {
@@ -180,7 +213,10 @@ impl SyntheticGraph {
 }
 
 fn count_active_bits(mask: &TopoBloomMask) -> u32 {
-    mask.0[0].count_ones() + mask.0[1].count_ones() + mask.0[2].count_ones() + mask.0[3].count_ones()
+    mask.0[0].count_ones()
+        + mask.0[1].count_ones()
+        + mask.0[2].count_ones()
+        + mask.0[3].count_ones()
 }
 
 // -------------------------------------------------------------------------
@@ -190,7 +226,8 @@ fn verify_l3_subgraph<T: TopologyProvider, U: TopologyProvider>(target: &T, cand
     let target_nodes = CellularGaloisCanonizer::canonize(target, target.num_variables());
     let candidate_nodes = CellularGaloisCanonizer::canonize(candidate, candidate.num_variables());
 
-    let mut candidate_sigs: Vec<[u64; 4]> = candidate_nodes.into_iter().map(|n| n.signature.0).collect();
+    let mut candidate_sigs: Vec<[u64; 4]> =
+        candidate_nodes.into_iter().map(|n| n.signature.0).collect();
 
     for t_node in target_nodes {
         if let Some(pos) = candidate_sigs.iter().position(|&c| c == t_node.signature.0) {
@@ -213,7 +250,11 @@ pub struct Demo3HTSShield {
 
 impl Demo3HTSShield {
     pub fn new(csv_path: &str) -> Self {
-        Self { csv_path: csv_path.to_string(), database: Vec::new(), setup_time_ns: 0 }
+        Self {
+            csv_path: csv_path.to_string(),
+            database: Vec::new(),
+            setup_time_ns: 0,
+        }
     }
 }
 
@@ -228,9 +269,16 @@ impl ScientificExperiment for Demo3HTSShield {
             let start = Instant::now();
             if let Ok(file) = File::open(cache_path) {
                 if let Ok(cached) = bincode::deserialize_from::<_, CachedDatabase>(file) {
-                    self.database = cached.entries.into_iter().map(|(s, arr)| (s, TopoBloomMask(arr))).collect();
+                    self.database = cached
+                        .entries
+                        .into_iter()
+                        .map(|(s, arr)| (s, TopoBloomMask(arr)))
+                        .collect();
                     self.setup_time_ns = start.elapsed().as_nanos();
-                    println!("    [CACHE] Loaded 1M signatures in {}ms", start.elapsed().as_millis());
+                    println!(
+                        "    [CACHE] Loaded 1M signatures in {}ms",
+                        start.elapsed().as_millis()
+                    );
                     return;
                 }
             }
@@ -244,26 +292,46 @@ impl ScientificExperiment for Demo3HTSShield {
         let mut base_smiles = Vec::new();
         for line in reader.lines().skip(1).filter_map(|l| l.ok()) {
             let clean = line.split(',').next().unwrap_or("").trim().replace("@", "");
-            if !clean.is_empty() { base_smiles.push(clean); }
+            if !clean.is_empty() {
+                base_smiles.push(clean);
+            }
         }
 
         let target_size = 1_000_000;
-        let expanded_dataset: Vec<String> = base_smiles.iter().cycle().take(target_size).cloned().collect();
+        let expanded_dataset: Vec<String> = base_smiles
+            .iter()
+            .cycle()
+            .take(target_size)
+            .cloned()
+            .collect();
 
         println!("    [TRACE] Demo 3: Indexing 1M Molecules via GF(2^256) 32-Byte Projection...");
 
-        self.database = expanded_dataset.par_iter()
+        self.database = expanded_dataset
+            .par_iter()
             .filter_map(|s| {
                 if let Some(complex) = SmilesParser::try_parse_to_complex(s) {
                     let mask = generate_32byte_l1_mask(&complex);
                     Some((s.clone(), mask))
-                } else { None }
-            }).collect();
+                } else {
+                    None
+                }
+            })
+            .collect();
 
         // 3. PERSIST TO DISK
         if let Ok(cache_file) = File::create(cache_path) {
-            let entries_to_cache: Vec<(String, [u64; 4])> = self.database.iter().map(|(s, m)| (s.clone(), m.0)).collect();
-            let _ = bincode::serialize_into(cache_file, &CachedDatabase { entries: entries_to_cache });
+            let entries_to_cache: Vec<(String, [u64; 4])> = self
+                .database
+                .iter()
+                .map(|(s, m)| (s.clone(), m.0))
+                .collect();
+            let _ = bincode::serialize_into(
+                cache_file,
+                &CachedDatabase {
+                    entries: entries_to_cache,
+                },
+            );
         }
         self.setup_time_ns = start.elapsed().as_nanos();
     }
@@ -276,7 +344,8 @@ impl ScientificExperiment for Demo3HTSShield {
         // AXIS 1: FUNCTIONAL FREQUENCY SPECTRUM (Statistical Law)
         // =====================================================================
         println!("    [AXIS 1] Executing Logarithmic Frequency Spectrum (100 Data Points)...");
-        let mut f1 = File::create("data/chemistry/results/demo3_axis1_frequency_scaling.csv").unwrap();
+        let mut f1 =
+            File::create("data/chemistry/results/demo3_axis1_frequency_scaling.csv").unwrap();
         writeln!(f1, "Query_ID,Frequency_Bin,V,E,L1_Latency_us,FPR_Pct").unwrap();
 
         // Simulating 10 logarithmic bins, 10 queries each (100 total points)
@@ -288,12 +357,26 @@ impl ScientificExperiment for Demo3HTSShield {
                 let target_mask = generate_32byte_l1_mask(&graph);
 
                 let t0 = Instant::now();
-                let passed = self.database.iter().filter(|(_, m)| target_mask.is_subset_of(m)).count();
+                let passed = self
+                    .database
+                    .iter()
+                    .filter(|(_, m)| target_mask.is_subset_of(m))
+                    .count();
                 let latency = t0.elapsed().as_micros();
                 let fpr = (passed as f64 / total) * 100.0;
 
                 let query_id = format!("Bin{}_Q{}", bin, q);
-                writeln!(f1, "{},{},{},{},{},{:.6}", query_id, bin, graph.num_v, graph.edges.len(), latency, fpr).unwrap();
+                writeln!(
+                    f1,
+                    "{},{},{},{},{},{:.6}",
+                    query_id,
+                    bin,
+                    graph.num_v,
+                    graph.edges.len(),
+                    latency,
+                    fpr
+                )
+                .unwrap();
             }
         }
 
@@ -301,18 +384,32 @@ impl ScientificExperiment for Demo3HTSShield {
         // AXIS 2: DIAMETER DILATATION (Bloom Saturation Limit)
         // =====================================================================
         println!("    [AXIS 2] Executing Geometric Dilatation & Saturation (D->60)...");
-        let mut f2 = File::create("data/chemistry/results/demo3_axis2_diameter_dilatation.csv").unwrap();
-        writeln!(f2, "Query_Type,D,V,Bits_Saturated,L1_Rejection_Rate,FPR_Pct").unwrap();
+        let mut f2 =
+            File::create("data/chemistry/results/demo3_axis2_diameter_dilatation.csv").unwrap();
+        writeln!(
+            f2,
+            "Query_Type,D,V,Bits_Saturated,L1_Rejection_Rate,FPR_Pct"
+        )
+        .unwrap();
 
         // Series A: Linear Chains up to D=60
         for d in (2..=60).step_by(2) {
             let graph = SyntheticGraph::linear_chain(d);
             let target_mask = generate_32byte_l1_mask(&graph);
             let bits_active = count_active_bits(&target_mask);
-            let passed = self.database.iter().filter(|(_, m)| target_mask.is_subset_of(m)).count();
+            let passed = self
+                .database
+                .iter()
+                .filter(|(_, m)| target_mask.is_subset_of(m))
+                .count();
             let rejection = ((total - passed as f64) / total) * 100.0;
             let fpr = (passed as f64 / total) * 100.0;
-            writeln!(f2, "Linear_Chain,{},{},{},{:.6},{:.6}", d, d, bits_active, rejection, fpr).unwrap();
+            writeln!(
+                f2,
+                "Linear_Chain,{},{},{},{:.6},{:.6}",
+                d, d, bits_active, rejection, fpr
+            )
+            .unwrap();
         }
 
         // Series B: Macrocycles up to D=40
@@ -320,10 +417,19 @@ impl ScientificExperiment for Demo3HTSShield {
             let graph = SyntheticGraph::macrocycle(d);
             let target_mask = generate_32byte_l1_mask(&graph);
             let bits_active = count_active_bits(&target_mask);
-            let passed = self.database.iter().filter(|(_, m)| target_mask.is_subset_of(m)).count();
+            let passed = self
+                .database
+                .iter()
+                .filter(|(_, m)| target_mask.is_subset_of(m))
+                .count();
             let rejection = ((total - passed as f64) / total) * 100.0;
             let fpr = (passed as f64 / total) * 100.0;
-            writeln!(f2, "Macrocycle,{},{},{},{:.6},{:.6}", d, d, bits_active, rejection, fpr).unwrap();
+            writeln!(
+                f2,
+                "Macrocycle,{},{},{},{:.6},{:.6}",
+                d, d, bits_active, rejection, fpr
+            )
+            .unwrap();
         }
 
         // =====================================================================
@@ -331,7 +437,11 @@ impl ScientificExperiment for Demo3HTSShield {
         // =====================================================================
         println!("    [AXIS 3] Executing Betti Stress Test (V=20, E=19 to 45)...");
         let mut f3 = File::create("data/chemistry/results/demo3_axis3_betti_stress.csv").unwrap();
-        writeln!(f3, "V,E,Betti_Number,L1_Candidates,L3_True_Matches,L3_Latency_ms,VF2_Latency_Est").unwrap();
+        writeln!(
+            f3,
+            "V,E,Betti_Number,L1_Candidates,L3_True_Matches,L3_Latency_ms,VF2_Latency_Est"
+        )
+        .unwrap();
 
         let v_fixed = 20;
         let edges_to_test = vec![19, 25, 35, 45]; // Betti 0, Betti 6, Betti 16, Betti 26
@@ -352,18 +462,27 @@ impl ScientificExperiment for Demo3HTSShield {
 
             // L3 Ego-Network Resolution
             let t0_l3 = Instant::now();
-            let true_matches = candidates.par_iter()
+            let true_matches = candidates
+                .par_iter()
                 .filter(|cand_smiles| {
                     if let Some(cand_complex) = SmilesParser::try_parse_to_complex(cand_smiles) {
                         verify_l3_subgraph(&graph, &cand_complex)
-                    } else { false }
-                }).count();
+                    } else {
+                        false
+                    }
+                })
+                .count();
             let l3_latency = t0_l3.elapsed().as_millis();
 
             // NP-Complete baseline estimation (Factorial scaling)
             let vf2_est = (1.5_f64).powi(betti as i32) * 10.0;
 
-            writeln!(f3, "{},{},{},{},{},{},{:.2}", v_fixed, e, betti, passed_l1, true_matches, l3_latency, vf2_est).unwrap();
+            writeln!(
+                f3,
+                "{},{},{},{},{},{},{:.2}",
+                v_fixed, e, betti, passed_l1, true_matches, l3_latency, vf2_est
+            )
+            .unwrap();
         }
 
         // =====================================================================
@@ -378,7 +497,11 @@ impl ScientificExperiment for Demo3HTSShield {
         for pos in 0..v_steroid {
             let graph = SyntheticGraph::steroid_with_sliding_heteroatom(v_steroid, pos);
             let target_mask = generate_32byte_l1_mask(&graph);
-            let passed = self.database.iter().filter(|(_, m)| target_mask.is_subset_of(m)).count();
+            let passed = self
+                .database
+                .iter()
+                .filter(|(_, m)| target_mask.is_subset_of(m))
+                .count();
             writeln!(f4, "Sliding_Nitrogen_Pos_{},N/A,{}", pos, passed).unwrap();
         }
 
@@ -390,7 +513,11 @@ impl ScientificExperiment for Demo3HTSShield {
             for _ in 0..20 {
                 let alien_graph = SyntheticGraph::erdos_renyi_alien(15, p);
                 let target_mask = generate_32byte_l1_mask(&alien_graph);
-                total_passed_tier += self.database.iter().filter(|(_, m)| target_mask.is_subset_of(m)).count();
+                total_passed_tier += self
+                    .database
+                    .iter()
+                    .filter(|(_, m)| target_mask.is_subset_of(m))
+                    .count();
             }
             writeln!(f4, "Erdos_Renyi_Alien,{:.2},{}", p, total_passed_tier).unwrap();
             p += 0.05;
@@ -398,9 +525,34 @@ impl ScientificExperiment for Demo3HTSShield {
 
         println!("    [OK] 4-Axis Deep Benchmarking Complete. Telemetry exported to data/chemistry/results/");
 
-        (ExperimentOutcome::IsomorphismMatch(true), 0, start_global.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(true),
+            0,
+            start_global.elapsed().as_nanos(),
+        )
     }
 
-    fn verify(&self, outcome: &ExperimentOutcome) -> bool { match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false } }
-    fn get_base_telemetry(&self) -> TelemetryRecord { TelemetryRecord { domain: "Chem".to_string(), experiment_name: "Demo3_L1_HTS_Industrial".to_string(), vertices: self.database.len(), edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 100.0, threads_utilized: rayon::current_num_threads(), peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 } }
+    fn verify(&self, outcome: &ExperimentOutcome) -> bool {
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
+    }
+    fn get_base_telemetry(&self) -> TelemetryRecord {
+        TelemetryRecord {
+            domain: "Chem".to_string(),
+            experiment_name: "Demo3_L1_HTS_Industrial".to_string(),
+            vertices: self.database.len(),
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 100.0,
+            threads_utilized: rayon::current_num_threads(),
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
+    }
 }

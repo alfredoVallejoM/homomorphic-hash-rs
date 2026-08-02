@@ -1,5 +1,8 @@
-/// Pure algebraic contract for the Finite Field GF(2^n).
-/// Closed for modification: Defines the strict mathematics of the substrate.
+/// Compatibility contract for the original fixed-width binary field API.
+///
+/// New generic code should use the segregated traits from [`microfield`]. This
+/// trait remains so existing consumers can migrate without changing their
+/// serialized bytes or topology adapters in one step.
 pub trait FiniteField: Sized + Eq + PartialEq + Clone + std::fmt::Debug {
     /// Additive identity element (0). Axiom: A + 0 = A
     fn zero() -> Self;
@@ -7,12 +10,10 @@ pub trait FiniteField: Sized + Eq + PartialEq + Clone + std::fmt::Debug {
     /// Multiplicative identity element (1). Axiom: A * 1 = A
     fn one() -> Self;
 
-    /// Homomorphic Addition.
-    /// In characteristic 2, this must be strictly idempotent: A + A = 0.
+    /// Field addition. In characteristic two, `a + a = 0`.
     fn add(&self, other: &Self) -> Self;
 
-    /// Carry-less polynomial multiplication modulo P(x).
-    /// Behavior changes based on the `crypto_mode` feature flag.
+    /// Carry-less polynomial multiplication modulo the field polynomial.
     fn mul(&self, other: &Self) -> Self;
 
     /// Multiplicative inverse in the cyclic group using Fermat's Little Theorem.
@@ -23,7 +24,7 @@ pub trait FiniteField: Sized + Eq + PartialEq + Clone + std::fmt::Debug {
     /// Mathematically equivalent to multiplying by the generating root modulo P(x).
     fn shift_phase(&self) -> Self;
 
-    /// Canonical injection from the ambient Euclidean space (256 bits) into the Finite Field.
-    /// MATHEMATICAL AXIOM: This must be a bijective mapping.
+    /// Canonical bijection between the legacy 32-byte representation and the
+    /// concrete 256-bit field presentation.
     fn from_bytes_canonical(data: &[u8; 32]) -> Self;
 }

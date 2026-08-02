@@ -53,8 +53,72 @@ F4.7-PACKED-SIMD está implementada: `PackedBatch<F>` puede conservar storage
 privado `u8`/`u16`/`u32`, ejecutar cinco operaciones sin repacking y convertir
 solo al entrar y salir. El perfil externo `u16` supera conservadoramente el
 58 % desde 64 elementos; los perfiles externos permanecen explícitos. El ABI
-batch ordinario y los kernels especializados no cambiaron. El siguiente corte
-es Fase 5, generación certificada de perfiles primos externos.
+batch ordinario y los kernels especializados no cambiaron.
+
+La Fase 5 está cerrada: incluye generación certificada de perfiles primos
+externos, assurance probado/probable, bundles reproducibles, contextos
+dinámicos y el puente hacia perfiles estáticos. F6.0–F6.8 rehabilitan ahora el
+legado algebraico: `GaloisSignature256` delega en `microfield` y el nuevo módulo
+`structural` ofrece suma/paridad, secuencias Horner, secuencias bidireccionales
+y multiconjuntos de una o varias evaluaciones con identidades, contadores,
+factores cero, tracking exacto y serialización canónica. La misma capa funciona
+con campos estáticos mantenidos, campos externos generados y, mediante la
+feature `dynamic-fields`, contextos validados construidos en runtime. Son
+hashes homomórficos no criptográficos: capturan ecuaciones y propiedades
+algebraicas, pero una colisión no prueba igualdad ni un residuo prueba
+pertenencia. F6.G0–G2 introducen además `IncidenceGraph` y
+`FastGraphLabeler<F, E, K>`: un motor relacional lineal por ronda, invariante
+por renumeración, que preserva dirección, roles, multiplicidad e hiperaristas.
+F251 es un perfil mantenido de primer nivel y el mismo algoritmo funciona sobre
+campos externos generados. `analyze_hybrid` combina la firma algebraica con un
+SHA-256 de descriptores invariantes adicionales. La canonización no se ejecuta
+en el camino crítico: solo se emite una forma exacta cuando la partición rápida
+queda discreta. Las firmas `Fast` de componentes desconectadas se combinan
+exactamente mediante `combine_disjoint`.
+
+F6.G3 cierra la optimización a gran escala. `prepare` conserva metadatos y
+constantes afines; `GraphWorkspace` ofrece análisis prestados sin asignaciones
+tras reservar; `GraphExecution::parallel()` reparte vértices de forma
+determinista; y `F251BatchGraphWorkspace` permite comparar explícitamente la
+ruta SoA/AVX2. En la máquina de calibración, el batch AVX2 mejora el escalar de
+un hilo, pero AoS+Rayon es claramente mejor cuando hay varios núcleos, por lo
+que SIMD no se fuerza automáticamente. El viejo `CellularGaloisCanonizer` es
+ahora una fachada sobre este mismo motor F251 y `try_analyze` expone el
+resultado mantenido completo; ya no existe una segunda recurrencia de grafos.
+El cierre y las mediciones están en
+[`phase-6-g3-final-report.md`](docs/microfield/phase-6-g3-final-report.md).
+
+F6.G4 añade incrementalidad exacta para perfiles `Fast` con un conjunto de
+vértices estable. `IncrementalGraphState` conserva las capas de ronda y un
+índice acotado de dependencias; `update_incremental` audita el grafo nuevo,
+recalcula solo el cono afectado y publica transaccionalmente etiquetas, firma,
+partición y componentes. Cambiar una arista puede unir o separar componentes
+sin abandonar el mismo contrato diferencial. Las mediciones y límites están en
+[`phase-6-g4-final-report.md`](docs/microfield/phase-6-g4-final-report.md).
+
+F6.G5–G6 cierran la Fase 6. `diagnose_degeneracy` separa colisiones del perfil
+finito de la indistinguibilidad local exacta y marca alta regularidad con un
+umbral versionado. Los perfiles heterogéneos pueden agruparse mediante
+`MultiFieldGraphEvidenceBuilder`, cuya igualdad significa únicamente
+`Indistinguishable`. `canonicalize_exact` escala de forma opt-in a
+individualización–refinamiento con límites de nodos y estado retenido; si no
+termina devuelve `BudgetExhausted` sin publicar una forma parcial. SageMath
+10.7 confirma que `C6` y `C3 ⊔ C3` ya forman un par regular no isomorfo que no
+separa ninguna cantidad de rondas locales; Shrikhande frente a torres 4×4
+cubre el caso fuertemente regular. El cierre está en
+[`phase-6-g5-g6-final-report.md`](docs/microfield/phase-6-g5-g6-final-report.md).
+El inventario acumulado de toda la fase está en
+[`phase-6-final-report.md`](docs/microfield/phase-6-final-report.md).
+
+F6.G7 reabre y corrige ese cierre práctico: la firma local v1 por sí sola no
+era una ruta discriminante suficiente. `analyze_discriminating` añade un
+perfil global exacto de componentes débiles/SCC, labels, relaciones, grados y
+multiplicidades; ante alta regularidad incorpora triángulos y `K4` bajo un
+presupuesto invariante. Así `C6` y `C3 ⊔ C3` se separan linealmente y
+Shrikhande/torres 4×4 se separan por `K4`, sin llamar “isomorfo” a una igualdad.
+La búsqueda exacta descompone ahora componentes. El diseño, corpus externo y
+mediciones están en
+[`phase-6-g7-final-report.md`](docs/microfield/phase-6-g7-final-report.md).
 
 ## Comandos
 
@@ -74,6 +138,13 @@ bash crates/microfield/tools/audit_unsafe_scope.sh
 cargo test -p microfield --all-features --test packed_batch --test packed_views
 cargo test -p homomorphic-hash-rs --lib
 cargo test -p homomorphic-hash-rs --test microfield_compat
+cargo test -p homomorphic-hash-rs --all-features --test structural_signatures
+cargo test -p homomorphic-hash-rs --all-features --test fast_graph
+cargo test -p homomorphic-hash-rs --all-features --test graph_canonical
+python3 tools/fetch_graph_corpus.py
+cargo test -p homomorphic-hash-rs --test external_graph_corpus -- --ignored
+conda run -n laboratorio_np sage tools/sage/verify_graph_degeneracy.sage
+cargo bench -p homomorphic-hash-rs --bench fast_graph
 ```
 
 ```text
@@ -110,4 +181,8 @@ Fase 4 en `docs/microfield/phase-4-final-report.md` y la ampliación SIMD en
 SIMD persistente están en `docs/microfield/phase-4-7-plan.md` y
 `docs/microfield/phase-4-7-final-report.md`. El roadmap
 corregido incluye la rehabilitación del legado y canonización de grafos dentro
-de Fase 6 en `docs/microfield/phases-3-7-roadmap.md`.
+de Fase 6 en `docs/microfield/phases-3-7-roadmap.md`. La auditoría y el cierre
+previo a canonización están en `docs/microfield/phase-6-legacy-audit.md` y
+`docs/microfield/phase-6-pre-canon-final-report.md`. El contrato y la primera
+vertical del motor rápido se documentan en
+`docs/microfield/phase-6-fast-graph.md`.

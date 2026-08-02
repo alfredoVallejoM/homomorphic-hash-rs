@@ -1,0 +1,11 @@
+[package]
+name = "structural-field-fixture"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+microfield = { path = "../microfield", default-features = false }
+
+[build-dependencies]
+microfield = { path = "../microfield", default-features = false, features = ["generator"] }

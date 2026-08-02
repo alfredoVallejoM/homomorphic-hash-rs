@@ -1,8 +1,10 @@
 use super::traits::FiniteField;
+use microfield::{BinaryPolynomialField, CanonicalEncoding, Field, Gf2_256HhV1, Invert};
 
-/// 256-bit Topological Signature optimized for SIMD AVX2.
-/// Strict 32-byte memory alignment forces LLVM to emit single-cycle
-/// `vmovdqa` vector loads.
+/// Byte-compatible aligned wrapper for the original 256-bit field API.
+///
+/// Arithmetic delegates to [`Gf2_256HhV1`]. Alignment is retained solely for
+/// ABI compatibility and is not itself a SIMD or latency guarantee.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(align(32))]
 pub struct GaloisSignature256(pub [u64; 4]);
@@ -13,6 +15,39 @@ impl GaloisSignature256 {
     pub fn is_zero(&self) -> bool {
         // Bitwise OR allows the compiler to fuse registers efficiently
         (self.0[0] | self.0[1] | self.0[2] | self.0[3]) == 0
+    }
+
+    /// Converts the compatibility representation into the maintained
+    /// Microfield presentation with identical canonical bytes.
+    #[must_use]
+    pub fn to_microfield(self) -> Gf2_256HhV1 {
+        Gf2_256HhV1::from_canonical(&self.to_canonical_bytes())
+            .expect("all 256-bit binary-field encodings are canonical")
+    }
+
+    /// Reconstructs the legacy aligned wrapper without exposing Microfield's
+    /// private limbs.
+    #[must_use]
+    pub fn from_microfield(value: Gf2_256HhV1) -> Self {
+        Self::from_canonical_bytes(value.to_canonical())
+    }
+
+    /// Returns the frozen little-endian legacy representation.
+    #[must_use]
+    pub fn to_canonical_bytes(self) -> [u8; 32] {
+        let mut bytes = [0_u8; 32];
+        for (limb, chunk) in self.0.into_iter().zip(bytes.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&limb.to_le_bytes());
+        }
+        bytes
+    }
+
+    fn from_canonical_bytes(bytes: [u8; 32]) -> Self {
+        let mut limbs = [0_u64; 4];
+        for (limb, chunk) in limbs.iter_mut().zip(bytes.chunks_exact(8)) {
+            *limb = u64::from_le_bytes(chunk.try_into().expect("chunk width is exact"));
+        }
+        Self(limbs)
     }
 }
 
@@ -29,153 +64,38 @@ impl FiniteField for GaloisSignature256 {
 
     #[inline(always)]
     fn add(&self, other: &Self) -> Self {
-        // Characteristic 2 addition is a carry-less XOR.
-        // LLVM auto-vectorizes this into a single `vpxor` YMM instruction.
-        GaloisSignature256([
-            self.0[0] ^ other.0[0],
-            self.0[1] ^ other.0[1],
-            self.0[2] ^ other.0[2],
-            self.0[3] ^ other.0[3],
-        ])
+        Self::from_microfield(self.to_microfield().add(other.to_microfield()))
     }
 
-    // =========================================================================
-    // MULTIPLICATION: STRUCTURAL MODE (High Throughput / Default)
-    // =========================================================================
-    #[cfg(not(feature = "crypto_mode"))]
     fn mul(&self, other: &Self) -> Self {
-        // Early exit: Singularity annihilation
-        if self.is_zero() || other.is_zero() {
-            return Self::zero();
-        }
-
-        let mut result = Self::zero();
-        let mut base = *self;
-
-        for i in 0..4 {
-            let mut word = other.0[i];
-
-            // Structural Optimization: Skip empty 64-bit blocks entirely.
-            if word == 0 {
-                for _ in 0..64 {
-                    base = base.shift_phase();
-                }
-                continue;
-            }
-
-            for j in 0..64 {
-                if (word & 1) == 1 {
-                    result = result.add(&base);
-                }
-
-                base = base.shift_phase();
-                word >>= 1;
-
-                // Resolved Micro-optimization: Phase Compensation
-                // If no bits remain in this word, we can exit the inner loop early
-                // to save CPU cycles, BUT we must mathematically fast-forward the base
-                // polynomial by the remaining steps to maintain strict positional
-                // alignment for the next 64-bit block in the outer loop.
-                if word == 0 {
-                    let remaining_shifts = 63 - j;
-                    for _ in 0..remaining_shifts {
-                        base = base.shift_phase();
-                    }
-                    break;
-                }
-            }
-        }
-        result
+        Self::from_microfield(self.to_microfield().mul(other.to_microfield()))
     }
 
-    // =========================================================================
-    // MULTIPLICATION: CRYPTOGRAPHIC MODE (Constant-Time)
-    // =========================================================================
-    #[cfg(feature = "crypto_mode")]
-    fn mul(&self, other: &Self) -> Self {
-        let mut result = Self::zero();
-        let mut base = *self;
-
-        // Strict iteration. No early exits. No conditionals.
-        for i in 0..4 {
-            let mut word = other.0[i];
-            for _ in 0..64 {
-                let bit = word & 1;
-                // Branchless mask: if bit=1 -> 0xFF..FF, if bit=0 -> 0x00..00
-                let mask = 0u64.wrapping_sub(bit);
-
-                result.0[0] ^= base.0[0] & mask;
-                result.0[1] ^= base.0[1] & mask;
-                result.0[2] ^= base.0[2] & mask;
-                result.0[3] ^= base.0[3] & mask;
-
-                base = base.shift_phase();
-                word >>= 1;
-            }
-        }
-        result
-    }
-
-    /// Multiplicative inverse using Fermat's Little Theorem.
-    /// Exponent: 2^256 - 2.
+    /// Multiplicative inverse delegated to Microfield's generated schedule.
     fn inv(&self) -> Option<Self> {
-        if self.is_zero() {
-            return None; // Non-invertible singularity
-        }
-
-        let mut base = *self;
-
-        // 2^256 - 2 binary representation: 255 'ones' followed by 1 'zero'.
-        // We skip the highest bit (already in `base`) and process 254 bits.
-        for _ in 1..255 {
-            base = base.mul(&base); // Square (Frobenius endomorphism)
-            base = base.mul(self); // Multiply
-        }
-
-        // Final bit is '0', so we only apply the square step.
-        base = base.mul(&base);
-
-        Some(base)
+        self.to_microfield().invert().map(Self::from_microfield)
     }
 
-    // =========================================================================
-    // PHASE SHIFT (Universal Branchless)
-    // =========================================================================
-    /// Shifts the polynomial left by 1 bit (Multiplication by 'x').
-    /// Why branchless for both modes?
-    /// Because in a dense hash, the overflow bit is '1' exactly 50% of the time.
-    /// A conditional `if` would cause a CPU Branch Misprediction 50% of the time,
-    /// causing a 15-cycle pipeline flush. The bitwise mask costs only 1 cycle.
+    /// Multiplies by the polynomial-basis element `x`.
     #[inline(always)]
     fn shift_phase(&self) -> Self {
-        let carry0 = self.0[0] >> 63;
-        let carry1 = self.0[1] >> 63;
-        let carry2 = self.0[2] >> 63;
-        let carry3 = self.0[3] >> 63; // Bit 255
-
-        let mut res = GaloisSignature256([
-            self.0[0] << 1,
-            (self.0[1] << 1) | carry0,
-            (self.0[2] << 1) | carry1,
-            (self.0[3] << 1) | carry2,
-        ]);
-
-        // Branchless modular reduction: P(x) = x^256 + x^10 + x^5 + x^2 + 1 (0x425)
-        let mask = 0u64.wrapping_sub(carry3);
-        res.0[0] ^= 0x425 & mask;
-
-        res
+        Self::from_microfield(self.to_microfield().mul_by_x())
     }
 
     #[inline(always)]
     fn from_bytes_canonical(data: &[u8; 32]) -> Self {
-        // Strict Little-Endian memory mapping to preserve structural determinism
-        // across different CPU architectures (x86_64 vs ARM).
-        GaloisSignature256([
-            u64::from_le_bytes(data[0..8].try_into().unwrap()),
-            u64::from_le_bytes(data[8..16].try_into().unwrap()),
-            u64::from_le_bytes(data[16..24].try_into().unwrap()),
-            u64::from_le_bytes(data[24..32].try_into().unwrap()),
-        ])
+        Self::from_canonical_bytes(*data)
+    }
+}
+
+impl From<Gf2_256HhV1> for GaloisSignature256 {
+    fn from(value: Gf2_256HhV1) -> Self {
+        Self::from_microfield(value)
+    }
+}
+
+impl From<GaloisSignature256> for Gf2_256HhV1 {
+    fn from(value: GaloisSignature256) -> Self {
+        value.to_microfield()
     }
 }

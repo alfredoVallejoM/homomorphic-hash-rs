@@ -18,10 +18,11 @@ pub use plan::{
 
 pub(crate) use goldilocks::{barrett_reduce_goldilocks, reduce_goldilocks};
 pub(crate) use implementation::{PrimeFieldSpec, PrimeWideProduct};
-#[cfg(all(feature = "portable", target_arch = "x86_64"))]
-pub(crate) use montgomery::{add_mod, montgomery_reduce_wide};
+#[cfg(all(feature = "portable", feature = "prime-fields", target_arch = "x86_64"))]
+pub(crate) use montgomery::montgomery_reduce_wide;
 pub(crate) use montgomery::{
-    add_mod_256, cmp_limbs, from_montgomery_256, montgomery_reduce_wide_256, neg_mod_256,
-    sub_mod_256, to_montgomery_256, wide_product,
+    add_mod, add_mod_256, cmp_limbs, from_montgomery, from_montgomery_256, montgomery_mul,
+    montgomery_reduce_wide_256, neg_mod, neg_mod_256, sub_mod, sub_mod_256, to_montgomery,
+    to_montgomery_256, wide_product,
 };
 pub(crate) use small::reduce_bytes_mod_u16;

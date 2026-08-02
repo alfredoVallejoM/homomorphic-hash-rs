@@ -42,6 +42,16 @@ pub(crate) fn add_mod<const LIMBS: usize>(
 #[inline]
 #[must_use]
 pub(crate) fn sub_mod_256(lhs: [u64; 4], rhs: [u64; 4], modulus: [u64; 4]) -> [u64; 4] {
+    sub_mod(lhs, rhs, modulus)
+}
+
+#[inline]
+#[must_use]
+pub(crate) fn sub_mod<const LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+) -> [u64; LIMBS] {
     let (difference, borrow) = subtract_wrapping(lhs, rhs);
     let corrected = add_wrapping(difference, modulus).0;
     conditional_select(difference, corrected, borrow)
@@ -50,14 +60,24 @@ pub(crate) fn sub_mod_256(lhs: [u64; 4], rhs: [u64; 4], modulus: [u64; 4]) -> [u
 #[inline]
 #[must_use]
 pub(crate) fn neg_mod_256(value: [u64; 4], modulus: [u64; 4]) -> [u64; 4] {
+    neg_mod(value, modulus)
+}
+
+#[inline]
+#[must_use]
+pub(crate) fn neg_mod<const LIMBS: usize>(
+    value: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+) -> [u64; LIMBS] {
     let negated = subtract_wrapping(modulus, value).0;
     let mut aggregate = 0_u64;
     for limb in value {
         aggregate |= limb;
     }
-    conditional_select([0; 4], negated, nonzero_bit(aggregate))
+    conditional_select([0; LIMBS], negated, nonzero_bit(aggregate))
 }
 
+#[cfg(test)]
 #[must_use]
 pub(crate) fn montgomery_mul_256(
     lhs: [u64; 4],
@@ -65,8 +85,19 @@ pub(crate) fn montgomery_mul_256(
     modulus: [u64; 4],
     neg_inv: u64,
 ) -> [u64; 4] {
-    let wide = wide_product(lhs, rhs);
+    let wide = wide_product::<4, 8>(lhs, rhs);
     montgomery_reduce_wide_256(wide, modulus, neg_inv)
+}
+
+#[must_use]
+pub(crate) fn montgomery_mul<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+    neg_inv: u64,
+) -> [u64; LIMBS] {
+    let wide = wide_product::<LIMBS, WIDE_LIMBS>(lhs, rhs);
+    montgomery_reduce_wide::<LIMBS, WIDE_LIMBS>(wide, modulus, neg_inv)
 }
 
 #[must_use]
@@ -76,12 +107,33 @@ pub(crate) fn to_montgomery_256(
     modulus: [u64; 4],
     neg_inv: u64,
 ) -> [u64; 4] {
-    montgomery_mul_256(canonical, r2, modulus, neg_inv)
+    to_montgomery::<4, 8>(canonical, r2, modulus, neg_inv)
+}
+
+#[must_use]
+pub(crate) fn to_montgomery<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    canonical: [u64; LIMBS],
+    r2: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+    neg_inv: u64,
+) -> [u64; LIMBS] {
+    montgomery_mul::<LIMBS, WIDE_LIMBS>(canonical, r2, modulus, neg_inv)
 }
 
 #[must_use]
 pub(crate) fn from_montgomery_256(value: [u64; 4], modulus: [u64; 4], neg_inv: u64) -> [u64; 4] {
-    montgomery_mul_256(value, [1, 0, 0, 0], modulus, neg_inv)
+    from_montgomery::<4, 8>(value, modulus, neg_inv)
+}
+
+#[must_use]
+pub(crate) fn from_montgomery<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    value: [u64; LIMBS],
+    modulus: [u64; LIMBS],
+    neg_inv: u64,
+) -> [u64; LIMBS] {
+    let mut one = [0_u64; LIMBS];
+    one[0] = 1;
+    montgomery_mul::<LIMBS, WIDE_LIMBS>(value, one, modulus, neg_inv)
 }
 
 #[must_use]
@@ -143,8 +195,12 @@ pub(crate) fn montgomery_reduce_wide<const LIMBS: usize, const WIDE_LIMBS: usize
 }
 
 #[must_use]
-pub(crate) fn wide_product(lhs: [u64; 4], rhs: [u64; 4]) -> [u64; 8] {
-    let mut wide = [0_u64; 8];
+pub(crate) fn wide_product<const LIMBS: usize, const WIDE_LIMBS: usize>(
+    lhs: [u64; LIMBS],
+    rhs: [u64; LIMBS],
+) -> [u64; WIDE_LIMBS] {
+    assert_eq!(WIDE_LIMBS, LIMBS * 2);
+    let mut wide = [0_u64; WIDE_LIMBS];
     for (left_index, left_limb) in lhs.iter().copied().enumerate() {
         let mut carry = 0_u64;
         for (right_index, right_limb) in rhs.iter().copied().enumerate() {
@@ -157,7 +213,7 @@ pub(crate) fn wide_product(lhs: [u64; 4], rhs: [u64; 4]) -> [u64; 8] {
         }
         // Earlier rows end before this limb, so the row carry is stored once
         // without a value-dependent propagation loop.
-        wide[left_index + 4] = carry;
+        wide[left_index + LIMBS] = carry;
     }
     wide
 }
