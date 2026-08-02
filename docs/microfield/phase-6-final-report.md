@@ -105,10 +105,14 @@ está en [phase-6-g7-final-report.md](phase-6-g7-final-report.md).
 - Un `BudgetExhausted` no decide isomorfismo.
 - La forma exacta actual está ligada al mismo `GraphSignatureId` versionado.
 
-## Preparación para Fase 7
+## Validación F6.V1–V6
 
-Fase 7 puede desarrollar torres/extensiones, FFT, reconciliación y adapters de
-aplicación como tracks separados. No necesita reabrir las leyes de Fase 6 ni
-convertir el buscador exacto en el flujo predeterminado. Cualquier nueva
-aplicación de grafos debe elegir entre v1 componible, v2 global/adaptativo y un
-presupuesto exacto final.
+F6.V1–V6 están implementadas y su primera campaña completa se documenta en el
+[`informe de validación`](phase-6-validation-final-report.md): leyes
+exhaustivas, colisiones mínimas, reconciliación acotada, 12.346 clases de orden
+8, CFI/SRG/ciclos, cuatro pilotos tipados, curva incremental y rendimiento
+hasta un millón de vértices.
+
+Fase 7, estabilización pública, licencia y publicación continúan bloqueadas por
+la matriz multi-CPU y los baselines externos que el informe enumera. La
+búsqueda exacta sigue fuera del flujo predeterminado.

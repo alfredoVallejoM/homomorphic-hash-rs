@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "id": "simple-n8-nauty",
+      "path": "simple-n8.g6",
+      "sha256": "546a249902101c97d3aa590f93e53366854bd0a6f405aa59bdb32d25c57f845a",
+      "records": 12346,
+      "oracle": "SageMath 10.7 graphs.nauty_geng(8)",
+      "regenerate": "DOT_SAGE=/tmp/microfield-sage conda run -n laboratorio_np sage tools/sage/generate_f6_graph_corpus.sage"
+    },
+    {
+      "id": "adversarial-isomorphism-oracle",
+      "path": "adversarial-oracle.json",
+      "sha256": "572d093bc818f4f040e467847c6a0bbec99bf5f8d6eef263ef351536ff491484",
+      "records": 3,
+      "oracle": "SageMath 10.7 Graph.is_isomorphic",
+      "regenerate": "DOT_SAGE=/tmp/microfield-sage conda run -n laboratorio_np sage tools/sage/verify_f6_adversarial.sage"
+    }
+  ]
+}

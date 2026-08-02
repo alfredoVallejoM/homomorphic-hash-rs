@@ -120,6 +120,17 @@ La búsqueda exacta descompone ahora componentes. El diseño, corpus externo y
 mediciones están en
 [`phase-6-g7-final-report.md`](docs/microfield/phase-6-g7-final-report.md).
 
+F6.V1–V6 están implementadas mediante un laboratorio reproducible no
+publicable. La campaña mantiene 145.636 ecuaciones metamórficas, 63.232 pares de
+reconciliación recuperados, las 12.346 clases simples de orden 8 y oráculos
+adversariales CFI/SRG/ciclos. Los resultados confirman que SHA híbrido o un
+segundo campo no resuelven por sí solos la regularidad, mientras que motivos
+adaptativos reducen los grafos ambiguos de 454 a 46 y el exacto separa los
+contraejemplos comprobados. Véase el
+[`informe F6.V`](docs/microfield/phase-6-validation-final-report.md). Fase 7 y
+publicación continúan bloqueadas hasta completar la evidencia multi-CPU y los
+baselines de dominio, no por falta de harness.
+
 ## Comandos
 
 ```text
@@ -141,6 +152,9 @@ cargo test -p homomorphic-hash-rs --test microfield_compat
 cargo test -p homomorphic-hash-rs --all-features --test structural_signatures
 cargo test -p homomorphic-hash-rs --all-features --test fast_graph
 cargo test -p homomorphic-hash-rs --all-features --test graph_canonical
+cargo test -p microfield-validation-lab --all-targets
+cargo run --release -p microfield-validation-lab -- semantic --manifest validation/f6/manifest.json --out validation/f6/results/semantic-v1.json
+cargo run --release -p microfield-validation-lab -- performance --manifest validation/f6/manifest.json --out /tmp/f6-performance.json
 python3 tools/fetch_graph_corpus.py
 cargo test -p homomorphic-hash-rs --test external_graph_corpus -- --ignored
 conda run -n laboratorio_np sage tools/sage/verify_graph_degeneracy.sage

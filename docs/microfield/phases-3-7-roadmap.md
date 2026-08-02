@@ -196,6 +196,21 @@ predeterminado. El cierre está en
 
 El diseño se fija en [ADR 0030](adr/0030-global-v2-and-external-corpus.md).
 
+### F6.V — validación científica y aplicada — implementada, evidencia en curso
+
+F6.G7 cerró el núcleo y [F6.V](phase-6-validation-plan.md) implementa ahora
+leyes exhaustivas y
+metamórficas, catálogo de colisiones, aplicaciones con baselines, corpus de
+grafos exhaustivo/adversarial, oráculos independientes, curvas de escalado e
+incrementalidad y reproducción multi-CPU.
+
+Cada firma y cada aplicación terminará clasificada como aplicación validada,
+primitiva validada, experimental o descartada. La ausencia de colisiones en un
+corpus no se convertirá en un claim universal. El
+[informe F6.V1–V6](phase-6-validation-final-report.md) contiene la primera
+clasificación. Fase 7, estabilización pública, licencia y publicación quedan
+pospuestas hasta completar su matriz multi-CPU y baselines externos.
+
 ### Gate de Fase 6
 
 La fase termina cuando el legado mantenido compila sobre la arquitectura nueva,
@@ -213,7 +228,7 @@ si canonicalize_exact(G, budget) produce Exact:
 Las firmas finitas mantienen colisiones declaradas; ninguna igualdad se presenta
 como prueba de isomorfismo.
 
-## Fase 7 — extensiones y aplicaciones
+## Fase 7 — extensiones y aplicaciones — bloqueada por F6.V
 
 Torres/extensiones, FFT, reconciliación y backends adicionales se mantienen
 como tracks independientes. `BaseEmbedding` será una capacidad separada; no se

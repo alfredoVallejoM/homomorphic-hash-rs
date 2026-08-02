@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://microfield.invalid/schema/f6-semantic-report-v1.json",
+  "title": "Microfield F6.V semantic report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "campaign_id",
+    "seed",
+    "signatures",
+    "reconciliation",
+    "graphs"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "campaign_id": { "type": "string", "minLength": 1 },
+    "seed": { "type": "integer", "minimum": 0 },
+    "signatures": { "type": "object" },
+    "reconciliation": { "type": "object" },
+    "graphs": { "type": "object" }
+  }
+}

@@ -20,7 +20,7 @@ jobs:
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
       - name: Format
-        run: cargo +stable fmt -p microfield -- --check
+        run: cargo +stable fmt --all -- --check
       - name: Format external generated-field fixture
         run: cargo +stable fmt --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml -- --check
       - name: Test all Microfield targets
@@ -61,6 +61,47 @@ jobs:
         run: cargo +stable test -p homomorphic-hash-rs --lib
       - name: Legacy field compatibility
         run: cargo +stable test -p homomorphic-hash-rs --test microfield_compat
+      - name: Structural signatures and graph regressions
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs
+          --test structural_signatures --test fast_graph --test graph_canonical
+      - name: F6.V validation harness unit gates
+        run: cargo +stable test -p microfield-validation-lab --all-targets
+
+  f6-validation:
+    name: F6.V reproducibility (${{ matrix.arch }})
+    needs: stable
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Regenerate deterministic F6.V semantic evidence
+        run: >-
+          cargo +stable run --release -p microfield-validation-lab -- semantic
+          --manifest validation/f6/manifest.json
+          --out validation/f6/results/semantic-v1.json
+      - name: Verify semantic report is reproducible
+        run: git diff --exit-code -- validation/f6/results
+      - name: Capture host-specific performance evidence
+        run: >-
+          cargo +stable run --release -p microfield-validation-lab -- performance
+          --manifest validation/f6/manifest.json
+          --out f6-performance-${{ matrix.arch }}.json
+      - name: Upload F6.V performance evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: f6-performance-${{ matrix.arch }}
+          path: f6-performance-${{ matrix.arch }}.json
+          if-no-files-found: error
 
   features:
     name: Runtime feature matrix

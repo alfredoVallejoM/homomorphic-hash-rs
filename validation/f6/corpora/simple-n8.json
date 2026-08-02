@@ -1,0 +1,9 @@
+{
+  "format": "graph6, one graph per line, no header",
+  "generator": "SageMath graphs.nauty_geng",
+  "graph_count": 12346,
+  "sage_version": "10.7",
+  "schema_version": 1,
+  "sha256": "546a249902101c97d3aa590f93e53366854bd0a6f405aa59bdb32d25c57f845a",
+  "vertices": 8
+}

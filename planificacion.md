@@ -3406,6 +3406,39 @@ se vuelve a cerrar únicamente tras superar este corpus, las suites locales,
 Clippy/rustdoc y los benchmarks de coste aislado. El detalle está en
 `docs/microfield/phase-6-g7-final-report.md` y ADR 0030.
 
+# 25. F6.V: validación científica y aplicada antes de publicación
+
+F6.G7 cerró la implementación de firmas y grafos. F6.V1–V6 implementan el
+programa de validación bloqueante definido en
+`docs/microfield/phase-6-validation-plan.md`; su primera evidencia se conserva
+en `docs/microfield/phase-6-validation-final-report.md` y
+`validation/f6/results/semantic-v1.json`.
+
+El programa exige:
+
+1. leyes exhaustivas y metamórficas para cada firma;
+2. catálogo reproducible de colisiones, parámetros y límites;
+3. aplicaciones de agregación, reconciliación y secuencias comparadas con
+   baselines adecuados;
+4. corpus de grafos exhaustivo, adversarial y multiformato con oráculo exacto;
+5. tasas de indistinguibilidad por escalón v1/híbrido/v2/motivos/multi-campo;
+6. curvas de coste incremental, memoria, latencia y búsqueda exacta;
+7. repetición en varias familias x86-64 y ARM64;
+8. clasificación final de cada vía como validada, primitiva, experimental o
+   descartada.
+
+La reconciliación incluye ya recuperación acotada con distancia desconocida:
+63.232 pares exhaustivos hasta diferencia seis se recuperan y verifican. Sigue
+como `ValidatedPrimitive` hasta disponer de factorización escalable y API
+pública. El corpus de 12.346 clases de orden ocho deja 454 grafos ambiguos en
+v1 y 46 tras motivos adaptativos; SHA híbrido y multi-campo local no reducen la
+regularidad. En grafos, una igualdad continúa significando
+`Indistinguishable`; solo un oráculo exacto completado certifica la forma.
+
+La implementación V1–V6 queda cerrada. La publicación continúa bloqueada por
+la evidencia multi-microarquitectura y los baselines externos enumerados en el
+informe, no por falta de infraestructura.
+
 # Referencias técnicas
 
 1. Rust Project,

@@ -53,10 +53,11 @@ cadena Itoh–Tsujii exacta antes de calcular artefactos. La ruta prestada pasa
 el gate de cero asignaciones y no amplía `unsafe`.
 
 La planificación Fases 3–7 se corrigió en
-[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md). La Fase 6 está cerrada: ha
-rehabilitado el legado sobre campos `microfield`, mantiene firmas y etiquetas
-lineales como primitiva componible, recomienda el discriminador global v2 y
-reserva la búsqueda exacta optativa y acotada para las simetrías. Las firmas
+[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md). La implementación de Fase 6
+está cerrada: ha rehabilitado el legado sobre campos `microfield`, mantiene
+firmas y etiquetas lineales como primitiva componible, recomienda el
+discriminador global v2 y reserva la búsqueda exacta optativa y acotada para
+las simetrías. F6.V1–V6 implementan ahora su validación reproducible. Las firmas
 algebraicas, SHA-256, invariantes globales, motivos y bundles multi-campo
 reducen colisiones, pero no deciden isomorfismo por igualdad.
 
@@ -87,7 +88,8 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | F6.0–F6.8 | Completada localmente | auditoría legacy, cinco firmas, campos generados/runtime, identidades, tracking, residual y wire schema 1 |
 | F6.G0–G2 | Completada localmente | CSR relacional, motor lineal multi-campo, F251, SHA-256 invariante y salida discreta exacta |
 | F6.G3 | Completo localmente | preparación/workspace, batch AVX2 medido, paralelismo determinista y migración del canonizador legado |
-| F6.G4–G7 | Completada localmente | incrementalidad, degeneración, exacto por componentes, perfil global v2 y corpus externo |
+| F6.G4–G7 | Implementación completada | incrementalidad, degeneración, exacto por componentes, perfil global v2 y corpus externo |
+| F6.V1–V6 | Implementada; evidencia de publicación aún bloqueante | 145.636 leyes, 63.232 reconciliaciones, 12.346 grafos n=8, adversariales, verticales y runners x86/ARM |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
@@ -348,7 +350,7 @@ La evidencia insuficiente se representa como selección explícita, nunca como
 un threshold optimista. El informe consolidado está en
 [`phase-2-final-report.md`](phase-2-final-report.md).
 
-### Fases 5 y 6 cerradas tras F6.G7; Fase 7 es el siguiente corte
+### F6.V1–V6 implementada; siguiente corte de evidencia
 
 La generación prima externa, assurance probado/probable, bundle/lock, caché,
 CLI, contextos dinámicos y puente dinámico→estático están implementados sin
@@ -374,9 +376,12 @@ El cierre acumulado está en
 La corrección v2 está en
 [`phase-6-g7-final-report.md`](phase-6-g7-final-report.md).
 
-El siguiente trabajo es Fase 7. Debe partir de los contratos ya cerrados y no
-introducir FFT, torres, reconciliación o adapters de aplicación dentro del hot
-path de campos o grafos.
+[`F6.V`](phase-6-validation-plan.md) ya dispone de laboratorio y primera
+campaña. El resultado y los claims permitidos/prohibidos están en
+[`phase-6-validation-final-report.md`](phase-6-validation-final-report.md). El
+siguiente corte no amplía el núcleo: completa microarquitecturas, baselines de
+reconciliación/dominio y campañas programadas de mayor escala. FFT, torres,
+estabilización, licencia y publicación permanecen bloqueadas hasta entonces.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no

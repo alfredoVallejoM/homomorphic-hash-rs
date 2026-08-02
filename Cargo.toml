@@ -6,7 +6,11 @@ description = "Firmas algebraicas homomorficas no criptograficas sobre campos fi
 autobenches = false
 
 [workspace]
-members = ["crates/microfield", "crates/structural-field-fixture"]
+members = [
+    "crates/microfield",
+    "crates/structural-field-fixture",
+    "crates/validation-lab",
+]
 exclude = ["crates/microfield/test-fixtures/external-consumer"]
 default-members = ["crates/microfield"]
 resolver = "2"
