@@ -1,5 +1,14 @@
 # Fase 6.G — etiquetado estructural rápido sobre campos finitos
 
+> Nota posterior (3 de agosto de 2026): este contrato continúa como baseline de
+> firmas y etiquetado, pero su cierre de canonización fue reabierto. Microcanon
+> v1 ya separa la autoridad exacta de `FastGraphLabeler` en G8–G10; véanse
+> [el plan G8–G15](phase-6-canonization-v2-plan.md) y
+> [ADR 0031](adr/0031-certified-canonization-core.md). Esta página conserva el
+> contrato rápido v0; la forma exacta nueva está en el
+> [informe G8/G9](phase-6-g8-g9-implementation-report.md) y el
+> [cierre G10](phase-6-g10-final-report.md).
+
 Fecha: 2 de agosto de 2026.
 
 ## Decisión
@@ -16,7 +25,7 @@ Se mantienen separados tres contratos:
 | Contrato | Resultado | Complejidad |
 |---|---|---|
 | `FastGraphLabeler::analyze` | etiquetas y firma con colisiones posibles | `O(K R (V + I))` |
-| `try_canonicalize`, partición discreta | bytes exactos y permutaciones | `O(K R (V + I) + V log V)` |
+| `try_canonicalize`, partición discreta | bytes Microcanon v1 y permutaciones | análisis rápido más refinamiento exacto sin IR |
 | `canonicalize_exact`, simetrías | forma exacta o agotamiento explícito | búsqueda opt-in acotada, exponencial en peor caso |
 
 `I` es el número de incidencias dirigidas normalizadas, `R` las rondas y `K`

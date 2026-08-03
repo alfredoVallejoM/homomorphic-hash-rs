@@ -1,6 +1,6 @@
 # Estado actual y siguiente plan
 
-Fecha de revisión: 2 de agosto de 2026.
+Fecha de revisión: 3 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
@@ -53,13 +53,23 @@ cadena Itoh–Tsujii exacta antes de calcular artefactos. La ruta prestada pasa
 el gate de cero asignaciones y no amplía `unsafe`.
 
 La planificación Fases 3–7 se corrigió en
-[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md). La implementación de Fase 6
-está cerrada: ha rehabilitado el legado sobre campos `microfield`, mantiene
-firmas y etiquetas lineales como primitiva componible, recomienda el
-discriminador global v2 y reserva la búsqueda exacta optativa y acotada para
-las simetrías. F6.V1–V6 implementan ahora su validación reproducible. Las firmas
-algebraicas, SHA-256, invariantes globales, motivos y bundles multi-campo
-reducen colisiones, pero no deciden isomorfismo por igualdad.
+[`phases-3-7-roadmap.md`](phases-3-7-roadmap.md). La parte algebraica y la
+migración legacy de Fase 6 están cerradas. El track de grafos G0–G7 queda como
+baseline v0. F6.G8 ya separa `GraphSchemaId` de
+`GraphAnalysisProfileId`, introduce encoding/parser v1, mappings verificados y
+la fachada fail-closed `Microcanon`. El baseline G9 ejecuta refinamiento exacto,
+componentes e IR exhaustivo sin depender de campos; el adapter histórico delega
+en él. G10 añade la estrategia compacta predeterminada, IDs internados, arena
+plana, trazas, automorfismos verificados, poda por órbitas/prefijo y presupuestos
+de bytes, profundidad y tiempo. Conserva G9 como referencia diferencial y
+produce los mismos bytes. G11–G15 añadirán firmas de loops, matching pareado y
+cierre científico. F6.V1–V6 conserva valor como caracterización reproducible del
+baseline. El diseño y la entrega están en
+[`phase-6-canonization-v2-plan.md`](phase-6-canonization-v2-plan.md) y
+[`ADR 0031`](adr/0031-certified-canonization-core.md), con evidencia en
+[`phase-6-g8-g9-implementation-report.md`](phase-6-g8-g9-implementation-report.md).
+El cierre y las mediciones de G10 están en
+[`phase-6-g10-final-report.md`](phase-6-g10-final-report.md).
 
 La Fase 2 está cerrada. H2.8 transforma la calibración, seguridad y
 compatibilidad en contratos versionados: tabla de selección v1 compilada como
@@ -88,8 +98,13 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | F6.0–F6.8 | Completada localmente | auditoría legacy, cinco firmas, campos generados/runtime, identidades, tracking, residual y wire schema 1 |
 | F6.G0–G2 | Completada localmente | CSR relacional, motor lineal multi-campo, F251, SHA-256 invariante y salida discreta exacta |
 | F6.G3 | Completo localmente | preparación/workspace, batch AVX2 medido, paralelismo determinista y migración del canonizador legado |
-| F6.G4–G7 | Implementación completada | incrementalidad, degeneración, exacto por componentes, perfil global v2 y corpus externo |
+| F6.G4–G7 | Baseline v0 completado | incrementalidad, degeneración, exacto básico por componentes, perfil global v2 y corpus externo; no es el cierre estable |
 | F6.V1–V6 | Implementada; evidencia de publicación aún bloqueante | 145.636 leyes, 63.232 reconciliaciones, 12.346 grafos n=8, adversariales, verticales y runners x86/ARM |
+| F6.G8 | Completado localmente | schema/profile separados, encoding/parser v1, key, mappings y verifier |
+| F6.G9 | Baseline completado localmente | Microcanon independiente e IR exhaustivo; 32.768 grafos n=6 en 156 clases exactas |
+| F6.G10 | Completado localmente | arena plana/IDs, G9 diferencial, órbitas y prefijo certificados, workspace y budgets; 92,8 % menos nodos en C32 |
+| F6.G11 / F6.RG | Siguiente hito | firmas v2, assurance, catálogo de loops/homomorfismos y jerarquía determinant/resolvent/contractions sobre campos |
+| F6.G12–G15 | Planificado | matcher pareado, descomposición, alta regularidad, delta real y cierre científico |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
@@ -350,7 +365,7 @@ La evidencia insuficiente se representa como selección explícita, nunca como
 un threshold optimista. El informe consolidado está en
 [`phase-2-final-report.md`](phase-2-final-report.md).
 
-### F6.V1–V6 implementada; siguiente corte de evidencia
+### F6.V1–V6 implementada; núcleo de grafos reabierto
 
 La generación prima externa, assurance probado/probable, bundle/lock, caché,
 CLI, contextos dinámicos y puente dinámico→estático están implementados sin
@@ -378,10 +393,14 @@ La corrección v2 está en
 
 [`F6.V`](phase-6-validation-plan.md) ya dispone de laboratorio y primera
 campaña. El resultado y los claims permitidos/prohibidos están en
-[`phase-6-validation-final-report.md`](phase-6-validation-final-report.md). El
-siguiente corte no amplía el núcleo: completa microarquitecturas, baselines de
-reconciliación/dominio y campañas programadas de mayor escala. FFT, torres,
-estabilización, licencia y publicación permanecen bloqueadas hasta entonces.
+[`phase-6-validation-final-report.md`](phase-6-validation-final-report.md). La
+auditoría posterior sí amplía y corrige el núcleo: G8–G15 separan canonización y
+firmas, añaden mappings verificados, podas demostradas, comparación pareada y
+presupuesto integral. En paralelo,
+[`F6.RG`](relational-green-invariant-research.md) estudiará una jerarquía de
+Green inspirada en `Theta` sin presentarla como completa ni novedosa antes de la
+baseline bibliográfica. FFT, torres, estabilización, licencia y publicación
+permanecen bloqueadas hasta cerrar esta frontera.
 
 La primera medición local de H2.2 observa mejoras entre 1,6x y 48,6x en las
 rutas cubiertas, con 2,8x en la inversión GF(2²³³). Son resultados locales, no

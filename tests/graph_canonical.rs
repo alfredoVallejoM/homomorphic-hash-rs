@@ -6,8 +6,9 @@ use homomorphic_hash_rs::{
     BinaryPolynomialEncoder, CanonicalBudgetLimit, CanonicalSearchBudget, CanonicalizationPath,
     DiscriminatingGraphComparison, DiscriminationRecommendation, ExactCanonicalOutcome,
     FastGraphLabeler, GraphDiscriminationPolicy, GraphError, GraphEscalationAdvice,
-    GraphEvidenceComparison, IncidenceGraph, IncidenceGraphBuilder, MotifAnalysisStatus,
-    MultiFieldGraphEvidenceBuilder, PrimeIntegerEncoder, RefinementProfile, VertexId,
+    GraphEvidenceComparison, IncidenceGraph, IncidenceGraphBuilder, Microcanon, MicrocanonOutcome,
+    MicrocanonStrategy, MotifAnalysisStatus, MultiFieldGraphEvidenceBuilder, PrimeIntegerEncoder,
+    RefinementProfile, VertexId,
 };
 use microfield::{CanonicalEncoding, Fp251V1, Gf2_256HhV1};
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
@@ -485,10 +486,7 @@ fn finite_field_aliasing_is_separated_from_combinatorial_regularity() {
         .unwrap()
     {
         ExactCanonicalOutcome::Exact { report, .. } => {
-            assert_eq!(
-                report.path(),
-                CanonicalizationPath::WeakComponentDecomposition
-            );
+            assert_eq!(report.path(), CanonicalizationPath::ExactRefinementDiscrete);
             assert_eq!(report.explored_nodes(), 0);
         }
         ExactCanonicalOutcome::BudgetExhausted { .. } => {
@@ -743,6 +741,20 @@ fn exact_results_match_an_independent_exhaustive_oracle_through_five_vertices() 
                     .unwrap(),
             )
             .0;
+            let reference = match Microcanon::default()
+                .with_strategy(MicrocanonStrategy::Reference)
+                .canonicalize(&graph, CanonicalSearchBudget::new(100_000))
+                .unwrap()
+            {
+                MicrocanonOutcome::Exact { form, .. } => form.bytes().to_vec(),
+                MicrocanonOutcome::Inconclusive { report } => {
+                    panic!("G9 reference exhausted at V={vertex_count}, mask={mask:#x}: {report:?}")
+                }
+            };
+            assert_eq!(
+                production, reference,
+                "G10 changed G9 bytes at V={vertex_count}, mask={mask:#x}"
+            );
             if let Some(previous) = oracle_to_production.insert(oracle, production.clone()) {
                 assert_eq!(
                     previous, production,
@@ -759,6 +771,102 @@ fn exact_results_match_an_independent_exhaustive_oracle_through_five_vertices() 
         assert_eq!(oracle_to_production.len(), expected_classes);
         assert_eq!(production_to_oracle.len(), expected_classes);
     }
+}
+
+fn permuted_simple_mask(vertex_count: usize, edge_mask: u64, new_to_old: &[usize]) -> u64 {
+    let edge_position = |left: usize, right: usize| {
+        let (left, right) = if left < right {
+            (left, right)
+        } else {
+            (right, left)
+        };
+        left * (2 * vertex_count - left - 1) / 2 + right - left - 1
+    };
+    let mut result = 0_u64;
+    let mut output_bit = 0;
+    for left in 0..vertex_count {
+        for right in left + 1..vertex_count {
+            let input_bit = edge_position(new_to_old[left], new_to_old[right]);
+            if edge_mask & (1_u64 << input_bit) != 0 {
+                result |= 1_u64 << output_bit;
+            }
+            output_bit += 1;
+        }
+    }
+    result
+}
+
+fn independent_simple_graph_orbits(vertex_count: usize) -> Vec<u64> {
+    let edge_bits = vertex_count * (vertex_count - 1) / 2;
+    let graph_count = 1_usize << edge_bits;
+    let mut permutations = Vec::new();
+    let mut permutation = (0..vertex_count).collect::<Vec<_>>();
+    for_each_permutation(&mut permutation, 0, &mut |order| {
+        permutations.push(order.to_vec());
+    });
+
+    let mut classes = vec![u64::MAX; graph_count];
+    for mask in 0..graph_count {
+        if classes[mask] != u64::MAX {
+            continue;
+        }
+        let orbit = permutations
+            .iter()
+            .map(|order| permuted_simple_mask(vertex_count, mask as u64, order))
+            .collect::<Vec<_>>();
+        let representative = *orbit.iter().min().unwrap();
+        for member in orbit {
+            classes[member as usize] = representative;
+        }
+    }
+    classes
+}
+
+#[test]
+#[ignore = "full 32,768-graph certification gate; run explicitly before releases"]
+fn microcanon_matches_every_simple_graph_isomorphism_class_at_six_vertices() {
+    let oracle = independent_simple_graph_orbits(6);
+    let canon = homomorphic_hash_rs::Microcanon::default();
+    let budget = CanonicalSearchBudget::new(1_000_000);
+    let mut oracle_to_production = BTreeMap::new();
+    let mut production_to_oracle = BTreeMap::new();
+    for (mask, &oracle_class) in oracle.iter().enumerate() {
+        let graph = simple_graph(6, mask as u64);
+        let production = match canon.canonicalize(&graph, budget).unwrap() {
+            homomorphic_hash_rs::MicrocanonOutcome::Exact { form, .. } => form.bytes().to_vec(),
+            homomorphic_hash_rs::MicrocanonOutcome::Inconclusive { report } => {
+                panic!("six-vertex gate exhausted at mask {mask:#x}: {report:?}")
+            }
+        };
+        let reference = match canon
+            .with_strategy(MicrocanonStrategy::Reference)
+            .canonicalize(&graph, budget)
+            .unwrap()
+        {
+            MicrocanonOutcome::Exact { form, .. } => form.bytes().to_vec(),
+            MicrocanonOutcome::Inconclusive { report } => {
+                panic!("G9 reference exhausted at six-vertex mask {mask:#x}: {report:?}")
+            }
+        };
+        assert_eq!(
+            production, reference,
+            "G10 changed G9 bytes at six-vertex mask {mask:#x}"
+        );
+        if let Some(previous) = oracle_to_production.insert(oracle_class, production.clone()) {
+            assert_eq!(
+                previous, production,
+                "isomorphic six-vertex masks disagree at {mask:#x}"
+            );
+        }
+        if let Some(previous) = production_to_oracle.insert(production, oracle_class) {
+            assert_eq!(
+                previous, oracle_class,
+                "non-isomorphic six-vertex masks collide at {mask:#x}"
+            );
+        }
+    }
+    assert_eq!(oracle_to_production.len(), 156);
+    assert_eq!(production_to_oracle.len(), 156);
 }
 
 #[test]

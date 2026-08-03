@@ -15,6 +15,13 @@ pub enum GraphError {
         /// Number of vertices available at validation time.
         vertex_count: usize,
     },
+    /// An operation refers to a relation descriptor outside one normalized graph.
+    InvalidRelation {
+        /// Supplied relation index.
+        index: usize,
+        /// Number of relation descriptors available in this graph.
+        relation_count: usize,
+    },
     /// Zero is not a meaningful edge or incidence multiplicity.
     ZeroMultiplicity,
     /// Summing duplicate edge multiplicities exceeded `u64`.
@@ -42,6 +49,24 @@ pub enum GraphError {
     NonInvertibleAggregateFactor,
     /// An internal or adapter-provided canonical order is not a permutation.
     InvalidCanonicalOrder,
+    /// Canonical graph bytes are truncated, malformed or not normalized.
+    InvalidCanonicalEncoding,
+    /// Canonical graph bytes use an unsupported encoding version.
+    UnsupportedCanonicalEncoding {
+        /// Version found in the input envelope.
+        version: u16,
+    },
+    /// A candidate graph mapping is not a complete exact isomorphism.
+    InvalidGraphMapping,
+    /// An invariant of the exact canonization implementation was violated.
+    CanonicalizationInvariantViolation,
+    /// A compact workspace was supplied to the retained reference strategy.
+    IncompatibleCanonicalWorkspace,
+    /// An incidence supplied to a hyperedge points at another auxiliary hyperedge.
+    InvalidHyperedgeEndpoint {
+        /// Supplied auxiliary vertex index.
+        index: usize,
+    },
     /// A multi-field evidence bundle must contain at least one channel.
     EmptyEvidenceProfile,
     /// A multi-field evidence profile cannot count one channel twice.
@@ -65,6 +90,13 @@ impl fmt::Display for GraphError {
             } => write!(
                 formatter,
                 "vertex index {index} is outside graph with {vertex_count} vertices"
+            ),
+            Self::InvalidRelation {
+                index,
+                relation_count,
+            } => write!(
+                formatter,
+                "relation index {index} is outside graph with {relation_count} descriptors"
             ),
             Self::ZeroMultiplicity => formatter.write_str("graph multiplicity must be non-zero"),
             Self::MultiplicityOverflow => formatter.write_str("graph multiplicity overflow"),
@@ -90,6 +122,25 @@ impl fmt::Display for GraphError {
             Self::InvalidCanonicalOrder => {
                 formatter.write_str("canonical vertex order is not a complete permutation")
             }
+            Self::InvalidCanonicalEncoding => {
+                formatter.write_str("invalid canonical graph encoding")
+            }
+            Self::UnsupportedCanonicalEncoding { version } => {
+                write!(formatter, "unsupported canonical graph encoding version {version}")
+            }
+            Self::InvalidGraphMapping => {
+                formatter.write_str("candidate mapping is not an exact graph isomorphism")
+            }
+            Self::CanonicalizationInvariantViolation => {
+                formatter.write_str("exact graph canonization invariant violation")
+            }
+            Self::IncompatibleCanonicalWorkspace => {
+                formatter.write_str("compact canonical workspace requires the G10 strategy")
+            }
+            Self::InvalidHyperedgeEndpoint { index } => write!(
+                formatter,
+                "hyperedge incidence endpoint {index} is not an entity vertex"
+            ),
             Self::EmptyEvidenceProfile => {
                 formatter.write_str("multi-field graph evidence profile is empty")
             }

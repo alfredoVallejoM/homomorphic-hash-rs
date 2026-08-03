@@ -20,7 +20,6 @@ use super::{
 
 const PARAMETER_ATTEMPTS: u16 = 2048;
 const SIGNATURE_MAGIC: &[u8; 4] = b"MFGR";
-const CANONICAL_MAGIC: &[u8; 4] = b"MFCG";
 const GRAPH_SCHEMA: u16 = 1;
 
 /// Stable encoder domain used by the convenience F251 graph profile.
@@ -545,38 +544,13 @@ impl<F: Field, const K: usize> HybridGraphAnalysis<F, K> {
     }
 }
 
-/// Exact graph bytes emitted only after field labels form a discrete partition.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct DiscreteCanonicalForm {
-    bytes: Vec<u8>,
-    original_to_canonical: Vec<VertexId>,
-    canonical_to_original: Vec<VertexId>,
-}
-
-impl DiscreteCanonicalForm {
-    /// Exact versioned graph bytes under the field-derived discrete order.
-    #[must_use]
-    pub fn bytes(&self) -> &[u8] {
-        &self.bytes
-    }
-
-    /// Maps each original index to its canonical position.
-    #[must_use]
-    pub fn original_to_canonical(&self) -> &[VertexId] {
-        &self.original_to_canonical
-    }
-
-    /// Maps each canonical position back to the supplied graph.
-    #[must_use]
-    pub fn canonical_to_original(&self) -> &[VertexId] {
-        &self.canonical_to_original
-    }
-}
+/// Compatibility name for the profile-independent exact graph form.
+pub type DiscreteCanonicalForm = super::CanonicalGraphForm;
 
 /// Bounded result: an exact discrete form or the complete fast analysis.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum TryCanonicalOutcome<F: Field, const K: usize> {
-    /// Every final class is a singleton, so sorting invariant labels is exact.
+    /// Every final class is a singleton and the exact core emitted its stable order.
     Canonical(DiscreteCanonicalForm),
     /// Symmetry remains; no potentially exponential search was attempted.
     SymmetryRemaining(FastGraphAnalysis<F, K>),
@@ -1294,6 +1268,8 @@ where
     /// Attempts exact canonical output without ever entering exponential search.
     ///
     /// A non-discrete result explicitly returns [`TryCanonicalOutcome::SymmetryRemaining`].
+    /// A discrete fast partition is re-ordered by exact relational refinement,
+    /// so the published bytes do not depend on the selected field profile.
     ///
     /// # Errors
     ///
@@ -1306,8 +1282,16 @@ where
         if analysis.cell_count != graph.vertex_count() {
             return Ok(TryCanonicalOutcome::SymmetryRemaining(analysis));
         }
-        let form = discrete_form(graph, &analysis.labels, self.signature_id)?;
-        Ok(TryCanonicalOutcome::Canonical(form))
+        match super::Microcanon::default()
+            .canonicalize(graph, super::CanonicalSearchBudget::new(0))?
+        {
+            super::MicrocanonOutcome::Exact { form, .. } => {
+                Ok(TryCanonicalOutcome::Canonical(form))
+            }
+            super::MicrocanonOutcome::Inconclusive { .. } => {
+                Ok(TryCanonicalOutcome::SymmetryRemaining(analysis))
+            }
+        }
     }
 
     fn encode_descriptors(&self, graph: &IncidenceGraph) -> Result<Vec<F>, GraphError> {
@@ -2662,97 +2646,4 @@ fn update_framed_digest(hasher: &mut Sha256, bytes: &[u8]) -> Result<(), GraphEr
     );
     hasher.update(bytes);
     Ok(())
-}
-
-pub(super) fn discrete_form<F, const K: usize>(
-    graph: &IncidenceGraph,
-    labels: &[StructuralLabel<F, K>],
-    signature_id: GraphSignatureId,
-) -> Result<DiscreteCanonicalForm, GraphError>
-where
-    F: Field + CanonicalEncoding,
-{
-    let mut canonical_to_original: Vec<VertexId> =
-        (0..graph.vertex_count()).map(VertexId::new).collect();
-    canonical_to_original.sort_unstable_by(|left, right| {
-        compare_labels(&labels[left.index()], &labels[right.index()])
-    });
-    canonical_form_from_order(graph, canonical_to_original, signature_id)
-}
-
-pub(super) fn canonical_form_from_order(
-    graph: &IncidenceGraph,
-    canonical_to_original: Vec<VertexId>,
-    signature_id: GraphSignatureId,
-) -> Result<DiscreteCanonicalForm, GraphError> {
-    if canonical_to_original.len() != graph.vertex_count() {
-        return Err(GraphError::InvalidCanonicalOrder);
-    }
-    let mut original_to_canonical = vec![VertexId::new(0); graph.vertex_count()];
-    let mut seen = vec![false; graph.vertex_count()];
-    for (canonical, original) in canonical_to_original.iter().copied().enumerate() {
-        if original.index() >= graph.vertex_count() || seen[original.index()] {
-            return Err(GraphError::InvalidCanonicalOrder);
-        }
-        seen[original.index()] = true;
-        original_to_canonical[original.index()] = VertexId::new(canonical);
-    }
-
-    let vertex_count =
-        u64::try_from(graph.vertex_count()).map_err(|_| GraphError::GraphTooLarge)?;
-    let incidence_count =
-        u64::try_from(graph.incidence_count()).map_err(|_| GraphError::GraphTooLarge)?;
-    let mut bytes = Vec::new();
-    bytes.extend_from_slice(CANONICAL_MAGIC);
-    bytes.extend_from_slice(&GRAPH_SCHEMA.to_le_bytes());
-    bytes.extend_from_slice(signature_id.as_bytes());
-    bytes.extend_from_slice(&vertex_count.to_le_bytes());
-    bytes.extend_from_slice(&incidence_count.to_le_bytes());
-    bytes.extend_from_slice(&graph.total_multiplicity().to_le_bytes());
-    for original in &canonical_to_original {
-        bytes.push(graph.vertex_kind(*original) as u8);
-        append_bytes(&mut bytes, graph.vertex_label(*original))?;
-    }
-
-    let mut arcs = Vec::with_capacity(graph.incidence_count());
-    for source in 0..graph.vertex_count() {
-        for incidence in graph.outgoing(VertexId::new(source)) {
-            arcs.push((
-                original_to_canonical[source].index(),
-                original_to_canonical[incidence.neighbor().index()].index(),
-                incidence.relation(),
-                incidence.multiplicity(),
-            ));
-        }
-    }
-    arcs.sort_unstable_by(|left, right| {
-        let left_relation = graph.relation(left.2);
-        let right_relation = graph.relation(right.2);
-        (left.0, left.1)
-            .cmp(&(right.0, right.1))
-            .then_with(|| left_relation.cmp(right_relation))
-            .then_with(|| left.3.cmp(&right.3))
-    });
-    for (source, target, relation, multiplicity) in arcs {
-        bytes.extend_from_slice(
-            &u64::try_from(source)
-                .map_err(|_| GraphError::GraphTooLarge)?
-                .to_le_bytes(),
-        );
-        bytes.extend_from_slice(
-            &u64::try_from(target)
-                .map_err(|_| GraphError::GraphTooLarge)?
-                .to_le_bytes(),
-        );
-        let descriptor = graph.relation(relation);
-        append_bytes(&mut bytes, descriptor.relation())?;
-        append_bytes(&mut bytes, descriptor.role())?;
-        bytes.extend_from_slice(&multiplicity.to_le_bytes());
-    }
-
-    Ok(DiscreteCanonicalForm {
-        bytes,
-        original_to_canonical,
-        canonical_to_original,
-    })
 }

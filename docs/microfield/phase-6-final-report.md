@@ -1,5 +1,14 @@
 # Informe final consolidado — Fase 6
 
+> Nota posterior (3 de agosto de 2026): este documento conserva el cierre
+> histórico del baseline F6.G0–G7. La auditoría de producto reabrió el track de
+> grafos como F6.G8–G15; la parte algebraica/legacy sí permanece cerrada. Véanse
+> [el plan Microcanon v1](phase-6-canonization-v2-plan.md) y
+> [ADR 0031](adr/0031-certified-canonization-core.md). F6.G8–G10 ya están
+> implementados; véanse el
+> [informe G8/G9](phase-6-g8-g9-implementation-report.md) y el
+> [cierre G10](phase-6-g10-final-report.md).
+
 Fecha de cierre: 2 de agosto de 2026.
 
 ## Resultado ejecutivo
@@ -103,7 +112,8 @@ está en [phase-6-g7-final-report.md](phase-6-g7-final-report.md).
   universal para cualquier familia.
 - No hay canonización exacta incremental.
 - Un `BudgetExhausted` no decide isomorfismo.
-- La forma exacta actual está ligada al mismo `GraphSignatureId` versionado.
+- El formato histórico v0 estaba ligado a `GraphSignatureId`; el encoding v1
+  de Microcanon ya es independiente. Las claves v0 no migran implícitamente.
 
 ## Validación F6.V1–V6
 

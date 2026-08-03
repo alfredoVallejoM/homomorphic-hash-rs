@@ -13,6 +13,7 @@
 //! and publish audited local edits through a reusable
 //! [`IncrementalGraphWorkspace`].
 
+mod canon;
 mod canonical;
 mod error;
 mod evidence;
@@ -21,10 +22,18 @@ mod incremental;
 mod labeler;
 mod legacy;
 mod model;
+mod schema;
+
+pub use canon::{
+    CanonicalBudgetLimit, CanonicalGraphDocument, CanonicalGraphEncodingId, CanonicalGraphForm,
+    CanonicalGraphKey, CanonicalSearchBudget, DifferenceWitness, GraphComparison,
+    GraphComparisonReport, Microcanon, MicrocanonOutcome, MicrocanonPath, MicrocanonReport,
+    MicrocanonStrategy, MicrocanonWorkspace, VerifiedGraphMapping,
+};
 
 pub use canonical::{
-    CanonicalBudgetLimit, CanonicalSearchBudget, CanonicalSearchReport, CanonicalizationPath,
-    DiscriminationRecommendation, ExactCanonicalOutcome, GraphDegeneracyReport,
+    CanonicalSearchReport, CanonicalizationPath, DiscriminationRecommendation,
+    ExactCanonicalOutcome, GraphDegeneracyReport,
 };
 pub use error::GraphError;
 pub use evidence::{
@@ -49,3 +58,4 @@ pub use model::{
     HyperedgeIncidence, Incidence, IncidenceGraph, IncidenceGraphBuilder, RelationDescriptor,
     RelationId, VertexId, VertexKind,
 };
+pub use schema::{GraphAnalysisProfileId, GraphSchemaId};

@@ -5,7 +5,7 @@ use homomorphic_hash_rs::{
     BinaryPolynomialEncoder, CanonicalSearchBudget, ExactCanonicalOutcome, F251BatchGraphWorkspace,
     F251GraphLabeler, FastGraphLabeler, GlobalGraphProfile, GraphDiscriminationPolicy,
     GraphExecution, GraphWorkspace, IncidenceGraph, IncidenceGraphBuilder,
-    IncrementalGraphWorkspace, RefinementProfile,
+    IncrementalGraphWorkspace, Microcanon, MicrocanonStrategy, RefinementProfile,
 };
 use microfield::Gf2_256HhV1;
 
@@ -20,6 +20,25 @@ fn homogeneous_cycle(vertices: usize) -> IncidenceGraph {
     let ids: Vec<_> = (0..vertices)
         .map(|_| builder.add_vertex(Vec::new()))
         .collect();
+    for index in 0..vertices {
+        builder
+            .add_undirected_relation(
+                ids[index],
+                ids[(index + 1) % vertices],
+                b"edge".to_vec(),
+                Vec::new(),
+                1,
+            )
+            .unwrap();
+    }
+    builder.build().unwrap()
+}
+
+fn uniquely_labeled_cycle(vertices: usize) -> IncidenceGraph {
+    let mut builder = IncidenceGraphBuilder::new();
+    let ids = (0..vertices)
+        .map(|index| builder.add_vertex(index.to_be_bytes().to_vec()))
+        .collect::<Vec<_>>();
     for index in 0..vertices {
         builder
             .add_undirected_relation(
@@ -319,6 +338,8 @@ fn benchmark_degeneracy_and_exact(criterion: &mut Criterion) {
 
     let mut exact = criterion.benchmark_group("graph_exact_opt_in");
     exact.sample_size(10);
+    let compact = Microcanon::default();
+    let reference = Microcanon::default().with_strategy(MicrocanonStrategy::Reference);
     for vertices in [6_usize, 8, 10, 12] {
         let graph = homogeneous_cycle(vertices);
         assert!(matches!(
@@ -328,12 +349,26 @@ fn benchmark_degeneracy_and_exact(criterion: &mut Criterion) {
             ExactCanonicalOutcome::Exact { .. }
         ));
         exact.bench_with_input(
-            BenchmarkId::new("individualization_refinement_cycle", vertices),
+            BenchmarkId::new("g10_compact_cycle", vertices),
             &graph,
             |bench, graph| {
                 bench.iter(|| {
-                    labeler
-                        .canonicalize_exact(
+                    compact
+                        .canonicalize(
+                            std::hint::black_box(graph),
+                            CanonicalSearchBudget::new(10_000_000),
+                        )
+                        .unwrap()
+                });
+            },
+        );
+        exact.bench_with_input(
+            BenchmarkId::new("g9_reference_cycle", vertices),
+            &graph,
+            |bench, graph| {
+                bench.iter(|| {
+                    reference
+                        .canonicalize(
                             std::hint::black_box(graph),
                             CanonicalSearchBudget::new(10_000_000),
                         )
@@ -343,6 +378,35 @@ fn benchmark_degeneracy_and_exact(criterion: &mut Criterion) {
         );
     }
     exact.finish();
+
+    let mut discrete = criterion.benchmark_group("graph_exact_discrete");
+    discrete.sample_size(10);
+    for vertices in [64_usize, 256] {
+        let graph = uniquely_labeled_cycle(vertices);
+        discrete.bench_with_input(
+            BenchmarkId::new("g10_compact", vertices),
+            &graph,
+            |bench, graph| {
+                bench.iter(|| {
+                    compact
+                        .canonicalize(std::hint::black_box(graph), CanonicalSearchBudget::new(0))
+                        .unwrap()
+                });
+            },
+        );
+        discrete.bench_with_input(
+            BenchmarkId::new("g9_reference", vertices),
+            &graph,
+            |bench, graph| {
+                bench.iter(|| {
+                    reference
+                        .canonicalize(std::hint::black_box(graph), CanonicalSearchBudget::new(0))
+                        .unwrap()
+                });
+            },
+        );
+    }
+    discrete.finish();
 }
 
 fn benchmark_global_v2(criterion: &mut Criterion) {

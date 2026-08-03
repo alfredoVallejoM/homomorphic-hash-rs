@@ -256,6 +256,11 @@ impl IncidenceGraphBuilder {
     ) -> Result<VertexId, GraphError> {
         for incidence in incidences {
             self.validate_vertex(incidence.vertex)?;
+            if self.vertices[incidence.vertex.index()].kind != VertexKind::Entity {
+                return Err(GraphError::InvalidHyperedgeEndpoint {
+                    index: incidence.vertex.index(),
+                });
+            }
             if incidence.multiplicity == 0 {
                 return Err(GraphError::ZeroMultiplicity);
             }
@@ -454,6 +459,74 @@ impl IncidenceGraph {
         self.total_multiplicity
     }
 
+    /// Returns whether an externally supplied identifier belongs to this graph.
+    #[must_use]
+    pub const fn contains_vertex(&self, vertex: VertexId) -> bool {
+        vertex.index() < self.vertex_kinds.len()
+    }
+
+    /// Returns the semantic kind after validating an external identifier.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`GraphError::InvalidVertex`] for an out-of-range identifier.
+    pub fn try_vertex_kind(&self, vertex: VertexId) -> Result<VertexKind, GraphError> {
+        self.validate_vertex(vertex)?;
+        Ok(self.vertex_kinds[vertex.index()])
+    }
+
+    /// Returns the exact label after validating an external identifier.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`GraphError::InvalidVertex`] for an out-of-range identifier.
+    pub fn try_vertex_label(&self, vertex: VertexId) -> Result<&[u8], GraphError> {
+        self.validate_vertex(vertex)?;
+        Ok(&self.labels[self.vertex_label_ids[vertex.index()]])
+    }
+
+    /// Returns an outgoing CSR row after validating an external identifier.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`GraphError::InvalidVertex`] for an out-of-range identifier.
+    pub fn try_outgoing(&self, vertex: VertexId) -> Result<&[Incidence], GraphError> {
+        self.validate_vertex(vertex)?;
+        Ok(self.outgoing(vertex))
+    }
+
+    /// Returns an incoming CSR row after validating an external identifier.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`GraphError::InvalidVertex`] for an out-of-range identifier.
+    pub fn try_incoming(&self, vertex: VertexId) -> Result<&[Incidence], GraphError> {
+        self.validate_vertex(vertex)?;
+        Ok(self.incoming(vertex))
+    }
+
+    /// Returns whether a descriptor identifier belongs to this graph.
+    #[must_use]
+    pub const fn contains_relation(&self, relation: RelationId) -> bool {
+        relation.index() < self.descriptors.len()
+    }
+
+    /// Returns a relation descriptor after validating its graph-local identifier.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`GraphError::InvalidRelation`] for an out-of-range identifier.
+    pub fn try_relation(&self, relation: RelationId) -> Result<&RelationDescriptor, GraphError> {
+        if self.contains_relation(relation) {
+            Ok(&self.descriptors[relation.index()])
+        } else {
+            Err(GraphError::InvalidRelation {
+                index: relation.index(),
+                relation_count: self.descriptors.len(),
+            })
+        }
+    }
+
     /// Semantic kind of a vertex.
     #[must_use]
     pub fn vertex_kind(&self, vertex: VertexId) -> VertexKind {
@@ -496,5 +569,16 @@ impl IncidenceGraph {
 
     pub(crate) fn vertex_label_id(&self, vertex: VertexId) -> usize {
         self.vertex_label_ids[vertex.index()]
+    }
+
+    fn validate_vertex(&self, vertex: VertexId) -> Result<(), GraphError> {
+        if self.contains_vertex(vertex) {
+            Ok(())
+        } else {
+            Err(GraphError::InvalidVertex {
+                index: vertex.index(),
+                vertex_count: self.vertex_count(),
+            })
+        }
     }
 }

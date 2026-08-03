@@ -54,14 +54,19 @@ externa. Se conserva su intención de no contaminar el núcleo algebraico:
 posterior que consume `microfield`; no pasarán a formar parte de `field`,
 `kernel` ni de la representación de los elementos.
 
-Estado a 2 de agosto de 2026: F6.0–F6.8 están implementados localmente y
+Estado a 3 de agosto de 2026: F6.0–F6.8 están implementados localmente y
 documentados en [phase-6-legacy-audit.md](phase-6-legacy-audit.md),
 [phase-6-pre-canon-plan.md](phase-6-pre-canon-plan.md) y
 [ADR 0027](adr/0027-structural-signatures-not-proofs.md). F6.G0–G7 están
 implementados: motor estructural, puente legado, ruta a gran escala, estado
 incremental, diagnóstico adversarial, canonización acotada y discriminador
 global v2. Véanse [phase-6-fast-graph.md](phase-6-fast-graph.md) y
-[phase-6-g7-final-report.md](phase-6-g7-final-report.md).
+[phase-6-g7-final-report.md](phase-6-g7-final-report.md). Esos hitos pasan a ser
+el baseline v0, no el cierre del producto: la auditoría integral reabre el track
+de grafos como F6.G8–G15 para separar un núcleo canónico exacto de todos sus
+aceleradores. El plan vinculante está en
+[phase-6-canonization-v2-plan.md](phase-6-canonization-v2-plan.md) y la decisión
+arquitectónica en [ADR 0031](adr/0031-certified-canonization-core.md).
 
 ### F6.0 — inventario y congelación del legado — completado
 
@@ -196,10 +201,9 @@ predeterminado. El cierre está en
 
 El diseño se fija en [ADR 0030](adr/0030-global-v2-and-external-corpus.md).
 
-### F6.V — validación científica y aplicada — implementada, evidencia en curso
+### F6.V — validación científica y aplicada v0 — implementada
 
-F6.G7 cerró el núcleo y [F6.V](phase-6-validation-plan.md) implementa ahora
-leyes exhaustivas y
+F6.V caracterizó los límites del baseline G0–G7 e implementó leyes exhaustivas y
 metamórficas, catálogo de colisiones, aplicaciones con baselines, corpus de
 grafos exhaustivo/adversarial, oráculos independientes, curvas de escalado e
 incrementalidad y reproducción multi-CPU.
@@ -209,12 +213,54 @@ primitiva validada, experimental o descartada. La ausencia de colisiones en un
 corpus no se convertirá en un claim universal. El
 [informe F6.V1–V6](phase-6-validation-final-report.md) contiene la primera
 clasificación. Fase 7, estabilización pública, licencia y publicación quedan
-pospuestas hasta completar su matriz multi-CPU y baselines externos.
+pospuestas hasta completar el núcleo v1 y su nueva campaña.
+
+### F6.G8–G9 — contrato y baseline Microcanon — completados localmente
+
+- identidad y encoding canónicos independientes del perfil;
+- parser, mappings inversos y verificador exacto;
+- baseline propio de individualización–refinamiento con referencia factorial;
+- adapter legacy delegado al núcleo independiente;
+- gate exhaustivo de 32.768 grafos simples de seis vértices, agrupados en las
+  156 clases exactas del oráculo.
+
+### F6.G10 — motor Microcanon industrial — completado localmente
+
+- refinamiento compacto, trazas, automorfismos, órbitas, podas demostradas y
+  presupuesto integral de memoria/tiempo/nodos.
+
+La implementación conserva bytes G9, reduce C32 de 97 a 7 nodos y mejora tanto
+la ruta simétrica como la discreta. Active-cell/radix y selector adaptativo no
+se promocionaron: son medios opcionales, no claims, hasta demostrar identidad
+framed y estabilidad. Véase el
+[informe G10](phase-6-g10-final-report.md).
+
+WL permanece como refinador; no define la corrección. Cambiar campo, lanes,
+motivos o planner no puede cambiar los bytes exactos.
+
+### F6.G11 — firmas v2 y expansión relacional por loops/Green — siguiente
+
+- assurance acotado para multievaluación y nueva secuencia multievaluada;
+- encodings realmente separados por lane;
+- catálogo generado L0..Ln de patterns conectados y moments por celda;
+- investigación determinant/resolvent/contractions inspirada en `Theta`, con
+  evaluación sobre campos y actualizaciones rank-one dentro del árbol IR.
+
+El programa científico y los límites de claims están en
+[relational-green-invariant-research.md](relational-green-invariant-research.md).
+
+### F6.G12–G15 — comparación, regularidad, incrementalidad y cierre — planificado
+
+- descomposición exacta, matcher pareado y mapping siempre verificado;
+- motivos tipados y 2-WL localizado para celdas ambiguas;
+- `GraphDelta` realmente local con fallback calibrado;
+- corpus simple/relacional/adversarial y adapters de dominio semánticamente
+  completos.
 
 ### Gate de Fase 6
 
-La fase termina cuando el legado mantenido compila sobre la arquitectura nueva,
-sus leyes corregidas tienen migración documentada, y cada contrato satisface:
+La parte algebraica legacy está cerrada. El track de grafos termina cuando G8–G15
+están implementados y, además de las leyes históricas, cada contrato satisface:
 
 ```text
 signature(G) == signature(relabel(G, permutation))
@@ -223,10 +269,14 @@ si try_canonicalize(G) produce Canonical:
     canonical(G) == canonical(relabel(G, permutation))
 si canonicalize_exact(G, budget) produce Exact:
     canonical(G) == canonical(relabel(G, permutation))
+canonical(G) es idéntico para todo campo, lane, perfil y estrategia
+si compare(G,H) produce Isomorphic(mapping): verify(G,H,mapping) == true
 ```
 
 Las firmas finitas mantienen colisiones declaradas; ninguna igualdad se presenta
-como prueba de isomorfismo.
+como prueba de isomorfismo. Presupuesto agotado produce `Inconclusive` sin forma
+ni mapping parcial. El gate exhaustivo y adversarial completo se define en el
+[plan v2](phase-6-canonization-v2-plan.md#criterio-final-de-cierre).
 
 ## Fase 7 — extensiones y aplicaciones — bloqueada por F6.V
 

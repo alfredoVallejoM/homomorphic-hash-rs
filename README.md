@@ -131,6 +131,23 @@ contraejemplos comprobados. Véase el
 publicación continúan bloqueadas hasta completar la evidencia multi-CPU y los
 baselines de dominio, no por falta de harness.
 
+F6.G8 y el baseline G9 sustituyen la autoridad exacta histórica por
+`Microcanon`: un núcleo que depende únicamente de `IncidenceGraph` y
+`GraphSchemaId`. El encoding `MFC2` posee parser estricto, key de índice,
+mappings inversos y verificación completa; `GraphComparison` solo responde
+`Isomorphic` junto con un mapping revalidado y falla como `Inconclusive` si el
+presupuesto no completa el árbol. El adapter `canonicalize_exact` ya produce
+los mismos bytes entre F251, GF(2^256), encoders, lanes y perfiles. El gate
+exhaustivo recorrió los 32.768 grafos simples etiquetados de orden seis y
+reprodujo exactamente las 156 clases del oráculo independiente. G10 incorpora
+ya el motor compacto predeterminado: arena plana, ranks enteros, workspace,
+budgets de bytes/profundidad/tiempo, automorfismos verificados y poda por
+órbitas/prefijo. Mantiene G9 como referencia diferencial y reproduce sus bytes;
+en C32 reduce 97 nodos a 7. La expansión por loops/Green inspirada en `Theta`
+permanece en G11. Véanse el
+[`informe G8/G9`](docs/microfield/phase-6-g8-g9-implementation-report.md) y el
+[`cierre G10`](docs/microfield/phase-6-g10-final-report.md).
+
 ## Comandos
 
 ```text
@@ -152,6 +169,8 @@ cargo test -p homomorphic-hash-rs --test microfield_compat
 cargo test -p homomorphic-hash-rs --all-features --test structural_signatures
 cargo test -p homomorphic-hash-rs --all-features --test fast_graph
 cargo test -p homomorphic-hash-rs --all-features --test graph_canonical
+cargo test -p homomorphic-hash-rs --all-features --test microcanon
+cargo test -p homomorphic-hash-rs --release --test graph_canonical microcanon_matches_every_simple_graph_isomorphism_class_at_six_vertices -- --ignored --exact
 cargo test -p microfield-validation-lab --all-targets
 cargo run --release -p microfield-validation-lab -- semantic --manifest validation/f6/manifest.json --out validation/f6/results/semantic-v1.json
 cargo run --release -p microfield-validation-lab -- performance --manifest validation/f6/manifest.json --out /tmp/f6-performance.json
