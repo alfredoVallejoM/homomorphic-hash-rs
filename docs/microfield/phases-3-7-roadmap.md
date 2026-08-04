@@ -238,7 +238,7 @@ framed y estabilidad. Véase el
 WL permanece como refinador; no define la corrección. Cambiar campo, lanes,
 motivos o planner no puede cambiar los bytes exactos.
 
-### F6.G11 — firmas v2 y expansión relacional por loops/Green — siguiente
+### F6.G11 — firmas v2 y expansión relacional por loops/Green — completado localmente
 
 - assurance acotado para multievaluación y nueva secuencia multievaluada;
 - encodings realmente separados por lane;
@@ -248,14 +248,28 @@ motivos o planner no puede cambiar los bytes exactos.
 
 El programa científico y los límites de claims están en
 [relational-green-invariant-research.md](relational-green-invariant-research.md).
+La implementación, el split discovery/holdout y la corrección específica para
+característica dos están en el
+[informe G11](phase-6-g11-final-report.md). El catálogo general de
+homomorfismos, zeta, resolventes y rank-one IR permanece como investigación,
+no como funcionalidad implícitamente completada.
 
-### F6.G12–G15 — comparación, regularidad, incrementalidad y cierre — planificado
+### F6.G12–G14 — comparación, regularidad e incrementalidad — completado localmente
 
 - descomposición exacta, matcher pareado y mapping siempre verificado;
 - motivos tipados y 2-WL localizado para celdas ambiguas;
 - `GraphDelta` realmente local con fallback calibrado;
 - corpus simple/relacional/adversarial y adapters de dominio semánticamente
   completos.
+
+G12 aporta el matcher exacto; G13 el pipeline de seis niveles y 2-WL
+localizado; G14 `GraphDelta`, replay y fallback. El
+[informe G13/G14](phase-6-g13-g14-final-report.md) contiene gates y límites.
+G15 queda planificado como preparación de toda la biblioteca para consumo
+interno: campos y firmas homomórficas son el producto primario; grafos/DAG son
+un vertical adicional. La
+publicación y estabilización pública serán una fase posterior separada; véase
+el [plan G15 interno](phase-6-g15-internal-readiness-plan.md).
 
 ### Gate de Fase 6
 

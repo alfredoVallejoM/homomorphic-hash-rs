@@ -42,11 +42,23 @@ codegen-units = 1
 # `target-cpu` se configura mediante RUSTFLAGS en mediciones controladas.
 
 [features]
-default = []
-dynamic-fields = ["microfield/dynamic"]
+default = ["legacy", "signatures", "graph"]
+# Maintained homomorphic-signature API. This feature deliberately does not
+# compile the graph or legacy modules.
+signatures = []
+# Graph analysis and canonization consume the maintained signature API.
+graph = ["signatures"]
+# Runtime-field signatures without enabling graph support.
+dynamic-signatures = ["signatures", "microfield/dynamic"]
+# Backwards-compatible feature name: historically this enabled both runtime
+# signatures and runtime graph profiles.
+dynamic-fields = ["dynamic-signatures", "graph"]
+# Source-compatible prototype modules. The migrated legacy canonizer consumes
+# the maintained graph model, but the graph feature does not depend on legacy.
+legacy = ["graph"]
 # Compatibilidad fuente con el prototipo. No implica garantías criptográficas
 # ni de tiempo constante.
-crypto_mode = []
+crypto_mode = ["legacy"]
 
 [[bench]]
 name = "structural_signatures"

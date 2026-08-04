@@ -389,3 +389,43 @@ fn reserve_total<T>(values: &mut Vec<T>, total: usize) {
         values.reserve_exact(total - values.len());
     }
 }
+
+pub(super) fn estimate_dependency_cone<F: Field, const K: usize>(
+    state: &IncrementalGraphState<F, K>,
+    seeds: &[usize],
+) -> Result<usize, GraphError> {
+    let vertex_count = state.graph.vertex_count();
+    let mut reached = vec![false; vertex_count];
+    let mut frontier = Vec::new();
+    for &seed in seeds {
+        if seed >= vertex_count {
+            return Err(GraphError::InvalidVertex {
+                index: seed,
+                vertex_count,
+            });
+        }
+        if !reached[seed] {
+            reached[seed] = true;
+            frontier.push(seed);
+        }
+    }
+    let mut estimated = frontier.len();
+    for _ in 0..state.rounds {
+        let mut next = frontier.clone();
+        for &vertex in &frontier {
+            for &neighbor in state.dependencies.neighbors(vertex) {
+                if !reached[neighbor] {
+                    reached[neighbor] = true;
+                    next.push(neighbor);
+                }
+            }
+        }
+        next.sort_unstable();
+        next.dedup();
+        estimated = estimated
+            .checked_add(next.len())
+            .ok_or(GraphError::GraphTooLarge)?;
+        frontier = next;
+    }
+    Ok(estimated)
+}

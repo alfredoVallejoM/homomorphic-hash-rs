@@ -1,0 +1,400 @@
+{
+  "schema_version": 1,
+  "oracle": "SageMath 10.7 graphs.nauty_geng(8), one representative per isomorphism class",
+  "corpus_sha256": "546a249902101c97d3aa590f93e53366854bd0a6f405aa59bdb32d25c57f845a",
+  "split_rule": "SHA-256(graph6)[0] bit 0: 0=discovery, 1=holdout",
+  "assurance_note": "Degree histograms and induced-pattern counts are exact only for their declared bounded data; every finite-field correlation, compression, moment and matrix evaluation is a fingerprint. No equality proves graph isomorphism.",
+  "discovery": {
+    "split": "discovery",
+    "graph_count": 6169,
+    "relabeling_checks": 21,
+    "collision_profiles": [
+      {
+        "tier": "baseline/f251-fast-1wl",
+        "distinct_outputs": 6088,
+        "collision_buckets": 68,
+        "colliding_graphs": 149,
+        "colliding_pairs": 95,
+        "maximum_bucket_size": 4
+      },
+      {
+        "tier": "degree-histogram/f251-multiset-k3",
+        "distinct_outputs": 952,
+        "collision_buckets": 604,
+        "colliding_graphs": 5821,
+        "colliding_pairs": 72080,
+        "maximum_bucket_size": 95
+      },
+      {
+        "tier": "moments/goldilocks-k3-d4",
+        "distinct_outputs": 952,
+        "collision_buckets": 604,
+        "colliding_graphs": 5821,
+        "colliding_pairs": 72080,
+        "maximum_bucket_size": 95
+      },
+      {
+        "tier": "patterns/exact-induced-l0-l3",
+        "distinct_outputs": 5895,
+        "collision_buckets": 250,
+        "colliding_graphs": 524,
+        "colliding_pairs": 304,
+        "maximum_bucket_size": 5
+      },
+      {
+        "tier": "patterns/additive-f251-k3",
+        "distinct_outputs": 5894,
+        "collision_buckets": 251,
+        "colliding_graphs": 526,
+        "colliding_pairs": 305,
+        "maximum_bucket_size": 5
+      },
+      {
+        "tier": "patterns/additive-goldilocks-k3",
+        "distinct_outputs": 5895,
+        "collision_buckets": 250,
+        "colliding_graphs": 524,
+        "colliding_pairs": 304,
+        "maximum_bucket_size": 5
+      },
+      {
+        "tier": "patterns/additive-gf2-256-k3",
+        "distinct_outputs": 509,
+        "collision_buckets": 494,
+        "colliding_graphs": 6154,
+        "colliding_pairs": 56990,
+        "maximum_bucket_size": 86
+      },
+      {
+        "tier": "patterns/product-f251-k3",
+        "distinct_outputs": 5894,
+        "collision_buckets": 251,
+        "colliding_graphs": 526,
+        "colliding_pairs": 305,
+        "maximum_bucket_size": 5
+      },
+      {
+        "tier": "patterns/product-goldilocks-k3",
+        "distinct_outputs": 5895,
+        "collision_buckets": 250,
+        "colliding_graphs": 524,
+        "colliding_pairs": 304,
+        "maximum_bucket_size": 5
+      },
+      {
+        "tier": "patterns/product-gf2-256-k3",
+        "distinct_outputs": 5895,
+        "collision_buckets": 250,
+        "colliding_graphs": 524,
+        "colliding_pairs": 304,
+        "maximum_bucket_size": 5
+      },
+      {
+        "tier": "matrix/f251-k3-trace6-char",
+        "distinct_outputs": 5955,
+        "collision_buckets": 203,
+        "colliding_graphs": 417,
+        "colliding_pairs": 226,
+        "maximum_bucket_size": 4
+      },
+      {
+        "tier": "matrix/goldilocks-k3-trace6-char",
+        "distinct_outputs": 5955,
+        "collision_buckets": 203,
+        "colliding_graphs": 417,
+        "colliding_pairs": 226,
+        "maximum_bucket_size": 4
+      },
+      {
+        "tier": "matrix/gf2-256-k3-trace6-char",
+        "distinct_outputs": 16,
+        "collision_buckets": 16,
+        "colliding_graphs": 6169,
+        "colliding_pairs": 1506515,
+        "maximum_bucket_size": 819
+      },
+      {
+        "tier": "theta-rg2/f251-k3",
+        "distinct_outputs": 6163,
+        "collision_buckets": 6,
+        "colliding_graphs": 12,
+        "colliding_pairs": 6,
+        "maximum_bucket_size": 2
+      },
+      {
+        "tier": "theta-rg2/goldilocks-k3",
+        "distinct_outputs": 6163,
+        "collision_buckets": 6,
+        "colliding_graphs": 12,
+        "colliding_pairs": 6,
+        "maximum_bucket_size": 2
+      },
+      {
+        "tier": "theta-rg2/gf2-256-k3",
+        "distinct_outputs": 1,
+        "collision_buckets": 1,
+        "colliding_graphs": 6169,
+        "colliding_pairs": 19025196,
+        "maximum_bucket_size": 6169
+      },
+      {
+        "tier": "closed-walk/goldilocks-k3-lengths-8-16-64-1e12",
+        "distinct_outputs": 5955,
+        "collision_buckets": 203,
+        "colliding_graphs": 417,
+        "colliding_pairs": 226,
+        "maximum_bucket_size": 4
+      },
+      {
+        "tier": "bundle/goldilocks-pattern-product-plus-matrix-plus-theta",
+        "distinct_outputs": 6169,
+        "collision_buckets": 0,
+        "colliding_graphs": 0,
+        "colliding_pairs": 0,
+        "maximum_bucket_size": 1
+      },
+      {
+        "tier": "bundle/1wl-plus-goldilocks-pattern-product-plus-matrix-plus-theta",
+        "distinct_outputs": 6169,
+        "collision_buckets": 0,
+        "colliding_graphs": 0,
+        "colliding_pairs": 0,
+        "maximum_bucket_size": 1
+      }
+    ]
+  },
+  "holdout": {
+    "split": "holdout",
+    "graph_count": 6177,
+    "relabeling_checks": 28,
+    "collision_profiles": [
+      {
+        "tier": "baseline/f251-fast-1wl",
+        "distinct_outputs": 6114,
+        "collision_buckets": 56,
+        "colliding_graphs": 119,
+        "colliding_pairs": 73,
+        "maximum_bucket_size": 5
+      },
+      {
+        "tier": "degree-histogram/f251-multiset-k3",
+        "distinct_outputs": 941,
+        "collision_buckets": 575,
+        "colliding_graphs": 5811,
+        "colliding_pairs": 77946,
+        "maximum_bucket_size": 109
+      },
+      {
+        "tier": "moments/goldilocks-k3-d4",
+        "distinct_outputs": 941,
+        "collision_buckets": 575,
+        "colliding_graphs": 5811,
+        "colliding_pairs": 77946,
+        "maximum_bucket_size": 109
+      },
+      {
+        "tier": "patterns/exact-induced-l0-l3",
+        "distinct_outputs": 5878,
+        "collision_buckets": 274,
+        "colliding_graphs": 573,
+        "colliding_pairs": 324,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "patterns/additive-f251-k3",
+        "distinct_outputs": 5878,
+        "collision_buckets": 274,
+        "colliding_graphs": 573,
+        "colliding_pairs": 324,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "patterns/additive-goldilocks-k3",
+        "distinct_outputs": 5878,
+        "collision_buckets": 274,
+        "colliding_graphs": 573,
+        "colliding_pairs": 324,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "patterns/additive-gf2-256-k3",
+        "distinct_outputs": 505,
+        "collision_buckets": 496,
+        "colliding_graphs": 6168,
+        "colliding_pairs": 56248,
+        "maximum_bucket_size": 77
+      },
+      {
+        "tier": "patterns/product-f251-k3",
+        "distinct_outputs": 5877,
+        "collision_buckets": 274,
+        "colliding_graphs": 574,
+        "colliding_pairs": 326,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "patterns/product-goldilocks-k3",
+        "distinct_outputs": 5878,
+        "collision_buckets": 274,
+        "colliding_graphs": 573,
+        "colliding_pairs": 324,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "patterns/product-gf2-256-k3",
+        "distinct_outputs": 5878,
+        "collision_buckets": 274,
+        "colliding_graphs": 573,
+        "colliding_pairs": 324,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "matrix/f251-k3-trace6-char",
+        "distinct_outputs": 5937,
+        "collision_buckets": 234,
+        "colliding_graphs": 474,
+        "colliding_pairs": 246,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "matrix/goldilocks-k3-trace6-char",
+        "distinct_outputs": 5937,
+        "collision_buckets": 234,
+        "colliding_graphs": 474,
+        "colliding_pairs": 246,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "matrix/gf2-256-k3-trace6-char",
+        "distinct_outputs": 16,
+        "collision_buckets": 16,
+        "colliding_graphs": 6177,
+        "colliding_pairs": 1517914,
+        "maximum_bucket_size": 763
+      },
+      {
+        "tier": "theta-rg2/f251-k3",
+        "distinct_outputs": 6170,
+        "collision_buckets": 7,
+        "colliding_graphs": 14,
+        "colliding_pairs": 7,
+        "maximum_bucket_size": 2
+      },
+      {
+        "tier": "theta-rg2/goldilocks-k3",
+        "distinct_outputs": 6170,
+        "collision_buckets": 7,
+        "colliding_graphs": 14,
+        "colliding_pairs": 7,
+        "maximum_bucket_size": 2
+      },
+      {
+        "tier": "theta-rg2/gf2-256-k3",
+        "distinct_outputs": 1,
+        "collision_buckets": 1,
+        "colliding_graphs": 6177,
+        "colliding_pairs": 19074576,
+        "maximum_bucket_size": 6177
+      },
+      {
+        "tier": "closed-walk/goldilocks-k3-lengths-8-16-64-1e12",
+        "distinct_outputs": 5937,
+        "collision_buckets": 234,
+        "colliding_graphs": 474,
+        "colliding_pairs": 246,
+        "maximum_bucket_size": 3
+      },
+      {
+        "tier": "bundle/goldilocks-pattern-product-plus-matrix-plus-theta",
+        "distinct_outputs": 6177,
+        "collision_buckets": 0,
+        "colliding_graphs": 0,
+        "colliding_pairs": 0,
+        "maximum_bucket_size": 1
+      },
+      {
+        "tier": "bundle/1wl-plus-goldilocks-pattern-product-plus-matrix-plus-theta",
+        "distinct_outputs": 6177,
+        "collision_buckets": 0,
+        "colliding_graphs": 0,
+        "colliding_pairs": 0,
+        "maximum_bucket_size": 1
+      }
+    ]
+  },
+  "adversarial": [
+    {
+      "family": "C6 versus 2C3",
+      "channel_distinguishes": {
+        "baseline/f251-fast-1wl": false,
+        "bundle/1wl-plus-goldilocks-pattern-product-plus-matrix-plus-theta": true,
+        "bundle/goldilocks-pattern-product-plus-matrix-plus-theta": true,
+        "closed-walk/goldilocks-k3-lengths-8-16-64-1e12": true,
+        "degree-histogram/f251-multiset-k3": false,
+        "matrix/f251-k3-trace6-char": true,
+        "matrix/gf2-256-k3-trace6-char": false,
+        "matrix/goldilocks-k3-trace6-char": true,
+        "moments/goldilocks-k3-d4": false,
+        "patterns/additive-f251-k3": true,
+        "patterns/additive-gf2-256-k3": false,
+        "patterns/additive-goldilocks-k3": true,
+        "patterns/exact-induced-l0-l3": true,
+        "patterns/product-f251-k3": true,
+        "patterns/product-gf2-256-k3": true,
+        "patterns/product-goldilocks-k3": true,
+        "theta-rg2/f251-k3": true,
+        "theta-rg2/gf2-256-k3": false,
+        "theta-rg2/goldilocks-k3": true
+      }
+    },
+    {
+      "family": "Shrikhande versus 4x4 rook (strongly regular)",
+      "channel_distinguishes": {
+        "baseline/f251-fast-1wl": false,
+        "bundle/1wl-plus-goldilocks-pattern-product-plus-matrix-plus-theta": true,
+        "bundle/goldilocks-pattern-product-plus-matrix-plus-theta": true,
+        "closed-walk/goldilocks-k3-lengths-8-16-64-1e12": false,
+        "degree-histogram/f251-multiset-k3": false,
+        "matrix/f251-k3-trace6-char": false,
+        "matrix/gf2-256-k3-trace6-char": false,
+        "matrix/goldilocks-k3-trace6-char": false,
+        "moments/goldilocks-k3-d4": false,
+        "patterns/additive-f251-k3": true,
+        "patterns/additive-gf2-256-k3": false,
+        "patterns/additive-goldilocks-k3": true,
+        "patterns/exact-induced-l0-l3": true,
+        "patterns/product-f251-k3": true,
+        "patterns/product-gf2-256-k3": true,
+        "patterns/product-goldilocks-k3": true,
+        "theta-rg2/f251-k3": false,
+        "theta-rg2/gf2-256-k3": false,
+        "theta-rg2/goldilocks-k3": false
+      }
+    },
+    {
+      "family": "CFI(K4) even versus one twisted edge",
+      "channel_distinguishes": {
+        "baseline/f251-fast-1wl": false,
+        "bundle/1wl-plus-goldilocks-pattern-product-plus-matrix-plus-theta": false,
+        "bundle/goldilocks-pattern-product-plus-matrix-plus-theta": false,
+        "closed-walk/goldilocks-k3-lengths-8-16-64-1e12": false,
+        "degree-histogram/f251-multiset-k3": false,
+        "matrix/f251-k3-trace6-char": false,
+        "matrix/gf2-256-k3-trace6-char": false,
+        "matrix/goldilocks-k3-trace6-char": false,
+        "moments/goldilocks-k3-d4": false,
+        "patterns/additive-f251-k3": false,
+        "patterns/additive-gf2-256-k3": false,
+        "patterns/additive-goldilocks-k3": false,
+        "patterns/exact-induced-l0-l3": false,
+        "patterns/product-f251-k3": false,
+        "patterns/product-gf2-256-k3": false,
+        "patterns/product-goldilocks-k3": false,
+        "theta-rg2/f251-k3": false,
+        "theta-rg2/gf2-256-k3": false,
+        "theta-rg2/goldilocks-k3": false
+      }
+    }
+  ],
+  "decision": "Retain independent lane encoding, bounded induced patterns, RG1 matrix channels and the frozen RG2 theta prototype as non-authoritative routing/rejection evidence. Continue homomorphism/resolvent research only if it beats these frozen baselines on a future untouched corpus."
+}

@@ -7,10 +7,11 @@ use homomorphic_hash_rs::topology::{
 };
 use homomorphic_hash_rs::{
     AdditiveSignature, BidirectionalSequenceSignature, BinaryPolynomialEncoder,
-    CanonicalElementEncoder, FiniteField as _, GaloisSignature256, LegacyAffineEncoderV1,
-    LegacyLinearEncoderV1, MultiEvaluationMultisetSignature, MultisetSignature,
-    PrimeIntegerEncoder, SequenceSignature, SignatureError, StructuralEncoder,
-    SymmetricDifferenceAggregator, TrackedMultiset, TrackedSequence,
+    CanonicalElementEncoder, DomainSeparatedHashToFieldEncoder, FiniteField as _,
+    GaloisSignature256, LegacyAffineEncoderV1, LegacyLinearEncoderV1,
+    MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature, MultisetSignature,
+    PrimeIntegerEncoder, SequenceSignature, SignatureAssurance, SignatureError, StructuralEncoder,
+    StructuralLaneEncoder, SymmetricDifferenceAggregator, TrackedMultiset, TrackedSequence,
 };
 use microfield::{
     BinaryPolynomialField, CanonicalEncoding, Field, Fp251V1, Fp256GenericV1, FpGoldilocks64V1,
@@ -21,7 +22,8 @@ use structural_field_fixture::Gf2_9StructuralFixture;
 #[cfg(feature = "dynamic-fields")]
 use homomorphic_hash_rs::{
     DynamicAdditiveSignature, DynamicBidirectionalSequenceSignature,
-    DynamicMultiEvaluationMultisetSignature, DynamicMultisetSignature, DynamicSequenceSignature,
+    DynamicMultiEvaluationMultisetSignature, DynamicMultiEvaluationSequenceSignature,
+    DynamicMultisetSignature, DynamicSequenceSignature,
 };
 #[cfg(feature = "dynamic-fields")]
 use microfield::DynField;
@@ -656,6 +658,130 @@ fn enriched_signature_counter_overflow_is_transactional_after_restore() {
     assert_eq!(multiset, before);
 }
 
+#[test]
+fn assurance_distinguishes_fingerprints_bounded_proofs_and_exact_tracking() {
+    let bounded = SignatureAssurance::BoundedExactOverEncodedElements {
+        maximum_cardinality: 3,
+    };
+    assert!(bounded.covers_encoded_cardinality(0));
+    assert!(bounded.covers_encoded_cardinality(3));
+    assert!(!bounded.covers_encoded_cardinality(4));
+    assert!(!bounded.tracks_source_values());
+    assert!(!SignatureAssurance::Fingerprint.covers_encoded_cardinality(1));
+    assert!(SignatureAssurance::ExactTracked.covers_encoded_cardinality(u64::MAX));
+    assert!(SignatureAssurance::ExactTracked.tracks_source_values());
+
+    let encoder = CanonicalElementEncoder;
+    let multi = MultiEvaluationMultisetSignature::<Fp251V1, _, 2>::new(
+        encoder,
+        [Fp251V1::ONE, Fp251V1::from_u64_mod(2)],
+    )
+    .unwrap();
+    assert_eq!(
+        multi.assurance(),
+        SignatureAssurance::BoundedExactOverEncodedElements {
+            maximum_cardinality: 2
+        }
+    );
+    assert_eq!(
+        MultisetSignature::<Fp251V1, _>::new(encoder, Fp251V1::ONE).assurance(),
+        SignatureAssurance::Fingerprint
+    );
+}
+
+#[test]
+fn domain_separated_hash_to_field_lanes_are_deterministic_independent_and_bound() {
+    let profile = [0x5a_u8; 32];
+    let encoder = DomainSeparatedHashToFieldEncoder::<4>::new(profile, 17);
+    let first: [Fp251V1; 4] = encoder.encode_lanes(b"same-source").unwrap();
+    let repeated: [Fp251V1; 4] = encoder.encode_lanes(b"same-source").unwrap();
+    assert_eq!(first, repeated);
+    assert!(first.windows(2).any(|pair| pair[0] != pair[1]));
+
+    let other_channel = DomainSeparatedHashToFieldEncoder::<4>::new(profile, 18);
+    let other_profile = DomainSeparatedHashToFieldEncoder::<4>::new([0xa5; 32], 17);
+    assert_ne!(encoder.id(), other_channel.id());
+    assert_ne!(encoder.id(), other_profile.id());
+    let changed_channel: [Fp251V1; 4] = other_channel.encode_lanes(b"same-source").unwrap();
+    assert_ne!(first, changed_channel);
+
+    let limited = encoder.with_maximum_input_bytes(3);
+    assert!(matches!(
+        <DomainSeparatedHashToFieldEncoder<4> as StructuralLaneEncoder<Fp251V1, 4>>::encode_lanes(
+            &limited, b"four",
+        ),
+        Err(SignatureError::InputTooLarge { .. })
+    ));
+    let empty = DomainSeparatedHashToFieldEncoder::<0>::new(profile, 17);
+    assert_eq!(
+        <DomainSeparatedHashToFieldEncoder<0> as StructuralLaneEncoder<Fp251V1, 0>>::encode_lanes(
+            &empty, b"value",
+        ),
+        Err(SignatureError::InvalidEvaluationPoints)
+    );
+}
+
+#[test]
+fn multi_evaluation_sequence_is_composable_canonical_and_bounded_exact() {
+    let encoder = CanonicalElementEncoder;
+    let bases = [Fp251V1::from_u64_mod(2), Fp251V1::from_u64_mod(3)];
+    let values = [5_u8, 7, 11, 13];
+    let mut complete =
+        MultiEvaluationSequenceSignature::<Fp251V1, _, 2>::new(encoder, bases).unwrap();
+    complete
+        .push_many(values.into_iter().map(|value| [value]))
+        .unwrap();
+    let mut prefix =
+        MultiEvaluationSequenceSignature::<Fp251V1, _, 2>::new(encoder, bases).unwrap();
+    let mut suffix =
+        MultiEvaluationSequenceSignature::<Fp251V1, _, 2>::new(encoder, bases).unwrap();
+    prefix
+        .push_many(values[..2].iter().copied().map(|value| [value]))
+        .unwrap();
+    suffix
+        .push_many(values[2..].iter().copied().map(|value| [value]))
+        .unwrap();
+    assert_eq!(prefix.concatenate(&suffix).unwrap(), complete);
+    assert_eq!(
+        complete.assurance(),
+        SignatureAssurance::BoundedExactOverEncodedElements {
+            maximum_cardinality: 2
+        }
+    );
+
+    let bytes = complete.to_canonical_bytes();
+    assert_eq!(
+        MultiEvaluationSequenceSignature::<Fp251V1, _, 2>::from_canonical_bytes(
+            encoder, bases, &bytes,
+        )
+        .unwrap(),
+        complete
+    );
+    let mut trailing = bytes;
+    trailing.push(0);
+    assert!(
+        MultiEvaluationSequenceSignature::<Fp251V1, _, 2>::from_canonical_bytes(
+            encoder, bases, &trailing,
+        )
+        .is_err()
+    );
+
+    // Exhaustively confirm the degree-one interpolation claim on a small
+    // alphabet: no two different length-two encoded sequences share both lanes.
+    let alphabet = [0_u8, 1, 2, 3, 4];
+    let mut observed = std::collections::BTreeMap::new();
+    for left in alphabet {
+        for right in alphabet {
+            let mut signature =
+                MultiEvaluationSequenceSignature::<Fp251V1, _, 2>::new(encoder, bases).unwrap();
+            signature.push(&[left]).unwrap();
+            signature.push(&[right]).unwrap();
+            let key = signature.states().map(|value| value.to_canonical()[0]);
+            assert_eq!(observed.insert(key, (left, right)), None);
+        }
+    }
+}
+
 #[cfg(feature = "dynamic-fields")]
 #[test]
 fn dynamic_binary_context_is_wire_compatible_with_the_same_generated_field() {
@@ -755,6 +881,29 @@ fn dynamic_binary_context_is_wire_compatible_with_the_same_generated_field() {
         static_multi.to_canonical_bytes()
     );
 
+    let static_bases = [static_base, static_base.mul(static_base)];
+    let dynamic_bases = static_bases
+        .iter()
+        .map(|base| field.decode(base.to_canonical().as_ref()).unwrap())
+        .collect::<Vec<_>>();
+    let mut static_multi_sequence =
+        MultiEvaluationSequenceSignature::<Gf2_9StructuralFixture, _, 2>::new(
+            encoder,
+            static_bases,
+        )
+        .unwrap();
+    static_multi_sequence.push_elements(static_values).unwrap();
+    let mut dynamic_multi_sequence =
+        DynamicMultiEvaluationSequenceSignature::new(field.clone(), encoder, dynamic_bases.clone())
+            .unwrap();
+    for element in &dynamic_values {
+        dynamic_multi_sequence.push_element(element).unwrap();
+    }
+    assert_eq!(
+        dynamic_multi_sequence.to_canonical_bytes().unwrap(),
+        static_multi_sequence.to_canonical_bytes()
+    );
+
     assert_eq!(
         DynamicAdditiveSignature::from_canonical_bytes(
             field.clone(),
@@ -786,13 +935,23 @@ fn dynamic_binary_context_is_wire_compatible_with_the_same_generated_field() {
     );
     assert_eq!(
         DynamicMultiEvaluationMultisetSignature::from_canonical_bytes(
-            field,
+            field.clone(),
             encoder,
             dynamic_offsets,
             &static_multi.to_canonical_bytes(),
         )
         .unwrap(),
         dynamic_multi
+    );
+    assert_eq!(
+        DynamicMultiEvaluationSequenceSignature::from_canonical_bytes(
+            field,
+            encoder,
+            dynamic_bases,
+            &static_multi_sequence.to_canonical_bytes(),
+        )
+        .unwrap(),
+        dynamic_multi_sequence
     );
 }
 

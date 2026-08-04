@@ -5,9 +5,10 @@ use std::collections::BTreeMap;
 use microfield::{CanonicalEncoding, Field, Invert, StaticField};
 
 use super::{
+    snapshot::{decode_snapshot, encode_snapshot, MULTISET_KIND},
     wire::{encode_header, verify_header, HEADER_BYTES},
-    AlgebraicResidual, CanonicalElementEncoder, SignatureContext, SignatureError, SignatureLaw,
-    StructuralEncoder,
+    AlgebraicResidual, CanonicalElementEncoder, SignatureAssurance, SignatureContext,
+    SignatureError, SignatureLaw, StructuralEncoder, TrackedSnapshotLimits,
 };
 
 /// Product evaluation of a multiset with exact cardinality and zero count.
@@ -215,6 +216,46 @@ where
         })
     }
 
+    pub(crate) fn apply_delta_parts(
+        &self,
+        removed: &Self,
+        added: &Self,
+    ) -> Result<Self, SignatureError> {
+        if self.context != removed.context || self.context != added.context {
+            return Err(SignatureError::IdentityMismatch);
+        }
+        let cardinality = self
+            .cardinality
+            .checked_sub(removed.cardinality)
+            .ok_or(SignatureError::ItemAbsent)?
+            .checked_add(added.cardinality)
+            .ok_or(SignatureError::CounterOverflow)?;
+        let zero_factor_count = self
+            .zero_factor_count
+            .checked_sub(removed.zero_factor_count)
+            .ok_or(SignatureError::ZeroFactorAbsent)?
+            .checked_add(added.zero_factor_count)
+            .ok_or(SignatureError::CounterOverflow)?;
+        let current_nonzero = self.cardinality - self.zero_factor_count;
+        let removed_nonzero = removed.cardinality - removed.zero_factor_count;
+        if removed_nonzero > current_nonzero {
+            return Err(SignatureError::ItemAbsent);
+        }
+        let divisor_inverse = removed
+            .nonzero_product
+            .invert()
+            .expect("the tracked non-zero product is invertible");
+        Ok(Self {
+            nonzero_product: self
+                .nonzero_product
+                .mul(divisor_inverse)
+                .mul(added.nonzero_product),
+            cardinality,
+            zero_factor_count,
+            ..self.clone()
+        })
+    }
+
     /// Derives a quotient relation for an assumed member.
     ///
     /// Every non-zero field value has an inverse, so success does not establish
@@ -330,6 +371,12 @@ where
         self.offset
     }
 
+    /// Equality remains a finite-field fingerprint for untracked multisets.
+    #[must_use]
+    pub const fn assurance(&self) -> SignatureAssurance {
+        SignatureAssurance::Fingerprint
+    }
+
     /// Serializes a stable, self-identifying little-endian envelope.
     #[must_use]
     pub fn to_canonical_bytes(&self) -> Vec<u8> {
@@ -397,7 +444,7 @@ where
         Ok(self.encoder.encode(data)?.add(self.offset))
     }
 
-    fn apply_residual(&mut self, residual: AlgebraicResidual<F>) {
+    pub(crate) fn apply_residual(&mut self, residual: AlgebraicResidual<F>) {
         self.nonzero_product = residual.state;
         self.cardinality = residual.item_count;
         self.zero_factor_count = residual.zero_factor_count;
@@ -495,5 +542,87 @@ where
     #[must_use]
     pub const fn signature(&self) -> &MultisetSignature<F, E> {
         &self.signature
+    }
+
+    /// Raw source multiplicities are retained and compared exactly.
+    #[must_use]
+    pub const fn assurance(&self) -> SignatureAssurance {
+        SignatureAssurance::ExactTracked
+    }
+
+    /// Serializes the compact state and exact raw multiplicities.
+    ///
+    /// # Errors
+    ///
+    /// Rejects configured limits, size overflow or allocation failure.
+    pub fn to_snapshot_bytes(&self) -> Result<Vec<u8>, SignatureError> {
+        self.to_snapshot_bytes_with_limits(TrackedSnapshotLimits::default())
+    }
+
+    /// Serializes an exact multiset snapshot under explicit limits.
+    ///
+    /// # Errors
+    ///
+    /// Rejects configured limits, size overflow or allocation failure.
+    pub fn to_snapshot_bytes_with_limits(
+        &self,
+        limits: TrackedSnapshotLimits,
+    ) -> Result<Vec<u8>, SignatureError> {
+        let compact = self.signature.to_canonical_bytes();
+        encode_snapshot(
+            MULTISET_KIND,
+            &compact,
+            self.multiplicities
+                .iter()
+                .map(|(item, multiplicity)| (item.as_slice(), *multiplicity)),
+            limits,
+        )
+    }
+
+    /// Restores an exact tracked multiset and revalidates its compact state.
+    ///
+    /// # Errors
+    ///
+    /// Rejects malformed data, identity drift, resource ceilings or a compact
+    /// state that does not match the retained multiplicities.
+    pub fn from_snapshot_bytes(
+        encoder: E,
+        offset: F,
+        bytes: &[u8],
+    ) -> Result<Self, SignatureError> {
+        Self::from_snapshot_bytes_with_limits(
+            encoder,
+            offset,
+            bytes,
+            TrackedSnapshotLimits::default(),
+        )
+    }
+
+    /// Restores an exact tracked multiset under explicit defensive limits.
+    ///
+    /// # Errors
+    ///
+    /// Rejects malformed, excessive or algebraically inconsistent snapshots.
+    pub fn from_snapshot_bytes_with_limits(
+        encoder: E,
+        offset: F,
+        bytes: &[u8],
+        limits: TrackedSnapshotLimits,
+    ) -> Result<Self, SignatureError> {
+        let decoded = decode_snapshot(bytes, MULTISET_KIND, limits)?;
+        let expected =
+            MultisetSignature::from_canonical_bytes(encoder.clone(), offset, decoded.compact)?;
+        let mut candidate = Self::new(encoder, offset);
+        for (item, multiplicity) in decoded.entries {
+            for _ in 0..multiplicity {
+                candidate.insert(&item)?;
+            }
+        }
+        if candidate.signature != expected {
+            return Err(SignatureError::InvalidWireFormat(
+                "tracked multiset compact mismatch",
+            ));
+        }
+        Ok(candidate)
     }
 }

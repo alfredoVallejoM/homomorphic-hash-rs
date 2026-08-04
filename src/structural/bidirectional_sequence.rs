@@ -4,7 +4,8 @@ use microfield::{CanonicalEncoding, Field, Pow, StaticField};
 
 use super::{
     wire::{encode_header, verify_header, HEADER_BYTES},
-    CanonicalElementEncoder, SignatureContext, SignatureError, SignatureLaw, StructuralEncoder,
+    CanonicalElementEncoder, SignatureAssurance, SignatureContext, SignatureError, SignatureLaw,
+    StructuralEncoder,
 };
 
 /// Paired Horner evaluation of a sequence and its reversal.
@@ -269,6 +270,12 @@ where
     #[must_use]
     pub const fn context(&self) -> SignatureContext {
         self.context
+    }
+
+    /// Two directions reduce collisions but remain finite fingerprints.
+    #[must_use]
+    pub const fn assurance(&self) -> SignatureAssurance {
+        SignatureAssurance::Fingerprint
     }
 
     /// Evaluation in insertion order.

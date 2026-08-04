@@ -3,9 +3,10 @@
 use microfield::{CanonicalEncoding, Field, Invert, Pow, StaticField};
 
 use super::{
+    snapshot::{decode_snapshot, encode_snapshot, SEQUENCE_KIND},
     wire::{encode_header, verify_header, HEADER_BYTES},
-    AlgebraicResidual, CanonicalElementEncoder, SignatureContext, SignatureError, SignatureLaw,
-    StructuralEncoder,
+    AlgebraicResidual, CanonicalElementEncoder, SignatureAssurance, SignatureContext,
+    SignatureError, SignatureLaw, StructuralEncoder, TrackedSnapshotLimits,
 };
 
 /// Ordered structural signature `H(xs) = (...(x₀·b + x₁)·b + ...)`.
@@ -183,6 +184,22 @@ where
         })
     }
 
+    pub(crate) fn trim_assuming_suffix(&self, suffix: &Self) -> Result<Self, SignatureError> {
+        if self.context != suffix.context {
+            return Err(SignatureError::IdentityMismatch);
+        }
+        let length = self
+            .length
+            .checked_sub(suffix.length)
+            .ok_or(SignatureError::ItemAbsent)?;
+        let inverse_power = self.base_inverse.pow(&[suffix.length]);
+        Ok(Self {
+            state: self.state.sub(suffix.state).mul(inverse_power),
+            length,
+            ..self.clone()
+        })
+    }
+
     /// Derives the algebraic predecessor for an assumed last item.
     ///
     /// This does not establish that `data` was actually last. Use a tracked
@@ -260,6 +277,12 @@ where
     #[must_use]
     pub const fn base(&self) -> F {
         self.base
+    }
+
+    /// Equality remains a finite-field fingerprint for untracked sequences.
+    #[must_use]
+    pub const fn assurance(&self) -> SignatureAssurance {
+        SignatureAssurance::Fingerprint
     }
 
     /// Serializes a stable, self-identifying little-endian envelope.
@@ -378,5 +401,91 @@ where
     #[must_use]
     pub const fn signature(&self) -> &SequenceSignature<F, E> {
         &self.signature
+    }
+
+    /// Raw source items are retained and compared exactly.
+    #[must_use]
+    pub const fn assurance(&self) -> SignatureAssurance {
+        SignatureAssurance::ExactTracked
+    }
+
+    /// Serializes both the compact state and every exact source item.
+    ///
+    /// This uses the distinct `MFTS` schema; it cannot be confused with a
+    /// compact `MFSG` signature.
+    ///
+    /// # Errors
+    ///
+    /// Rejects configured limits, size overflow or allocation failure.
+    pub fn to_snapshot_bytes(&self) -> Result<Vec<u8>, SignatureError> {
+        self.to_snapshot_bytes_with_limits(TrackedSnapshotLimits::default())
+    }
+
+    /// Serializes an exact snapshot under explicit defensive limits.
+    ///
+    /// # Errors
+    ///
+    /// Rejects configured limits, size overflow or allocation failure.
+    pub fn to_snapshot_bytes_with_limits(
+        &self,
+        limits: TrackedSnapshotLimits,
+    ) -> Result<Vec<u8>, SignatureError> {
+        let compact = self.signature.to_canonical_bytes();
+        encode_snapshot(
+            SEQUENCE_KIND,
+            &compact,
+            self.items.iter().map(|item| (item.as_slice(), 1)),
+            limits,
+        )
+    }
+
+    /// Restores an exact tracked sequence and revalidates its compact state.
+    ///
+    /// # Errors
+    ///
+    /// Rejects malformed data, identity drift, resource ceilings or any
+    /// disagreement between retained items and the embedded compact signature.
+    pub fn from_snapshot_bytes(encoder: E, base: F, bytes: &[u8]) -> Result<Self, SignatureError> {
+        Self::from_snapshot_bytes_with_limits(
+            encoder,
+            base,
+            bytes,
+            TrackedSnapshotLimits::default(),
+        )
+    }
+
+    /// Restores an exact tracked sequence under explicit defensive limits.
+    ///
+    /// # Errors
+    ///
+    /// Rejects malformed, excessive or algebraically inconsistent snapshots.
+    pub fn from_snapshot_bytes_with_limits(
+        encoder: E,
+        base: F,
+        bytes: &[u8],
+        limits: TrackedSnapshotLimits,
+    ) -> Result<Self, SignatureError> {
+        let decoded = decode_snapshot(bytes, SEQUENCE_KIND, limits)?;
+        let expected =
+            SequenceSignature::from_canonical_bytes(encoder.clone(), base, decoded.compact)?;
+        let mut candidate = Self::new(encoder, base)?;
+        candidate
+            .items
+            .try_reserve_exact(decoded.entries.len())
+            .map_err(|_| SignatureError::AllocationFailed)?;
+        for (item, multiplicity) in decoded.entries {
+            if multiplicity != 1 {
+                return Err(SignatureError::InvalidWireFormat(
+                    "tracked sequence multiplicity",
+                ));
+            }
+            candidate.push(&item)?;
+        }
+        if candidate.signature != expected {
+            return Err(SignatureError::InvalidWireFormat(
+                "tracked sequence compact mismatch",
+            ));
+        }
+        Ok(candidate)
     }
 }

@@ -335,6 +335,24 @@ impl DynField {
         }
     }
 
+    /// Reports whether graph channels operate in characteristic two.
+    #[must_use]
+    pub fn characteristic_is_two(&self) -> bool {
+        match &self.inner.family {
+            DynFamily::Binary { .. } => true,
+            DynFamily::Prime { modulus, .. } => modulus == &BigUint::from(2_u8),
+        }
+    }
+
+    /// Extension degree of the runtime presentation.
+    #[must_use]
+    pub fn extension_degree(&self) -> u32 {
+        match &self.inner.family {
+            DynFamily::Binary { degree, .. } => *degree,
+            DynFamily::Prime { .. } => 1,
+        }
+    }
+
     /// Returns the exact canonical byte width.
     #[must_use]
     pub fn canonical_bytes(&self) -> usize {

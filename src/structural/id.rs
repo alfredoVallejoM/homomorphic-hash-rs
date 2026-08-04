@@ -30,6 +30,8 @@ pub enum SignatureLaw {
     BidirectionalSequence = 4,
     /// Commutative products evaluated at multiple independent offsets.
     MultiEvaluationMultiset = 5,
+    /// Ordered Horner evaluations at several pairwise-distinct bases.
+    MultiEvaluationSequence = 6,
 }
 
 /// Complete compatibility identity attached to every state.

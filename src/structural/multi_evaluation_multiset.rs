@@ -4,7 +4,8 @@ use microfield::{CanonicalEncoding, Field, StaticField};
 
 use super::{
     wire::{encode_header, verify_header, HEADER_BYTES},
-    CanonicalElementEncoder, SignatureContext, SignatureError, SignatureLaw, StructuralEncoder,
+    CanonicalElementEncoder, SignatureAssurance, SignatureContext, SignatureError, SignatureLaw,
+    StructuralEncoder,
 };
 
 /// Product signature `P(tᵢ)=∏(encode(x)+tᵢ)` at `K` distinct offsets.
@@ -241,6 +242,17 @@ where
     #[must_use]
     pub const fn cardinality(&self) -> u64 {
         self.cardinality
+    }
+
+    /// Exactness bound over already encoded field elements.
+    ///
+    /// Equality is conclusive only when both signatures have the same
+    /// cardinality and that cardinality is at most `K`.
+    #[must_use]
+    pub const fn assurance(&self) -> SignatureAssurance {
+        SignatureAssurance::BoundedExactOverEncodedElements {
+            maximum_cardinality: K,
+        }
     }
 
     /// Serializes all coordinates in a self-identifying envelope.

@@ -2,7 +2,8 @@
 
 Fecha: 3 de agosto de 2026.
 
-Estado: F6.G8–G10 completados localmente; F6.G11–G15 pendientes.
+Estado: F6.G8–G14 completados localmente; F6.G15 queda planificado como cierre
+de consumo interno, separado de una futura fase de publicación.
 
 La entrega G8/G9 se documenta en
 [`phase-6-g8-g9-implementation-report.md`](phase-6-g8-g9-implementation-report.md).
@@ -11,7 +12,7 @@ etiquetados de orden seis y reprodujo exactamente las 156 clases del oráculo
 factorial independiente tanto con G9 como con G10. El cierre G10 y sus
 desviaciones justificadas se documentan en
 [`phase-6-g10-final-report.md`](phase-6-g10-final-report.md). Los invariantes
-por loops y el matcher pareado siguen siendo hitos posteriores.
+por loops y el matcher pareado se cierran en G11/G12.
 
 ## Veredicto sobre la propuesta actual
 
@@ -485,12 +486,13 @@ frontera y artefactos de componentes. No pretende medir metadata del allocator,
 el grafo de entrada, el resultado entregado al caller ni todos los temporales
 atómicos. Por ello la API lo denomina `peak_tracked_bytes`, no memoria RSS.
 
-### F6.G11 — firmas v2 y assurance
+### F6.G11 — firmas v2 y assurance — completado localmente
 
 Entregables:
 
 - `SignatureAssurance`;
 - garantía acotada del multiconjunto multievaluado;
+- histograma exacto de grados y correlación multiconjunto multievaluada;
 - secuencia multievaluada estática y dinámica;
 - domain-separated hash-to-field por lane;
 - moments por ronda/celda y patrones conectados tipados;
@@ -503,7 +505,18 @@ Entregables:
 Gate: cada canal posee ley, identidad, wire, colisión mínima conocida,
 metamorfismo, benchmark y clasificación de assurance.
 
+La entrega implementada incluye assurance, multievaluación, lanes
+independientes, moments, catálogo inducido conectado L0–L3, compresiones
+aditiva/producto, matrix RG1 y theta RG2. El split autenticado de 12.346 clases
+n=8 da cero colisiones para el bundle Goldilocks, pero CFI permanece como
+contraejemplo. El catálogo general de homomorfismos, zeta y resolventes no se
+promocionan aún. Véase el
+[informe G11](phase-6-g11-final-report.md) y la
+[ADR 0032](adr/0032-g11-assurance-and-field-characteristic.md).
+
 ### F6.G12 — descomposición y comparación pareada
+
+Estado: completado localmente.
 
 Entregables:
 
@@ -517,7 +530,17 @@ Entregables:
 Gate: `compare(G,H)` nunca devuelve igualdad sin mapping verificado y supera a
 canonizar dos veces en los corpus de comparación pareada.
 
-### F6.G13 — ambigüedad de alta regularidad
+La entrega implementada añade prefiltros exactos tipados, block-cut mediante
+Tarjan iterativo, interning exacto no recursivo para bosques, refinamiento
+conjunto y matcher fail-first. `compare_with_field_profile` calcula el canal
+finito dentro de la llamada y solo lo usa como witness negativo. La campaña
+determinista coincide con el oráculo canónico en 1024 pares y decide CFI(K4) en
+6.976 asignaciones. En caminos, el pareado mejora 8,83× a n=128 y 72,44× a
+n=1.024 frente a dos canonizaciones. Véanse el
+[informe G12](phase-6-g12-final-report.md) y la
+[ADR 0033](adr/0033-paired-comparison-and-long-walks.md).
+
+### F6.G13 — ambigüedad de alta regularidad — completado localmente
 
 Entregables:
 
@@ -531,7 +554,10 @@ Entregables:
 Gate: toda pareja indistinguible por los canales sigue llegando al IR exacto;
 ninguna se marca isomorfa por heurística.
 
-### F6.G14 — incrementalidad real
+Implementado mediante `AdaptiveGraphPipeline`, ceilings fail-closed, catálogo
+L0–L3 con skip atómico y `LocalPairRefinementProfile` admitido por `a³·r`.
+
+### F6.G14 — incrementalidad real — completado localmente
 
 Entregables:
 
@@ -546,10 +572,24 @@ Entregables:
 Gate: edits locales pequeños reducen trabajo end-to-end, no solo aritmética; a
 partir del umbral calibrado el fallback no es peor que insistir localmente.
 
-### F6.G15 — cierre científico e interno
+Implementado con `GraphDelta`, revisión optimista, invalidación tipada,
+estimador y tres rutas. En n=1.024, label delta mejora 2,78× frente al rebuild;
+la ruta topológica conserva como límite la construcción del CSR candidato.
+
+### F6.G15 — cierre científico e interno — planificado
+
+La ejecución detallada, los niveles de uso admitidos y el artefacto go/no-go se
+definen en el [plan G15 interno](phase-6-g15-internal-readiness-plan.md).
+G15 cubre primero campos, firmas homomórficas y protocolos derivados; grafos y
+canonización son un vertical de consumo, no el producto completo.
 
 Entregables:
 
+- allowlist de campos, encoders y firmas con ley/assurance explícitos;
+- API soportada de agregación, secuencias, multisets, tracking y
+  multievaluación;
+- persistencia de firmas y promoción de reconciliación acotada;
+- aplicaciones de firmas comparadas con baselines exactos y criptográficos;
 - migración de adapters de química/redes al modelo exacto, sin perder carga,
   aromaticidad, isótopos, quiralidad, dirección o schema de dominio;
 - manifiestos de corpus con URL, licencia, SHA-256 y parser versionado;

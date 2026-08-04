@@ -1,11 +1,13 @@
 //! Exact, field-independent graph canonization and mapping verification.
 
 use core::mem::size_of;
+use microfield::{CanonicalEncoding, Field, Pow, StaticField};
 use std::time::Instant;
 
 mod compact;
 mod encoding;
 mod mapping;
+mod paired;
 mod search;
 
 pub use compact::MicrocanonWorkspace;
@@ -13,6 +15,7 @@ pub use encoding::{
     CanonicalGraphDocument, CanonicalGraphEncodingId, CanonicalGraphForm, CanonicalGraphKey,
 };
 pub use mapping::VerifiedGraphMapping;
+pub use paired::{PairedComparisonPath, PairedComparisonReport};
 pub use search::{
     CanonicalBudgetLimit, CanonicalSearchBudget, MicrocanonOutcome, MicrocanonPath,
     MicrocanonReport,
@@ -31,7 +34,10 @@ pub enum MicrocanonStrategy {
     Reference,
 }
 
-use super::{GraphError, GraphSchemaId, IncidenceGraph, VertexId};
+use super::{
+    FastGraphLabeler, GraphError, GraphSchemaId, GraphSignatureId, IncidenceGraph, VertexId,
+};
+use crate::structural::StructuralEncoder;
 use search::CanonicalizationRun;
 
 /// Exact reason why two graphs cannot be isomorphic under one schema.
@@ -58,6 +64,30 @@ pub enum DifferenceWitness {
         /// Right total.
         right: u64,
     },
+    /// Exact vertex kinds or labels have different multiplicities.
+    VertexDescriptors {
+        /// First differing byte in the sorted exact descriptor profile.
+        first_differing_byte: usize,
+    },
+    /// Joint exact refinement produced different cell multiplicities.
+    StablePartition {
+        /// Refinement pass at which the exact histograms diverged.
+        pass: u64,
+    },
+    /// Exact articulation/block membership profiles differ.
+    BlockCutProfile {
+        /// First differing byte in the exact sorted profile.
+        first_differing_byte: usize,
+    },
+    /// Both inputs are forests and their exact relational tree codes differ.
+    TreeForest,
+    /// A compatible finite-field channel differs.
+    FiniteFieldEvidence {
+        /// Field, encoder, lanes, parameters and refinement-profile identity.
+        signature_id: GraphSignatureId,
+    },
+    /// Exact paired candidate search exhausted every possible mapping.
+    CandidateSpaceExhausted,
     /// Complete exact canonical forms differ.
     CanonicalForms {
         /// First differing byte, or the common length if one is a prefix.
@@ -70,6 +100,7 @@ pub enum DifferenceWitness {
 pub struct GraphComparisonReport {
     left: Option<MicrocanonReport>,
     right: Option<MicrocanonReport>,
+    paired: Option<PairedComparisonReport>,
 }
 
 impl GraphComparisonReport {
@@ -83,6 +114,12 @@ impl GraphComparisonReport {
     #[must_use]
     pub const fn right(&self) -> Option<&MicrocanonReport> {
         self.right.as_ref()
+    }
+
+    /// Direct paired-matcher report when G12 avoided two canonizations.
+    #[must_use]
+    pub const fn paired(&self) -> Option<&PairedComparisonReport> {
+        self.paired.as_ref()
     }
 }
 
@@ -223,67 +260,39 @@ impl Microcanon {
             });
         }
 
-        let left_run = self.canonicalize_run(left, budget)?;
-        let left_report = left_run.outcome.report().clone();
-        let (left_form, left_nodes) = match left_run.outcome {
-            MicrocanonOutcome::Exact { form, report } => (form, report.explored_nodes()),
-            MicrocanonOutcome::Inconclusive { report } => {
-                return Ok(GraphComparison::Inconclusive {
-                    report: GraphComparisonReport {
-                        left: Some(report),
-                        right: None,
-                    },
-                });
-            }
-        };
-        let mut right_budget =
-            CanonicalSearchBudget::new(budget.max_search_nodes().saturating_sub(left_nodes))
-                .with_max_retained_state_cells(budget.max_retained_state_cells())
-                .with_max_retained_bytes(budget.max_retained_bytes())
-                .with_max_depth(budget.max_depth());
-        if let Some(limit) = budget.max_elapsed() {
-            right_budget =
-                right_budget.with_max_elapsed(limit.saturating_sub(left_report.elapsed()));
-        }
-        let right_run = self.canonicalize_run(right, right_budget)?;
-        let (right_form, right_report) = match right_run.outcome {
-            MicrocanonOutcome::Exact { form, report } => (form, report),
-            MicrocanonOutcome::Inconclusive { report } => {
-                return Ok(GraphComparison::Inconclusive {
-                    report: GraphComparisonReport {
-                        left: Some(left_report),
-                        right: Some(report),
-                    },
-                });
-            }
-        };
-        let report = GraphComparisonReport {
-            left: Some(left_report),
-            right: Some(right_report),
-        };
-        if left_form.bytes() != right_form.bytes() {
-            let first_differing_byte = left_form
-                .bytes()
-                .iter()
-                .zip(right_form.bytes())
-                .position(|(left, right)| left != right)
-                .unwrap_or_else(|| left_form.bytes().len().min(right_form.bytes().len()));
+        paired::compare(left, right, budget)
+    }
+
+    /// Computes one finite-field profile before exact paired matching.
+    ///
+    /// A differing invariant is a sound negative witness. Equality only falls
+    /// through to the field-independent exact matcher.
+    ///
+    /// # Errors
+    ///
+    /// Propagates field encoding and exact paired-comparison failures.
+    pub fn compare_with_field_profile<F, E, const K: usize>(
+        &self,
+        left: &IncidenceGraph,
+        right: &IncidenceGraph,
+        labeler: &FastGraphLabeler<F, E, K>,
+        budget: CanonicalSearchBudget,
+    ) -> Result<GraphComparison, GraphError>
+    where
+        F: Field + CanonicalEncoding + StaticField + Pow,
+        E: StructuralEncoder<F>,
+    {
+        let left_profile = labeler.analyze(left)?;
+        let right_profile = labeler.analyze(right)?;
+        if left_profile.signature() != right_profile.signature() {
             return Ok(GraphComparison::Different {
-                witness: DifferenceWitness::CanonicalForms {
-                    first_differing_byte,
+                witness: DifferenceWitness::FiniteFieldEvidence {
+                    signature_id: labeler.signature_id(),
                 },
-                report,
+                report: GraphComparisonReport::default(),
             });
         }
-
-        let mut candidate = vec![VertexId::new(0); left.vertex_count()];
-        for canonical in 0..left.vertex_count() {
-            let left_original = left_form.canonical_to_original()[canonical];
-            let right_original = right_form.canonical_to_original()[canonical];
-            candidate[left_original.index()] = right_original;
-        }
-        let mapping = VerifiedGraphMapping::verify(left, right, &candidate)?;
-        Ok(GraphComparison::Isomorphic { mapping, report })
+        self.compare(left, right, budget)
     }
 
     pub(crate) fn canonicalize_run(

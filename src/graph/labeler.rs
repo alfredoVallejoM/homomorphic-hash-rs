@@ -1631,6 +1631,16 @@ where
         graph: IncidenceGraph,
         workspace: &mut IncrementalGraphWorkspace<F, K>,
     ) -> Result<IncrementalUpdateStats, GraphError> {
+        self.update_incremental_impl(state, graph, workspace, None)
+    }
+
+    fn update_incremental_impl(
+        &self,
+        state: &mut IncrementalGraphState<F, K>,
+        graph: IncidenceGraph,
+        workspace: &mut IncrementalGraphWorkspace<F, K>,
+        audited_subset: Option<&[usize]>,
+    ) -> Result<IncrementalUpdateStats, GraphError> {
         if !matches!(self.profile, RefinementProfile::Fast { .. }) {
             return Err(GraphError::NonComposableProfile);
         }
@@ -1645,14 +1655,31 @@ where
                 actual: graph.vertex_count(),
             });
         }
-        let audited_incidence_records = state
-            .graph
-            .incidence_count()
-            .checked_add(graph.incidence_count())
-            .ok_or(GraphError::GraphTooLarge)?;
+        let audited_vertices = audited_subset.map_or(vertex_count, <[usize]>::len);
+        let audited_incidence_records = if let Some(vertices) = audited_subset {
+            vertices.iter().try_fold(0_usize, |total, &index| {
+                let vertex = VertexId::new(index);
+                [
+                    state.graph.outgoing(vertex).len(),
+                    state.graph.incoming(vertex).len(),
+                    graph.outgoing(vertex).len(),
+                    graph.incoming(vertex).len(),
+                ]
+                .into_iter()
+                .try_fold(total, |sum, count| {
+                    sum.checked_add(count).ok_or(GraphError::GraphTooLarge)
+                })
+            })?
+        } else {
+            state
+                .graph
+                .incidence_count()
+                .checked_add(graph.incidence_count())
+                .ok_or(GraphError::GraphTooLarge)?
+        };
         if state.graph == graph {
             return Ok(IncrementalUpdateStats {
-                audited_vertices: vertex_count,
+                audited_vertices,
                 audited_incidence_records,
                 previous_component_count: state.dependencies.component_count,
                 component_count: state.dependencies.component_count,
@@ -1677,8 +1704,9 @@ where
             .resize(state.rounds.saturating_add(1), AggregateDelta::identity());
 
         let initial = state.labels_at(0);
-        for (index, old_initial) in initial.iter().enumerate() {
-            if *old_initial != prepared.initial_labels[index] {
+        let mut audit_vertex = |index: usize| {
+            let old_initial = initial[index];
+            if old_initial != prepared.initial_labels[index] {
                 workspace.initial_changed.push(index);
             }
             let vertex = VertexId::new(index);
@@ -1694,6 +1722,15 @@ where
                 graph.incoming(vertex),
             ) {
                 workspace.topology_changed.push(index);
+            }
+        };
+        if let Some(vertices) = audited_subset {
+            for &index in vertices {
+                audit_vertex(index);
+            }
+        } else {
+            for index in 0..vertex_count {
+                audit_vertex(index);
             }
         }
 
@@ -1906,7 +1943,7 @@ where
         state.revision = revision;
 
         Ok(IncrementalUpdateStats {
-            audited_vertices: vertex_count,
+            audited_vertices,
             audited_incidence_records,
             initial_seed_vertices: workspace.initial_changed.len(),
             topology_seed_vertices: workspace.topology_changed.len(),
@@ -1919,6 +1956,105 @@ where
             dependency_records,
             revision,
         })
+    }
+
+    /// Applies a typed G14 transaction and selects local replay or full rebuild.
+    ///
+    /// The delta is normalized into a complete candidate before any persistent
+    /// state changes. Admission uses command count and a conservative dependency
+    /// cone; whichever route is selected publishes atomically.
+    ///
+    /// # Errors
+    ///
+    /// Rejects revision drift, invalid endpoints/relations, policy drift and
+    /// every error of the incremental or complete analysis paths.
+    pub fn apply_delta(
+        &self,
+        state: &mut IncrementalGraphState<F, K>,
+        delta: &super::GraphDelta,
+        policy: super::GraphDeltaPolicy,
+        workspace: &mut IncrementalGraphWorkspace<F, K>,
+    ) -> Result<super::GraphDeltaUpdateReport, GraphError> {
+        if delta
+            .expected_revision()
+            .is_some_and(|expected| expected != state.revision)
+        {
+            return Err(GraphError::GraphDeltaRevisionMismatch {
+                expected: delta.expected_revision().unwrap_or(u64::MAX),
+                actual: state.revision,
+            });
+        }
+        let applied = delta.apply(&state.graph)?;
+        let touched_vertices = applied.touched_vertices.len();
+        let invalidation = super::GraphChannelInvalidation {
+            local: applied.label_changed || applied.topology_changed,
+            global: applied.label_changed || applied.topology_changed,
+            higher_order: applied.label_changed || applied.topology_changed,
+        };
+        if applied.graph == state.graph {
+            return Ok(super::GraphDeltaUpdateReport {
+                path: super::GraphDeltaUpdatePath::NoChange,
+                operation_count: delta.operation_count(),
+                touched_vertices,
+                estimated_vertex_rounds: 0,
+                invalidation: super::GraphChannelInvalidation::default(),
+                label_changed: false,
+                topology_changed: false,
+                incremental: None,
+                revision: state.revision,
+            });
+        }
+        let estimated_vertex_rounds =
+            super::incremental::estimate_dependency_cone(state, &applied.touched_vertices)?;
+        let total_vertex_rounds = state
+            .graph
+            .vertex_count()
+            .checked_mul(state.rounds.saturating_add(1))
+            .ok_or(GraphError::GraphTooLarge)?;
+        let admitted_cells = total_vertex_rounds
+            .checked_mul(usize::from(policy.maximum_cone_per_mille()))
+            .ok_or(GraphError::GraphTooLarge)?
+            / 1000;
+        let use_incremental = delta.operation_count() <= policy.maximum_incremental_operations()
+            && estimated_vertex_rounds <= admitted_cells;
+        if use_incremental {
+            let stats = self.update_incremental_impl(
+                state,
+                applied.graph,
+                workspace,
+                Some(&applied.touched_vertices),
+            )?;
+            Ok(super::GraphDeltaUpdateReport {
+                path: super::GraphDeltaUpdatePath::IncrementalCone,
+                operation_count: delta.operation_count(),
+                touched_vertices,
+                estimated_vertex_rounds,
+                invalidation,
+                label_changed: applied.label_changed,
+                topology_changed: applied.topology_changed,
+                incremental: Some(stats),
+                revision: state.revision,
+            })
+        } else {
+            let revision = state
+                .revision
+                .checked_add(1)
+                .ok_or(GraphError::GraphTooLarge)?;
+            let mut replacement = self.incremental_state(applied.graph)?;
+            replacement.revision = revision;
+            *state = replacement;
+            Ok(super::GraphDeltaUpdateReport {
+                path: super::GraphDeltaUpdatePath::FullRebuild,
+                operation_count: delta.operation_count(),
+                touched_vertices,
+                estimated_vertex_rounds,
+                invalidation,
+                label_changed: applied.label_changed,
+                topology_changed: applied.topology_changed,
+                incremental: None,
+                revision,
+            })
+        }
     }
 
     fn record_aggregate_delta(

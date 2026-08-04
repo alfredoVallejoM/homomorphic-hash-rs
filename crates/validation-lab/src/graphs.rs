@@ -340,6 +340,24 @@ fn adversarial_results(
     ])
 }
 
+/// Rebuilds the frozen adversarial graph pairs for G11 holdout channels.
+pub fn g11_adversarial_pairs() -> Result<Vec<(&'static str, IncidenceGraph, IncidenceGraph)>, String>
+{
+    Ok(vec![
+        ("C6 versus 2C3", cycles(&[6])?, cycles(&[3, 3])?),
+        (
+            "Shrikhande versus 4x4 rook (strongly regular)",
+            shrikhande_graph()?,
+            rook_graph()?,
+        ),
+        (
+            "CFI(K4) even versus one twisted edge",
+            cfi_k4(None)?,
+            cfi_k4(Some(0))?,
+        ),
+    ])
+}
+
 fn compare_adversarial(
     labeler: &FastGraphLabeler<Fp251V1, PrimeIntegerEncoder, 3>,
     family: &str,

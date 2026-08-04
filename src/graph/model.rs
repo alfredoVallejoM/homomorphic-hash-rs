@@ -441,6 +441,57 @@ pub struct IncidenceGraph {
 }
 
 impl IncidenceGraph {
+    pub(super) fn with_vertex_label_updates(
+        &self,
+        updates: &[(usize, Vec<u8>)],
+    ) -> Result<Self, GraphError> {
+        use std::collections::{BTreeMap, BTreeSet};
+
+        let mut vertex_labels = (0..self.vertex_count())
+            .map(|index| self.vertex_label(VertexId::new(index)).to_vec())
+            .collect::<Vec<_>>();
+        for (index, label) in updates {
+            if *index >= vertex_labels.len() {
+                return Err(GraphError::InvalidVertex {
+                    index: *index,
+                    vertex_count: vertex_labels.len(),
+                });
+            }
+            vertex_labels[*index].clone_from(label);
+        }
+        let labels = vertex_labels
+            .iter()
+            .cloned()
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>();
+        let ids = labels
+            .iter()
+            .cloned()
+            .enumerate()
+            .map(|(id, label)| (label, id))
+            .collect::<BTreeMap<_, _>>();
+        let vertex_label_ids = vertex_labels
+            .iter()
+            .map(|label| {
+                ids.get(label)
+                    .copied()
+                    .ok_or(GraphError::CanonicalizationInvariantViolation)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Self {
+            labels,
+            descriptors: self.descriptors.clone(),
+            vertex_kinds: self.vertex_kinds.clone(),
+            vertex_label_ids,
+            outgoing_offsets: self.outgoing_offsets.clone(),
+            outgoing: self.outgoing.clone(),
+            incoming_offsets: self.incoming_offsets.clone(),
+            incoming: self.incoming.clone(),
+            total_multiplicity: self.total_multiplicity,
+        })
+    }
+
     /// Number of entity and auxiliary hyperedge vertices.
     #[must_use]
     pub const fn vertex_count(&self) -> usize {

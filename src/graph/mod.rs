@@ -15,25 +15,39 @@
 
 mod canon;
 mod canonical;
+mod dag;
+mod delta;
 mod error;
 mod evidence;
 mod global;
 mod incremental;
 mod labeler;
+#[cfg(feature = "legacy")]
 mod legacy;
 mod model;
+mod pipeline;
 mod schema;
+mod signature;
 
 pub use canon::{
     CanonicalBudgetLimit, CanonicalGraphDocument, CanonicalGraphEncodingId, CanonicalGraphForm,
     CanonicalGraphKey, CanonicalSearchBudget, DifferenceWitness, GraphComparison,
     GraphComparisonReport, Microcanon, MicrocanonOutcome, MicrocanonPath, MicrocanonReport,
-    MicrocanonStrategy, MicrocanonWorkspace, VerifiedGraphMapping,
+    MicrocanonStrategy, MicrocanonWorkspace, PairedComparisonPath, PairedComparisonReport,
+    VerifiedGraphMapping,
 };
 
 pub use canonical::{
     CanonicalSearchReport, CanonicalizationPath, DiscriminationRecommendation,
     ExactCanonicalOutcome, GraphDegeneracyReport,
+};
+pub use dag::{
+    CanonicalGraphDag, CanonicalGraphDagLimits, GraphDagNode, GraphDagNodeId,
+    GraphDagResolveOutcome, GraphDagResolveReport, GraphDagUpdateKind, GraphSubnetworkAdapter,
+};
+pub use delta::{
+    GraphChannelInvalidation, GraphDelta, GraphDeltaPolicy, GraphDeltaUpdatePath,
+    GraphDeltaUpdateReport,
 };
 pub use error::GraphError;
 pub use evidence::{
@@ -53,9 +67,27 @@ pub use labeler::{
     InvariantGraphDigest, PreparedGraph, RefinementProfile, StructuralLabel, TryCanonicalOutcome,
     DEFAULT_F251_GRAPH_DOMAIN,
 };
+#[cfg(feature = "legacy")]
 pub use legacy::from_legacy_topology;
 pub use model::{
     HyperedgeIncidence, Incidence, IncidenceGraph, IncidenceGraphBuilder, RelationDescriptor,
     RelationId, VertexId, VertexKind,
 };
+pub use pipeline::{
+    AdaptiveFilterOutcome, AdaptiveFilterPolicy, AdaptiveFilterReport, AdaptiveFilterTier,
+    AdaptiveGraphPipeline, AdaptiveTierReport,
+};
 pub use schema::{GraphAnalysisProfileId, GraphSchemaId};
+#[cfg(feature = "dynamic-fields")]
+pub use signature::DynamicGraphFieldProfile;
+pub use signature::{
+    CellMomentCell, CellMomentProfile, CellMomentProfileId, ClosedWalkAnalysisStatus,
+    ClosedWalkOperator, ClosedWalkQueryPlan, ClosedWalkQueryPlanId, ConnectedPatternCount,
+    ConnectedPatternProfile, DegreeHistogram, DegreeHistogramBin, DegreeHistogramProfile,
+    DegreeHistogramProfileId, GraphFieldChannel, GraphFieldSuitability, LocalPairRefinementProfile,
+    LocalPairRefinementProfileId, LoopPatternCatalog, LoopPatternCatalogId, MatrixAnalysisStatus,
+    PairRefinementStatus, PatternAnalysisStatus, PatternFieldFingerprint, PatternFingerprintId,
+    PatternProductFingerprint, RelationalClosedWalkProfile, RelationalClosedWalkProfileId,
+    RelationalMatrixProfile, RelationalMatrixProfileId, RelationalThetaProfile,
+    RelationalThetaProfileId, StaticGraphFieldProfile, ThetaAnalysisStatus,
+};

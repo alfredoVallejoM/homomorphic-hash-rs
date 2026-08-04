@@ -239,8 +239,9 @@ fn comparison_returns_only_verified_mappings_and_exact_difference_witnesses() {
             assert_eq!(mapping.left_to_right().len(), graph.vertex_count());
             assert_eq!(mapping.right_to_left().len(), graph.vertex_count());
             VerifiedGraphMapping::verify(&graph, &permuted, mapping.left_to_right()).unwrap();
-            assert!(report.left().is_some());
-            assert!(report.right().is_some());
+            assert!(report.left().is_none());
+            assert!(report.right().is_none());
+            assert!(report.paired().is_some());
         }
         outcome => panic!("expected verified isomorphism, found {outcome:?}"),
     }

@@ -1,12 +1,14 @@
 //! Explicit byte-to-field encoders.
 
 use microfield::{BinaryPolynomialField, CanonicalEncoding, Field, Gf2_256HhV1, PrimeField};
+use sha2::{Digest as _, Sha256};
 
 use super::{EncoderId, SignatureError};
 
 const DEFAULT_MAXIMUM_INPUT_BYTES: usize = 16 * 1024 * 1024;
 const INLINE_INPUT_BYTES: usize = 256;
 const INLINE_FRAMED_BYTES: usize = INLINE_INPUT_BYTES + 9;
+const DEFAULT_HASH_TO_FIELD_ATTEMPTS: u64 = 4_096;
 
 /// A deterministic, identified mapping from byte strings to one field.
 pub trait StructuralEncoder<F: Field>: Clone + Send + Sync + 'static {
@@ -22,11 +24,159 @@ pub trait StructuralEncoder<F: Field>: Clone + Send + Sync + 'static {
     fn encoder_id(&self) -> EncoderId;
 }
 
+/// Encoder that produces independently domain-separated field coordinates.
+pub trait StructuralLaneEncoder<F: Field, const K: usize>: Clone + Send + Sync + 'static {
+    /// Encodes one source value independently in every lane.
+    ///
+    /// # Errors
+    ///
+    /// Rejects resource limits or exhausted canonical rejection sampling.
+    fn encode_lanes(&self, data: &[u8]) -> Result<[F; K], SignatureError>;
+
+    /// Stable identity of profile, channel, lane count and encoding algorithm.
+    #[must_use]
+    fn encoder_id(&self) -> EncoderId;
+}
+
+/// SHA-256 expansion followed by deterministic canonical rejection per lane.
+///
+/// SHA-256 is used as a stable mixer and domain separator. No cryptographic
+/// security claim is made for signatures that consume these field elements.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DomainSeparatedHashToFieldEncoder<const K: usize> {
+    profile_id: [u8; 32],
+    channel: u64,
+    maximum_input_bytes: usize,
+    maximum_attempts: u64,
+}
+
+impl<const K: usize> DomainSeparatedHashToFieldEncoder<K> {
+    /// Creates a lane encoder bound to one analysis profile and channel.
+    #[must_use]
+    pub const fn new(profile_id: [u8; 32], channel: u64) -> Self {
+        Self {
+            profile_id,
+            channel,
+            maximum_input_bytes: DEFAULT_MAXIMUM_INPUT_BYTES,
+            maximum_attempts: DEFAULT_HASH_TO_FIELD_ATTEMPTS,
+        }
+    }
+
+    /// Replaces the defensive source-size ceiling without changing identity.
+    #[must_use]
+    pub const fn with_maximum_input_bytes(mut self, maximum: usize) -> Self {
+        self.maximum_input_bytes = maximum;
+        self
+    }
+
+    /// Replaces the defensive rejection ceiling without changing identity.
+    #[must_use]
+    pub const fn with_maximum_attempts(mut self, maximum: u64) -> Self {
+        self.maximum_attempts = maximum;
+        self
+    }
+
+    /// Analysis profile bound into every lane.
+    #[must_use]
+    pub const fn profile_id(self) -> [u8; 32] {
+        self.profile_id
+    }
+
+    /// Semantic channel bound into every lane.
+    #[must_use]
+    pub const fn channel(self) -> u64 {
+        self.channel
+    }
+
+    /// Stable identity excluding defensive work ceilings.
+    #[must_use]
+    pub fn id(self) -> EncoderId {
+        let mut descriptor = Vec::with_capacity(48);
+        descriptor.extend_from_slice(b"sha256-canonical-rejection-lanes-v1\0");
+        descriptor.extend_from_slice(&self.profile_id);
+        descriptor.extend_from_slice(&self.channel.to_le_bytes());
+        descriptor.extend_from_slice(&u64::try_from(K).unwrap_or(u64::MAX).to_le_bytes());
+        EncoderId::derive(&descriptor)
+    }
+}
+
+impl<F, const K: usize> StructuralLaneEncoder<F, K> for DomainSeparatedHashToFieldEncoder<K>
+where
+    F: Field + CanonicalEncoding,
+{
+    fn encode_lanes(&self, data: &[u8]) -> Result<[F; K], SignatureError> {
+        if data.len() > self.maximum_input_bytes {
+            return Err(SignatureError::InputTooLarge {
+                maximum: self.maximum_input_bytes,
+                actual: data.len(),
+            });
+        }
+        if K == 0 {
+            return Err(SignatureError::InvalidEvaluationPoints);
+        }
+        let mut lanes = [F::ZERO; K];
+        for (lane, output) in lanes.iter_mut().enumerate() {
+            *output = hash_lane::<F>(
+                self.profile_id,
+                self.channel,
+                u64::try_from(lane).map_err(|_| SignatureError::HashToFieldExhausted)?,
+                data,
+                self.maximum_attempts,
+            )?;
+        }
+        Ok(lanes)
+    }
+
+    fn encoder_id(&self) -> EncoderId {
+        self.id()
+    }
+}
+
+fn hash_lane<F: Field + CanonicalEncoding>(
+    profile_id: [u8; 32],
+    channel: u64,
+    lane: u64,
+    data: &[u8],
+    maximum_attempts: u64,
+) -> Result<F, SignatureError> {
+    let repr_len = F::ZERO.to_canonical().as_ref().len();
+    let data_len = u64::try_from(data.len()).map_err(|_| SignatureError::HashToFieldExhausted)?;
+    let mut candidate = Vec::new();
+    candidate
+        .try_reserve_exact(repr_len)
+        .map_err(|_| SignatureError::AllocationFailed)?;
+    for attempt in 0..maximum_attempts {
+        candidate.clear();
+        let mut block = 0_u64;
+        while candidate.len() < repr_len {
+            let mut hasher = Sha256::new();
+            hasher.update(b"microfield/hash-to-field-lane/v1\0");
+            hasher.update(profile_id);
+            hasher.update(channel.to_le_bytes());
+            hasher.update(lane.to_le_bytes());
+            hasher.update(data_len.to_le_bytes());
+            hasher.update(data);
+            hasher.update(attempt.to_le_bytes());
+            hasher.update(block.to_le_bytes());
+            let digest = hasher.finalize();
+            let remaining = repr_len - candidate.len();
+            candidate.extend_from_slice(&digest[..remaining.min(digest.len())]);
+            block = block
+                .checked_add(1)
+                .ok_or(SignatureError::HashToFieldExhausted)?;
+        }
+        if let Ok(element) = F::from_canonical_slice(&candidate) {
+            return Ok(element);
+        }
+    }
+    Err(SignatureError::HashToFieldExhausted)
+}
+
 /// Runtime-context equivalent of [`StructuralEncoder`].
 ///
 /// This adapter is intentionally separate: static field signatures remain
 /// monomorphized and do not carry an `Arc` or runtime field checks.
-#[cfg(feature = "dynamic-fields")]
+#[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 pub trait DynamicStructuralEncoder: Clone + Send + Sync + 'static {
     /// Encodes bytes under one validated runtime field context.
     ///
@@ -69,7 +219,7 @@ where
     }
 }
 
-#[cfg(feature = "dynamic-fields")]
+#[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 impl DynamicStructuralEncoder for CanonicalElementEncoder {
     fn encode_dynamic(
         &self,
@@ -140,7 +290,7 @@ where
     }
 }
 
-#[cfg(feature = "dynamic-fields")]
+#[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 impl DynamicStructuralEncoder for BinaryPolynomialEncoder {
     fn encode_dynamic(
         &self,
@@ -263,7 +413,7 @@ where
     }
 }
 
-#[cfg(feature = "dynamic-fields")]
+#[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 impl DynamicStructuralEncoder for PrimeIntegerEncoder {
     fn encode_dynamic(
         &self,

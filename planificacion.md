@@ -3439,6 +3439,76 @@ La implementación V1–V6 queda cerrada. La publicación continúa bloqueada po
 la evidencia multi-microarquitectura y los baselines externos enumerados en el
 informe, no por falta de infraestructura.
 
+# 26. F6.G15: preparación para consumo interno
+
+Tras G8–G14, la biblioteca se considera un release candidate interno
+condicionado: firmas y filtros son utilizables como evidencias negativas, y
+`Microcanon` es utilizable como autoridad exacta siempre que `Inconclusive` se
+propague. Todavía no se aprueba usar una firma rápida como clave persistente ni
+integrar adapters de dominio sin schema explícito.
+
+G15 queda separada de publicación. Las firmas homomórficas son producto de
+primer nivel y grafos/canonización un vertical adicional. Sus hitos son:
+
+1. inventario de campos, encoders, firmas, protocolos y grafos;
+2. API soportada para suma, secuencias, multisets, multievaluación y tracking;
+3. wire/snapshots, agregación distribuida, streaming y reconciliación;
+4. deltas versionados y transaccionales por ley, sin claims criptográficos;
+5. aplicaciones sobre archivos, bases de datos y árboles jerárquicos;
+6. perfiles de campo por característica, cardinalidad, ley, K y backend;
+7. perfiles de grafos, DAG exacto y adapter de cliques/subredes;
+8. cierre de corpus, oráculos y colisiones residuales de ambos tracks;
+9. property/fuzz tests de firmas, deltas, wires, parser y `GraphDelta`;
+10. SLO por workload, consumidor, runbook y artefacto reproducible go/no-go.
+
+La salida será `ReadyForInternalUse`, `Conditional` o `NotReady`; nunca una
+aprobación narrativa. Quedan fuera licencia, crates.io, semver 1.0, claims
+multi-CPU, SLA externo y equivalencia científica general. El desarrollo
+completo, gates y Definition of Done están en
+`docs/microfield/phase-6-g15-internal-readiness-plan.md`. La auditoría de la
+capacidad existente y la frontera viable de deltas está en
+`docs/microfield/phase-6-signature-delta-audit.md`.
+
+El cierre transversal de campos, firmas, deltas, reconciliación, grafos,
+calidad y operabilidad hasta una release candidate técnica queda consolidado en
+`docs/microfield/release-candidate-readiness-plan.md`.
+
+RC.0 y RC.1 quedan completados localmente: el paquete separa `signatures`,
+`dynamic-signatures`, `graph` y `legacy`, y el inventario ejecutable valida
+campos mantenidos, un campo externo generado y su presentación runtime. El
+informe está en `docs/microfield/rc-0-rc-1-implementation-report.md`.
+
+RC.2 queda completado localmente con builders estáticos/runtime, perfiles de
+campo y evaluación, trait compacto sellado y snapshots exactos `MFTS` para
+`TrackedSequence`/`TrackedMultiset`. La evidencia está en
+`docs/microfield/rc-2-signature-api-report.md`.
+
+RC.3 queda completado localmente con envelopes `MFDE`, deltas segregados por
+ley, estado revisionado, aplicación preflight/candidate/commit y journal
+persistible `MFDJ`. Las campañas aleatorias comparan cada transición con
+rebuild y el replay repetido se reconoce por `DeltaId`. La evidencia está en
+`docs/microfield/rc-3-delta-core-report.md`.
+
+RC.4 queda completado localmente con chunking fijo identificado, framing
+`MFFC`, árbol ordenado `HomomorphicSummaryTree`, edits locales O(k log n),
+fallback completo al cambiar fronteras y checkpoints exactos `MFST`. La
+evidencia está en `docs/microfield/rc-4-summary-tree-report.md`.
+
+RC.5 queda completado localmente con schema y filas `MFRW`, tabla particionada,
+before/after images, transacciones `MFTX`, log `MFTL` y reconciliación pública
+`MFRS`. V1 declara claves primarias únicas y reconciliación de conjuntos sin
+multiplicidad. La evidencia está en
+`docs/microfield/rc-5-database-reconciliation-report.md`.
+
+RC.6 queda completado localmente con `CanonicalGraphDag`, snapshot persistente
+`MFGD`, restauración que vuelve a canonizar cada nodo, dependencias acíclicas y
+reutilización condicionada a igualdad de bytes canónicos completos. Los
+adapters separan subred inducida —pérdida de frontera explícita—, subred cerrada
+—pérdida rechazada— y clique relacional dirigido. `GraphDeltaUpdateReport`
+expone por separado cambios de labels y topología, pero ambos exigen una nueva
+canonización exacta antes de publicar identidad. La evidencia está en
+`docs/microfield/rc-6-graph-dag-report.md`.
+
 # Referencias técnicas
 
 1. Rust Project,

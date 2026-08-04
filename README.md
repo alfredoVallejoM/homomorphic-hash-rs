@@ -9,6 +9,51 @@ Este repositorio contiene dos paquetes con ciclos de vida independientes:
 fronteras internas siguen SOLID, dispatch estático en operaciones escalares y
 selección previa de estrategia para operaciones por lote.
 
+## Features del paquete raíz
+
+| Feature | Superficie |
+|---|---|
+| `signatures` | firmas homomórficas estáticas sin grafos ni legado |
+| `dynamic-signatures` | firmas sobre campos runtime validados |
+| `graph` | análisis estructural y canonización; depende de firmas |
+| `legacy` | compatibilidad del prototipo; no recomendada para código nuevo |
+| `dynamic-fields` | alias compatible para runtime signatures + graph |
+
+La configuración predeterminada conserva la compatibilidad existente. Un
+consumidor centrado únicamente en firmas puede usar
+`default-features = false, features = ["signatures"]`.
+
+`SignatureBuilder<F, E>` y `DynamicSignatureBuilder<E>` ofrecen la fachada
+mantenida. `CompactSignature` expone perfil y snapshot `MFSG`; las variantes
+`Tracked*` usan el schema exacto separado `MFTS` con límites de restauración.
+Véase el [informe RC.2](docs/microfield/rc-2-signature-api-report.md).
+
+RC.3 añade deltas `MFDE` tipados para suma, multiconjunto y append/trim
+ordenado, además de estado revisionado y journals `MFDJ` con replay
+idempotente. La retirada compacta valida una ecuación algebraica: la existencia
+del dato retirado sigue correspondiendo a tracking exacto o a la fuente
+autoritativa. Véase el
+[informe RC.3](docs/microfield/rc-3-delta-core-report.md).
+
+RC.4 incorpora `FileChunkProfile` y `HomomorphicSummaryTree`: los reemplazos
+que conservan longitud recomputan solo las hojas y ancestros afectados; los
+cambios de fronteras usan un rebuild transaccional explícito. Los checkpoints
+`MFST` conservan bytes exactos, revisión y raíz reconstruible. Véase el
+[informe RC.4](docs/microfield/rc-4-summary-tree-report.md).
+
+RC.5 añade filas tipadas `MFRW`, tablas particionadas, transacciones exactas
+`MFTX` y logs idempotentes `MFTL`. El decoder de reconciliación deja de ser
+código privado del laboratorio y se publica como `BoundedSetReconciler` con
+wire `MFRS` y cotas explícitas. Véase el
+[informe RC.5](docs/microfield/rc-5-database-reconciliation-report.md).
+
+RC.6 cierra la persistencia de grafos con `CanonicalGraphDag`: búsqueda barata,
+canonización exacta, comparación completa de bytes y commit/reutilización
+atómicos. Incluye snapshot `MFGD` revalidado al restaurar y adapters explícitos
+para subredes inducidas, componentes cerrados y cliques relacionales. Las
+firmas rápidas nunca crean identidad definitiva. Véase el
+[informe RC.6](docs/microfield/rc-6-graph-dag-report.md).
+
 ## Estado
 
 El scaffold y la Fase 0 mínima de `microfield` están implementados. El
@@ -62,8 +107,9 @@ legado algebraico: `GaloisSignature256` delega en `microfield` y el nuevo módul
 `structural` ofrece suma/paridad, secuencias Horner, secuencias bidireccionales
 y multiconjuntos de una o varias evaluaciones con identidades, contadores,
 factores cero, tracking exacto y serialización canónica. La misma capa funciona
-con campos estáticos mantenidos, campos externos generados y, mediante la
-feature `dynamic-fields`, contextos validados construidos en runtime. Son
+con campos estáticos mantenidos, campos externos generados y, mediante
+`dynamic-signatures` —o el alias compatible `dynamic-fields`—, contextos
+validados construidos en runtime. Son
 hashes homomórficos no criptográficos: capturan ecuaciones y propiedades
 algebraicas, pero una colisión no prueba igualdad ni un residuo prueba
 pertenencia. F6.G0–G2 introducen además `IncidenceGraph` y
@@ -143,10 +189,54 @@ reprodujo exactamente las 156 clases del oráculo independiente. G10 incorpora
 ya el motor compacto predeterminado: arena plana, ranks enteros, workspace,
 budgets de bytes/profundidad/tiempo, automorfismos verificados y poda por
 órbitas/prefijo. Mantiene G9 como referencia diferencial y reproduce sus bytes;
-en C32 reduce 97 nodos a 7. La expansión por loops/Green inspirada en `Theta`
-permanece en G11. Véanse el
+en C32 reduce 97 nodos a 7. G11 incorpora assurance explícito, lanes
+independientes, secuencias multievaluadas, moments, patterns relacionales
+inducidos L0–L3, compresión multiplicativa compatible con campos binarios,
+matrix RG1 y seis contracciones theta RG2. El bundle Goldilocks no colisiona en
+las 12.346 clases n=8 del split discovery/holdout, pero CFI sigue colisionando:
+son aceleradores fuertes, no una prueba de isomorfismo. Véanse el
 [`informe G8/G9`](docs/microfield/phase-6-g8-g9-implementation-report.md) y el
-[`cierre G10`](docs/microfield/phase-6-g10-final-report.md).
+[`cierre G10`](docs/microfield/phase-6-g10-final-report.md), junto con el
+[`informe G11`](docs/microfield/phase-6-g11-final-report.md).
+
+El cierre G11/G12 añade perfiles de adecuación por característica para campos
+estáticos y runtime, y `RelationalClosedWalkProfile` consulta trazas de
+longitudes `u64` mediante recurrencias exactas del campo sin ampliar el catálogo
+factorial. `Microcanon::compare` usa ahora block-cut iterativo, codificación
+exacta de bosques sin recursión, refinamiento conjunto y matcher fail-first.
+El mismo plan de longitudes puede usar adjacency o el operador
+non-backtracking sobre incidencias para eliminar rebotes inmediatos.
+`DegreeHistogramProfile` añade un prefiltro lineal y componible: conserva el
+histograma exacto de grados de soporte, registros dirigidos y multiplicidades,
+y lo acompaña con una firma multiconjunto multievaluada de las tuplas por
+vértice. El comparador exacto usa esos descriptores antes de block-cut.
+Una diferencia de campo puede rechazar; una igualdad siempre continúa por el
+núcleo exacto y todo `Isomorphic` incluye un `VerifiedGraphMapping`. La campaña
+G12 coincide con formas canónicas en 1024 pares y decide CFI(K4). En caminos de
+1.024 vértices, la comparación pareada local fue 72,44× más rápida que dos
+canonizaciones. Véase el
+[`informe G12`](docs/microfield/phase-6-g12-final-report.md).
+
+G13/G14 cierran la ruta interna con `AdaptiveGraphPipeline`: seis niveles desde
+metadatos hasta matching exacto, ceilings, skips atómicos y trazas de coste. El
+2-WL se localiza por ambigüedad y trabajo. `GraphDelta` añade transacciones de
+labels/relaciones/multiplicidad, revisión, estimación y fallback. Ninguna
+heurística publica isomorfismo. A n=1.024, un label delta fue 2,78× más rápido
+que reconstruir el estado. Véase el
+[`informe G13/G14`](docs/microfield/phase-6-g13-g14-final-report.md).
+
+G15 se reserva para aprobar el consumo interno, no para publicar el crate:
+congelará las APIs de campos y firmas, sus leyes, assurance, wires, perfiles,
+agregación, streaming y reconciliación. Como vertical adicional cerrará schemas,
+DAG canónico, adapters de grafos, oráculos, fuzzing, presupuestos y un gate
+reproducible de go/no-go. El alcance completo está en el
+[`plan G15 interno`](docs/microfield/phase-6-g15-internal-readiness-plan.md).
+La frontera concreta para deltas de archivos, bases de datos y árboles
+jerárquicos se audita en el
+[`informe de firmas y deltas`](docs/microfield/phase-6-signature-delta-audit.md).
+El inventario completo de trabajo restante y los gates de la release candidate
+técnica están en el
+[`plan maestro RC`](docs/microfield/release-candidate-readiness-plan.md).
 
 ## Comandos
 
@@ -170,10 +260,14 @@ cargo test -p homomorphic-hash-rs --all-features --test structural_signatures
 cargo test -p homomorphic-hash-rs --all-features --test fast_graph
 cargo test -p homomorphic-hash-rs --all-features --test graph_canonical
 cargo test -p homomorphic-hash-rs --all-features --test microcanon
+cargo test -p homomorphic-hash-rs --all-features --test graph_signatures_v2
+cargo test -p homomorphic-hash-rs --all-features --test graph_g12
 cargo test -p homomorphic-hash-rs --release --test graph_canonical microcanon_matches_every_simple_graph_isomorphism_class_at_six_vertices -- --ignored --exact
 cargo test -p microfield-validation-lab --all-targets
 cargo run --release -p microfield-validation-lab -- semantic --manifest validation/f6/manifest.json --out validation/f6/results/semantic-v1.json
 cargo run --release -p microfield-validation-lab -- performance --manifest validation/f6/manifest.json --out /tmp/f6-performance.json
+cargo run --release -p microfield-validation-lab -- g11 --manifest validation/f6/manifest.json --out validation/f6/results/g11-v1.json
+cargo run --release -p microfield-validation-lab -- g12 --manifest validation/f6/manifest.json --out validation/f6/results/g12-v1.json
 python3 tools/fetch_graph_corpus.py
 cargo test -p homomorphic-hash-rs --test external_graph_corpus -- --ignored
 conda run -n laboratorio_np sage tools/sage/verify_graph_degeneracy.sage

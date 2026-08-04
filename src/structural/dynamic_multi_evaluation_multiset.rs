@@ -5,8 +5,8 @@ use microfield::{DynElement, DynField};
 use super::{
     dynamic::{check_element, checked_increment, encode_element, read_u64, require_context},
     wire::{encode_header, verify_header, HEADER_BYTES},
-    CanonicalElementEncoder, DynamicStructuralEncoder, SignatureContext, SignatureError,
-    SignatureLaw,
+    CanonicalElementEncoder, DynamicStructuralEncoder, SignatureAssurance, SignatureContext,
+    SignatureError, SignatureLaw,
 };
 
 /// Runtime products `P(tᵢ)=∏(encode(x)+tᵢ)` at distinct offsets.
@@ -202,6 +202,14 @@ where
     #[must_use]
     pub const fn cardinality(&self) -> u64 {
         self.cardinality
+    }
+
+    /// Exactness bound over already encoded runtime field elements.
+    #[must_use]
+    pub fn assurance(&self) -> SignatureAssurance {
+        SignatureAssurance::BoundedExactOverEncodedElements {
+            maximum_cardinality: self.offsets.len(),
+        }
     }
 
     /// Serializes every coordinate using the common `MFSG` schema.

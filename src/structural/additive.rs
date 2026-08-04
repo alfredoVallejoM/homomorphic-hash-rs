@@ -4,7 +4,8 @@ use microfield::{CanonicalEncoding, Field, StaticField};
 
 use super::{
     wire::{encode_header, verify_header, HEADER_BYTES},
-    CanonicalElementEncoder, SignatureContext, SignatureError, SignatureLaw, StructuralEncoder,
+    CanonicalElementEncoder, SignatureAssurance, SignatureContext, SignatureError, SignatureLaw,
+    StructuralEncoder,
 };
 
 /// Commutative field sum of encoded terms with an exact absorbed-term count.
@@ -173,10 +174,38 @@ where
         })
     }
 
+    pub(crate) fn apply_delta_parts(
+        &self,
+        removed: &Self,
+        added: &Self,
+    ) -> Result<Self, SignatureError> {
+        if self.context != removed.context || self.context != added.context {
+            return Err(SignatureError::IdentityMismatch);
+        }
+        let remaining = self
+            .term_count
+            .checked_sub(removed.term_count)
+            .ok_or(SignatureError::ItemAbsent)?;
+        let term_count = remaining
+            .checked_add(added.term_count)
+            .ok_or(SignatureError::CounterOverflow)?;
+        Ok(Self {
+            state: self.state.sub(removed.state).add(added.state),
+            term_count,
+            ..self.clone()
+        })
+    }
+
     /// Complete compatibility identity.
     #[must_use]
     pub const fn context(&self) -> SignatureContext {
         self.context
+    }
+
+    /// Equality remains a finite-field fingerprint.
+    #[must_use]
+    pub const fn assurance(&self) -> SignatureAssurance {
+        SignatureAssurance::Fingerprint
     }
 
     /// Accumulated field value.

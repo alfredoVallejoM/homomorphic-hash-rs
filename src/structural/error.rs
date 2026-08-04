@@ -19,6 +19,11 @@ pub enum SignatureError {
     CounterOverflow,
     /// Temporary framing storage could not be reserved.
     AllocationFailed,
+    /// A tracked snapshot exceeds one configured restoration ceiling.
+    SnapshotLimitExceeded(&'static str),
+    /// Deterministic rejection sampling did not find a canonical element
+    /// within its explicit work ceiling.
+    HashToFieldExhausted,
     /// Two states use different field, encoder, law or parameters.
     IdentityMismatch,
     /// Sequence base is zero or one and cannot encode useful position.
@@ -34,10 +39,10 @@ pub enum SignatureError {
     /// Canonical signature bytes are malformed or belong to another context.
     InvalidWireFormat(&'static str),
     /// The selected encoder does not apply to the runtime field family.
-    #[cfg(feature = "dynamic-fields")]
+    #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
     EncoderFamilyMismatch,
     /// A runtime field rejected an element or arithmetic operation.
-    #[cfg(feature = "dynamic-fields")]
+    #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
     DynamicField(microfield::DynFieldError),
 }
 
@@ -50,6 +55,12 @@ impl fmt::Display for SignatureError {
             Self::NonCanonicalElement => formatter.write_str("non-canonical field element"),
             Self::CounterOverflow => formatter.write_str("structural counter overflow"),
             Self::AllocationFailed => formatter.write_str("structural framing allocation failed"),
+            Self::SnapshotLimitExceeded(limit) => {
+                write!(formatter, "tracked snapshot exceeds {limit} limit")
+            }
+            Self::HashToFieldExhausted => {
+                formatter.write_str("hash-to-field rejection limit exhausted")
+            }
             Self::IdentityMismatch => formatter.write_str("incompatible structural identities"),
             Self::DegenerateSequenceBase => {
                 formatter.write_str("sequence base must be neither zero nor one")
@@ -63,11 +74,11 @@ impl fmt::Display for SignatureError {
             Self::InvalidWireFormat(reason) => {
                 write!(formatter, "invalid structural wire format: {reason}")
             }
-            #[cfg(feature = "dynamic-fields")]
+            #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
             Self::EncoderFamilyMismatch => {
                 formatter.write_str("structural encoder does not match dynamic field family")
             }
-            #[cfg(feature = "dynamic-fields")]
+            #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
             Self::DynamicField(error) => error.fmt(formatter),
         }
     }
@@ -75,7 +86,7 @@ impl fmt::Display for SignatureError {
 
 impl std::error::Error for SignatureError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        #[cfg(feature = "dynamic-fields")]
+        #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
         if let Self::DynamicField(error) = self {
             return Some(error);
         }
@@ -83,7 +94,7 @@ impl std::error::Error for SignatureError {
     }
 }
 
-#[cfg(feature = "dynamic-fields")]
+#[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 impl From<microfield::DynFieldError> for SignatureError {
     fn from(error: microfield::DynFieldError) -> Self {
         Self::DynamicField(error)

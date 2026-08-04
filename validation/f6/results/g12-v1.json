@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "seed": 684033,
+  "small_differential_pairs": 1024,
+  "verified_relabelings": 6,
+  "largest_forest_vertices": 4096,
+  "route_counts": {
+    "BlockCutDecomposition": 94,
+    "ExactPrefilter": 729,
+    "PairedSearch": 96,
+    "TreeForest": 114
+  },
+  "adversarial": [
+    {
+      "family": "C6 versus 2C3",
+      "witness": "BlockCutProfile { first_differing_byte: 7 }",
+      "explored_nodes": 0
+    },
+    {
+      "family": "Shrikhande versus 4x4 rook (strongly regular)",
+      "witness": "CandidateSpaceExhausted",
+      "explored_nodes": 304
+    },
+    {
+      "family": "CFI(K4) even versus one twisted edge",
+      "witness": "CandidateSpaceExhausted",
+      "explored_nodes": 6976
+    }
+  ],
+  "inconclusive_outcomes": 0
+}

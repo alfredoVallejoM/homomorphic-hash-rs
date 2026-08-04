@@ -47,6 +47,13 @@ impl CanonicalGraphEncodingId {
 pub struct CanonicalGraphKey([u8; 32]);
 
 impl CanonicalGraphKey {
+    pub(crate) fn derive(bytes: &[u8]) -> Self {
+        let mut hasher = Sha256::new();
+        hasher.update(b"microfield/canonical-graph-key/v1\0");
+        hasher.update(bytes);
+        Self(hasher.finalize().into())
+    }
+
     /// Borrows the digest bytes.
     #[must_use]
     pub const fn as_bytes(&self) -> &[u8; 32] {
@@ -229,10 +236,7 @@ pub(crate) fn canonical_form_from_order(
         bytes.extend_from_slice(&arc.multiplicity.to_be_bytes());
     }
 
-    let mut hasher = Sha256::new();
-    hasher.update(b"microfield/canonical-graph-key/v1\0");
-    hasher.update(&bytes);
-    let key = CanonicalGraphKey(hasher.finalize().into());
+    let key = CanonicalGraphKey::derive(&bytes);
     Ok(CanonicalGraphForm {
         encoding_id: CanonicalGraphEncodingId::V1,
         schema_id,

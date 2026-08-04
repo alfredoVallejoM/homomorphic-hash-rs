@@ -1,6 +1,6 @@
 # Estado actual y siguiente plan
 
-Fecha de revisión: 3 de agosto de 2026.
+Fecha de revisión: 4 de agosto de 2026.
 
 ## Diagnóstico ejecutivo
 
@@ -62,14 +62,30 @@ componentes e IR exhaustivo sin depender de campos; el adapter histórico delega
 en él. G10 añade la estrategia compacta predeterminada, IDs internados, arena
 plana, trazas, automorfismos verificados, poda por órbitas/prefijo y presupuestos
 de bytes, profundidad y tiempo. Conserva G9 como referencia diferencial y
-produce los mismos bytes. G11–G15 añadirán firmas de loops, matching pareado y
-cierre científico. F6.V1–V6 conserva valor como caracterización reproducible del
-baseline. El diseño y la entrega están en
+produce los mismos bytes. G11 añade ya assurance, lanes independientes,
+secuencias multievaluadas, moments, patterns L0–L3, matrix RG1 y theta RG2. Su
+bundle Goldilocks no colisiona en las 12.346 clases n=8, pero CFI sigue
+indistinguible y conserva al exacto como autoridad. La extensión final G11
+añade policy estática/dinámica por característica y closed walks de longitud
+`u64` mediante recurrencias exactas de campo. G12 sustituye la doble
+canonización por prefiltros exactos, block-cut iterativo, bosques exactos sin
+recursión, refinamiento conjunto y matcher fail-first. CFI(K4) se decide por
+agotamiento exacto en 6.976 asignaciones. G13/G14 cierran ahora el pipeline
+adaptativo, el 2-WL localizado y la incrementalidad transaccional. G15 queda
+planificado como gate de consumo interno —API y protocolos de firmas/campos,
+persistencia, aplicaciones, grafos/DAG, oráculos, robustez y SLO— y la
+publicación pasa a una fase posterior separada. F6.V1–V6
+conserva valor como caracterización reproducible
+del baseline. El diseño y la entrega están en
 [`phase-6-canonization-v2-plan.md`](phase-6-canonization-v2-plan.md) y
 [`ADR 0031`](adr/0031-certified-canonization-core.md), con evidencia en
 [`phase-6-g8-g9-implementation-report.md`](phase-6-g8-g9-implementation-report.md).
 El cierre y las mediciones de G10 están en
 [`phase-6-g10-final-report.md`](phase-6-g10-final-report.md).
+El cierre, holdout y límites de G11 están en
+[`phase-6-g11-final-report.md`](phase-6-g11-final-report.md).
+El cierre exacto y las mediciones pareadas están en
+[`phase-6-g12-final-report.md`](phase-6-g12-final-report.md).
 
 La Fase 2 está cerrada. H2.8 transforma la calibración, seguridad y
 compatibilidad en contratos versionados: tabla de selección v1 compilada como
@@ -103,8 +119,10 @@ suma, producto y cuadrado out-of-place, y producto/cuadrado in-place, sin
 | F6.G8 | Completado localmente | schema/profile separados, encoding/parser v1, key, mappings y verifier |
 | F6.G9 | Baseline completado localmente | Microcanon independiente e IR exhaustivo; 32.768 grafos n=6 en 156 clases exactas |
 | F6.G10 | Completado localmente | arena plana/IDs, G9 diferencial, órbitas y prefijo certificados, workspace y budgets; 92,8 % menos nodos en C32 |
-| F6.G11 / F6.RG | Siguiente hito | firmas v2, assurance, catálogo de loops/homomorfismos y jerarquía determinant/resolvent/contractions sobre campos |
-| F6.G12–G15 | Planificado | matcher pareado, descomposición, alta regularidad, delta real y cierre científico |
+| F6.G11 / F6.RG | Cerrado localmente | assurance, campos externos/runtime, histograma de grado + multiset, patterns, producto, matrix/theta y closed walks `u64`; homomorfismos/resolventes quedan como investigación |
+| F6.G12 | Cerrado localmente | block-cut, bosques exactos, matcher pareado, mapping verificado, CFI y benchmark frente a doble canonización |
+| F6.G13–G14 | Cerrado localmente | pipeline de seis niveles, 2-WL localizado, `GraphDelta`, replay/fallback y campaña determinista |
+| F6.G15 | Planificado | APIs de firmas/campos, protocolos y persistencia; aplicaciones, grafos/DAG, oráculos, fuzzing, SLO y go/no-go |
 | API algebraica | Correcto | `F2` y tres campos completos, nominales y monomorfizados |
 | Batch H4 | Integrado | catálogo, builder, fachada y backend portable en `main` |
 | Errores batch | Transaccional | todas las longitudes se validan antes de escribir |
