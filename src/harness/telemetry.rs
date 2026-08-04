@@ -59,3 +59,9 @@ impl TelemetryRecorder {
         wtr.flush().expect("Failed to flush CSV writer");
     }
 }
+
+impl Default for TelemetryRecorder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

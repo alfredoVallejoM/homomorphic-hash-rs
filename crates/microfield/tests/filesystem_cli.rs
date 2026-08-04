@@ -137,6 +137,15 @@ fn cli_validate_normalize_and_certify_have_stable_success_contracts() {
 }
 
 #[test]
+fn cli_replays_all_maintained_prime_certificates() {
+    let output = run_cli([OsStr::new("verify-primes"), OsStr::new("--json")]);
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report, serde_json::json!({ "ok": true, "certificates": 3 }));
+}
+
+#[test]
 fn cli_emit_and_check_use_distinct_exit_codes_for_drift() {
     let temporary = TemporaryDirectory::new("microfield-cli-output");
     let output = temporary.path().as_os_str();

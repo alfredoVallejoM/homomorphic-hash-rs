@@ -1,0 +1,180 @@
+{
+  "schema": "microfield-rc-supported-surface-v1",
+  "release_scope": "internal-technical-rc",
+  "capabilities": [
+    {
+      "id": "field.static.binary",
+      "status": "supported",
+      "feature": "microfield/builtin-fields",
+      "contract": "nominal static fields with canonical encoding and portable fallback"
+    },
+    {
+      "id": "field.static.prime",
+      "status": "supported",
+      "feature": "microfield/prime-fields",
+      "contract": "nominal static prime fields with canonical integer encoding"
+    },
+    {
+      "id": "field.generated.binary",
+      "status": "supported",
+      "feature": "microfield/generator",
+      "contract": "certified generated nominal type bound to FieldId"
+    },
+    {
+      "id": "field.generated.prime",
+      "status": "supported",
+      "feature": "microfield/generator",
+      "contract": "certified generated nominal type bound to FieldId"
+    },
+    {
+      "id": "field.runtime",
+      "status": "conditional",
+      "feature": "microfield/dynamic",
+      "contract": "validated runtime context with explicit assurance and limits"
+    },
+    {
+      "id": "signature.additive",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "commutative field sum and exact term count"
+    },
+    {
+      "id": "signature.sequence",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "ordered Horner evaluation, length and concatenation"
+    },
+    {
+      "id": "signature.multiset",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "commutative product, cardinality and zero-factor accounting"
+    },
+    {
+      "id": "signature.bidirectional-sequence",
+      "status": "experimental",
+      "feature": "signatures",
+      "contract": "forward and reverse ordered evaluations"
+    },
+    {
+      "id": "signature.multi-evaluation-multiset",
+      "status": "experimental",
+      "feature": "signatures",
+      "contract": "K product evaluations with bounded exactness over encoded elements"
+    },
+    {
+      "id": "signature.multi-evaluation-sequence",
+      "status": "experimental",
+      "feature": "signatures",
+      "contract": "K Horner evaluations with bounded exactness over encoded elements"
+    },
+    {
+      "id": "signature.tracked",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "exact source retention with O(n) memory"
+    },
+    {
+      "id": "signature.runtime",
+      "status": "conditional",
+      "feature": "dynamic-signatures",
+      "contract": "runtime-field equivalent with explicit field context"
+    },
+    {
+      "id": "signature.builder",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "typed static/runtime construction without law or field erasure"
+    },
+    {
+      "id": "signature.compact-snapshot",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "MFSG state with complete SignatureContext and no retained source values"
+    },
+    {
+      "id": "signature.tracked-snapshot",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "MFTS exact source snapshot with limits and compact-state reconstruction"
+    },
+    {
+      "id": "signature.residual",
+      "status": "restricted",
+      "feature": "signatures",
+      "contract": "algebraic equation only; never membership or authorization"
+    },
+    {
+      "id": "protocol.reconciliation",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "bounded Fp251 set recovery with MFRS profile/wire and explicit universe, difference, degree and memory ceilings"
+    },
+    {
+      "id": "protocol.database-rows",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "MFRW schema-bound typed rows with unique canonical primary keys and exact row versions"
+    },
+    {
+      "id": "protocol.database-transactions",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "partitioned MFTX before/after transactions with atomic commit, revision and idempotent MFTL replay"
+    },
+    {
+      "id": "protocol.data-delta",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "MFDE law-specific static/generated-field deltas with namespace, revisions and atomic commit"
+    },
+    {
+      "id": "protocol.delta-journal",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "MFDJ bounded persistence, contiguous ordering and idempotent in-memory replay"
+    },
+    {
+      "id": "protocol.file-chunks",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "fixed-size MFFC-framed chunks with profile-bound identity and exact retained bytes"
+    },
+    {
+      "id": "protocol.summary-tree",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "ordered hierarchical summary with local fixed-boundary updates and explicit rebuild fallback"
+    },
+    {
+      "id": "protocol.summary-checkpoint",
+      "status": "supported",
+      "feature": "signatures",
+      "contract": "bounded MFST checkpoint with exact bytes and root reconstruction"
+    },
+    {
+      "id": "graph.filter",
+      "status": "supported",
+      "feature": "graph",
+      "contract": "negative evidence or Indistinguishable; never equality proof"
+    },
+    {
+      "id": "graph.microcanon",
+      "status": "conditional",
+      "feature": "graph",
+      "contract": "exact result with verified mapping or explicit Inconclusive"
+    },
+    {
+      "id": "graph.canonical-dag",
+      "status": "planned",
+      "feature": "graph",
+      "contract": "persistent identity derived only from exact canonical bytes"
+    },
+    {
+      "id": "legacy.proof-facade",
+      "status": "legacy-adapter",
+      "feature": "legacy",
+      "contract": "source compatibility only; result is an algebraic residual"
+    }
+  ]
+}

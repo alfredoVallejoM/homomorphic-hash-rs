@@ -7,6 +7,7 @@ use crate::{ArtifactBundleDigest, ArtifactId, FieldId};
 const FIELD_DOMAIN: &[u8] = b"microfield:field-id:v1\0";
 const ARTIFACT_DOMAIN: &[u8] = b"microfield:artifact-id:v1\0";
 const ARTIFACT_BUNDLE_DOMAIN: &[u8] = b"microfield:artifact-bundle:v1\0";
+const GENERATED_PACKAGE_DOMAIN: &[u8] = b"microfield:generated-field-package:v1\0";
 
 pub(crate) fn field_id(identity_bytes: &[u8]) -> FieldId {
     FieldId::from_bytes(digest(FIELD_DOMAIN, identity_bytes))
@@ -20,12 +21,31 @@ pub(crate) fn artifact_bundle_digest(descriptor_bytes: &[u8]) -> ArtifactBundleD
     ArtifactBundleDigest::from_bytes(digest(ARTIFACT_BUNDLE_DOMAIN, descriptor_bytes))
 }
 
+pub(crate) fn generated_package_digest(
+    artifact_bundle: ArtifactBundleDigest,
+    rust_source: &[u8],
+) -> ArtifactBundleDigest {
+    let mut hasher = Sha256::new();
+    hasher.update(GENERATED_PACKAGE_DOMAIN);
+    hasher.update(artifact_bundle.as_bytes());
+    hasher.update((rust_source.len() as u64).to_le_bytes());
+    hasher.update(rust_source);
+    ArtifactBundleDigest::from_bytes(hasher.finalize().into())
+}
+
 pub(crate) fn content_digest(bytes: &[u8]) -> String {
     hex(&digest(&[], bytes))
 }
 
 pub(crate) fn proof_digest(plan_bytes: &[u8]) -> String {
     hex(&digest(b"microfield:reduction-plan:v1\0", plan_bytes))
+}
+
+pub(crate) fn isa_profile_digest(profile_bytes: &[u8]) -> String {
+    hex(&digest(
+        b"microfield:verified-isa-profile:v1\0",
+        profile_bytes,
+    ))
 }
 
 pub(crate) fn hex(bytes: &[u8]) -> String {

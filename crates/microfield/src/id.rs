@@ -14,6 +14,13 @@ impl FieldId {
         Self(bytes)
     }
 
+    /// Builds an identifier from generated lowercase hexadecimal text.
+    #[doc(hidden)]
+    #[must_use]
+    pub const fn __from_generated_hex(hex: &str) -> Self {
+        Self(decode_digest(hex))
+    }
+
     /// Borrows the serialized digest.
     #[must_use]
     pub const fn as_bytes(&self) -> &[u8; 32] {
@@ -41,7 +48,7 @@ impl fmt::Debug for FieldId {
     }
 }
 
-#[cfg(feature = "generator")]
+#[cfg(any(feature = "generator", feature = "dynamic"))]
 impl serde::Serialize for FieldId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -61,6 +68,13 @@ impl ArtifactId {
     #[must_use]
     pub const fn from_bytes(bytes: [u8; 32]) -> Self {
         Self(bytes)
+    }
+
+    /// Builds an identifier from generated lowercase hexadecimal text.
+    #[doc(hidden)]
+    #[must_use]
+    pub const fn __from_generated_hex(hex: &str) -> Self {
+        Self(decode_digest(hex))
     }
 
     /// Borrows the serialized digest.
@@ -90,7 +104,7 @@ impl fmt::Debug for ArtifactId {
     }
 }
 
-#[cfg(feature = "generator")]
+#[cfg(any(feature = "generator", feature = "dynamic"))]
 impl serde::Serialize for ArtifactId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -142,7 +156,7 @@ impl fmt::Debug for ArtifactBundleDigest {
     }
 }
 
-#[cfg(feature = "generator")]
+#[cfg(any(feature = "generator", feature = "dynamic"))]
 impl serde::Serialize for ArtifactBundleDigest {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -157,4 +171,24 @@ fn write_hex(formatter: &mut fmt::Formatter<'_>, bytes: &[u8]) -> fmt::Result {
         write!(formatter, "{byte:02x}")?;
     }
     Ok(())
+}
+
+const fn decode_digest(hex: &str) -> [u8; 32] {
+    let bytes = hex.as_bytes();
+    assert!(bytes.len() == 64);
+    let mut out = [0_u8; 32];
+    let mut index = 0;
+    while index < out.len() {
+        out[index] = (decode_nibble(bytes[index * 2]) << 4) | decode_nibble(bytes[index * 2 + 1]);
+        index += 1;
+    }
+    out
+}
+
+const fn decode_nibble(byte: u8) -> u8 {
+    match byte {
+        b'0'..=b'9' => byte - b'0',
+        b'a'..=b'f' => byte - b'a' + 10,
+        _ => panic!("generated digest must use lowercase hexadecimal"),
+    }
 }

@@ -1,5 +1,78 @@
 # Contratos técnicos v1
 
+## Campos primos de Fase 4
+
+| Nombre | Característica | Representación | Bytes |
+|---|---:|---|---:|
+| `Fp251V1` | 251 | canónica `u8` | 1 |
+| `FpGoldilocks64V1` | (2^{64}-2^{32}+1) | canónica `u64` | 8 |
+| `Fp256GenericV1` | primo congelado de 256 bits | Montgomery, 4×`u64` privados | 32 |
+
+`PrimeField` no expone módulo en limbs, (R), reducción ni rango lazy.
+`from_canonical_integer` rechaza todo entero fuera de `[0,p)` y
+`from_bytes_mod_order` es la única frontera mínima que reduce explícitamente.
+El encoding es little-endian de longitud exacta.
+
+`PrimeFieldSpec` y `PrimeWideProduct` son internos. `RangeContract` autentica
+los límites de un kernel; `Reduced`, `Lazy2` y `Lazy4` no implementan encoding
+ni cruzan la API. Native, Barrett, Solinas y Montgomery poseen planes
+inmutables verificables. El plan y la representación pertenecen a `ArtifactId`,
+no a `FieldId`.
+
+Identidades congeladas:
+
+| Campo | `FieldId` |
+|---|---|
+| `Fp251V1` | `aef78c79e5e5e929ee046a199df8eab46633a4ea7cabf66480fe2d7909d678da` |
+| `FpGoldilocks64V1` | `db27c832ee2b9e87ae66e00657a20cf705132730f5ac43e3f7031f9bb1e272ac` |
+| `Fp256GenericV1` | `60cbdb42c3d6efbc7158144f6a42d015a708ca15ae47e5156204660f97681e8e` |
+
+Los certificados mantenidos son demostrativos: división completa o
+Pocklington. El corpus Sage se regenera desde una semilla pública y se contrasta
+con cada operación pública. La factory TOML binaria v1 permanece cerrada;
+Fase 5 añade un schema primo v1 separado, assurance explícito y Pocklington
+replayable sin reinterpretar documentos binarios.
+
+## Contratos externos de Fase 5
+
+`ValidationAssurance::Proven` es el único estado que permite emitir un tipo
+estático. `ProbablePrime { rounds }` es visible, exportable y exclusivamente
+runtime. Para módulos mayores que `u64`, `Proven` exige certificado
+Pocklington: reconstrucción de factores, cota de raíz, Fermat y gcd.
+
+`PrimeFieldFactory` selecciona storage canónico `u8`/`u16`/`u32` hasta los
+límites de sus bridges AVX2 y Montgomery radix-64 después. El perfil forma
+parte de `ArtifactId`; módulo, base y encoding forman `FieldId`. Todo adapter
+ISA externo es explícito hasta calibración concreta.
+
+`MicrofieldLock` cubre identidades, versión, manifiesto, representación,
+templates y digests de payload. La caché verifica el lock al leer y no actúa
+como autoridad matemática.
+
+`DynElement` conserva `FieldId` y storage privado; `DynBatch` valida una vez al
+construirse y `DynEngine` valida contexto/longitudes una vez por operación. El
+nivel publicado es `GenericPortable`. `generate_static` vuelve a certificar el
+manifiesto exportado y exige igualdad de `FieldId`.
+
+## Algoritmos derivados de Fase 3
+
+`BatchPlan<F>` autentica operación, revisión, longitud, backend y `FieldId`.
+`WorkspaceLayout` declara elementos tipados, words de máscara, alineamiento,
+soporte in-place y comportamiento de asignación.
+
+La inversión batch es tolerante a cero: un bit de máscara solo se activa para
+un valor invertible; cero produce cero. Cualquier error de shape, máscara,
+workspace o backend ocurre antes de modificar salida. El mismo contrato
+transaccional rige scans, Horner y `mul_add_into`.
+
+Los coeficientes de Horner están en orden de grado ascendente. Cero
+coeficientes es un shape inválido; cero puntos o cero polinomios es un lote
+vacío válido. `CoefficientLayout` impide transposiciones implícitas.
+
+El IR v4 de inversión se verifica simbólicamente contra `2^degree-2` antes de
+la emisión. Cambiarlo altera `ArtifactId`, no `FieldId`; codegen ABI permanece
+en v3.
+
 ## Campos mantenidos
 
 | Nombre | Módulo | Bytes |
@@ -44,10 +117,10 @@ Identidades congeladas:
 | `Gf2_256AltV1` | `5c78ea2f9ea1b2d59b88bf32e38ae33be4c2f977f0232c4441f7a16e4c9bb54d` |
 
 `StaticFieldSpec` expone tanto `FieldId` como `ArtifactId`. `ArtifactId` usa
-otro dominio SHA-256 e incorpora `FieldId`, versión del
-generador, versión del IR, familia target y build normalizado. Cambiar el
-nombre del campo no altera ninguna identidad; cambiar el build conserva
-`FieldId` y cambia `ArtifactId`.
+otro dominio SHA-256 e incorpora `FieldId`, versión del generador, versión del
+IR, familia target, build normalizado y plan de optimización portable. Cambiar
+el nombre del campo no altera ninguna identidad; cambiar build o codegen
+conserva `FieldId` y cambia `ArtifactId`.
 
 `ArtifactBundleDigest` usa el dominio
 `microfield:artifact-bundle:v1\0` sobre la lista canónica de rutas, longitudes
@@ -105,9 +178,49 @@ La inversión ejecuta una cadena fija parametrizada por el grado para
 Sage. Ninguna operación escalar consulta `Engine`, reserva heap o usa dispatch
 dinámico.
 
+## Factory binaria estática
+
+Con `generator`, `BinaryFieldFactory` acepta un manifiesto v1 o un Builder de
+parámetros matemáticos. El Builder no elude el esquema: construye una entrada
+que vuelve a pasar por el parser estricto y por el mismo pipeline de
+normalización, identidad, Rabin, planificación y artefactos.
+
+La salida es fuente Rust previa a compilación, no un campo dinámico. El newtype
+generado contiene exactamente `ceil(m / 64)` limbs privados y el encoding
+contiene `ceil(m / 8)` bytes. Los bits de padding se rechazan; los bytes
+polinómicos arbitrariamente anchos se reducen. La fuente actual usa ABI de
+codegen 3, tomado de `CURRENT_CODEGEN_ABI_VERSION`, y cada módulo comprueba su
+compatibilidad mediante una aserción `const`; el runtime conserva helpers ABI
+1/2 y acepta el rango 1..=3. La matriz autoritativa está versionada en
+`abi/runtime-codegen-matrix-v1.csv`.
+`GeneratedFieldPackage::package_digest` autentica conjuntamente el digest del
+bundle de certificados/planes y los bytes exactos del módulo Rust.
+
+El plan portable v2 elige estáticamente producto escolar por bits activos,
+cuadrado por expansión de bits, inversión Itoh–Tsujii y una de tres
+reducciones: tail bajo alineado, términos dispersos o palabras densas. La
+decisión depende solo del descriptor validado, queda serializada en el IR y no
+añade ramas de selección al escalar.
+
+IR v3 añade `VerifiedIsaProfile`, derivado exclusivamente tras validación. El
+perfil fija layout, anchuras, backends carry-less compatibles, digest de
+reducción y digest propio. Se emite como archivo del bundle y habilita una
+estrategia ISA segura sin exponer `KernelSet` ni intrinsics. Todo perfil externo
+es `explicit_only`: corrección certificada no autoriza selección automática sin
+calibración nativa.
+
+El contrato ABI 3 compila también sin la feature `portable`: álgebra, encoding
+y metadata permanecen disponibles en `no_std`, mientras `Engine` y los adapters
+ISA no se compilan. Activar batch no cambia layout, identidad ni código escalar.
+
+La publicación crea y sincroniza un archivo de staging antes de renombrarlo. Se
+rechazan directorios o targets que sean symlinks o archivos especiales. Los
+nombres v1 son `snake_case` ASCII estricto y nunca se interpretan como tokens o
+rutas antes de normalizarse.
+
 ## Batch portable
 
-`Engine<F>` selecciona una referencia a `KernelSet<F>` al construirse. Cada
+`Engine<F>` construye y selecciona un `KernelSet<F>` privado al construirse. Cada
 operación valida las longitudes antes de escribir y realiza una única llamada
 indirecta por lote. El backend portable recorre los slices sin asignar, hacer
 packing, detectar CPU ni paralelizar.
@@ -117,15 +230,87 @@ Operaciones v1: `add_into`, `mul_into`, `square_into`, `mul_assign` y
 salida distinta por contrato de préstamos; las rutas `*_assign` expresan
 aliasing intencional.
 
-`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. En H4
-solo `Portable` está certificado. Forzar PCLMUL, VPCLMUL o PMULL devuelve
-`EngineBuildError::BackendUnavailable`. `FixedSchedule` se rechaza porque el
-producto portable actual tiene scheduling dependiente de los operandos.
+`BackendId` identifica solicitudes y diagnósticos, no disponibilidad. H2.4
+compila PCLMUL en x86-64, H2.5 compila PMULL en AArch64 y H2.7 compila VPCLMUL
+en x86-64. ABI 3 registra los adapters ISA compatibles para campos externos.
+Un campo ABI 1/2 continúa devolviendo
+`BackendUnsupportedByField`. En todos los casos se distingue CPU sin capability
+(`BackendUnsupportedByCpu`) de campo sin perfil.
+
+PCLMUL mantenido participa en selección automática con el umbral medido. Los
+backends primos mantenidos hacen lo mismo solo en su región certificada:
+`Fp251V1` AVX2 desde 64 elementos y `FpGoldilocks64V1` AVX2 desde 4. PMULL,
+VPCLMUL, BMI2 primo y todo perfil externo tienen
+`automatic_selection = false`: solo un backend forzado tras detección puede
+usarlos. Los perfiles externos canónicos `u8`/`u16` pueden recibir un candidato
+AVX2 opaco, pero no heredan la calibración de los campos mantenidos. En
+VPCLMUL la exclusión es una decisión medida: el desenrollado mejora rutas
+GF(2²⁵⁶) largas, pero no supera a PCLMUL de forma estable en la región conjunta.
+`FixedSchedule` también respeta esta regla salvo que se fuerce el backend.
+Portable no recibe garantía fija porque su producto actual depende de los
+operandos.
+
+`EngineBuilder::build()` usa por defecto `CpuCapabilities::portable_only()` y
+nunca hace detección implícita. Con `std`, `EngineBuilder::detect()` captura una
+instantánea real una vez. `CpuCapabilities` expone arquitectura y flags para
+diagnóstico, pero sus bits no tienen constructor público.
+
+`expected_batch` y `KernelMetadata::minimum_batch` son pistas de selección para
+`Auto`. No limitan las longitudes válidas: todo `KernelSet` registrado debe
+aceptar cualquier slice, incluido el vacío.
+
+H2.8 congela esos valores en `calibration/selection-table-v1.csv`. El runtime
+los materializa como `SelectionCalibration` privadas y constantes: no lee CSV,
+no consulta modelos de CPU y no añade branches al lote. Una promoción exige
+20 % de mejora conservadora, packing incluido y diversidad de familias. La CI
+valida perfiles/decisiones, pero los benchmarks se capturan fuera del gate
+ordinario para no confundir ruido del runner con una regresión funcional.
+
+## Batch persistente
+
+`Engine::packing_plan(len)` es la única factory de planes. El plan queda ligado
+al backend seleccionado, al `FieldId`, al layout, a la longitud lógica/padded,
+al tile y al alineamiento. Sus campos son privados y no se serializa.
+
+H2.6 admite `PackedLayout::Aos`. H2.7 añade `AosLanePairs` exclusivamente para
+VPCLMUL: dos elementos AoS forman una tesela, la longitud padded es par y el
+inicio se alinea a 32 bytes. F4.7 añade `CanonicalU8`, `CanonicalU16` y
+`CanonicalU32` para storage persistente de perfiles primos. El backend realiza
+el interleave o trabaja sobre lanes privadas; no se exponen limbs ni cambia el
+layout de `F`.
+
+`PackedBatch<F>` requiere `alloc`. `PackedBatchView` y
+`PackedBatchViewMut` no lo requieren y toman prestado storage
+`MaybeUninit<u8>` mediante `pack_into_storage`. `required_packed_bytes` incluye
+el peor slack de alineamiento; longitud cero requiere cero bytes. Todo slot
+padded se inicializa antes de exponer una referencia tipada: con `F::ZERO` para
+AoS o con la lane canónica cero para storage primo.
+
+`PackingPlan::element_size()` conserva el tamaño lógico de `F` por
+compatibilidad. `physical_element_size()` y `data_bytes()` describen el storage
+real. El plan recibe el layout desde la estrategia packed del `KernelSet`; no
+lo infiere solo de `BackendId`.
+
+Suma, producto y cuadrado packed tienen rutas out-of-place; producto y cuadrado
+ofrecen además sus variantes in-place. Una operación valida todos los planes y
+el backend antes de escribir, y después realiza una llamada al kernel
+seleccionado sobre la región padded. No asigna, no hace repacking, no detecta
+CPU ni selecciona estrategia durante la operación.
+
+Los codecs `F ↔ u8/u16/u32` son funciones seguras y monomorfizadas. Los
+perfiles AVX2 externos siguen siendo explícitos. Admitir una anchura física
+demuestra compatibilidad y corrección, no autoriza selección automática ni
+transfiere la calibración entre módulos.
+
+Los préstamos expresan aliasing: una vista mutable conserva el préstamo
+exclusivo del storage y no puede coexistir de forma segura con otra vista sobre
+la misma región. No se exponen bytes, offsets, punteros ni padding.
 
 ## Errores y escrituras
 
 - Encoding incorrecto devuelve `DecodeError`; no hace panic.
 - Una longitud batch inválida se detecta antes de escribir.
+- Un backend o plan packed incompatible se detecta antes de escribir.
 - La salida permanece intacta si la validación falla.
 - Invertir cero devuelve `None`.
 - `from_canonical` nunca reduce; `from_polynomial_bytes_mod` sí.
@@ -135,3 +320,57 @@ producto portable actual tiene scheduling dependiente de los operandos.
 La Fase 1 no promete tiempo constante. `pow` es variable en bits y longitud.
 El contrato prohíbe describir una operación como constante sin auditoría
 específica.
+
+PCLMUL posee schedule fijo respecto de los valores para `mul` y `square`, pero
+esta propiedad de scheduling no equivale por sí sola a una garantía completa
+de tiempo constante del sistema.
+
+Los kernels PMULL de los presets también poseen calendario fijo respecto de
+los valores. El perfil ABI 3 publica `schedule = fixed` solamente para
+`low_tail_fold`; `sparse_term_fold` y `dense_word_fold` publican
+`schedule = data_dependent`, pues su reducción inspecciona bits del producto.
+`FixedSchedule` respeta esa clasificación incluso ante selección explícita.
+
+Los campos Montgomery con `N` limbs de 64 bits pueden implementar el puerto
+público-oculto `VerifiedPrimeMontgomery64Field<N, 2N>` y obtener una
+`VerifiedPrimeIsaStrategy` opaca. Intrinsics, función kernel y catálogo mutable
+permanecen dentro de Microfield. El campo entrega únicamente módulo, inversa y
+conversiones de limbs; el runtime es dueño de suma, producto ancho, carry, REDC
+y corrección. Esta elegibilidad no es una certificación de rendimiento. Cada
+`KernelSet` necesita una decisión de promoción propia; el candidato de
+`Fp256GenericV1` conserva `automatic_selection = false`.
+
+BMI2 se clasifica como `ScheduleKind::Fixed`: producto y REDC usan iteraciones
+determinadas por `N`, recorren por completo cada cadena de carry y seleccionan
+la resta final sin ramas dependientes del valor. La auditoría de release exige
+16 `MULX` y ausencia de saltos condicionales en el producto+REDC mantenido de
+cuatro limbs. `FixedSchedule` puede forzarlo, pero esta propiedad no equivale a
+una garantía criptográfica integral de tiempo constante.
+
+## Firmas estructurales sobre campos
+
+`structural` pertenece al paquete consumidor raíz, no al núcleo `microfield`.
+Sus contratos aceptan cualquier `F` que implemente las capacidades requeridas:
+
+- aditiva: `Field + CanonicalEncoding + StaticField`;
+- secuencia: añade `Pow + Invert` por residuales;
+- secuencia bidireccional: añade `Pow`;
+- multiconjunto simple: añade `Invert` por residuales;
+- multiconjunto multievaluado: no exige inversión.
+
+Los métodos `*_element` existen únicamente junto a
+`CanonicalElementEncoder`: así la ingestión directa conserva exactamente la
+misma identidad que el decoding canónico y no finge haber aplicado otro
+encoder. Los métodos de lote son transaccionales frente a todos los errores
+representables.
+
+Con `dynamic-fields`, tipos separados aceptan `DynField`/`DynElement`. Todo
+elemento, base y offset se valida contra el `FieldId` del contexto. Esta ruta
+puede asignar y ejecutar aritmética runtime; no altera el layout, bounds ni
+ensamblado de los tipos estáticos.
+
+`BidirectionalSequenceSignature` almacena `H(xs)`, `H(reverse(xs))` y longitud.
+`MultiEvaluationMultisetSignature<F,E,K>` exige `K > 0` y offsets distintos;
+almacena un producto no nulo y contador de ceros por punto. Ambas conservan
+composición exacta por particiones, pero siguen siendo fingerprints finitos:
+no autentican, no prueban pertenencia y no deciden igualdad estructural.

@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "campaign_id": "f6-validation-v1",
+  "seed": 684033,
+  "signatures": {
+    "enumerated_words": 1365,
+    "metamorphic_checks": 145636,
+    "collision_profiles": [
+      {
+        "signature": "additive-f251-v1",
+        "semantic_inputs": 126,
+        "distinct_outputs": 51,
+        "collision_buckets": 30,
+        "colliding_inputs": 105,
+        "minimum_colliding_size": 2
+      },
+      {
+        "signature": "sequence-f251-v1",
+        "semantic_inputs": 1365,
+        "distinct_outputs": 463,
+        "collision_buckets": 334,
+        "colliding_inputs": 1236,
+        "minimum_colliding_size": 3
+      },
+      {
+        "signature": "bidirectional-sequence-f251-v1",
+        "semantic_inputs": 1365,
+        "distinct_outputs": 1363,
+        "collision_buckets": 2,
+        "colliding_inputs": 4,
+        "minimum_colliding_size": 5
+      },
+      {
+        "signature": "multiset-k1-f251-v1",
+        "semantic_inputs": 126,
+        "distinct_outputs": 125,
+        "collision_buckets": 1,
+        "colliding_inputs": 2,
+        "minimum_colliding_size": 5
+      },
+      {
+        "signature": "multiset-k2-f251-v1",
+        "semantic_inputs": 126,
+        "distinct_outputs": 126,
+        "collision_buckets": 0,
+        "colliding_inputs": 0,
+        "minimum_colliding_size": null
+      },
+      {
+        "signature": "multiset-k4-f251-v1",
+        "semantic_inputs": 126,
+        "distinct_outputs": 126,
+        "collision_buckets": 0,
+        "colliding_inputs": 0,
+        "minimum_colliding_size": null
+      }
+    ],
+    "minimum_examples": [
+      {
+        "signature": "additive-f251-v1",
+        "left": [
+          0,
+          2
+        ],
+        "right": [
+          1,
+          1
+        ],
+        "classification": "finite-field sum alias after commutative normalization"
+      },
+      {
+        "signature": "sequence-f251-v1",
+        "left": [
+          0,
+          0,
+          2
+        ],
+        "right": [
+          2,
+          1,
+          0
+        ],
+        "classification": "fixed-point polynomial evaluation alias"
+      },
+      {
+        "signature": "bidirectional-sequence-f251-v1",
+        "left": [
+          0,
+          3,
+          2,
+          3,
+          0
+        ],
+        "right": [
+          3,
+          0,
+          0,
+          0,
+          3
+        ],
+        "classification": "fixed-point polynomial evaluation alias"
+      },
+      {
+        "signature": "multiset-k1-f251-v1",
+        "left": [
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "right": [
+          2,
+          3,
+          3,
+          3,
+          3
+        ],
+        "classification": "fixed-point characteristic-polynomial evaluation alias"
+      }
+    ],
+    "residual_membership_control": "confirmed: a fabricated last item can derive a recomposing residual; this is not membership",
+    "applications": [
+      {
+        "application": "distributed additive and multiset aggregation",
+        "classification": "ValidatedPrimitive",
+        "evidence": "145636 exhaustive split/merge equations passed across canonical words",
+        "required_confirmation": "exact state or domain-specific store after candidate filtering"
+      },
+      {
+        "application": "parallel sequence chunk composition",
+        "classification": "ValidatedPrimitive",
+        "evidence": "every split through length six equals direct Horner evaluation; performance runner compares O(1) merge against reread and SHA-256",
+        "required_confirmation": "exact bytes or cryptographic digest when identity assurance is required"
+      },
+      {
+        "application": "multi-evaluation candidate index",
+        "classification": "Experimental",
+        "evidence": "K=2 and K=4 remove the K=1 collision in the frozen small-domain campaign",
+        "required_confirmation": "exact multiset comparison; fixed evaluation points provide no universal probability guarantee"
+      }
+    ]
+  },
+  "reconciliation": {
+    "exhaustive_pairs": 63232,
+    "recovered_pairs": 63232,
+    "rejected_over_bound": 1,
+    "maximum_symmetric_difference": 6,
+    "classification": "MaintainedPrimitive: public bounded set recovery over Fp251 with profile/wire/limits; v1 rejects multiset multiplicity"
+  },
+  "graphs": {
+    "oracle": "SageMath 10.7 graphs.nauty_geng(8), one representative per isomorphism class",
+    "corpus_sha256": "546a249902101c97d3aa590f93e53366854bd0a6f405aa59bdb32d25c57f845a",
+    "graph_count": 12346,
+    "relabeling_checks": 128,
+    "collision_profiles": [
+      {
+        "tier": "f251-fast-v1",
+        "distinct_outputs": 12095,
+        "collision_buckets": 203,
+        "colliding_graphs": 454,
+        "colliding_pairs": 350,
+        "maximum_bucket_size": 8
+      },
+      {
+        "tier": "f251-hybrid-v1",
+        "distinct_outputs": 12095,
+        "collision_buckets": 203,
+        "colliding_graphs": 454,
+        "colliding_pairs": 350,
+        "maximum_bucket_size": 8
+      },
+      {
+        "tier": "f251-global-v2",
+        "distinct_outputs": 12103,
+        "collision_buckets": 198,
+        "colliding_graphs": 441,
+        "colliding_pairs": 335,
+        "maximum_bucket_size": 8
+      },
+      {
+        "tier": "f251-adaptive-motifs-v2",
+        "distinct_outputs": 12322,
+        "collision_buckets": 22,
+        "colliding_graphs": 46,
+        "colliding_pairs": 27,
+        "maximum_bucket_size": 4
+      },
+      {
+        "tier": "f251-plus-gf2-256-fast",
+        "distinct_outputs": 12095,
+        "collision_buckets": 203,
+        "colliding_graphs": 454,
+        "colliding_pairs": 350,
+        "maximum_bucket_size": 8
+      }
+    ],
+    "minimum_fast_collision": {
+      "left_graph6": "G?BDB?",
+      "right_graph6": "G?`CQG",
+      "escalated_hybrid_distinguishes": false,
+      "escalated_global_v2_distinguishes": true,
+      "escalated_adaptive_v2_distinguishes": true,
+      "escalated_multi_field_distinguishes": false,
+      "exact_distinguishes": true
+    },
+    "adversarial_families": [
+      {
+        "family": "C6 versus 2C3",
+        "non_isomorphic": true,
+        "fast_distinguishes": false,
+        "hybrid_distinguishes": false,
+        "exact_distinguishes": true
+      },
+      {
+        "family": "Shrikhande versus 4x4 rook (strongly regular)",
+        "non_isomorphic": true,
+        "fast_distinguishes": false,
+        "hybrid_distinguishes": false,
+        "exact_distinguishes": true
+      },
+      {
+        "family": "CFI(K4) even versus one twisted edge",
+        "non_isomorphic": true,
+        "fast_distinguishes": false,
+        "hybrid_distinguishes": false,
+        "exact_distinguishes": true
+      }
+    ],
+    "applied_verticals": [
+      {
+        "vertical": "molecule",
+        "relabeling_invariant": true,
+        "typed_perturbation_detected": true
+      },
+      {
+        "vertical": "directed-network",
+        "relabeling_invariant": true,
+        "typed_perturbation_detected": true
+      },
+      {
+        "vertical": "knowledge-graph",
+        "relabeling_invariant": true,
+        "typed_perturbation_detected": true
+      },
+      {
+        "vertical": "hypergraph",
+        "relabeling_invariant": true,
+        "typed_perturbation_detected": true
+      }
+    ],
+    "incremental_work_curve": [
+      {
+        "vertex_count": 1000,
+        "edited_vertices": 1,
+        "recomputed_vertex_rounds": 80,
+        "full_vertex_rounds": 8000,
+        "work_ratio": 0.01,
+        "matches_full_recomputation": true
+      },
+      {
+        "vertex_count": 1000,
+        "edited_vertices": 10,
+        "recomputed_vertex_rounds": 800,
+        "full_vertex_rounds": 8000,
+        "work_ratio": 0.1,
+        "matches_full_recomputation": true
+      },
+      {
+        "vertex_count": 1000,
+        "edited_vertices": 100,
+        "recomputed_vertex_rounds": 6400,
+        "full_vertex_rounds": 8000,
+        "work_ratio": 0.8,
+        "matches_full_recomputation": true
+      },
+      {
+        "vertex_count": 1000,
+        "edited_vertices": 250,
+        "recomputed_vertex_rounds": 7750,
+        "full_vertex_rounds": 8000,
+        "work_ratio": 0.96875,
+        "matches_full_recomputation": true
+      },
+      {
+        "vertex_count": 1000,
+        "edited_vertices": 500,
+        "recomputed_vertex_rounds": 8000,
+        "full_vertex_rounds": 8000,
+        "work_ratio": 1.0,
+        "matches_full_recomputation": true
+      }
+    ]
+  }
+}

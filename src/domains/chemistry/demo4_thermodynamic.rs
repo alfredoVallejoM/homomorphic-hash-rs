@@ -1,15 +1,14 @@
-use std::time::Instant;
+use rand::seq::SliceRandom;
+use rayon::prelude::*;
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::Write;
-use std::collections::HashSet;
-use rayon::prelude::*;
-use rand::Rng;
-use rand::seq::SliceRandom;
+use std::time::Instant;
 
 use crate::algebra::galois_256::GaloisSignature256;
-use crate::engine::canonizer::{CellularGaloisCanonizer, CanonicalNode};
 use crate::domains::chemistry::smiles_parser::SmilesParser;
-use crate::harness::experiment::{ScientificExperiment, ExperimentOutcome};
+use crate::engine::canonizer::{CanonicalNode, CellularGaloisCanonizer};
+use crate::harness::experiment::{ExperimentOutcome, ScientificExperiment};
 use crate::harness::telemetry::TelemetryRecord;
 
 // =========================================================================
@@ -33,9 +32,15 @@ fn generate_crosslinked_cysteine(units: usize, bridges: usize) -> String {
 
     // Safely inject ring closures to form S-S bonds between pairs of cysteines
     for b in 0..bridges {
-        if 2 * b + 1 >= units { break; }
+        if 2 * b + 1 >= units {
+            break;
+        }
         let ring_id = b + 1;
-        let ring_str = if ring_id < 10 { format!("{}", ring_id) } else { format!("%{:02}", ring_id) };
+        let ring_str = if ring_id < 10 {
+            format!("{}", ring_id)
+        } else {
+            format!("%{:02}", ring_id)
+        };
 
         residues[2 * b] = format!("N[C@@H](CS{})C(=O)", ring_str);
         residues[2 * b + 1] = format!("N[C@@H](CS{})C(=O)", ring_str);
@@ -45,7 +50,12 @@ fn generate_crosslinked_cysteine(units: usize, bridges: usize) -> String {
 }
 
 /// Axis 3: Recursive Binary Dendrimer (Fractal Depth Modeling)
-fn build_binary_dendrimer(depth: usize, current: usize, is_mutant: bool, is_last_branch: bool) -> String {
+fn build_binary_dendrimer(
+    depth: usize,
+    current: usize,
+    is_mutant: bool,
+    is_last_branch: bool,
+) -> String {
     if current == depth {
         if is_mutant && is_last_branch {
             return "O".to_string(); // Peripheral Isosteric Mutation
@@ -64,14 +74,16 @@ fn build_binary_dendrimer(depth: usize, current: usize, is_mutant: bool, is_last
 // ALGEBRAIC UTILITIES
 // -------------------------------------------------------------------------
 fn calculate_hamming_distance(sig1: &GaloisSignature256, sig2: &GaloisSignature256) -> u32 {
-    (sig1.0[0] ^ sig2.0[0]).count_ones() +
-    (sig1.0[1] ^ sig2.0[1]).count_ones() +
-    (sig1.0[2] ^ sig2.0[2]).count_ones() +
-    (sig1.0[3] ^ sig2.0[3]).count_ones()
+    (sig1.0[0] ^ sig2.0[0]).count_ones()
+        + (sig1.0[1] ^ sig2.0[1]).count_ones()
+        + (sig1.0[2] ^ sig2.0[2]).count_ones()
+        + (sig1.0[3] ^ sig2.0[3]).count_ones()
 }
 
 fn verify_global_collision(nodes_a: &[CanonicalNode], nodes_b: &[CanonicalNode]) -> bool {
-    if nodes_a.len() != nodes_b.len() { return false; }
+    if nodes_a.len() != nodes_b.len() {
+        return false;
+    }
     let mut sigs_b: Vec<[u64; 4]> = nodes_b.iter().map(|n| n.signature.0).collect();
 
     for node_a in nodes_a {
@@ -128,7 +140,12 @@ impl ScientificExperiment for Demo4ThermodynamicLimit {
                     println!("      [TRACE] Canonized Poly-Glycine (N={}) -> V={}, E={} | Latency: {} ms", units, complex.var_count, e_count, lat_ms);
                 }
 
-                writeln!(f1, "{},{},{},{},{:.4}", units, complex.var_count, e_count, lat_ms, mutpe).unwrap();
+                writeln!(
+                    f1,
+                    "{},{},{},{},{:.4}",
+                    units, complex.var_count, e_count, lat_ms, mutpe
+                )
+                .unwrap();
             }
         }
 
@@ -157,35 +174,67 @@ impl ScientificExperiment for Demo4ThermodynamicLimit {
                     println!("      [TRACE] Cross-linked Cysteine (Bridges={}) -> Density: {:.2} | Latency: {} ms", bridges, rho, lat_ms);
                 }
 
-                writeln!(f2, "{},{},{},{:.4},{}", bridges, complex.var_count, e_count, rho, lat_ms).unwrap();
+                writeln!(
+                    f2,
+                    "{},{},{},{:.4},{}",
+                    bridges, complex.var_count, e_count, rho, lat_ms
+                )
+                .unwrap();
             }
         }
 
         // =====================================================================
         // AXIS 3: THE EVENT HORIZON (Over-Squashing in Fractal Dendrimers)
         // =====================================================================
-        println!("    [AXIS 3] Mapping the Topological Event Horizon (Dendrimer Over-Squashing)...");
+        println!(
+            "    [AXIS 3] Mapping the Topological Event Horizon (Dendrimer Over-Squashing)..."
+        );
         let mut f3 = File::create("data/chemistry/results/demo4_axis3_event_horizon.csv").unwrap();
-        writeln!(f3, "Fractal_Depth,Total_V,Hamming_Distance_Bits,Signal_Squashed").unwrap();
+        writeln!(
+            f3,
+            "Fractal_Depth,Total_V,Hamming_Distance_Bits,Signal_Squashed"
+        )
+        .unwrap();
 
-        for depth in 1..=15 { // Maxing out fractal generation before string overflow
+        for depth in 1..=15 {
+            // Maxing out fractal generation before string overflow
             let smiles_base = build_binary_dendrimer(depth, 0, false, false);
             let smiles_mutant = build_binary_dendrimer(depth, 0, true, true);
 
-            if let (Some(c_base), Some(c_mutant)) = (SmilesParser::try_parse_to_complex(&smiles_base), SmilesParser::try_parse_to_complex(&smiles_mutant)) {
-
+            if let (Some(c_base), Some(c_mutant)) = (
+                SmilesParser::try_parse_to_complex(&smiles_base),
+                SmilesParser::try_parse_to_complex(&smiles_mutant),
+            ) {
                 let base_nodes = CellularGaloisCanonizer::canonize(&c_base, c_base.var_count);
                 let mutant_nodes = CellularGaloisCanonizer::canonize(&c_mutant, c_mutant.var_count);
 
                 // The root Carbon is mathematically at index 0 due to our programmatic recursive generation
-                let base_root_sig = base_nodes.iter().find(|n| n.original_index == 0).unwrap().signature.clone();
-                let mutant_root_sig = mutant_nodes.iter().find(|n| n.original_index == 0).unwrap().signature.clone();
+                let base_root_sig = base_nodes
+                    .iter()
+                    .find(|n| n.original_index == 0)
+                    .unwrap()
+                    .signature
+                    .clone();
+                let mutant_root_sig = mutant_nodes
+                    .iter()
+                    .find(|n| n.original_index == 0)
+                    .unwrap()
+                    .signature
+                    .clone();
 
                 let hamming_dist = calculate_hamming_distance(&base_root_sig, &mutant_root_sig);
                 let is_squashed = hamming_dist == 0;
 
-                println!("      [TRACE] Dendrimer Depth: {} | Core Hamming Shift: {} bits", depth, hamming_dist);
-                writeln!(f3, "{},{},{},{}", depth, c_base.var_count, hamming_dist, is_squashed).unwrap();
+                println!(
+                    "      [TRACE] Dendrimer Depth: {} | Core Hamming Shift: {} bits",
+                    depth, hamming_dist
+                );
+                writeln!(
+                    f3,
+                    "{},{},{},{}",
+                    depth, c_base.var_count, hamming_dist, is_squashed
+                )
+                .unwrap();
 
                 if is_squashed {
                     println!("      >> [CRITICAL] Event Horizon reached at Depth {} (Information Annihilated)", depth);
@@ -199,7 +248,11 @@ impl ScientificExperiment for Demo4ThermodynamicLimit {
         // =====================================================================
         println!("    [AXIS 4] Probing Entropy Death via Combinatorial Peptide Isomers...");
         let mut f4 = File::create("data/chemistry/results/demo4_axis4_injectivity.csv").unwrap();
-        writeln!(f4, "Peptide_Length,Unique_Isomers_Generated,Global_Collisions,Collision_Rate_Pct").unwrap();
+        writeln!(
+            f4,
+            "Peptide_Length,Unique_Isomers_Generated,Global_Collisions,Collision_Rate_Pct"
+        )
+        .unwrap();
 
         let amino_acids = ["NCC(=O)", "N[C@@H](C)C(=O)", "N[C@@H](CO)C(=O)"]; // Gly, Ala, Ser
         let sequence_lengths = vec![5, 10, 15, 20];
@@ -218,20 +271,25 @@ impl ScientificExperiment for Demo4ThermodynamicLimit {
                 unique_smiles.insert(seq.join(""));
             }
 
-            println!("      [TRACE] Evaluating {} Constitutional Isomers of length {}...", permutations_per_tier, length);
+            println!(
+                "      [TRACE] Evaluating {} Constitutional Isomers of length {}...",
+                permutations_per_tier, length
+            );
 
             // Parse and Canonize
-            let canonical_ensembles: Vec<Vec<CanonicalNode>> = unique_smiles.into_par_iter()
+            let canonical_ensembles: Vec<Vec<CanonicalNode>> = unique_smiles
+                .into_par_iter()
                 .filter_map(|s| SmilesParser::try_parse_to_complex(&s))
                 .map(|c| CellularGaloisCanonizer::canonize(&c, c.var_count))
                 .collect();
 
             let mut collisions = 0;
-            let total_comparisons = (canonical_ensembles.len() * (canonical_ensembles.len() - 1)) / 2;
+            let total_comparisons =
+                (canonical_ensembles.len() * (canonical_ensembles.len() - 1)) / 2;
 
             // N^2 Collision Matrix check
             for i in 0..canonical_ensembles.len() {
-                for j in (i+1)..canonical_ensembles.len() {
+                for j in (i + 1)..canonical_ensembles.len() {
                     if verify_global_collision(&canonical_ensembles[i], &canonical_ensembles[j]) {
                         collisions += 1;
                     }
@@ -239,15 +297,32 @@ impl ScientificExperiment for Demo4ThermodynamicLimit {
             }
 
             let collision_rate = (collisions as f64 / total_comparisons as f64) * 100.0;
-            writeln!(f4, "{},{},{},{:.6}", length, canonical_ensembles.len(), collisions, collision_rate).unwrap();
+            writeln!(
+                f4,
+                "{},{},{},{:.6}",
+                length,
+                canonical_ensembles.len(),
+                collisions,
+                collision_rate
+            )
+            .unwrap();
         }
 
         println!("    [OK] Biochemical Thermodynamic Limit Experiment Complete. Data exported.");
 
-        (ExperimentOutcome::IsomorphismMatch(true), 0, start_global.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(true),
+            0,
+            start_global.elapsed().as_nanos(),
+        )
     }
 
-    fn verify(&self, outcome: &ExperimentOutcome) -> bool { match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false } }
+    fn verify(&self, outcome: &ExperimentOutcome) -> bool {
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
+    }
 
     fn get_base_telemetry(&self) -> TelemetryRecord {
         TelemetryRecord {
@@ -263,7 +338,7 @@ impl ScientificExperiment for Demo4ThermodynamicLimit {
             threads_utilized: rayon::current_num_threads(),
             peak_memory_mb: 0.0,
             isomorphism_verified: true,
-            false_positives_detected: 0
+            false_positives_detected: 0,
         }
     }
 }

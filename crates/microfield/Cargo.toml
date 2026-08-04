@@ -3,7 +3,7 @@ name = "microfield"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.89"
-description = "Portable binary finite-field core with zero-cost abstractions"
+description = "Portable finite-field core with zero-cost abstractions"
 publish = false
 autobins = false
 
@@ -28,17 +28,71 @@ path = "benches/portable_batch.rs"
 harness = false
 required-features = ["portable", "builtin-fields"]
 
+[[bench]]
+name = "portable_codegen_optimizer"
+path = "benches/portable_codegen_optimizer.rs"
+harness = false
+
+[[bench]]
+name = "derived_algorithms"
+path = "benches/derived_algorithms.rs"
+harness = false
+required-features = ["portable", "builtin-fields"]
+
+[[bench]]
+name = "prime_fields"
+path = "benches/prime_fields.rs"
+harness = false
+required-features = ["portable", "prime-fields"]
+
+[[bench]]
+name = "persistent_prime_bridge"
+path = "benches/persistent_prime_bridge.rs"
+harness = false
+required-features = ["std", "portable", "prime-fields"]
+
+[[bench]]
+name = "dynamic_fields"
+path = "benches/dynamic_fields.rs"
+harness = false
+required-features = ["dynamic", "portable", "prime-fields"]
+
 [features]
-default = ["std", "portable", "builtin-fields"]
+default = ["std", "portable", "builtin-fields", "prime-fields"]
 std = ["alloc"]
 alloc = []
 portable = []
 builtin-fields = []
-generator = ["std", "dep:serde", "dep:serde_json", "dep:sha2", "dep:toml"]
+prime-fields = []
+generator = [
+    "std",
+    "prime-fields",
+    "dep:num-bigint",
+    "dep:num-integer",
+    "dep:num-traits",
+    "dep:serde",
+    "dep:serde_json",
+    "dep:sha2",
+    "dep:toml",
+]
+dynamic = [
+    "std",
+    "prime-fields",
+    "dep:num-bigint",
+    "dep:num-integer",
+    "dep:num-traits",
+    "dep:serde",
+    "dep:serde_json",
+    "dep:sha2",
+    "dep:toml",
+]
 count-allocations = ["std", "dep:allocation-counter"]
 
 [dependencies]
 allocation-counter = { version = "0.8.1", optional = true }
+num-bigint = { version = "0.4.6", optional = true }
+num-integer = { version = "0.1.46", optional = true }
+num-traits = { version = "0.2.19", optional = true }
 serde = { version = "1.0.228", features = ["derive"], optional = true }
 serde_json = { version = "1.0.149", optional = true }
 sha2 = { version = "0.10.9", optional = true }
@@ -49,7 +103,7 @@ criterion = "0.5.1"
 
 [lints.rust]
 missing_docs = "warn"
-unsafe_code = "forbid"
+unsafe_code = "deny"
 
 [lints.clippy]
 all = "warn"

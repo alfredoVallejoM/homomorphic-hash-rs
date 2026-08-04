@@ -1,9 +1,9 @@
 {
-  "schema": 1,
+  "schema": 2,
   "field_id": "4825b6d5606e34af32722a4a6a96d04a1e21337be0fb734adb9c69f9b9d77d31",
-  "artifact_id": "7be252a754124403744d441293d21e9e7d18e20b6a9ace12c175aba6cd50b188",
-  "ir_version": 1,
-  "target_family": "portable",
+  "artifact_id": "872b55354bb91e13ca649f6907d0825cc1cfa055ceabd174d4e5b7debd3350cf",
+  "ir_version": 4,
+  "target_family": "portable_with_verified_isa_profile",
   "product": {
     "limb_bits": 64,
     "input_limbs": 2,
@@ -1164,778 +1164,19 @@
     "proof_digest": "07545484d4a09b1d44c25d0a0042042046396f9b5e2467bc5b6b0d7a2c327220"
   },
   "inversion": {
-    "algorithm": "binary-fixed-chain-v1",
+    "algorithm": "itoh-tsujii-binary-v1",
     "exponent": "2^degree-2",
+    "degree": 128,
     "steps": [
       {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
-      },
-      {
-        "operation": "multiply_base"
+        "operation": "save_accumulator"
       },
       {
         "operation": "square",
         "count": 1
       },
       {
-        "operation": "multiply_base"
+        "operation": "multiply_saved"
       },
       {
         "operation": "square",
@@ -1943,20 +1184,16 @@
       },
       {
         "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
       },
       {
-        "operation": "multiply_base"
+        "operation": "save_accumulator"
       },
       {
         "operation": "square",
-        "count": 1
+        "count": 3
       },
       {
-        "operation": "multiply_base"
+        "operation": "multiply_saved"
       },
       {
         "operation": "square",
@@ -1964,20 +1201,16 @@
       },
       {
         "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
       },
       {
-        "operation": "multiply_base"
+        "operation": "save_accumulator"
       },
       {
         "operation": "square",
-        "count": 1
+        "count": 7
       },
       {
-        "operation": "multiply_base"
+        "operation": "multiply_saved"
       },
       {
         "operation": "square",
@@ -1985,20 +1218,16 @@
       },
       {
         "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
       },
       {
-        "operation": "multiply_base"
+        "operation": "save_accumulator"
       },
       {
         "operation": "square",
-        "count": 1
+        "count": 15
       },
       {
-        "operation": "multiply_base"
+        "operation": "multiply_saved"
       },
       {
         "operation": "square",
@@ -2006,20 +1235,16 @@
       },
       {
         "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
       },
       {
-        "operation": "multiply_base"
+        "operation": "save_accumulator"
       },
       {
         "operation": "square",
-        "count": 1
+        "count": 31
       },
       {
-        "operation": "multiply_base"
+        "operation": "multiply_saved"
       },
       {
         "operation": "square",
@@ -2027,20 +1252,16 @@
       },
       {
         "operation": "multiply_base"
-      },
-      {
-        "operation": "square",
-        "count": 1
       },
       {
-        "operation": "multiply_base"
+        "operation": "save_accumulator"
       },
       {
         "operation": "square",
-        "count": 1
+        "count": 63
       },
       {
-        "operation": "multiply_base"
+        "operation": "multiply_saved"
       },
       {
         "operation": "square",
@@ -2053,6 +1274,39 @@
         "operation": "square",
         "count": 1
       }
-    ]
+    ],
+    "cost": {
+      "multiplications": 12,
+      "squares": 127,
+      "saved_values": 1
+    }
+  },
+  "portable_optimization": {
+    "schema": 1,
+    "degree_class": "power_of_two_limb_aligned",
+    "multiplication": "set-bit-schoolbook-v1",
+    "squaring": "bit-spread-v1",
+    "reduction": "low_tail_fold",
+    "inversion": "itoh-tsujii-binary-v1",
+    "modulus_terms": 5
+  },
+  "verified_isa_profile": {
+    "schema": 1,
+    "field_id": "4825b6d5606e34af32722a4a6a96d04a1e21337be0fb734adb9c69f9b9d77d31",
+    "profile_class": "power_of_two_limb_aligned",
+    "limb_bits": 64,
+    "input_limbs": 2,
+    "wide_limbs": 4,
+    "layout": "polynomial-limbs-little-endian-v1",
+    "product": "clmul64-schoolbook-v1",
+    "reduction_proof_digest": "07545484d4a09b1d44c25d0a0042042046396f9b5e2467bc5b6b0d7a2c327220",
+    "backends": [
+      "x86_pclmul",
+      "x86_vpclmul",
+      "aarch64_pmull"
+    ],
+    "selection": "explicit_only",
+    "schedule": "fixed",
+    "profile_digest": "55d7dbb0145a5551160bcc81b70adc90074410e6496ba91d5f6b14a7616f5713"
   }
 }

@@ -2,7 +2,9 @@
 
 Fecha de planificación: 1 de agosto de 2026.
 
-Estado: planificada, todavía no iniciada.
+Estado: cerrada. H2.1–H2.8 y el puente ABI 3 están implementados. La tabla de
+selección v1 mantiene PCLMUL automático y PMULL/VPCLMUL explícitos; ampliar
+`Auto` exige nueva evidencia versionada, no reabrir la Fase 2.
 
 ## Objetivo ejecutivo
 
@@ -33,21 +35,24 @@ identidad dentro de cada producto.
 
 ```mermaid
 flowchart LR
-    H21[H2.1 Factory binaria] --> H22[H2.2 Capabilities y selector]
-    H22 --> H23[H2.3 x86 PCLMUL]
-    H22 --> H24[H2.4 AArch64 PMULL]
-    H23 --> H25[H2.5 PackedBatch]
-    H24 --> H25
-    H25 --> H26[H2.6 VPCLMUL]
-    H23 --> H27[H2.7 Cierre]
-    H24 --> H27
-    H25 --> H27
-    H26 --> H27
+    H21[H2.1 Factory binaria] --> H22[H2.2 Optimizador portable]
+    H22 --> H23[H2.3 Capabilities y selector]
+    H23 --> H24[H2.4 x86 PCLMUL]
+    H24 --> Bridge[Puente ABI 3 perfiles externos]
+    Bridge --> H25[H2.5 AArch64 PMULL]
+    H24 --> H26[H2.6 PackedBatch]
+    H25 --> H26
+    H26 --> H27[H2.7 VPCLMUL ✅]
+    H24 --> H28[H2.8 Cierre ✅]
+    H25 --> H28
+    H26 --> H28
+    H27 --> H28
 ```
 
-H2.3 y H2.4 pueden avanzar de forma independiente. H2.6 no bloquea el cierre
-si el backend funciona pero no supera el punto de equilibrio exigido; en ese
-caso queda desactivado por el selector y documentado.
+Los adapters H2.4/H2.5 comparten contrato pero su aritmética puede evolucionar
+de forma independiente; el orden operativo situó el puente ABI 3 entre ambos.
+H2.7 no bloquea el cierre si el backend funciona pero no supera el punto de
+equilibrio exigido; en ese caso queda desactivado por el selector y documentado.
 
 ## H2.1 — Factory pública de campos binarios estáticos
 
@@ -81,7 +86,7 @@ Dos adaptadores alimentan el mismo caso de uso:
 
 ```rust
 let package = BinaryFieldFactory::builder()
-    .name("Gf2_233Custom")
+    .name("gf2_233_custom")
     .degree(233)
     .modulus_exponents([233, 74, 0])
     .build()?
@@ -234,7 +239,105 @@ Un repositorio consumidor limpio puede declarar un campo binario soportado,
 generarlo en `build.rs`, compilarlo, usar todas las operaciones escalares y
 batch portables y regenerarlo sin diff, sin editar Microfield.
 
-## H2.2 — Capabilities, catálogo ampliado y selector
+### Resultado implementado (H2.1)
+
+H2.1 dispone ya de un vertical ejecutable:
+
+- `microfield::generator::BinaryFieldFactory` acepta Builder o manifiesto;
+- ambos adaptadores convergen en `FieldManifest`, normalización, `FieldId`,
+  Rabin, planificación y artefactos existentes;
+- `GeneratedFieldPackage` entrega identidad, artefactos, fuente y publicación
+  atómica para `OUT_DIR`;
+- el ABI de codegen v1 queda comprobado mediante un `const` al compilar el
+  módulo generado;
+- la representación usa arrays literales de `u64`, módulo completo multilimb y
+  padding estricto para cualquier grado admitido por v1;
+- el escalar generado es estático, `no_std`, sin heap, `unsafe`, trait objects
+  ni contexto dentro del elemento;
+- `Engine<F>` acepta presets y tipos con la capability segura emitida por la
+  factory; sus punteros y tablas siguen privados y se construyen por la
+  composición interna;
+- un crate fixture externo genera GF(2⁹) y GF(2²³³) desde `build.rs`, usa
+  `include!`, compila el runtime sin `std` y ejercita la fachada batch;
+- GF(2⁹) se contrasta exhaustivamente con un modelo independiente y GF(2²³³)
+  cubre aritmética multilimb, inversión, Frobenius y el fold del módulo;
+- SageMath 10.7 en `laboratorio_np` aporta vectores externos v2 para GF(2²³³)
+  y el consumidor los contrasta con suma, producto, cuadrado, inversa,
+  potencia y `mul_by_x`;
+- los tres presets mantenidos atraviesan la factory y conservan exactamente su
+  `FieldId`; siguen usando sus especializaciones escalares 128/256 medidas;
+- nombres hostiles, polinomios reducibles, límites, symlinks, mezcla de tipos y
+  acceso a limbs tienen pruebas negativas.
+
+La guía de consumo está en `binary-field-factory.md` y la compatibilidad del
+ABI en ADR 0010. Los backends ISA para campos externos permanecen fuera de
+H2.1: H2.3 debe decidir elegibilidad a partir de capacidades, nunca a partir de
+un trait libre implementado por el consumidor.
+
+## H2.2 — Optimizador portable estático
+
+### Propósito
+
+Evitar que la extensibilidad de H2.1 condene a los campos externos a una ruta
+bit a bit. Cada campo certificado recibe en codegen un plan portable estático,
+sin handcode por campo, contexto runtime ni selección dentro de una operación.
+
+### Selección determinista
+
+El selector puro clasifica el grado como:
+
+- potencia de dos y alineado a limb;
+- alineado a limb;
+- no alineado.
+
+La clasificación prioriza 64, 128, 256, 512, 1024, 2048 y 4096, pero no
+confunde «potencia de dos» con «optimizable». La forma del módulo decide la
+reducción:
+
+- `LowTailFold`: grado múltiplo de 64 y tail de grado máximo 32;
+- `SparseTermFold`: número acotado de términos no nulos;
+- `DenseWordFold`: tail empaquetado en palabras para módulos densos.
+
+Todas las rutas comparten producto escolar carry-less que visita bits activos,
+cuadrado dedicado por expansión de bits e inversión Itoh–Tsujii. El límite de
+4096 y los campos no alineados conservan soporte; no se hace padding semántico
+ni cambia el encoding.
+
+### Estabilidad
+
+- `FieldId`, layout, encoding, traits y resultados no cambian;
+- el plan forma parte del IR v2 y de `ArtifactId`;
+- el digest de paquete sigue cubriendo los bytes exactos de la fuente;
+- ABI de codegen 2 llama a helpers nuevos; el runtime conserva ABI 1;
+- la selección es previa a compilación y queda visible en
+  `GeneratedFieldPackage::portable_optimization`;
+- el fallback v1 permanece como oráculo diferencial, no como ruta generada
+  por defecto;
+- no se introduce `unsafe`, heap, `dyn Trait` ni dispatch escalar.
+
+### Pruebas y rendimiento
+
+- equivalencia directa de las tres reducciones v2 contra v1;
+- matriz alineada para 64, 128, 256, 512, 1024, 2048 y 4096 bits;
+- GF(2⁹) exhaustivo, GF(2²³³) contra SageMath 10.7;
+- fixture denso GF(2¹⁰) exhaustivo usando
+  \(x^{10}+x^9+\ldots+x+1\);
+- regeneración determinista y goldens de `ArtifactId`/bundle actualizados;
+- benchmark Criterion separado para referencia y optimizado.
+
+En el i7-13700HX local el producto mejoró 5,4x en GF(2¹²⁸) y 2,0x en
+GF(2²³³); la inversión GF(2²³³), 2,8x. Son observaciones reproducibles, no
+garantías entre CPUs. El informe y el comando exacto están en
+`portable-optimizer.md`.
+
+### Resultado
+
+H2.2 se entregó con ABI 2. El puente posterior elevó la fuente actual a ABI 3 y
+el runtime acepta ABI 1..=3. Los presets mantenidos conservan sus rutas
+escalares especializadas; sus artefactos se regeneraron porque el IR y el
+perfil certificado sí cambiaron.
+
+## H2.3 — Capabilities, catálogo ampliado y selector
 
 ### Propósito
 
@@ -264,10 +367,26 @@ campo, CPU y política.
 - una sola llamada indirecta por lote;
 - construcción concurrente determinista y Engine `Send + Sync`.
 
-H2.2 termina con selector completo aunque todavía solo pueda elegir portable en
+H2.3 termina con selector completo aunque todavía solo pueda elegir portable en
 hardware sin los backends de los hitos siguientes.
 
-## H2.3 — x86-64 PCLMUL
+### Resultado
+
+Implementado. `CpuCapabilities` solo admite detección real con `std` o el límite
+conservador `portable_only`; sus bits no son construibles por consumidores. El
+catálogo contiene slots opcionales y conserva compatibilidad con fuente
+generada ABI 1/2. `build()` es determinista y no detecta; `detect()` toma una
+instantánea una sola vez. El backend forzado distingue build, campo, CPU y
+política, mientras la selección automática aplica las cinco políticas sin
+alterar `Engine` ni el hot path.
+
+La tabla unitaria recorre 491.520 combinaciones forzadas y una matriz adicional
+de selección automática. Integración cubre detección real, cero asignaciones,
+construcción concurrente, `no_std`, campos externos y fallback portable. En
+H2.3 ningún slot ISA estaba marcado como compilado. La matriz CI compila además
+las rutas AArch64 `no_std` y `std`; H2.4 se apoya en esa frontera ya cerrada.
+
+## H2.4 — x86-64 PCLMUL
 
 ### Propósito
 
@@ -292,7 +411,71 @@ Acelerar producto y cuadrado AoS sin cambiar tipos o encoding.
 - selección únicamente donde la mejora inferior medida supera 20 %;
 - objetivo de 2x en `Gf2_256HhV1`, registrado como objetivo, no como garantía.
 
-## H2.4 — AArch64 PMULL
+### Resultado
+
+Implementado para los tres presets mantenidos. GF(2¹²⁸) usa tres productos
+carry-less mediante Karatsuba; GF(2²⁵⁶) usa nueve mediante un nivel exterior.
+El cuadrado dedicado usa dos/cuatro productos y ambos caminos reutilizan los
+reductores certificados. Los kernels aceptan todas las longitudes, canarios,
+tails y operaciones in-place sin packing, scratch o asignaciones.
+
+La capability solo se habilita por detección confiable y la selección ocurre
+al construir `Engine`. El crate niega `unsafe` globalmente y una prueba limita
+las excepciones a los dos adapters ISA auditados. ASan, Miri portable, MSRV,
+compilación AArch64 y consumidor externo están cubiertos. El audit de
+ensamblado confirma instrucciones PCLMUL y ausencia de asignador o dispatch
+interno.
+
+Criterion sobre i7-13700HX/Rust 1.97.1 confirma mejora conservadora superior a
+20 % desde un elemento en producto y cuadrado para los tres presets, por lo
+que `minimum_batch = 1`. HH-256/4096 mejora aproximadamente 37,5x en producto.
+Los campos externos ABI 1/2 conservan perfil portable. ABI 3 materializa el
+puente descrito a continuación sin abrir el registro de kernels.
+
+## Puente previo a H2.5 — perfiles ISA externos verificados
+
+### Propósito
+
+Permitir que un campo externo validado use adaptadores ISA del runtime sin
+entregar punteros, intrinsics, metadata arbitraria o claims desde el manifiesto.
+
+### Trabajo
+
+- `VerifiedIsaProfile` derivado después de normalización, Rabin y planificación;
+- digest con dominio propio, archivo `verified-isa-profile.json` e inclusión en
+  IR v3, `ArtifactId`, bundle y paquete generado;
+- clasificación autenticada del schedule completo: low-tail fijo y
+  sparse/dense dependiente de datos;
+- ABI de codegen 3 con tamaños literales, extracción por valor y reducción
+  segura generada;
+- `VerifiedIsaStrategy` opaca: construye adapters ISA dentro de Microfield;
+- estrategia genérica schoolbook monomorfizada para grados 2..=4096;
+- `automatic_selection = false` hasta calibración por campo/objetivo;
+- compatibilidad runtime N-2 para fuente ABI 1..=3.
+
+### Gates
+
+- el manifiesto no puede solicitar ni declarar certificación ISA;
+- fuente emitida sin `unsafe`, `dyn Trait`, heap o punteros de función;
+- la misma fuente compila scalar-only `no_std` sin activar `portable`;
+- digest del perfil recalculado por una prueba independiente;
+- x86 y AArch64: ISA == portable en sparse, dense y low-tail;
+- grados externos 9, 10, 128, 192 y 233, incluidas las tres clases, padding y
+  limbs múltiples;
+- `Auto` conserva portable y backend forzado exige capabilities detectadas;
+- `FixedSchedule` acepta low-tail y rechaza sparse/dense;
+- artefactos mantenidos se regeneran determinísticamente.
+
+### Resultado
+
+Implementado y ampliado en H2.7. Todo campo válido del esquema v1 recibe un
+perfil estructural target-neutral; el target decide qué adapter compila. El
+fixture externo usa PCLMUL y VPCLMUL en x86 y PMULL en AArch64 para las tres
+reducciones. La autenticidad se liga al paquete mediante digests; la seguridad
+ISA permanece en el runtime. Véase
+[`ADR 0014`](adr/0014-verified-external-isa-profiles.md).
+
+## H2.5 — AArch64 PMULL
 
 ### Propósito
 
@@ -314,34 +497,58 @@ Ofrecer la misma semántica acelerada en AArch64 real.
 - matriz de hardware y compilador documentada;
 - selector incapaz de ejecutar PMULL fuera de una capability confirmada.
 
-## H2.5 — `PackedBatch` y storage alineado
+### Resultado
+
+Implementado con selección automática deliberadamente desactivada hasta medir
+hardware ARM real. Los presets usan Karatsuba 3/9 y cuadrado 2/4; ABI 3 usa
+schoolbook genérico. Ambos reutilizan reducción certificada, soportan toda
+longitud e in-place y no asignan.
+
+La suite pública y los cinco campos externos pasan bajo QEMU 8.2 `-cpu max`,
+también con AddressSanitizer. Cross-Clippy cubre `std`/`no_std` y el audit de
+ensamblado exige PMULL y prohíbe `br`/`blr`/asignador. CI añade hardware ARM64
+real.
+No se publican cifras QEMU ni un `minimum_batch` automático. Véase
+[`ADR 0015`](adr/0015-aarch64-pmull-backend.md).
+
+## H2.6 ✅ — `PackedBatch` y storage alineado
 
 ### Propósito
 
 Amortizar transformaciones de layout en cargas que reutilizan lotes sin
 contaminar la API AoS o el tipo escalar.
 
-### Trabajo
+### Resultado
 
-- `PackingPlan` y layouts AoS/SoA/híbridos;
-- `AlignedBuffer` con overflow, `Layout` y `Drop` auditados;
-- `PackedBatch<F>` owned bajo `alloc`;
-- vistas sobre `MaybeUninit<u8>` aportado por el usuario;
-- pack/unpack explícitos;
-- batches ligados a backend, layout, campo y longitud;
-- operaciones packed y rutas in-place explícitas.
+- `PackingPlan` inmutable ligado a backend, `FieldId`, AoS, longitud, padding,
+  tile, tamaño y alineamiento;
+- `PackedLayout::Aos` como único estado v1 ejecutable; SoA/híbrido se difieren
+  hasta que H2.7 aporte un kernel que pueda consumirlos;
+- `AlignedBuffer<F>` con overflow, `Layout`, inicialización completa, `Drop` y
+  `Send`/`Sync` auditados;
+- `PackedBatch<F>` owned bajo `alloc`, también para campos externos generados;
+- vistas sin `alloc` sobre `MaybeUninit<u8>` aportado por el usuario;
+- pack/unpack explícitos, cero elementos y slack de alineamiento calculable;
+- producto/cuadrado packed out-of-place e in-place sobre owned y vistas;
+- validación transaccional antes de la única llamada de kernel.
 
 ### Gates
 
-- Miri sobre storage y vistas seguras;
-- AddressSanitizer en fronteras alineadas;
-- padding inicializado, cero elementos y tails completos;
-- errores dejan destino intacto;
-- compile-fail para aliasing;
-- ningún layout interno se serializa;
-- publicación del coste completo pack + kernel + unpack.
+- Miri cubre storage prestado y owned; ASan los ejecuta en x86-64 y AArch64;
+- offsets posibles, padding, cero elementos y tails tienen tests específicos;
+- errores de longitud/backend/plan dejan el destino intacto;
+- el préstamo exclusivo y un compile-fail impiden aliasing mutable;
+- el plan no se serializa y sus campos no tienen constructor público;
+- el benchmark separa pack, unpack, kernel reutilizado y pipeline completo.
 
-## H2.6 — VPCLMUL y throughput
+La decisión y su frontera de seguridad están en
+[`ADR 0016`](adr/0016-persistent-packed-batches.md).
+
+## H2.7 — VPCLMUL y throughput
+
+Estado: implementado y medido el 2 de agosto de 2026. El backend queda
+disponible mediante selección forzada y fuera de selección automática según la
+regla de aceptación de este hito.
 
 ### Propósito
 
@@ -363,7 +570,20 @@ incluido packing, con intervalo reproducible. Si no gana, permanece probado y
 forzable para diagnóstico o se compila fuera; nunca se selecciona por prestigio
 de la instrucción.
 
-## H2.7 — Calibración, auditoría y cierre
+### Resultado
+
+- `backend::x86_vpclmul` procesa dos campos por registro y cubre presets y ABI 3;
+- `PackedLayout::AosLanePairs` fija teselas de dos, padding par y alineación 32;
+- tails, in-place, vistas prestadas y owned son diferenciales contra portable;
+- el ELF exige `vpclmulqdq` y `vzeroupper`, sin dispatch interno ni asignador;
+- GF(2¹²⁸) solo muestra una mejora modesta a partir de la región de 64 en la
+  CPU local; ambos campos de 256 bits pierden ampliamente frente a PCLMUL;
+- `automatic_selection = false` conserva la política estable y eficiente.
+
+La decisión, cifras y frontera de seguridad están en
+[`ADR 0017`](adr/0017-x86-vpclmul-lane-pairs.md).
+
+## H2.8 — Calibración, auditoría y cierre
 
 ### Propósito
 
@@ -381,6 +601,19 @@ Convertir implementaciones correctas en una política de producción trazable.
 - regeneración de presets mediante la factory pública;
 - informe final de Fase 2.
 
+### Partes ejecutables
+
+1. **H2.8.1 — Calibración multi-CPU:** capturar PCLMUL/VPCLMUL en al menos dos
+   familias x86-64 y PMULL en hardware ARM64, incluyendo pipeline packed.
+2. **H2.8.2 — Seguridad:** cerrar inventario comentado de cada `unsafe`, Miri
+   portable/storage y ASan nativo para las tres fronteras ISA.
+3. **H2.8.3 — Reproducibilidad:** versionar entorno, comandos, seeds y corpus
+   minimizado de pruebas diferenciales; añadir un gate de regresión no ruidoso.
+4. **H2.8.4 — Estabilidad:** congelar matriz runtime/codegen ABI, política de
+   `ArtifactId` y procedimiento de regeneración de presets.
+5. **H2.8.5 — Cierre:** ejecutar matriz completa, publicar informe final y
+   decidir con evidencia si alguna tabla automática puede ampliarse.
+
 ### Definición de terminado
 
 - un consumidor genera campos binarios externos sin editar Microfield;
@@ -395,9 +628,30 @@ Convertir implementaciones correctas en una política de producción trazable.
 - la API pública no expone tipos ISA ni catálogos raw;
 - benchmarks indican CPU, SO, microcódigo, Rust, flags e intervalo.
 
+### Resultado implementado
+
+1. **H2.8.1:** Criterion cubre la matriz normativa y separa kernel, fachada y
+   pipeline packed. `capture_calibration.sh` produce evidencia autocontenida y
+   el workflow manual la ejecuta sobre dos labels x86-64 y ARM64. La tabla v1
+   no amplía selección automática porque la diversidad favorable todavía no
+   alcanza el gate.
+2. **H2.8.2:** las cuatro fronteras `unsafe` tienen inventario SHA-256,
+   documentación de invariantes y gates Miri/ASan/ASM. Los audits rechazan
+   asignador, división, dispatch indirecto y crecimiento estructural anómalo.
+3. **H2.8.3:** schema/perfil Criterion v1, seeds persistentes y un corpus de 20
+   casos proporcionan reproducción determinista. La CI valida estructura y
+   decisiones, nunca latencia ruidosa del runner.
+4. **H2.8.4:** una constante única fija ABI emitido 3; la matriz congela runtime
+   1..=3 y los tests verifican la política de `FieldId`, `ArtifactId`, bundle y
+   regeneración pública de presets.
+5. **H2.8.5:** la matriz final y las limitaciones están publicadas en
+   [`phase-2-final-report.md`](phase-2-final-report.md). Fase 2 cierra con
+   PCLMUL automático y PMULL/VPCLMUL explícitos.
+
 ## Entregables documentales
 
 - ADR de factory y ABI de codegen;
+- ADR del optimizador portable y selección determinista;
 - ADR de elegibilidad ISA para campos externos;
 - contratos del Builder/manifiesto y actualización;
 - guía `build.rs` para consumidores;

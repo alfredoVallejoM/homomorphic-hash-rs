@@ -1,143 +1,163 @@
-use crate::algebra::traits::FiniteField;
-use crate::algebra::galois_256::GaloisSignature256;
-use crate::topology::traits::HomomorphicAggregator;
-use crate::topology::multiset::MultisetAggregator;
-use crate::topology::bloom_l1::{TopologicalMask, TopoBloomMask};
-use crate::engine::spectral_f251::SpectralEngineF251;
+//! Compatibility façade from the historical bipartite API to the maintained
+//! finite-field graph engine.
 
-/// Bipartite Interface for Cellular Complexes.
+use microfield::{CanonicalEncoding, Fp251V1};
+
+use crate::{
+    algebra::{galois_256::GaloisSignature256, traits::FiniteField},
+    graph::{
+        from_legacy_topology, F251GraphLabeler, FastGraphAnalysis, GraphError, IncidenceGraph,
+        RefinementProfile,
+    },
+    topology::bloom_l1::{TopoBloomMask, TopologicalMask},
+};
+
+const LEGACY_LANES: usize = 3;
+const MAX_COMPATIBILITY_ROUNDS: usize = 64;
+
+/// Legacy bipartite interface for cellular-complex experiments.
 pub trait TopologyProvider {
     fn num_variables(&self) -> usize;
     fn num_clauses(&self) -> usize;
     fn variables_in_clause(&self, clause_index: usize) -> Vec<usize>;
     fn clauses_for_variable(&self, variable_index: usize) -> Vec<usize>;
 
-    /// NEW: Provides the physical mass/seed of the variable (e.g., Atom type, Logic Gate polarity).
-    /// Default implementation returns None, ensuring 100% backward compatibility
-    /// with existing pure-logic tests that only care about unweighted topology.
+    /// Provides an optional variable seed, such as atom type or gate polarity.
     fn initial_state(&self, _variable_index: usize) -> Option<GaloisSignature256> {
         None
     }
 }
 
-/// The final crystallized topological DNA of a node.
-#[derive(Clone, Debug)]
+/// Output record retained for source compatibility.
+///
+/// `signature` packs the three canonical F251 lane bytes into the low bytes of
+/// the historical 256-bit container. `bloom_mask` remains a non-authoritative,
+/// index-dependent prefilter; it is not part of the maintained graph identity.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CanonicalNode {
     pub original_index: usize,
     pub signature: GaloisSignature256,
     pub bloom_mask: TopoBloomMask,
 }
 
+/// Full maintained result produced through a legacy provider.
+///
+/// Entity vertices occupy `0..variable_count`; clause/hyperedge vertices are
+/// retained after them instead of being flattened into pairwise edges.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct LegacyGraphAnalysis {
+    graph: IncidenceGraph,
+    structural: FastGraphAnalysis<Fp251V1, LEGACY_LANES>,
+    variable_count: usize,
+}
+
+impl LegacyGraphAnalysis {
+    /// Exact normalized incidence graph used by the new engine.
+    #[must_use]
+    pub const fn graph(&self) -> &IncidenceGraph {
+        &self.graph
+    }
+
+    /// Generic F251 structural analysis, including clause vertices and the
+    /// composable graph signature.
+    #[must_use]
+    pub const fn structural(&self) -> &FastGraphAnalysis<Fp251V1, LEGACY_LANES> {
+        &self.structural
+    }
+
+    /// Number of entity vertices supplied by the historical provider.
+    #[must_use]
+    pub const fn variable_count(&self) -> usize {
+        self.variable_count
+    }
+}
+
+/// Deprecated name retained as a façade over [`F251GraphLabeler`].
 pub struct CellularGaloisCanonizer;
 
 impl CellularGaloisCanonizer {
-    /// Executes the full automorphic canonization process.
-    pub fn canonize<T: TopologyProvider + ?Sized>(provider: &T, max_iterations: usize) -> Vec<CanonicalNode> {
-        let v_count = provider.num_variables();
-        let c_count = provider.num_clauses();
-
-        if v_count == 0 { return vec![]; }
-
-        // Phase 1: Hybrid Spectral Initialization (GF_251 Betti Numbers)
-        let mut var_signatures = Self::hybrid_spectral_initialization(provider, v_count, c_count);
-
-        // NEW: Atomic Seed Injection (Curing Atomic Blindness)
-        for i in 0..v_count {
-            if let Some(seed) = provider.initial_state(i) {
-                // Homomorphically add the chemical/physical identity to the topological spectrum.
-                // This guarantees both geometric and material uniqueness in the baseline signature.
-                var_signatures[i] = var_signatures[i].add(&seed);
-            }
+    /// Converts a legacy provider and runs the maintained generic graph engine.
+    ///
+    /// # Errors
+    ///
+    /// Rejects invalid provider indices and graph/encoding overflows before
+    /// returning any partial analysis. Zero rounds and values above the
+    /// compatibility ceiling are rejected by this precise API.
+    pub fn try_analyze<T: TopologyProvider + ?Sized>(
+        provider: &T,
+        rounds: usize,
+    ) -> Result<LegacyGraphAnalysis, GraphError> {
+        if rounds == 0 || rounds > MAX_COMPATIBILITY_ROUNDS {
+            return Err(GraphError::InvalidProfile);
         }
+        let variable_count = provider.num_variables();
+        let graph = from_legacy_topology(provider)?;
+        let labeler = F251GraphLabeler::<LEGACY_LANES>::f251(RefinementProfile::Fast { rounds })?;
+        let structural = labeler.analyze(&graph)?;
+        Ok(LegacyGraphAnalysis {
+            graph,
+            structural,
+            variable_count,
+        })
+    }
 
-        let mut clause_signatures = vec![GaloisSignature256::zero(); c_count];
-
-        // L1 Shield Pre-computation
-        let mut var_masks = vec![TopoBloomMask::empty(); v_count];
-        for i in 0..v_count {
-            var_masks[i] = TopoBloomMask::from_variable_index(i);
-        }
-
-        // Phase 2: Cohomological Refinement (Message Passing)
-        for _ in 0..max_iterations {
-            // Step 2A: Volume Update (Clauses)
-            let mut next_clause_signatures = vec![GaloisSignature256::zero(); c_count];
-            for j in 0..c_count {
-                let mut clause_state = MultisetAggregator::empty_state();
-                for &v_idx in &provider.variables_in_clause(j) {
-                    clause_state = MultisetAggregator::aggregate(
-                        &clause_state,
-                        &var_signatures[v_idx],
-                        0
-                    );
+    /// Produces compatibility records while executing the maintained engine.
+    ///
+    /// New code should call [`Self::try_analyze`] and consume its identified
+    /// field signature directly. To preserve the infallible historical shape,
+    /// this adapter maps zero rounds to one and caps extreme requests at 64.
+    #[must_use]
+    pub fn canonize<T: TopologyProvider + ?Sized>(
+        provider: &T,
+        requested_rounds: usize,
+    ) -> Vec<CanonicalNode> {
+        let rounds = requested_rounds.clamp(1, MAX_COMPATIBILITY_ROUNDS);
+        let analysis = Self::try_analyze(provider, rounds)
+            .expect("legacy topology must contain only valid variable indices");
+        let masks = compatibility_masks(provider, analysis.variable_count, rounds);
+        analysis.structural.labels()[..analysis.variable_count]
+            .iter()
+            .enumerate()
+            .zip(masks)
+            .map(|((original_index, label), bloom_mask)| {
+                let mut bytes = [0_u8; 32];
+                for (target, lane) in bytes.iter_mut().zip(label.lanes()) {
+                    *target = lane.to_canonical()[0];
                 }
+                CanonicalNode {
+                    original_index,
+                    signature: GaloisSignature256::from_bytes_canonical(&bytes),
+                    bloom_mask,
+                }
+            })
+            .collect()
+    }
+}
 
-                // Asymmetric Inertia: S^2 * Phi
-                let inertia = clause_signatures[j].mul(&clause_signatures[j]).shift_phase();
-                next_clause_signatures[j] = inertia.add(&clause_state);
-            }
-            clause_signatures = next_clause_signatures;
-
-            // Step 2B: Boundary Update (Variables)
-            let mut next_var_signatures = vec![GaloisSignature256::zero(); v_count];
-            for i in 0..v_count {
-                let mut var_state = MultisetAggregator::empty_state();
-                let mut var_mask = var_masks[i].clone();
-
-                for &c_idx in &provider.clauses_for_variable(i) {
-                    var_state = MultisetAggregator::aggregate(
-                        &var_state,
-                        &clause_signatures[c_idx],
-                        0
-                    );
-
-                    // Accumulate L1 entropy
-                    for &neighbor_v in &provider.variables_in_clause(c_idx) {
-                        var_mask = var_mask.union(&var_masks[neighbor_v]);
+/// Synchronous compatibility prefilter. It is deliberately kept outside the
+/// field recurrence so index-based Bloom collisions cannot affect signatures.
+fn compatibility_masks<T: TopologyProvider + ?Sized>(
+    provider: &T,
+    variable_count: usize,
+    rounds: usize,
+) -> Vec<TopoBloomMask> {
+    let mut current: Vec<_> = (0..variable_count)
+        .map(TopoBloomMask::from_variable_index)
+        .collect();
+    let mut next = current.clone();
+    for _ in 0..rounds {
+        for (variable, output) in next.iter_mut().enumerate() {
+            let mut mask = current[variable];
+            for clause in provider.clauses_for_variable(variable) {
+                for neighbor in provider.variables_in_clause(clause) {
+                    if let Some(neighbor_mask) = current.get(neighbor) {
+                        mask = mask.union(neighbor_mask);
                     }
                 }
-
-                let inertia = var_signatures[i].mul(&var_signatures[i]).shift_phase();
-                next_var_signatures[i] = inertia.add(&var_state);
-                var_masks[i] = var_mask;
             }
-            var_signatures = next_var_signatures;
+            *output = mask;
         }
-
-        // Output Generation
-        var_signatures.into_iter().enumerate().zip(var_masks.into_iter()).map(|((i, sig), mask)| {
-            CanonicalNode {
-                original_index: i,
-                signature: sig,
-                bloom_mask: mask,
-            }
-        }).collect()
+        core::mem::swap(&mut current, &mut next);
     }
-
-    /// Implements the Context-Aware Hybrid Engine to prevent thermodynamic collapse.
-    fn hybrid_spectral_initialization<T: TopologyProvider + ?Sized>(
-        provider: &T,
-        v_count: usize,
-        c_count: usize
-    ) -> Vec<GaloisSignature256> {
-        let density = if v_count > 0 { c_count as f64 / v_count as f64 } else { 0.0 };
-        let split_threshold = (v_count as f64).sqrt().max(10.0);
-
-        let estimated_diameter = if density > 10.0 { 2 } else { 4 };
-        let l_max = 9.min(2 * estimated_diameter + 1);
-
-        let spectra = if density >= split_threshold {
-            SpectralEngineF251::compute_dense(provider, v_count, l_max)
-        } else {
-            SpectralEngineF251::compute_sparse(provider, v_count, l_max)
-        };
-
-        spectra.into_iter().map(|spectrum| {
-            let mut buffer = [0u8; 32];
-            for (i, &walk_count) in spectrum.iter().enumerate().take(8) {
-                buffer[i] = walk_count as u8;
-            }
-            GaloisSignature256::from_bytes_canonical(&buffer)
-        }).collect()
-    }
+    current
 }

@@ -7,6 +7,8 @@ macro_rules! define_binary_field {
         limbs = $limbs:ty,
         repr = $repr:ty,
         implementation = $implementation:ty,
+        modulus_tail = $modulus_tail:expr,
+        catalog = $catalog:path,
         spec = $spec:expr,
         debug_name = $debug_name:literal
     ) => {
@@ -16,18 +18,32 @@ macro_rules! define_binary_field {
         pub struct $name($limbs);
 
         #[cfg(feature = "portable")]
-        static PORTABLE_KERNELS: crate::kernel::KernelSet<$name> =
-            crate::backend::portable::kernel_set::<$name>();
+        static PORTABLE_STRATEGY: crate::__private::PortableStrategy<$name> =
+            crate::__private::PortableStrategy::new();
 
         #[cfg(feature = "portable")]
         static KERNEL_CATALOG: crate::kernel::KernelCatalog<$name> =
-            crate::kernel::KernelCatalog::portable(&PORTABLE_KERNELS);
+            $catalog(PORTABLE_STRATEGY.kernels());
 
         impl $name {
             #[inline]
-            fn from_limbs(limbs: $limbs) -> Self {
+            pub(crate) const fn from_limbs(limbs: $limbs) -> Self {
                 Self(limbs)
             }
+
+            #[cfg(all(
+                feature = "portable",
+                any(target_arch = "x86_64", target_arch = "aarch64")
+            ))]
+            pub(crate) const fn into_limbs(self) -> $limbs {
+                self.0
+            }
+
+            #[cfg(all(
+                feature = "portable",
+                any(target_arch = "x86_64", target_arch = "aarch64")
+            ))]
+            pub(crate) const ISA_MODULUS_TAIL: u64 = $modulus_tail;
 
             fn write_hex(self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 for limb in self.0.as_ref().iter().rev() {
@@ -173,6 +189,17 @@ macro_rules! define_binary_field {
 
         #[cfg(feature = "portable")]
         impl crate::kernel::sealed::Sealed for $name {}
+
+        #[cfg(feature = "portable")]
+        impl crate::__private::PortableField for $name {
+            fn __portable_strategy() -> &'static crate::__private::PortableStrategy<Self> {
+                &PORTABLE_STRATEGY
+            }
+
+            fn __kernel_catalog() -> crate::kernel::KernelCatalog<Self> {
+                KERNEL_CATALOG
+            }
+        }
 
         #[cfg(feature = "portable")]
         impl crate::kernel::BuiltinField for $name {

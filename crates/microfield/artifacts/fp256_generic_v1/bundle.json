@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "artifact_id": "ada93f06fbf2d8abac8885764ff3c20a220fd0e80287f9db924ff2ca9e310940",
+  "bundle_digest": "8e32d6dd9cfc3b697ba2df2a8e284098089343c0be311a08de103e769e7fb36a",
+  "files": [
+    {
+      "path": "certificate.json",
+      "bytes": 2012,
+      "sha256": "a91aecb33d77ad152c48bda3e4d1b862b7bf2ab3bdfc4e0e27418bf954b998b2"
+    },
+    {
+      "path": "descriptor.json",
+      "bytes": 359,
+      "sha256": "d20720a605fbba6272b13623e2daf392e0c21c633a1194a6e609376191f5401f"
+    },
+    {
+      "path": "metadata.json",
+      "bytes": 277,
+      "sha256": "30b94e0efdaa69825f1cc5eb729516ec7387d353460b0e63710f67750205b41b"
+    }
+  ]
+}

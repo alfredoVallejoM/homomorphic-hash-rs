@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "oracle": "SageMath exact integers",
+  "seed": "microfield:fp256-generic-v1:2026-08-02",
+  "seed_sha256": "cf6eae7cff8f204b479357c7b75741c7d422888d8e1649d7a6db0c11ff188599",
+  "fields": [
+    {
+      "name": "fp251_v1",
+      "modulus": "251",
+      "canonical_bytes": 1,
+      "cases": [
+        {
+          "name": "boundary-0",
+          "a": "00",
+          "b": "00",
+          "sum": "00",
+          "difference": "00",
+          "product": "00",
+          "square": "00",
+          "inverse": null
+        },
+        {
+          "name": "boundary-1",
+          "a": "01",
+          "b": "fa",
+          "sum": "00",
+          "difference": "02",
+          "product": "fa",
+          "square": "01",
+          "inverse": "01"
+        },
+        {
+          "name": "boundary-2",
+          "a": "fa",
+          "b": "fa",
+          "sum": "f9",
+          "difference": "00",
+          "product": "01",
+          "square": "01",
+          "inverse": "fa"
+        },
+        {
+          "name": "boundary-3",
+          "a": "02",
+          "b": "03",
+          "sum": "05",
+          "difference": "fa",
+          "product": "06",
+          "square": "04",
+          "inverse": "7e"
+        },
+        {
+          "name": "seeded-0",
+          "a": "e0",
+          "b": "d2",
+          "sum": "b7",
+          "difference": "0e",
+          "product": "67",
+          "square": "e3",
+          "inverse": "9e"
+        },
+        {
+          "name": "seeded-1",
+          "a": "d3",
+          "b": "47",
+          "sum": "1f",
+          "difference": "8c",
+          "product": "ac",
+          "square": "5e",
+          "inverse": "45"
+        },
+        {
+          "name": "seeded-2",
+          "a": "05",
+          "b": "a6",
+          "sum": "ab",
+          "difference": "5a",
+          "product": "4d",
+          "square": "19",
+          "inverse": "c9"
+        },
+        {
+          "name": "seeded-3",
+          "a": "7c",
+          "b": "de",
+          "sum": "5f",
+          "difference": "99",
+          "product": "a9",
+          "square": "41",
+          "inverse": "53"
+        }
+      ]
+    },
+    {
+      "name": "fp_goldilocks64_v1",
+      "modulus": "18446744069414584321",
+      "canonical_bytes": 8,
+      "cases": [
+        {
+          "name": "boundary-0",
+          "a": "0000000000000000",
+          "b": "0000000000000000",
+          "sum": "0000000000000000",
+          "difference": "0000000000000000",
+          "product": "0000000000000000",
+          "square": "0000000000000000",
+          "inverse": null
+        },
+        {
+          "name": "boundary-1",
+          "a": "0100000000000000",
+          "b": "00000000ffffffff",
+          "sum": "0000000000000000",
+          "difference": "0200000000000000",
+          "product": "00000000ffffffff",
+          "square": "0100000000000000",
+          "inverse": "0100000000000000"
+        },
+        {
+          "name": "boundary-2",
+          "a": "00000000ffffffff",
+          "b": "00000000ffffffff",
+          "sum": "fffffffffeffffff",
+          "difference": "0000000000000000",
+          "product": "0100000000000000",
+          "square": "0100000000000000",
+          "inverse": "00000000ffffffff"
+        },
+        {
+          "name": "boundary-3",
+          "a": "0200000000000000",
+          "b": "0300000000000000",
+          "sum": "0500000000000000",
+          "difference": "00000000ffffffff",
+          "product": "0600000000000000",
+          "square": "0400000000000000",
+          "inverse": "01000080ffffff7f"
+        },
+        {
+          "name": "seeded-0",
+          "a": "be733e219ad44f1b",
+          "b": "0340d7e38ea86ad0",
+          "sum": "c1b31505297dbaeb",
+          "difference": "bc33673d0a2ce54a",
+          "product": "d94710b4308b371e",
+          "square": "76fcbed27b6e1e61",
+          "inverse": "11ec157e8c3e9533"
+        },
+        {
+          "name": "seeded-1",
+          "a": "d834a5c48747ead6",
+          "b": "40d15a9087cb0259",
+          "sum": "170600551013ed2f",
+          "difference": "98634a34007ce77d",
+          "product": "fa61c67aa74fe710",
+          "square": "d0a6f75fc9386f30",
+          "inverse": "1e92a045073e9569"
+        },
+        {
+          "name": "seeded-2",
+          "a": "c1d637cd4255a14b",
+          "b": "8f270f5aa2ce3d9b",
+          "sum": "50fe4627e523dfe6",
+          "difference": "33af28739f8663b0",
+          "product": "d8cedfd85546c8ad",
+          "square": "190a138069a5553d",
+          "inverse": "655611ad2377208e"
+        },
+        {
+          "name": "seeded-3",
+          "a": "bf526e98992129e2",
+          "b": "0db71ee54b5386ee",
+          "sum": "cb098d7de674afd0",
+          "difference": "b39b4fb34ccea2f3",
+          "product": "a9e7f19059250e4c",
+          "square": "afb15746feeae3b5",
+          "inverse": "dd1b224f27c1b6d5"
+        }
+      ]
+    },
+    {
+      "name": "fp256_generic_v1",
+      "modulus": "71319327679048415160211920703270965766974670828100238494590001805011376932671",
+      "canonical_bytes": 32,
+      "cases": [
+        {
+          "name": "boundary-0",
+          "a": "0000000000000000000000000000000000000000000000000000000000000000",
+          "b": "0000000000000000000000000000000000000000000000000000000000000000",
+          "sum": "0000000000000000000000000000000000000000000000000000000000000000",
+          "difference": "0000000000000000000000000000000000000000000000000000000000000000",
+          "product": "0000000000000000000000000000000000000000000000000000000000000000",
+          "square": "0000000000000000000000000000000000000000000000000000000000000000",
+          "inverse": null
+        },
+        {
+          "name": "boundary-1",
+          "a": "0100000000000000000000000000000000000000000000000000000000000000",
+          "b": "3e0728a5ee67d760ed3e19a7d947b0596ea1ecfb6d4ddfa2cb3872e6184fad9d",
+          "sum": "0000000000000000000000000000000000000000000000000000000000000000",
+          "difference": "0200000000000000000000000000000000000000000000000000000000000000",
+          "product": "3e0728a5ee67d760ed3e19a7d947b0596ea1ecfb6d4ddfa2cb3872e6184fad9d",
+          "square": "0100000000000000000000000000000000000000000000000000000000000000",
+          "inverse": "0100000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "name": "boundary-2",
+          "a": "3e0728a5ee67d760ed3e19a7d947b0596ea1ecfb6d4ddfa2cb3872e6184fad9d",
+          "b": "3e0728a5ee67d760ed3e19a7d947b0596ea1ecfb6d4ddfa2cb3872e6184fad9d",
+          "sum": "3d0728a5ee67d760ed3e19a7d947b0596ea1ecfb6d4ddfa2cb3872e6184fad9d",
+          "difference": "0000000000000000000000000000000000000000000000000000000000000000",
+          "product": "0100000000000000000000000000000000000000000000000000000000000000",
+          "square": "0100000000000000000000000000000000000000000000000000000000000000",
+          "inverse": "3e0728a5ee67d760ed3e19a7d947b0596ea1ecfb6d4ddfa2cb3872e6184fad9d"
+        },
+        {
+          "name": "boundary-3",
+          "a": "0200000000000000000000000000000000000000000000000000000000000000",
+          "b": "0300000000000000000000000000000000000000000000000000000000000000",
+          "sum": "0500000000000000000000000000000000000000000000000000000000000000",
+          "difference": "3e0728a5ee67d760ed3e19a7d947b0596ea1ecfb6d4ddfa2cb3872e6184fad9d",
+          "product": "0600000000000000000000000000000000000000000000000000000000000000",
+          "square": "0400000000000000000000000000000000000000000000000000000000000000",
+          "inverse": "a0039452f7b36bb0769f8cd3ec23d82cb750f6fdb6a66fd1651c39738ca7d64e"
+        },
+        {
+          "name": "seeded-0",
+          "a": "57ea1b989613f51e218d0e1cd0e3e49b5e9ee756c541f223f500c788ec89d151",
+          "b": "137b22edc1f124a8e958794d74e3fd6730e0261d6b6516f9a18eb13ec86f326a",
+          "sum": "2b5e16e0699d42661da76ec26a7f32aa20dd2178c259297acb5606e19baa561e",
+          "difference": "83762150c389a7d72473ae753548978d9c5fad35c829bbcd1eab87303d694c85",
+          "product": "57819a052df60f98638f4f7bcccd3ea7ee5c06016a0ea914fadcbcd2dc90c71b",
+          "square": "3a5b0e3836e692ffb7db46962cb218119acb9c714a7a3ac916eb22ceb5bb0b62",
+          "inverse": "3cab32db1586ff3ca1cceab495e2621e5c728b6455f96a41cc4b2de823a27451"
+        },
+        {
+          "name": "seeded-1",
+          "a": "2611004217bce94b4907356c628807830ae0419102b7ab36fe6f45e321ebb917",
+          "b": "ef1e9b0e7b484b4a94bc821b214a5ee51f82ecd071707836816a368ad4904316",
+          "sum": "15309b5092043596ddc3b78783d265682a622e627427246d7fda7b6df67bfd2d",
+          "difference": "37f264339c739e01b54ab250413ea99dea5d55c0904633007d050f594d5a7601",
+          "product": "86c1df85427f1e64902a268d20cc4549e51f01e2d93c27b8f53fa9068039c455",
+          "square": "fe2451be7a89616f1cf02fe6f07db423d0aa3399209d58e1a3be798320273d8a",
+          "inverse": "7dcf286840baffc086e2d5ccce65392d38c5db4e24dd7daaf04009ac50e6d979"
+        },
+        {
+          "name": "seeded-2",
+          "a": "53f6c103d7a4f3f0662833d39bef440a94ccedc9c77a46f73447140822aaed5d",
+          "b": "0e0f3885df08a9914e73d90a52f07292d1aa7b19e481f8588a5b3acb8c10d232",
+          "sum": "6105fa88b6ad9c82b59b0cdeeddfb79c657769e3abfc3e50bfa24ed3aebabf90",
+          "difference": "45e7897ef79b4a5f18b559c849ffd177c22172b0e3f84d9eaaebd93c95991b2b",
+          "product": "ab358d784bc0dec758211f5536d49b9dc356f05d2559660f8b7e151ba54dce31",
+          "square": "c95f483e7b880cb378f4a2709a75afd9284c8a2df825a1b9512a0dbc3dae7651",
+          "inverse": "a59ee7cc09f41611c6226922feb25c90543662f9152f55e7c7b30f7d7cacf17b"
+        },
+        {
+          "name": "seeded-3",
+          "a": "4d58ec4ae84ee50f2cad4b864a997615c9c9168f48c6bf1af348f58fc8a36c2e",
+          "b": "9d373be93abbbfb7b4242f4da908a674004869a390ff8583c87f9db8f511ce62",
+          "sum": "ea8f2734230aa5c7e0d17ad3f3a11c8ac9118032d9c5459ebbc89248beb53a91",
+          "difference": "ef27d9069cfbfcb864c735e07ad880fa36239ae72514193af601cabdebe04b69",
+          "product": "0134343b01378a7b37dc37dd0c301c7b5c714b49aff921b36f5cc9800db16798",
+          "square": "0447184ec96adfe1790df7b1f762439a17d3309671a83118c5b183b948dda15d",
+          "inverse": "fe5b6856944f1caa0feedaf99bf59352544a6e668c86bdab9ae0a14abb427207"
+        }
+      ]
+    }
+  ]
+}

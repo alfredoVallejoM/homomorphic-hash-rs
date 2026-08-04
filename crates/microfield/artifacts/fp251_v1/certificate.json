@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "field_id": "aef78c79e5e5e929ee046a199df8eab46633a4ea7cabf66480fe2d7909d678da",
+  "validator": "microfield-prime-v1",
+  "primality": {
+    "algorithm": "trial-division-complete-v1",
+    "modulus": "251",
+    "bound": 15,
+    "tested_primes": [2, 3, 5, 7, 11, 13]
+  }
+}

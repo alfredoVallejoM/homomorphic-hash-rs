@@ -2,10 +2,16 @@
 name = "homomorphic-hash-rs"
 version = "0.1.0"
 edition = "2021"
-description = "Libreria de Hashes Homomorficos Topologicos basados en GF(2^256)"
+description = "Firmas algebraicas homomorficas no criptograficas sobre campos finitos"
+autobenches = false
 
 [workspace]
-members = ["crates/microfield"]
+members = [
+    "crates/microfield",
+    "crates/structural-field-fixture",
+    "crates/validation-lab",
+]
+exclude = ["crates/microfield/test-fixtures/external-consumer"]
 default-members = ["crates/microfield"]
 resolver = "2"
 
@@ -18,12 +24,16 @@ rayon = "1.11.0"
 serde = { version = "1.0.228", features = ["derive"] }
 ureq = "2.9.1"                                         # HTTP client (Robusto, sin overhead asíncrono)
 flate2 = "1.0.28"                                      # Streaming GZIP decompression
+microfield = { path = "crates/microfield" }
+sha2 = "0.10.9"
 # Dependencias futuras para paralelismo o utilidades
 # rayon = "1.5"
 
 [dev-dependencies]
+allocation-counter = "0.8.1"
 criterion = "0.5" # Para el perfilado termodinamico (benches)
-microfield = { path = "crates/microfield" }
+serde_json = "1.0"
+structural-field-fixture = { path = "crates/structural-field-fixture" }
 
 [profile.release]
 opt-level = 3
@@ -32,20 +42,30 @@ codegen-units = 1
 # `target-cpu` se configura mediante RUSTFLAGS en mediciones controladas.
 
 [features]
-default = []
-# Enable this feature to compile the library without conditional branches
-# in hot loops, preventing timing side-channel attacks at the cost of
-# some structural throughput.
-crypto_mode = []
+default = ["legacy", "signatures", "graph"]
+# Maintained homomorphic-signature API. This feature deliberately does not
+# compile the graph or legacy modules.
+signatures = []
+# Graph analysis and canonization consume the maintained signature API.
+graph = ["signatures"]
+# Runtime-field signatures without enabling graph support.
+dynamic-signatures = ["signatures", "microfield/dynamic"]
+# Backwards-compatible feature name: historically this enabled both runtime
+# signatures and runtime graph profiles.
+dynamic-fields = ["dynamic-signatures", "graph"]
+# Source-compatible prototype modules. The migrated legacy canonizer consumes
+# the maintained graph model, but the graph feature does not depend on legacy.
+legacy = ["graph"]
+# Compatibilidad fuente con el prototipo. No implica garantías criptográficas
+# ni de tiempo constante.
+crypto_mode = ["legacy"]
 
 [[bench]]
-name = "01_throughput"
+name = "structural_signatures"
+path = "benches/structural_signatures.rs"
 harness = false
 
 [[bench]]
-name = "02_asymptotic"
-harness = false
-
-[[bench]]
-name = "03_thermodynamic"
+name = "fast_graph"
+path = "benches/fast_graph.rs"
 harness = false

@@ -17,6 +17,22 @@ where
     )
 }
 
+/// Creates the same safe portable loops with certified prime metadata.
+#[cfg(feature = "prime-fields")]
+pub(crate) const fn prime_kernel_set<F>(prime: crate::PrimeKernelMetadata) -> KernelSet<F>
+where
+    F: Field + Square,
+{
+    KernelSet::new(
+        crate::KernelMetadata::portable::<F>().with_prime(prime),
+        add::<F>,
+        multiply::<F>,
+        square::<F>,
+        multiply_assign::<F>,
+        square_assign::<F>,
+    )
+}
+
 #[inline]
 fn add<F: Field>(out: &mut [F], lhs: &[F], rhs: &[F]) {
     debug_assert_eq!(out.len(), lhs.len());

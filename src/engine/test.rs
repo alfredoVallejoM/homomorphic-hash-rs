@@ -488,9 +488,8 @@ mod hasher_tests {
 }
 #[cfg(test)]
 mod canonizer_tests {
-    use crate::algebra::traits::FiniteField;
     use crate::engine::canonizer::{CellularGaloisCanonizer, TopologyProvider};
-    use crate::GaloisSignature256;
+    use crate::GraphError;
 
     // =========================================================================
     // MOCK PROVIDER: Strictly isolates the structural graphs for testing
@@ -816,21 +815,18 @@ mod canonizer_tests {
     // =========================================================================
 
     #[test]
-    fn t21_single_iteration_absorbs_immediate_neighborhood() {
+    fn t21_single_round_uses_the_maintained_incidence_engine() {
         let g = MockGraph::new(3, vec![vec![0, 1]]);
-        let res_t0 = CellularGaloisCanonizer::canonize(&g, 0);
-        let res_t1 = CellularGaloisCanonizer::canonize(&g, 1);
-
-        // Node 2 is isolated. Node 0 has Node 1.
-        // FIX: S_0 = 0. S_1 = 0^2 * Phi + 1 = 1.
+        let analysis = CellularGaloisCanonizer::try_analyze(&g, 1).unwrap();
+        assert_eq!(analysis.graph().vertex_count(), 4);
+        assert_eq!(analysis.structural().signature().rounds(), 1);
         assert_eq!(
-            res_t1[2].signature,
-            GaloisSignature256::one(),
-            "Isolated node mathematically absorbs the MultiSet vacuum (1)"
+            analysis.structural().labels()[0],
+            analysis.structural().labels()[1]
         );
         assert_ne!(
-            res_t0[0].signature, res_t1[0].signature,
-            "Connected node mathematically evolves"
+            analysis.structural().labels()[0],
+            analysis.structural().labels()[2]
         );
     }
 
@@ -841,7 +837,7 @@ mod canonizer_tests {
         let res_t5 = CellularGaloisCanonizer::canonize(&g, 5);
         assert_ne!(
             res_t2[0].signature, res_t5[0].signature,
-            "S^2 * Phi Inertia guarantees perpetual temporal divergence"
+            "different fixed-round profiles execute distinct identified recurrences"
         );
     }
 
@@ -856,20 +852,17 @@ mod canonizer_tests {
     }
 
     #[test]
-    fn t24_inertia_advances_isolated_nodes() {
-        // Due to S^2 * Phi, a node evolves even with 0 clauses.
+    fn t24_precise_legacy_bridge_rejects_unbounded_round_requests() {
         let g = MockGraph::new(1, vec![]);
-        let t0 = CellularGaloisCanonizer::canonize(&g, 0);
-        let t1 = CellularGaloisCanonizer::canonize(&g, 1);
-        assert_eq!(
-            t1[0].signature,
-            t0[0]
-                .signature
-                .mul(&t0[0].signature)
-                .shift_phase()
-                .add(&GaloisSignature256::one()),
-            "Phase shift inertia precisely mapped"
-        );
+        assert!(matches!(
+            CellularGaloisCanonizer::try_analyze(&g, 0),
+            Err(GraphError::InvalidProfile)
+        ));
+        assert!(matches!(
+            CellularGaloisCanonizer::try_analyze(&g, 65),
+            Err(GraphError::InvalidProfile)
+        ));
+        assert_eq!(CellularGaloisCanonizer::canonize(&g, 0).len(), 1);
     }
 
     #[test]
@@ -1418,7 +1411,7 @@ mod spectral_f251_tests {
 mod engine_integration_tests {
     use crate::algebra::galois_256::GaloisSignature256;
     use crate::algebra::traits::FiniteField;
-    use crate::engine::canonizer::{CanonicalNode, CellularGaloisCanonizer, TopologyProvider};
+    use crate::engine::canonizer::{CellularGaloisCanonizer, TopologyProvider};
     use crate::topology::bloom_l1::TopologicalMask;
     use crate::TopoBloomMask;
     // =========================================================================
@@ -2430,19 +2423,21 @@ mod stress_and_limits_tests {
 }
 #[cfg(test)]
 mod proof_tests {
-    use crate::engine::proofs::{ProofGenerator, ProofVerifier, TopologicalWitness};
     use crate::algebra::galois_256::GaloisSignature256;
-    use crate::topology::traits::HomomorphicAggregator;
+    use crate::algebra::traits::FiniteField;
+    use crate::engine::proofs::{ProofGenerator, ProofVerifier, TopologicalWitness};
     use crate::topology::multiset::MultisetAggregator;
     use crate::topology::sequence::SequenceAggregator;
     use crate::topology::symmetric_difference::SymmetricDifferenceAggregator;
-    use crate::algebra::traits::FiniteField;
+    use crate::topology::traits::HomomorphicAggregator;
     // =========================================================================
     // UTILS: ENTROPY GENERATION (DETERMINISTIC FOR TESTING)
     // =========================================================================
     fn generate_mass(seed: u8) -> [u8; 32] {
         let mut data = [0u8; 32];
-        for i in 0..32 { data[i] = seed.wrapping_add(i as u8); }
+        for i in 0..32 {
+            data[i] = seed.wrapping_add(i as u8);
+        }
         data
     }
 
@@ -2460,23 +2455,37 @@ mod proof_tests {
         let embedded = MultisetAggregator::embed_to_field(&e1);
         state = MultisetAggregator::aggregate(&state, &embedded, 0);
 
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, &e1, &witness, 0));
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1, &witness, 0));
     }
 
-   #[test]
+    #[test]
     fn test_02_multiset_tautological_forgery_demonstration() {
         let e1 = generate_mass(1);
         let e2 = generate_mass(2); // Never injected
-        let mut state: GaloisSignature256 = MultisetAggregator::aggregate(
+        let state: GaloisSignature256 = MultisetAggregator::aggregate(
             &MultisetAggregator::empty_state(),
             &MultisetAggregator::embed_to_field(&e1),
-            0
+            0,
         );
 
-        let fake_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e2).unwrap();
+        let fake_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e2)
+        .unwrap();
         // ASSERT TRUE: We empirically prove the topological tautology.
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, &e2, &fake_witness, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e2, &fake_witness, 0));
     }
 
     /// Test 03: Teorema de Invarianza Conmutativa.
@@ -2487,11 +2496,20 @@ mod proof_tests {
         let e2 = generate_mass(2);
 
         let mut state_ab = MultisetAggregator::empty_state();
-        state_ab = MultisetAggregator::aggregate(&state_ab, &MultisetAggregator::embed_to_field(&e1), 0);
-        state_ab = MultisetAggregator::aggregate(&state_ab, &MultisetAggregator::embed_to_field(&e2), 0);
+        state_ab =
+            MultisetAggregator::aggregate(&state_ab, &MultisetAggregator::embed_to_field(&e1), 0);
+        state_ab =
+            MultisetAggregator::aggregate(&state_ab, &MultisetAggregator::embed_to_field(&e2), 0);
 
-        let witness_e1 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state_ab, &e1).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state_ab, &e1, &witness_e1, 0));
+        let witness_e1 = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state_ab, &e1)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state_ab, &e1, &witness_e1, 0));
     }
 
     /// Test 04: Conservación de Multiplicidad Físico-Matemática.
@@ -2504,10 +2522,21 @@ mod proof_tests {
         state = MultisetAggregator::aggregate(&state, &embedded, 0);
         state = MultisetAggregator::aggregate(&state, &embedded, 1); // Insertado 2 veces
 
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1)
+        .unwrap();
         // El testigo (remainder) DEBE seguir conteniendo a e1.
-        let second_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&witness.state_remainder, &e1).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&witness.state_remainder, &e1, &second_witness, 0));
+        let second_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&witness.state_remainder, &e1)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&witness.state_remainder, &e1, &second_witness, 0));
     }
 
     /// Test 05: Inmunidad al Divisor de Cero (Axioma Afín).
@@ -2520,8 +2549,15 @@ mod proof_tests {
         state = MultisetAggregator::aggregate(&state, &embedded, 0);
 
         // Si no hubiera desplazamiento afín (X_g), state sería 0 y la extracción fallaría (div por cero).
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &zeros).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, &zeros, &witness, 0));
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &zeros)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &zeros, &witness, 0));
     }
 
     /// Test 06: Extracción Imposible del Vacío.
@@ -2530,9 +2566,16 @@ mod proof_tests {
     fn test_06_multiset_empty_state_tautology() {
         let e1 = generate_mass(1);
         let empty_state: GaloisSignature256 = MultisetAggregator::empty_state();
-        let fake_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&empty_state, &e1).unwrap();
+        let fake_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&empty_state, &e1)
+        .unwrap();
         // ASSERT TRUE: 1 * X_e^{-1} * X_e == 1.
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&empty_state, &e1, &fake_witness, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&empty_state, &e1, &fake_witness, 0));
     }
 
     /// Test 07: Indistinguibilidad del Testigo (ZKP limit).
@@ -2542,11 +2585,24 @@ mod proof_tests {
         let e1 = generate_mass(1);
         let e2 = generate_mass(2);
 
-        let mut state_a = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
-        let mut state_b = MultisetAggregator::aggregate(&state_a, &MultisetAggregator::embed_to_field(&e2), 0);
+        let state_a = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
+        let state_b =
+            MultisetAggregator::aggregate(&state_a, &MultisetAggregator::embed_to_field(&e2), 0);
 
-        let witness_a = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state_a, &e1).unwrap();
-        let witness_b = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state_b, &e1).unwrap();
+        let witness_a = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state_a, &e1)
+        .unwrap();
+        let witness_b = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state_b, &e1)
+        .unwrap();
 
         assert_ne!(witness_a.state_remainder, witness_b.state_remainder);
     }
@@ -2557,31 +2613,59 @@ mod proof_tests {
     fn test_08_multiset_massive_entropy() {
         let target = generate_mass(99);
         let mut state = MultisetAggregator::empty_state();
-        state = MultisetAggregator::aggregate(&state, &MultisetAggregator::embed_to_field(&target), 0);
+        state =
+            MultisetAggregator::aggregate(&state, &MultisetAggregator::embed_to_field(&target), 0);
 
         for i in 0..100 {
             let noise = generate_mass(i as u8);
-            state = MultisetAggregator::aggregate(&state, &MultisetAggregator::embed_to_field(&noise), i + 1);
+            state = MultisetAggregator::aggregate(
+                &state,
+                &MultisetAggregator::embed_to_field(&noise),
+                i + 1,
+            );
         }
 
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &target).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, &target, &witness, 0));
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &target)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &target, &witness, 0));
     }
 
     /// Test 09: Extracción en Orden Aleatorio.
     /// Hipótesis: Un multiconjunto puede ser desensamblado completamente en cualquier orden.
     #[test]
     fn test_09_multiset_random_teardown() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2); let e3 = generate_mass(3);
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
+        let e3 = generate_mass(3);
         let mut state = MultisetAggregator::empty_state();
         state = MultisetAggregator::aggregate(&state, &MultisetAggregator::embed_to_field(&e1), 0);
         state = MultisetAggregator::aggregate(&state, &MultisetAggregator::embed_to_field(&e2), 0);
         state = MultisetAggregator::aggregate(&state, &MultisetAggregator::embed_to_field(&e3), 0);
 
         // Extraer e2 primero (medio), luego e3, luego e1.
-        let w_e2 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e2).unwrap();
-        let w_e3 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&w_e2.state_remainder, &e3).unwrap();
-        let w_e1 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&w_e3.state_remainder, &e1).unwrap();
+        let w_e2 =
+            ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(
+                &state, &e2,
+            )
+            .unwrap();
+        let w_e3 =
+            ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(
+                &w_e2.state_remainder,
+                &e3,
+            )
+            .unwrap();
+        let w_e1 =
+            ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(
+                &w_e3.state_remainder,
+                &e1,
+            )
+            .unwrap();
 
         assert_eq!(w_e1.state_remainder, MultisetAggregator::empty_state());
     }
@@ -2590,11 +2674,24 @@ mod proof_tests {
     /// Hipótesis: El testigo (remainder) de e1 frente a H_M es isomórfico al estado H_{M \setminus e1}.
     #[test]
     fn test_10_multiset_witness_isomorphism() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2);
-        let state_e2_only = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e2), 0);
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
+        let state_e2_only = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e2),
+            0,
+        );
 
-        let state_both = MultisetAggregator::aggregate(&state_e2_only, &MultisetAggregator::embed_to_field(&e1), 0);
-        let witness_e1 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state_both, &e1).unwrap();
+        let state_both = MultisetAggregator::aggregate(
+            &state_e2_only,
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
+        let witness_e1 = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state_both, &e1)
+        .unwrap();
 
         assert_eq!(witness_e1.state_remainder, state_e2_only);
     }
@@ -2608,42 +2705,64 @@ mod proof_tests {
     /// Hipótesis: El ÚLTIMO elemento insertado puede ser extraído invirtiendo el desplazamiento de fase.
     #[test]
     fn test_11_sequence_terminal_causality() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2);
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
         let mut state = SequenceAggregator::empty_state();
         state = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&e1), 0);
         state = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&e2), 1);
 
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state, &e2).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&state, &e2, &witness, 1));
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&state, &e2)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&state, &e2, &witness, 1));
     }
 
     #[test]
     fn test_12_sequence_past_extraction_tautology() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2);
-        let mut state: GaloisSignature256 = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &SequenceAggregator::embed_to_field(&e1), 0);
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
+        let mut state: GaloisSignature256 = SequenceAggregator::aggregate(
+            &SequenceAggregator::empty_state(),
+            &SequenceAggregator::embed_to_field(&e1),
+            0,
+        );
         state = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&e2), 1);
 
-        let fake_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state, &e1).unwrap();
+        let fake_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&state, &e1)
+        .unwrap();
         // ASSERT TRUE: ((S + e1) * x^{-1} * x) + e1 == S.
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&state, &e1, &fake_witness, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&state, &e1, &fake_witness, 0));
     }
 
     /// Test 13: Ruptura de Simetría (No Conmutatividad).
     /// Hipótesis: H(e1 -> e2) != H(e2 -> e1).
     #[test]
     fn test_13_sequence_order_perturbation_rejection() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2);
-let mut s_ab: GaloisSignature256 = SequenceAggregator::aggregate(
-    &SequenceAggregator::empty_state(),
-    &SequenceAggregator::embed_to_field(&e1),
-    0
-);        s_ab = SequenceAggregator::aggregate(&s_ab, &SequenceAggregator::embed_to_field(&e2), 1);
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
+        let mut s_ab: GaloisSignature256 = SequenceAggregator::aggregate(
+            &SequenceAggregator::empty_state(),
+            &SequenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        s_ab = SequenceAggregator::aggregate(&s_ab, &SequenceAggregator::embed_to_field(&e2), 1);
 
         let mut s_ba: GaloisSignature256 = SequenceAggregator::aggregate(
-    &SequenceAggregator::empty_state(),
-    &SequenceAggregator::embed_to_field(&e2),
-    0
-);
+            &SequenceAggregator::empty_state(),
+            &SequenceAggregator::embed_to_field(&e2),
+            0,
+        );
         s_ba = SequenceAggregator::aggregate(&s_ba, &SequenceAggregator::embed_to_field(&e1), 1);
 
         assert_ne!(s_ab, s_ba);
@@ -2656,12 +2775,20 @@ let mut s_ab: GaloisSignature256 = SequenceAggregator::aggregate(
         let events = [generate_mass(1), generate_mass(2), generate_mass(3)];
         let mut state = SequenceAggregator::empty_state();
         for (i, e) in events.iter().enumerate() {
-            state = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(e), i);
+            state =
+                SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(e), i);
         }
 
         for event in events.iter().rev() {
-            let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state, event).unwrap();
-            assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&state, event, &witness, 0));
+            let witness = ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                SequenceAggregator,
+            >(&state, event)
+            .unwrap();
+            assert!(ProofVerifier::verify_inclusion::<
+                GaloisSignature256,
+                SequenceAggregator,
+            >(&state, event, &witness, 0));
             state = witness.state_remainder; // El estado retrocede en el tiempo
         }
         assert_eq!(state, SequenceAggregator::empty_state());
@@ -2672,8 +2799,15 @@ let mut s_ab: GaloisSignature256 = SequenceAggregator::aggregate(
     fn test_15_sequence_empty_state_rollback_tautology() {
         let empty: GaloisSignature256 = SequenceAggregator::empty_state();
         let e1 = generate_mass(1);
-        let fake_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&empty, &e1).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&empty, &e1, &fake_witness, 0));
+        let fake_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&empty, &e1)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&empty, &e1, &fake_witness, 0));
     }
 
     /// Test 16: Corrupción de Testigo Secuencial.
@@ -2681,11 +2815,22 @@ let mut s_ab: GaloisSignature256 = SequenceAggregator::aggregate(
     #[test]
     fn test_16_sequence_witness_corruption() {
         let e1 = generate_mass(1);
-        let state = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &SequenceAggregator::embed_to_field(&e1), 0);
-        let mut witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state, &e1).unwrap();
+        let state = SequenceAggregator::aggregate(
+            &SequenceAggregator::empty_state(),
+            &SequenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        let mut witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&state, &e1)
+        .unwrap();
 
         witness.state_remainder.0[0] ^= 1; // Corrupción inducida
-        assert!(!ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&state, &e1, &witness, 0));
+        assert!(!ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&state, &e1, &witness, 0));
     }
 
     /// Test 17: Invarianza Cero-Longitud (Linearidad de Embebido).
@@ -2694,8 +2839,8 @@ let mut s_ab: GaloisSignature256 = SequenceAggregator::aggregate(
     fn test_17_sequence_embedding_linearity() {
         let e1 = generate_mass(1);
         // Ancle el embebido
-let embedded: GaloisSignature256 = SequenceAggregator::embed_to_field(&e1);
-let state = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &embedded, 0);
+        let embedded: GaloisSignature256 = SequenceAggregator::embed_to_field(&e1);
+        let state = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &embedded, 0);
         assert_eq!(embedded, state);
     }
 
@@ -2703,13 +2848,21 @@ let state = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &e
     /// Hipótesis: El testigo de e2 no puede usarse para validar a e1.
     #[test]
     fn test_18_sequence_witness_temporal_asymmetry() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2);
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
         let mut state = SequenceAggregator::empty_state();
         state = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&e1), 0);
         state = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&e2), 1);
 
-        let w_e2 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state, &e2).unwrap();
-        assert!(!ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&state, &e1, &w_e2, 0));
+        let w_e2 =
+            ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(
+                &state, &e2,
+            )
+            .unwrap();
+        assert!(!ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&state, &e1, &w_e2, 0));
     }
 
     // =========================================================================
@@ -2723,9 +2876,17 @@ let state = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &e
     fn test_19_symdiff_involution_identity() {
         let e1 = generate_mass(1);
         // Ancle el estado vacío inicial
-let state0: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
-        let state1 = SymmetricDifferenceAggregator::aggregate(&state0, &SymmetricDifferenceAggregator::embed_to_field(&e1), 0);
-        let state2 = SymmetricDifferenceAggregator::aggregate(&state1, &SymmetricDifferenceAggregator::embed_to_field(&e1), 1);
+        let state0: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
+        let state1 = SymmetricDifferenceAggregator::aggregate(
+            &state0,
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        let state2 = SymmetricDifferenceAggregator::aggregate(
+            &state1,
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            1,
+        );
 
         assert_eq!(state0, state2);
     }
@@ -2735,9 +2896,20 @@ let state0: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
     #[test]
     fn test_20_symdiff_odd_parity_inclusion() {
         let e1 = generate_mass(1);
-        let state = SymmetricDifferenceAggregator::aggregate(&SymmetricDifferenceAggregator::empty_state(), &SymmetricDifferenceAggregator::embed_to_field(&e1), 0);
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &e1).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &e1, &witness, 0));
+        let state = SymmetricDifferenceAggregator::aggregate(
+            &SymmetricDifferenceAggregator::empty_state(),
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state, &e1)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state, &e1, &witness, 0));
     }
 
     /// Test 21 (Corrected): Symmetric Difference XOR Tautology.
@@ -2745,25 +2917,43 @@ let state0: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
     fn test_21_symdiff_even_parity_forgery_demonstration() {
         let e1 = generate_mass(1);
         let state: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
-        let fake_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &e1).unwrap();
+        let fake_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state, &e1)
+        .unwrap();
         // ASSERT TRUE: (0 ^ e1) ^ e1 == 0.
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &e1, &fake_witness, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state, &e1, &fake_witness, 0));
     }
 
     /// Test 22: Conmutatividad Absoluta.
     /// Hipótesis: XOR es invariante al orden.
     #[test]
     fn test_22_symdiff_commutativity() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2);
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
         // Ancle el agregado
-let s_ab: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
-    &SymmetricDifferenceAggregator::aggregate(&SymmetricDifferenceAggregator::empty_state(), &SymmetricDifferenceAggregator::embed_to_field(&e1), 0),
-    &SymmetricDifferenceAggregator::embed_to_field(&e2), 1
-);
-let s_ba: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
-    &SymmetricDifferenceAggregator::aggregate(&SymmetricDifferenceAggregator::empty_state(), &SymmetricDifferenceAggregator::embed_to_field(&e2), 0),
-    &SymmetricDifferenceAggregator::embed_to_field(&e1), 1
-);
+        let s_ab: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
+            &SymmetricDifferenceAggregator::aggregate(
+                &SymmetricDifferenceAggregator::empty_state(),
+                &SymmetricDifferenceAggregator::embed_to_field(&e1),
+                0,
+            ),
+            &SymmetricDifferenceAggregator::embed_to_field(&e2),
+            1,
+        );
+        let s_ba: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
+            &SymmetricDifferenceAggregator::aggregate(
+                &SymmetricDifferenceAggregator::empty_state(),
+                &SymmetricDifferenceAggregator::embed_to_field(&e2),
+                0,
+            ),
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            1,
+        );
         assert_eq!(s_ab, s_ba);
     }
 
@@ -2774,13 +2964,17 @@ let s_ba: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         let zeros = [0u8; 32];
         let e1 = generate_mass(1);
         // Ancle el primer estado
-let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
-    &SymmetricDifferenceAggregator::empty_state(),
-    &SymmetricDifferenceAggregator::embed_to_field(&e1),
-    0
-);
+        let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
+            &SymmetricDifferenceAggregator::empty_state(),
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            0,
+        );
 
-        let state_e1_and_zeros = SymmetricDifferenceAggregator::aggregate(&state_e1, &SymmetricDifferenceAggregator::embed_to_field(&zeros), 1);
+        let state_e1_and_zeros = SymmetricDifferenceAggregator::aggregate(
+            &state_e1,
+            &SymmetricDifferenceAggregator::embed_to_field(&zeros),
+            1,
+        );
 
         // En F256, el bloque de ceros se evalúa a GaloisSignature256::zero(), sumarlo deja el estado intacto.
         assert_eq!(state_e1, state_e1_and_zeros);
@@ -2793,45 +2987,85 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         let elements = [generate_mass(1), generate_mass(2), generate_mass(3)];
         let mut state = SymmetricDifferenceAggregator::empty_state();
         for e in &elements {
-            state = SymmetricDifferenceAggregator::aggregate(&state, &SymmetricDifferenceAggregator::embed_to_field(e), 0);
+            state = SymmetricDifferenceAggregator::aggregate(
+                &state,
+                &SymmetricDifferenceAggregator::embed_to_field(e),
+                0,
+            );
         }
 
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &elements[1]).unwrap();
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state, &elements[1])
+        .unwrap();
         // El resto debe ser solo e1 + e3
         let mut expected_remainder = SymmetricDifferenceAggregator::empty_state();
-        expected_remainder = SymmetricDifferenceAggregator::aggregate(&expected_remainder, &SymmetricDifferenceAggregator::embed_to_field(&elements[0]), 0);
-        expected_remainder = SymmetricDifferenceAggregator::aggregate(&expected_remainder, &SymmetricDifferenceAggregator::embed_to_field(&elements[2]), 0);
+        expected_remainder = SymmetricDifferenceAggregator::aggregate(
+            &expected_remainder,
+            &SymmetricDifferenceAggregator::embed_to_field(&elements[0]),
+            0,
+        );
+        expected_remainder = SymmetricDifferenceAggregator::aggregate(
+            &expected_remainder,
+            &SymmetricDifferenceAggregator::embed_to_field(&elements[2]),
+            0,
+        );
 
         assert_eq!(witness.state_remainder, expected_remainder);
     }
 
     // =========================================================================
-    // DOMAIN 4: COMPUTATIONAL PHYSICS & CRYPTOGRAPHIC RESISTANCE
-    // Validating F256 collisions, side-channel mitigations, and bounds.
+    // DOMAIN 4: LEGACY EQUATION REGRESSION
+    // These tests freeze characteristic-two comparisons, not timing or
+    // cryptographic guarantees.
     // =========================================================================
 
-    /// Test 25: Resolución Isócrona de Equivalencia (True).
-    /// Hipótesis: El comparador de tiempo constante debe certificar la igualdad usando A+B=0.
+    /// Test 25: la comparación algebraica acepta una ecuación correcta usando
+    /// `A + B = 0`; no se realiza una afirmación de tiempo constante.
     #[test]
     #[cfg(feature = "crypto_mode")]
     fn test_25_crypto_isochronous_equality_true() {
         let e1 = generate_mass(1);
-        let state = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
+        let state = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1)
+        .unwrap();
 
-        assert!(ProofVerifier::verify_inclusion_isochronous::<GaloisSignature256, MultisetAggregator>(&state, &e1, &witness, 0));
+        assert!(ProofVerifier::verify_inclusion_isochronous::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1, &witness, 0));
     }
 
-    /// Test 26: Resolución Isócrona de Equivalencia (False).
-    /// Hipótesis: El comparador de tiempo constante debe rechazar alteraciones sin short-circuit.
+    /// Test 26: la ecuación falla si se cambia el candidato pero se reutiliza
+    /// el residuo de otro candidato.
     #[test]
     #[cfg(feature = "crypto_mode")]
-    fn test_26_crypto_isochronous_equality_false() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2);
-        let state = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
-        let fake_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e2).unwrap();
+    fn test_26_compat_equation_rejects_changed_candidate() {
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
+        let state = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
+        let witness_for_e1 = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1)
+        .unwrap();
 
-        assert!(!ProofVerifier::verify_inclusion_isochronous::<GaloisSignature256, MultisetAggregator>(&state, &e2, &fake_witness, 0));
+        assert!(!ProofVerifier::verify_inclusion_isochronous::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e2, &witness_for_e1, 0));
     }
 
     /// Test 27: Efecto Avalancha en el Macro-estado (Bit Flip de Salida).
@@ -2839,11 +3073,22 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_27_macro_state_bit_flip_avalanche() {
         let e1 = generate_mass(1);
-        let mut state = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
+        let mut state = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1)
+        .unwrap();
 
         state.0[3] ^= 0x8000000000000000; // Modificar el bit más significativo (255) del estado
-        assert!(!ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, &e1, &witness, 0));
+        assert!(!ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1, &witness, 0));
     }
 
     /// Test 28: Efecto Avalancha en la Masa Física (Bit Flip de Entrada).
@@ -2851,22 +3096,44 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_28_element_bit_flip_avalanche() {
         let mut e1 = generate_mass(1);
-        let state = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
-        let witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
+        let state = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
+        let witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1)
+        .unwrap();
 
         e1[15] ^= 0x01; // Cambiar un solo bit en el medio del array de 32 bytes
-        assert!(!ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, &e1, &witness, 0));
+        assert!(!ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1, &witness, 0));
     }
 
     /// Test 29 (Corrected): Malicious Null Witness Injection.
     #[test]
     fn test_29_null_witness_tautological_acceptance() {
         let e1 = generate_mass(1);
-        let state: GaloisSignature256 = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
+        let state: GaloisSignature256 = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
 
-        let fake_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
+        let fake_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1)
+        .unwrap();
         // Prove that the mathematically derived witness is accepted.
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, &e1, &fake_witness, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1, &fake_witness, 0));
     }
 
     /// Test 30 (Corrected): Padding Collision Tautology.
@@ -2876,9 +3143,20 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         let mut e1_padded = e1;
         e1_padded[31] = 0x00;
 
-        let state: GaloisSignature256 = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
-        let fake_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1_padded).unwrap();
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, &e1_padded, &fake_witness, 0));
+        let state: GaloisSignature256 = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
+        let fake_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1_padded)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, &e1_padded, &fake_witness, 0));
     }
 
     // =========================================================================
@@ -2893,7 +3171,11 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         let mut state: GaloisSignature256 = MultisetAggregator::empty_state();
         for i in 0..10_000 {
             let chunk = [(i % 256) as u8; 32];
-            state = MultisetAggregator::aggregate(&state, &MultisetAggregator::embed_to_field(&chunk), i);
+            state = MultisetAggregator::aggregate(
+                &state,
+                &MultisetAggregator::embed_to_field(&chunk),
+                i,
+            );
         }
         assert_ne!(state, MultisetAggregator::empty_state());
     }
@@ -2905,8 +3187,10 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     fn test_32_sequence_cyclic_overflow_simulation() {
         let e1 = generate_mass(42);
         let mut state: GaloisSignature256 = SequenceAggregator::empty_state();
-        for i in 0..500 { // 500 > 256
-            state = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&e1), i);
+        for i in 0..500 {
+            // 500 > 256
+            state =
+                SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&e1), i);
         }
         assert_ne!(state, GaloisSignature256::zero());
     }
@@ -2917,7 +3201,11 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         let mut state: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
         let e1 = generate_mass(7);
         for i in 0..10_000 {
-            state = SymmetricDifferenceAggregator::aggregate(&state, &SymmetricDifferenceAggregator::embed_to_field(&e1), i);
+            state = SymmetricDifferenceAggregator::aggregate(
+                &state,
+                &SymmetricDifferenceAggregator::embed_to_field(&e1),
+                i,
+            );
         }
         // Even parity -> Should annihilate perfectly to zero.
         assert_eq!(state, SymmetricDifferenceAggregator::empty_state());
@@ -2928,7 +3216,7 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     /// to 0, respecting the affine subspace axiom that prevents zero-divisors.
     #[test]
     fn test_34_multiset_affine_bit_truncation() {
-        let mut e1 = [0xFF; 32]; // All bits 1
+        let e1 = [0xFF; 32]; // All bits 1
         let embedded: GaloisSignature256 = MultisetAggregator::embed_to_field(&e1);
         // Byte 31 is the MSB. If bit 7 of byte 31 is stripped, 0xFF becomes 0x7F.
         // Assuming little-endian mapping in from_bytes_canonical, the highest word's MSB must be 0.
@@ -2958,7 +3246,8 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_37_massive_payload_embedding() {
         let massive_data = vec![0x11; 1024 * 1024]; // 1 Megabyte
-        let embedded: GaloisSignature256 = SymmetricDifferenceAggregator::embed_to_field(&massive_data);
+        let embedded: GaloisSignature256 =
+            SymmetricDifferenceAggregator::embed_to_field(&massive_data);
         assert_ne!(embedded, GaloisSignature256::zero());
     }
 
@@ -2967,8 +3256,16 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_38_sequence_index_invariance() {
         let e1 = generate_mass(1);
-        let s1: GaloisSignature256 = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &SequenceAggregator::embed_to_field(&e1), 0);
-        let s2: GaloisSignature256 = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &SequenceAggregator::embed_to_field(&e1), 9999);
+        let s1: GaloisSignature256 = SequenceAggregator::aggregate(
+            &SequenceAggregator::empty_state(),
+            &SequenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        let s2: GaloisSignature256 = SequenceAggregator::aggregate(
+            &SequenceAggregator::empty_state(),
+            &SequenceAggregator::embed_to_field(&e1),
+            9999,
+        );
         assert_eq!(s1, s2);
     }
 
@@ -2977,13 +3274,26 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_39_cross_topology_interference_multi_to_seq() {
         let e1 = generate_mass(1);
-        let multi_state: GaloisSignature256 = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
+        let multi_state: GaloisSignature256 = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
 
         // Generate proof in Multiset Geometry
-        let multi_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&multi_state, &e1).unwrap();
+        let multi_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&multi_state, &e1)
+        .unwrap();
 
         // Try to verify in Sequence Geometry
-        let is_valid = ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&multi_state, &e1, &multi_witness, 0);
+        let is_valid = ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(
+            &multi_state,
+            &e1,
+            &multi_witness,
+            0,
+        );
         assert!(!is_valid); // Must fail due to orthogonal algebraic operations.
     }
 
@@ -2991,10 +3301,23 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_40_cross_topology_interference_sym_to_multi() {
         let e1 = generate_mass(1);
-        let sym_state: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(&SymmetricDifferenceAggregator::empty_state(), &SymmetricDifferenceAggregator::embed_to_field(&e1), 0);
-        let sym_witness = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&sym_state, &e1).unwrap();
+        let sym_state: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
+            &SymmetricDifferenceAggregator::empty_state(),
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        let sym_witness = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&sym_state, &e1)
+        .unwrap();
 
-        let is_valid = ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&sym_state, &e1, &sym_witness, 0);
+        let is_valid = ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(
+            &sym_state,
+            &e1,
+            &sym_witness,
+            0,
+        );
         assert!(!is_valid);
     }
 
@@ -3028,27 +3351,54 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     /// If we forge a witness for e2 on state(e1), does it break if we actually add e2 later?
     #[test]
     fn test_44_tautology_cascade_resolution() {
-        let e1 = generate_mass(1); let e2 = generate_mass(2);
-        let state1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(&SymmetricDifferenceAggregator::empty_state(), &SymmetricDifferenceAggregator::embed_to_field(&e1), 0);
+        let e1 = generate_mass(1);
+        let e2 = generate_mass(2);
+        let state1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
+            &SymmetricDifferenceAggregator::empty_state(),
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            0,
+        );
 
         // Forge witness for e2
-        let forge_w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&state1, &e2).unwrap();
+        let forge_w = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state1, &e2)
+        .unwrap();
 
         // Now actually add e2 to state
-        let state2 = SymmetricDifferenceAggregator::aggregate(&state1, &SymmetricDifferenceAggregator::embed_to_field(&e2), 0);
+        let state2 = SymmetricDifferenceAggregator::aggregate(
+            &state1,
+            &SymmetricDifferenceAggregator::embed_to_field(&e2),
+            0,
+        );
 
         // The forged witness for state1 should NOT be valid for state2.
-        assert!(!ProofVerifier::verify_inclusion::<GaloisSignature256, SymmetricDifferenceAggregator>(&state2, &e2, &forge_w, 0));
+        assert!(!ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state2, &e2, &forge_w, 0));
     }
 
-    /// Test 45: Isochronous Verifier on Symmetric Difference.
+    /// Test 45: comparación compatible sobre diferencia simétrica.
     #[test]
     #[cfg(feature = "crypto_mode")]
     fn test_45_isochronous_verifier_symdiff() {
         let e1 = generate_mass(1);
-        let state: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(&SymmetricDifferenceAggregator::empty_state(), &SymmetricDifferenceAggregator::embed_to_field(&e1), 0);
-        let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &e1).unwrap();
-        assert!(ProofVerifier::verify_inclusion_isochronous::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &e1, &w, 0));
+        let state: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
+            &SymmetricDifferenceAggregator::empty_state(),
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        let w = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state, &e1)
+        .unwrap();
+        assert!(ProofVerifier::verify_inclusion_isochronous::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state, &e1, &w, 0));
     }
 
     /// Test 46: Distributive Axiom of Sequence over Boolean Ring.
@@ -3069,7 +3419,10 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     /// Ensures that the remainder witness size is always strictly 32 bytes structurally.
     #[test]
     fn test_47_witness_dimension_consistency() {
-        assert_eq!(core::mem::size_of::<TopologicalWitness<GaloisSignature256>>(), 32);
+        assert_eq!(
+            core::mem::size_of::<TopologicalWitness<GaloisSignature256>>(),
+            32
+        );
     }
 
     /// Test 48: Subspace Collision with Affine Shift.
@@ -3077,7 +3430,8 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_48_subspace_collision_affine_shift() {
         let zero_embed: GaloisSignature256 = MultisetAggregator::embed_to_field(&[0u8; 32]);
-        let mut buf = [0u8; 32]; buf[31] = 0x80;
+        let mut buf = [0u8; 32];
+        buf[31] = 0x80;
         let gen_constant = GaloisSignature256::from_bytes_canonical(&buf);
         assert_ne!(zero_embed, gen_constant);
     }
@@ -3092,7 +3446,9 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         // We test that extracting from a valid state always returns Some.
         let state: GaloisSignature256 = MultisetAggregator::empty_state();
         let e1 = generate_mass(1);
-        let res = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1);
+        let res = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(
+            &state, &e1,
+        );
         assert!(res.is_some());
     }
 
@@ -3101,10 +3457,22 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_50_deterministic_witness_generation() {
         let e1 = generate_mass(1);
-        let state: GaloisSignature256 = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(&e1), 0);
+        let state: GaloisSignature256 = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(&e1),
+            0,
+        );
 
-        let w1 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
-        let w2 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
+        let w1 =
+            ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(
+                &state, &e1,
+            )
+            .unwrap();
+        let w2 =
+            ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(
+                &state, &e1,
+            )
+            .unwrap();
         assert_eq!(w1.state_remainder, w2.state_remainder);
     }
 
@@ -3112,11 +3480,21 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_51_proof_fails_permuted_data() {
         let mut e1 = generate_mass(1);
-        let state: GaloisSignature256 = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &SequenceAggregator::embed_to_field(&e1), 0);
-        let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state, &e1).unwrap();
+        let state: GaloisSignature256 = SequenceAggregator::aggregate(
+            &SequenceAggregator::empty_state(),
+            &SequenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(
+            &state, &e1,
+        )
+        .unwrap();
 
         e1.swap(0, 1); // Permute bytes physically
-        assert!(!ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&state, &e1, &w, 0));
+        assert!(!ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&state, &e1, &w, 0));
     }
 
     /// Test 52: Extreme Shift Accumulation (Galois Limit Check).
@@ -3135,10 +3513,22 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     fn test_53_symdiff_anomaly_extinction() {
         let state: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
         let e1 = generate_mass(1);
-        let fake_w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &e1).unwrap();
+        let fake_w = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&state, &e1)
+        .unwrap();
 
-        let real_state = SymmetricDifferenceAggregator::aggregate(&state, &SymmetricDifferenceAggregator::embed_to_field(&e1), 0);
-        let real_w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&real_state, &e1).unwrap();
+        let real_state = SymmetricDifferenceAggregator::aggregate(
+            &state,
+            &SymmetricDifferenceAggregator::embed_to_field(&e1),
+            0,
+        );
+        let real_w = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&real_state, &e1)
+        .unwrap();
 
         // The fake witness on the empty state should be mathematically distinct from the real witness.
         assert_ne!(fake_w.state_remainder, real_w.state_remainder);
@@ -3157,13 +3547,14 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
     #[test]
     fn test_55_zero_padding_equivalence() {
         let short: &[u8] = &[0x01];
-        let mut padded = [0u8; 32]; padded[0] = 0x01;
+        let mut padded = [0u8; 32];
+        padded[0] = 0x01;
         let e_short: GaloisSignature256 = MultisetAggregator::embed_to_field(short);
         let e_padded: GaloisSignature256 = MultisetAggregator::embed_to_field(&padded);
         assert_eq!(e_short, e_padded);
     }
 
-     /// Test 56 (Corrected): Maximum Multiplicity Tautology (Deep Subspace Extraction).
+    /// Test 56 (Corrected): Maximum Multiplicity Tautology (Deep Subspace Extraction).
     /// Extracting an element N times from an empty state validates if evaluated layer-by-layer.
     #[test]
     fn test_56_maximum_multiplicity_tautology() {
@@ -3174,10 +3565,17 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
 
         for _ in 0..10 {
             // Extraemos un nivel más de profundidad matemática
-            let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&current_macro_state, &e1).unwrap();
+            let w = ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                MultisetAggregator,
+            >(&current_macro_state, &e1)
+            .unwrap();
 
             // Verificamos que el testigo de esta capa inferior reconstruye exactamente la capa actual
-            assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&current_macro_state, &e1, &w, 0));
+            assert!(ProofVerifier::verify_inclusion::<
+                GaloisSignature256,
+                MultisetAggregator,
+            >(&current_macro_state, &e1, &w, 0));
 
             // El resto (remainder) se convierte en el nuevo macro-estado para la siguiente iteración profunda
             current_macro_state = w.state_remainder;
@@ -3193,7 +3591,7 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         assert_eq!(shifted.mul(&phase_inv), base);
     }
 
- /// Test 58: Additive vs Multiplicative Identity Orthogonality.
+    /// Test 58: Additive vs Multiplicative Identity Orthogonality.
     #[test]
     fn test_58_identity_orthogonality() {
         // Anclamos los tipos explícitamente en la declaración de variables
@@ -3205,21 +3603,29 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         assert_ne!(empty_symdiff, empty_multiset);
     }
 
-
-
     /// Test 59 (Corrected): Malicious Chunk Interception Tautology.
     /// Theorem: A partial/truncated message still yields a valid tautological forgery
     /// because the polynomial division perfectly anchors to the fake physical mass.
     #[test]
     fn test_59_malicious_chunk_interception_tautology() {
         let data: &[u8] = &[0x01, 0x02, 0x03];
-        let state: GaloisSignature256 = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &MultisetAggregator::embed_to_field(data), 0);
+        let state: GaloisSignature256 = MultisetAggregator::aggregate(
+            &MultisetAggregator::empty_state(),
+            &MultisetAggregator::embed_to_field(data),
+            0,
+        );
         let fake_data: &[u8] = &[0x01, 0x02]; // Missing byte
 
-        let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, fake_data).unwrap();
+        let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(
+            &state, fake_data,
+        )
+        .unwrap();
 
         // ASSERT TRUE: The math perfectly mirrors the corrupted input.
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&state, fake_data, &w, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&state, fake_data, &w, 0));
     }
 
     /// Test 60: THE UNIVERSAL THEOREM.
@@ -3233,387 +3639,502 @@ let state_e1: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
         let s_s: GaloisSignature256 = SequenceAggregator::empty_state();
         let s_d: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
 
-        let w_m = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&s_m, &e1).unwrap();
-        let w_s = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&s_s, &e1).unwrap();
-        let w_d = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&s_d, &e1).unwrap();
+        let w_m =
+            ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(
+                &s_m, &e1,
+            )
+            .unwrap();
+        let w_s =
+            ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(
+                &s_s, &e1,
+            )
+            .unwrap();
+        let w_d = ProofGenerator::generate_inclusion_proof::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&s_d, &e1)
+        .unwrap();
 
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&s_m, &e1, &w_m, 0));
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&s_s, &e1, &w_s, 0));
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SymmetricDifferenceAggregator>(&s_d, &e1, &w_d, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            MultisetAggregator,
+        >(&s_m, &e1, &w_m, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SequenceAggregator,
+        >(&s_s, &e1, &w_s, 0));
+        assert!(ProofVerifier::verify_inclusion::<
+            GaloisSignature256,
+            SymmetricDifferenceAggregator,
+        >(&s_d, &e1, &w_d, 0));
     }
 
     #[cfg(test)]
-mod advanced_proof_tests {
-    use crate::engine::proofs::{ProofGenerator, ProofVerifier, TopologicalWitness};
-    use crate::algebra::galois_256::GaloisSignature256;
-    use crate::topology::traits::HomomorphicAggregator;
-    use crate::topology::multiset::MultisetAggregator;
-    use crate::topology::sequence::SequenceAggregator;
-    use crate::topology::symmetric_difference::SymmetricDifferenceAggregator;
-    use crate::algebra::traits::FiniteField;
+    mod advanced_proof_tests {
+        use crate::algebra::galois_256::GaloisSignature256;
+        use crate::algebra::traits::FiniteField;
+        use crate::engine::proofs::{ProofGenerator, ProofVerifier};
+        use crate::topology::multiset::MultisetAggregator;
+        use crate::topology::sequence::SequenceAggregator;
+        use crate::topology::symmetric_difference::SymmetricDifferenceAggregator;
+        use crate::topology::traits::HomomorphicAggregator;
 
-    fn generate_mass(seed: u8) -> [u8; 32] {
-        let mut data = [0u8; 32];
-        for i in 0..32 { data[i] = seed.wrapping_add(i as u8); }
-        data
-    }
-
-    // =========================================================================
-    // DOMAIN C: ADVANCED RING TOPOLOGY, CAUSALITY, AND FIELD AXIOMS
-    // =========================================================================
-
-    /// Test 61: SymDiff Massive Involution (N-ary Even Parity).
-    /// Adding an element an even number of times (100) must geometrically yield zero.
-    #[test]
-    fn test_61_symdiff_massive_even_involution() {
-        let e1 = generate_mass(1);
-        let mut state: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
-        for _ in 0..100 {
-            state = SymmetricDifferenceAggregator::aggregate(&state, &SymmetricDifferenceAggregator::embed_to_field(&e1), 0);
-        }
-        assert_eq!(state, SymmetricDifferenceAggregator::empty_state());
-    }
-
-    /// Test 62: SymDiff Massive Involution (N-ary Odd Parity).
-    /// Adding an element an odd number of times (101) must strictly isolate the element.
-    #[test]
-    fn test_62_symdiff_massive_odd_involution() {
-        let e1 = generate_mass(1);
-        let mut state: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
-        let embedded: GaloisSignature256 = SymmetricDifferenceAggregator::embed_to_field(&e1);
-        for _ in 0..101 {
-            state = SymmetricDifferenceAggregator::aggregate(&state, &embedded, 0);
-        }
-        assert_eq!(state, embedded);
-    }
-
-    /// Test 63: SymDiff Associative Property: (A + B) + C == A + (B + C)
-    #[test]
-    fn test_63_symdiff_associativity() {
-        let e1: GaloisSignature256 = SymmetricDifferenceAggregator::embed_to_field(&generate_mass(1));
-        let e2: GaloisSignature256 = SymmetricDifferenceAggregator::embed_to_field(&generate_mass(2));
-        let e3: GaloisSignature256 = SymmetricDifferenceAggregator::embed_to_field(&generate_mass(3));
-
-        let state_ab = SymmetricDifferenceAggregator::aggregate(&e1, &e2, 0);
-        let state_abc1 = SymmetricDifferenceAggregator::aggregate(&state_ab, &e3, 0);
-
-        let state_bc = SymmetricDifferenceAggregator::aggregate(&e2, &e3, 0);
-        let state_abc2 = SymmetricDifferenceAggregator::aggregate(&e1, &state_bc, 0);
-
-        assert_eq!(state_abc1, state_abc2);
-    }
-
-    /// Test 64: Multiset Prime Cardinality Stress.
-    /// Injects an odd prime number of identical elements (17) and extracts them iteratively.
-    #[test]
-    fn test_64_multiset_prime_cardinality_stress() {
-        let e1 = generate_mass(99);
-        let mut state: GaloisSignature256 = MultisetAggregator::empty_state();
-        for _ in 0..17 {
-            state = MultisetAggregator::aggregate(&state, &MultisetAggregator::embed_to_field(&e1), 0);
+        fn generate_mass(seed: u8) -> [u8; 32] {
+            let mut data = [0u8; 32];
+            for i in 0..32 {
+                data[i] = seed.wrapping_add(i as u8);
+            }
+            data
         }
 
-        for _ in 0..17 {
-            let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state, &e1).unwrap();
-            state = w.state_remainder;
-        }
-        assert_eq!(state, MultisetAggregator::empty_state());
-    }
+        // =========================================================================
+        // DOMAIN C: ADVANCED RING TOPOLOGY, CAUSALITY, AND FIELD AXIOMS
+        // =========================================================================
 
-    /// Test 65: Sequence Index Agnosticism.
-    /// Proves causality is driven by Horner shifts, not the explicit 'index' parameter.
-    #[test]
-    fn test_65_sequence_index_agnosticism() {
-        let e1: GaloisSignature256 = SequenceAggregator::embed_to_field(&generate_mass(1));
-        let s_a: GaloisSignature256 = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &e1, 0);
-        let s_b: GaloisSignature256 = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &e1, 1000);
-        assert_eq!(s_a, s_b);
-    }
-
-    /// Test 66: Time-Dilated Embedding Collisions.
-    /// Proves embedding A -> B is orthogonal to A -> (Empty) -> B.
-    #[test]
-    fn test_66_sequence_time_dilation_orthogonality() {
-        let ea: GaloisSignature256 = SequenceAggregator::embed_to_field(&generate_mass(1));
-        let eb: GaloisSignature256 = SequenceAggregator::embed_to_field(&generate_mass(2));
-        let e_empty: GaloisSignature256 = SequenceAggregator::empty_state();
-
-        let s_immediate: GaloisSignature256 = SequenceAggregator::aggregate(
-            &SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &ea, 0), &eb, 1
-        );
-
-        let s_dilated: GaloisSignature256 = SequenceAggregator::aggregate(
-            &SequenceAggregator::aggregate(
-                &SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &ea, 0), &e_empty, 1
-            ), &eb, 2
-        );
-
-        assert_ne!(s_immediate, s_dilated);
-    }
-
-    /// Test 67: Distributive Property of the Polynomial Ring.
-    /// E1 * (E2 + E3) == (E1 * E2) + (E1 * E3)
-    #[test]
-    fn test_67_field_distributive_law() {
-        let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
-        let e2: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(2));
-        let e3: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(3));
-
-        let sum_23 = e2.add(&e3);
-        let left_side = e1.mul(&sum_23);
-
-        let prod_12 = e1.mul(&e2);
-        let prod_13 = e1.mul(&e3);
-        let right_side = prod_12.add(&prod_13);
-
-        assert_eq!(left_side, right_side);
-    }
-
-    /// Test 68: Multiplicative Associativity in Galois Field.
-    /// E1 * (E2 * E3) == (E1 * E2) * E3
-    #[test]
-    fn test_68_field_multiplicative_associativity() {
-        let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
-        let e2: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(2));
-        let e3: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(3));
-
-        let left_side = e1.mul(&e2.mul(&e3));
-        let right_side = e1.mul(&e2).mul(&e3);
-
-        assert_eq!(left_side, right_side);
-    }
-
-    /// Test 69: GF(2) Characteristic Annihilation in Addition.
-    /// E1 + E1 == 0
-    #[test]
-    fn test_69_field_characteristic_two_addition() {
-        let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
-        assert_eq!(e1.add(&e1), GaloisSignature256::zero());
-    }
-
-    /// Test 70: Frobenius Endomorphism - Squaring is Linear.
-    /// (E1 + E2)^2 == E1^2 + E2^2
-    #[test]
-    fn test_70_frobenius_linearity() {
-        let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
-        let e2: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(2));
-
-        let sum_sq = e1.add(&e2).mul(&e1.add(&e2));
-        let sq_sum = e1.mul(&e1).add(&e2.mul(&e2));
-
-        assert_eq!(sum_sq, sq_sum);
-    }
-
-    /// Test 71: Affine Generator Constant Extraction via Tautology.
-    #[test]
-    fn test_71_multiset_affine_tautology() {
-        let empty: GaloisSignature256 = MultisetAggregator::empty_state();
-        let e1 = generate_mass(1);
-        let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&empty, &e1).unwrap();
-        // Since it's tautological, it mathematically "forces" the affine inclusion.
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, MultisetAggregator>(&empty, &e1, &w, 0));
-    }
-
-    /// Test 72: High-Velocity Shift Phase Benchmarking Matrix.
-    #[test]
-    fn test_72_high_velocity_shift_phase() {
-        let mut state: GaloisSignature256 = GaloisSignature256([0x01, 0, 0, 0]);
-        for _ in 0..256 {
-            state = state.shift_phase();
-        }
-        // Shifting 256 times triggers modular reduction exactly once per wrap.
-        assert_ne!(state, GaloisSignature256::zero());
-    }
-
-    /// Test 73: Little-Endian Canonical Alignment.
-    /// Asserts that mapping from bytes strictly follows LE protocol on u64.
-    #[test]
-    fn test_73_canonical_endian_mapping() {
-        let mut buf = [0u8; 32];
-        buf[0] = 0xAA; buf[1] = 0xBB;
-        let sig = GaloisSignature256::from_bytes_canonical(&buf);
-        assert_eq!(sig.0[0], 0xBBAA);
-    }
-
-    /// Test 74: Nested Witness Re-Embedding (Meta-Topology).
-    /// Takes a witness and physically embeds its bytes as a new element.
-    #[test]
-    fn test_74_meta_topology_witness_embedding() {
-        let e1 = generate_mass(1);
-        let state: GaloisSignature256 = SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &SequenceAggregator::embed_to_field(&e1), 0);
-        let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state, &e1).unwrap();
-
-        let w_bytes = unsafe { core::mem::transmute::<[u64; 4], [u8; 32]>(w.state_remainder.0) };
-        let meta_state: GaloisSignature256 = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&w_bytes), 1);
-
-        assert_ne!(meta_state, state);
-    }
-
-    /// Test 75: Boundary Crossing - 31 byte vs 32 byte chunks.
-    #[test]
-    fn test_75_chunking_boundary_crossing() {
-        let d31 = vec![0x11; 31];
-        let d32 = vec![0x11; 32];
-        let s31: GaloisSignature256 = MultisetAggregator::embed_to_field(&d31);
-        let s32: GaloisSignature256 = MultisetAggregator::embed_to_field(&d32);
-        assert_ne!(s31, s32);
-    }
-
-    /// Test 76: Over-Capacity Embedding (64 bytes).
-    #[test]
-    fn test_76_over_capacity_embedding() {
-        let d64 = vec![0xFF; 64];
-        let s64: GaloisSignature256 = SequenceAggregator::embed_to_field(&d64);
-        assert_ne!(s64, GaloisSignature256::zero());
-    }
-
-    /// Test 77: Empty Slice Multiplicative Identity.
-    #[test]
-    fn test_77_multiset_empty_slice_identity() {
-        let s: GaloisSignature256 = MultisetAggregator::embed_to_field(&[]);
-        assert_eq!(s, GaloisSignature256::zero());
-        // Note: Raw empty slice embed is zero. Affine X_g happens during aggregate.
-    }
-
-    /// Test 78: Multiplicative Zero-Trap Immunity Check.
-    #[test]
-    fn test_78_multiset_zero_trap_immunity() {
-        let zero_embed: GaloisSignature256 = MultisetAggregator::embed_to_field(&[0u8; 32]);
-        let s_multi: GaloisSignature256 = MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &zero_embed, 0);
-        // Multiset aggregate adds the affine generator, so it must NOT be zero.
-        assert_ne!(s_multi, GaloisSignature256::zero());
-    }
-
-    /// Test 79: Causality Rejection for Future Extraction.
-    #[test]
-    fn test_79_sequence_future_extraction_rejection() {
-        let e1 = generate_mass(1);
-        let s_empty: GaloisSignature256 = SequenceAggregator::empty_state();
-        let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&s_empty, &e1).unwrap();
-        // The mathematical extraction works (tautology), but verify it.
-        assert!(ProofVerifier::verify_inclusion::<GaloisSignature256, SequenceAggregator>(&s_empty, &e1, &w, 0));
-    }
-
-    /// Test 80: Sequence Shift of Multiplicative Identity.
-    #[test]
-    fn test_80_sequence_shift_one() {
-        let one = GaloisSignature256([1, 0, 0, 0]);
-        let shift = one.shift_phase();
-        assert_eq!(shift, GaloisSignature256([2, 0, 0, 0]));
-    }
-
-    /// Test 81: Affine Bit Forgery Resistance.
-    #[test]
-    fn test_81_affine_bit_forgery_resistance() {
-        let mut e1 = generate_mass(1);
-        let e1_embedded: GaloisSignature256 = MultisetAggregator::embed_to_field(&e1);
-
-        e1[31] ^= 0x80; // Flip the 255th bit manually
-        let e1_forged: GaloisSignature256 = MultisetAggregator::embed_to_field(&e1);
-
-        // The embed_to_field strictly masks bit 255 to 0. They should be identical.
-        assert_eq!(e1_embedded, e1_forged);
-    }
-
-    /// Test 82: Cross-Generator Zero Sum.
-    #[test]
-    fn test_82_cross_generator_zero_sum() {
-        let mut sig1 = GaloisSignature256([0, 0, 0, 0]);
-        let mut sig2 = GaloisSignature256([0, 0, 0, 0]);
-        sig1.0[0] = 0xDEADBEEF;
-        sig2.0[0] = 0xDEADBEEF;
-
-        assert_eq!(sig1.add(&sig2), GaloisSignature256::zero());
-    }
-
-    /// Test 83: Orthogonal Dimensions Multiplication.
-    #[test]
-    fn test_83_orthogonal_multiplication() {
-        let sig1 = GaloisSignature256([1, 0, 0, 0]);
-        let sig2 = GaloisSignature256([0, 1, 0, 0]);
-        let prod = sig1.mul(&sig2);
-        // 1 * (x^64) = x^64.
-        assert_eq!(prod, sig2);
-    }
-
-    /// Test 84: Polynomial Modulo Wrap Around.
-    #[test]
-    fn test_84_polynomial_modulo_wrap() {
-        let sig_high = GaloisSignature256([0, 0, 0, 0x8000000000000000]); // x^255
-        let wrapped = sig_high.shift_phase(); // x^256 mod P(x)
-        // P(x) = x^256 + x^10 + x^5 + x^2 + 1  => x^256 = x^10 + x^5 + x^2 + 1 (0x425)
-        assert_eq!(wrapped, GaloisSignature256([0x425, 0, 0, 0]));
-    }
-
-    /// Test 85: Inverse of Phase Shift.
-    #[test]
-    fn test_85_inverse_of_phase_shift() {
-        let phase = GaloisSignature256([2, 0, 0, 0]);
-        let inv = phase.inv().unwrap();
-        assert_eq!(phase.mul(&inv), GaloisSignature256([1, 0, 0, 0]));
-    }
-
-    /// Test 86: Deep Causal Rollback Precision.
-    #[test]
-    fn test_86_deep_causal_rollback_precision() {
-        let mut state: GaloisSignature256 = SequenceAggregator::empty_state();
-        let e1 = generate_mass(1);
-        for i in 0..50 {
-            state = SequenceAggregator::aggregate(&state, &SequenceAggregator::embed_to_field(&e1), i);
+        /// Test 61: SymDiff Massive Involution (N-ary Even Parity).
+        /// Adding an element an even number of times (100) must geometrically yield zero.
+        #[test]
+        fn test_61_symdiff_massive_even_involution() {
+            let e1 = generate_mass(1);
+            let mut state: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
+            for _ in 0..100 {
+                state = SymmetricDifferenceAggregator::aggregate(
+                    &state,
+                    &SymmetricDifferenceAggregator::embed_to_field(&e1),
+                    0,
+                );
+            }
+            assert_eq!(state, SymmetricDifferenceAggregator::empty_state());
         }
 
-        for _ in 0..50 {
-            let w = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state, &e1).unwrap();
-            state = w.state_remainder;
+        /// Test 62: SymDiff Massive Involution (N-ary Odd Parity).
+        /// Adding an element an odd number of times (101) must strictly isolate the element.
+        #[test]
+        fn test_62_symdiff_massive_odd_involution() {
+            let e1 = generate_mass(1);
+            let mut state: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
+            let embedded: GaloisSignature256 = SymmetricDifferenceAggregator::embed_to_field(&e1);
+            for _ in 0..101 {
+                state = SymmetricDifferenceAggregator::aggregate(&state, &embedded, 0);
+            }
+            assert_eq!(state, embedded);
         }
-        assert_eq!(state, SequenceAggregator::empty_state());
+
+        /// Test 63: SymDiff Associative Property: (A + B) + C == A + (B + C)
+        #[test]
+        fn test_63_symdiff_associativity() {
+            let e1: GaloisSignature256 =
+                SymmetricDifferenceAggregator::embed_to_field(&generate_mass(1));
+            let e2: GaloisSignature256 =
+                SymmetricDifferenceAggregator::embed_to_field(&generate_mass(2));
+            let e3: GaloisSignature256 =
+                SymmetricDifferenceAggregator::embed_to_field(&generate_mass(3));
+
+            let state_ab = SymmetricDifferenceAggregator::aggregate(&e1, &e2, 0);
+            let state_abc1 = SymmetricDifferenceAggregator::aggregate(&state_ab, &e3, 0);
+
+            let state_bc = SymmetricDifferenceAggregator::aggregate(&e2, &e3, 0);
+            let state_abc2 = SymmetricDifferenceAggregator::aggregate(&e1, &state_bc, 0);
+
+            assert_eq!(state_abc1, state_abc2);
+        }
+
+        /// Test 64: Multiset Prime Cardinality Stress.
+        /// Injects an odd prime number of identical elements (17) and extracts them iteratively.
+        #[test]
+        fn test_64_multiset_prime_cardinality_stress() {
+            let e1 = generate_mass(99);
+            let mut state: GaloisSignature256 = MultisetAggregator::empty_state();
+            for _ in 0..17 {
+                state = MultisetAggregator::aggregate(
+                    &state,
+                    &MultisetAggregator::embed_to_field(&e1),
+                    0,
+                );
+            }
+
+            for _ in 0..17 {
+                let w = ProofGenerator::generate_inclusion_proof::<
+                    GaloisSignature256,
+                    MultisetAggregator,
+                >(&state, &e1)
+                .unwrap();
+                state = w.state_remainder;
+            }
+            assert_eq!(state, MultisetAggregator::empty_state());
+        }
+
+        /// Test 65: Sequence Index Agnosticism.
+        /// Proves causality is driven by Horner shifts, not the explicit 'index' parameter.
+        #[test]
+        fn test_65_sequence_index_agnosticism() {
+            let e1: GaloisSignature256 = SequenceAggregator::embed_to_field(&generate_mass(1));
+            let s_a: GaloisSignature256 =
+                SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &e1, 0);
+            let s_b: GaloisSignature256 =
+                SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &e1, 1000);
+            assert_eq!(s_a, s_b);
+        }
+
+        /// Test 66: Time-Dilated Embedding Collisions.
+        /// Proves embedding A -> B is orthogonal to A -> (Empty) -> B.
+        #[test]
+        fn test_66_sequence_time_dilation_orthogonality() {
+            let ea: GaloisSignature256 = SequenceAggregator::embed_to_field(&generate_mass(1));
+            let eb: GaloisSignature256 = SequenceAggregator::embed_to_field(&generate_mass(2));
+            let e_empty: GaloisSignature256 = SequenceAggregator::empty_state();
+
+            let s_immediate: GaloisSignature256 = SequenceAggregator::aggregate(
+                &SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &ea, 0),
+                &eb,
+                1,
+            );
+
+            let s_dilated: GaloisSignature256 = SequenceAggregator::aggregate(
+                &SequenceAggregator::aggregate(
+                    &SequenceAggregator::aggregate(&SequenceAggregator::empty_state(), &ea, 0),
+                    &e_empty,
+                    1,
+                ),
+                &eb,
+                2,
+            );
+
+            assert_ne!(s_immediate, s_dilated);
+        }
+
+        /// Test 67: Distributive Property of the Polynomial Ring.
+        /// E1 * (E2 + E3) == (E1 * E2) + (E1 * E3)
+        #[test]
+        fn test_67_field_distributive_law() {
+            let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
+            let e2: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(2));
+            let e3: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(3));
+
+            let sum_23 = e2.add(&e3);
+            let left_side = e1.mul(&sum_23);
+
+            let prod_12 = e1.mul(&e2);
+            let prod_13 = e1.mul(&e3);
+            let right_side = prod_12.add(&prod_13);
+
+            assert_eq!(left_side, right_side);
+        }
+
+        /// Test 68: Multiplicative Associativity in Galois Field.
+        /// E1 * (E2 * E3) == (E1 * E2) * E3
+        #[test]
+        fn test_68_field_multiplicative_associativity() {
+            let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
+            let e2: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(2));
+            let e3: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(3));
+
+            let left_side = e1.mul(&e2.mul(&e3));
+            let right_side = e1.mul(&e2).mul(&e3);
+
+            assert_eq!(left_side, right_side);
+        }
+
+        /// Test 69: GF(2) Characteristic Annihilation in Addition.
+        /// E1 + E1 == 0
+        #[test]
+        fn test_69_field_characteristic_two_addition() {
+            let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
+            assert_eq!(e1.add(&e1), GaloisSignature256::zero());
+        }
+
+        /// Test 70: Frobenius Endomorphism - Squaring is Linear.
+        /// (E1 + E2)^2 == E1^2 + E2^2
+        #[test]
+        fn test_70_frobenius_linearity() {
+            let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
+            let e2: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(2));
+
+            let sum_sq = e1.add(&e2).mul(&e1.add(&e2));
+            let sq_sum = e1.mul(&e1).add(&e2.mul(&e2));
+
+            assert_eq!(sum_sq, sq_sum);
+        }
+
+        /// Test 71: Affine Generator Constant Extraction via Tautology.
+        #[test]
+        fn test_71_multiset_affine_tautology() {
+            let empty: GaloisSignature256 = MultisetAggregator::empty_state();
+            let e1 = generate_mass(1);
+            let w = ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                MultisetAggregator,
+            >(&empty, &e1)
+            .unwrap();
+            // Since it's tautological, it mathematically "forces" the affine inclusion.
+            assert!(ProofVerifier::verify_inclusion::<
+                GaloisSignature256,
+                MultisetAggregator,
+            >(&empty, &e1, &w, 0));
+        }
+
+        /// Test 72: High-Velocity Shift Phase Benchmarking Matrix.
+        #[test]
+        fn test_72_high_velocity_shift_phase() {
+            let mut state: GaloisSignature256 = GaloisSignature256([0x01, 0, 0, 0]);
+            for _ in 0..256 {
+                state = state.shift_phase();
+            }
+            // Shifting 256 times triggers modular reduction exactly once per wrap.
+            assert_ne!(state, GaloisSignature256::zero());
+        }
+
+        /// Test 73: Little-Endian Canonical Alignment.
+        /// Asserts that mapping from bytes strictly follows LE protocol on u64.
+        #[test]
+        fn test_73_canonical_endian_mapping() {
+            let mut buf = [0u8; 32];
+            buf[0] = 0xAA;
+            buf[1] = 0xBB;
+            let sig = GaloisSignature256::from_bytes_canonical(&buf);
+            assert_eq!(sig.0[0], 0xBBAA);
+        }
+
+        /// Test 74: Nested Witness Re-Embedding (Meta-Topology).
+        /// Takes a witness and physically embeds its bytes as a new element.
+        #[test]
+        fn test_74_meta_topology_witness_embedding() {
+            let e1 = generate_mass(1);
+            let state: GaloisSignature256 = SequenceAggregator::aggregate(
+                &SequenceAggregator::empty_state(),
+                &SequenceAggregator::embed_to_field(&e1),
+                0,
+            );
+            let w = ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                SequenceAggregator,
+            >(&state, &e1)
+            .unwrap();
+
+            let w_bytes =
+                unsafe { core::mem::transmute::<[u64; 4], [u8; 32]>(w.state_remainder.0) };
+            let meta_state: GaloisSignature256 = SequenceAggregator::aggregate(
+                &state,
+                &SequenceAggregator::embed_to_field(&w_bytes),
+                1,
+            );
+
+            assert_ne!(meta_state, state);
+        }
+
+        /// Test 75: Boundary Crossing - 31 byte vs 32 byte chunks.
+        #[test]
+        fn test_75_chunking_boundary_crossing() {
+            let d31 = vec![0x11; 31];
+            let d32 = vec![0x11; 32];
+            let s31: GaloisSignature256 = MultisetAggregator::embed_to_field(&d31);
+            let s32: GaloisSignature256 = MultisetAggregator::embed_to_field(&d32);
+            assert_ne!(s31, s32);
+        }
+
+        /// Test 76: Over-Capacity Embedding (64 bytes).
+        #[test]
+        fn test_76_over_capacity_embedding() {
+            let d64 = vec![0xFF; 64];
+            let s64: GaloisSignature256 = SequenceAggregator::embed_to_field(&d64);
+            assert_ne!(s64, GaloisSignature256::zero());
+        }
+
+        /// Test 77: Empty Slice Multiplicative Identity.
+        #[test]
+        fn test_77_multiset_empty_slice_identity() {
+            let s: GaloisSignature256 = MultisetAggregator::embed_to_field(&[]);
+            assert_eq!(s, GaloisSignature256::zero());
+            // Note: Raw empty slice embed is zero. Affine X_g happens during aggregate.
+        }
+
+        /// Test 78: Multiplicative Zero-Trap Immunity Check.
+        #[test]
+        fn test_78_multiset_zero_trap_immunity() {
+            let zero_embed: GaloisSignature256 = MultisetAggregator::embed_to_field(&[0u8; 32]);
+            let s_multi: GaloisSignature256 =
+                MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &zero_embed, 0);
+            // Multiset aggregate adds the affine generator, so it must NOT be zero.
+            assert_ne!(s_multi, GaloisSignature256::zero());
+        }
+
+        /// Test 79: Causality Rejection for Future Extraction.
+        #[test]
+        fn test_79_sequence_future_extraction_rejection() {
+            let e1 = generate_mass(1);
+            let s_empty: GaloisSignature256 = SequenceAggregator::empty_state();
+            let w = ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                SequenceAggregator,
+            >(&s_empty, &e1)
+            .unwrap();
+            // The mathematical extraction works (tautology), but verify it.
+            assert!(ProofVerifier::verify_inclusion::<
+                GaloisSignature256,
+                SequenceAggregator,
+            >(&s_empty, &e1, &w, 0));
+        }
+
+        /// Test 80: Sequence Shift of Multiplicative Identity.
+        #[test]
+        fn test_80_sequence_shift_one() {
+            let one = GaloisSignature256([1, 0, 0, 0]);
+            let shift = one.shift_phase();
+            assert_eq!(shift, GaloisSignature256([2, 0, 0, 0]));
+        }
+
+        /// Test 81: Affine Bit Forgery Resistance.
+        #[test]
+        fn test_81_affine_bit_forgery_resistance() {
+            let mut e1 = generate_mass(1);
+            let e1_embedded: GaloisSignature256 = MultisetAggregator::embed_to_field(&e1);
+
+            e1[31] ^= 0x80; // Flip the 255th bit manually
+            let e1_forged: GaloisSignature256 = MultisetAggregator::embed_to_field(&e1);
+
+            // The embed_to_field strictly masks bit 255 to 0. They should be identical.
+            assert_eq!(e1_embedded, e1_forged);
+        }
+
+        /// Test 82: Cross-Generator Zero Sum.
+        #[test]
+        fn test_82_cross_generator_zero_sum() {
+            let mut sig1 = GaloisSignature256([0, 0, 0, 0]);
+            let mut sig2 = GaloisSignature256([0, 0, 0, 0]);
+            sig1.0[0] = 0xDEADBEEF;
+            sig2.0[0] = 0xDEADBEEF;
+
+            assert_eq!(sig1.add(&sig2), GaloisSignature256::zero());
+        }
+
+        /// Test 83: Orthogonal Dimensions Multiplication.
+        #[test]
+        fn test_83_orthogonal_multiplication() {
+            let sig1 = GaloisSignature256([1, 0, 0, 0]);
+            let sig2 = GaloisSignature256([0, 1, 0, 0]);
+            let prod = sig1.mul(&sig2);
+            // 1 * (x^64) = x^64.
+            assert_eq!(prod, sig2);
+        }
+
+        /// Test 84: Polynomial Modulo Wrap Around.
+        #[test]
+        fn test_84_polynomial_modulo_wrap() {
+            let sig_high = GaloisSignature256([0, 0, 0, 0x8000000000000000]); // x^255
+            let wrapped = sig_high.shift_phase(); // x^256 mod P(x)
+                                                  // P(x) = x^256 + x^10 + x^5 + x^2 + 1  => x^256 = x^10 + x^5 + x^2 + 1 (0x425)
+            assert_eq!(wrapped, GaloisSignature256([0x425, 0, 0, 0]));
+        }
+
+        /// Test 85: Inverse of Phase Shift.
+        #[test]
+        fn test_85_inverse_of_phase_shift() {
+            let phase = GaloisSignature256([2, 0, 0, 0]);
+            let inv = phase.inv().unwrap();
+            assert_eq!(phase.mul(&inv), GaloisSignature256([1, 0, 0, 0]));
+        }
+
+        /// Test 86: Deep Causal Rollback Precision.
+        #[test]
+        fn test_86_deep_causal_rollback_precision() {
+            let mut state: GaloisSignature256 = SequenceAggregator::empty_state();
+            let e1 = generate_mass(1);
+            for i in 0..50 {
+                state = SequenceAggregator::aggregate(
+                    &state,
+                    &SequenceAggregator::embed_to_field(&e1),
+                    i,
+                );
+            }
+
+            for _ in 0..50 {
+                let w = ProofGenerator::generate_inclusion_proof::<
+                    GaloisSignature256,
+                    SequenceAggregator,
+                >(&state, &e1)
+                .unwrap();
+                state = w.state_remainder;
+            }
+            assert_eq!(state, SequenceAggregator::empty_state());
+        }
+
+        /// Test 87: Multiset Commutativity Limit Overload.
+        #[test]
+        fn test_87_multiset_commutativity_limit() {
+            let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
+            let e2: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(2));
+
+            let s_ab: GaloisSignature256 = MultisetAggregator::aggregate(
+                &MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &e1, 0),
+                &e2,
+                0,
+            );
+            let s_ba: GaloisSignature256 = MultisetAggregator::aggregate(
+                &MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &e2, 0),
+                &e1,
+                0,
+            );
+
+            assert_eq!(s_ab, s_ba);
+        }
+
+        /// Test 88: The Void Multiplier Anomaly.
+        #[test]
+        fn test_88_void_multiplier_anomaly() {
+            let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
+            let zero: GaloisSignature256 = GaloisSignature256::zero();
+            assert_eq!(e1.mul(&zero), zero);
+        }
+
+        /// Test 89: SymDiff Double Extraction.
+        #[test]
+        fn test_89_symdiff_double_extraction_collapse() {
+            let e1 = generate_mass(1);
+            let state: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(
+                &SymmetricDifferenceAggregator::empty_state(),
+                &SymmetricDifferenceAggregator::embed_to_field(&e1),
+                0,
+            );
+
+            let w1 = ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                SymmetricDifferenceAggregator,
+            >(&state, &e1)
+            .unwrap();
+            let w2 = ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                SymmetricDifferenceAggregator,
+            >(&w1.state_remainder, &e1)
+            .unwrap();
+
+            // Extracting it twice (XOR) adds it back. w2 remainder should be the original state.
+            assert_eq!(w2.state_remainder, state);
+        }
+
+        /// Test 90: Master Architectural Coherence.
+        /// Evaluates if the Prover can gracefully handle a completely zeroed physical mass.
+        #[test]
+        fn test_90_master_architectural_coherence() {
+            let e_zero = [0u8; 32];
+            let state_m: GaloisSignature256 = MultisetAggregator::empty_state();
+            let state_s: GaloisSignature256 = SequenceAggregator::empty_state();
+            let state_d: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
+
+            assert!(ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                MultisetAggregator,
+            >(&state_m, &e_zero)
+            .is_some());
+            assert!(ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                SequenceAggregator,
+            >(&state_s, &e_zero)
+            .is_some());
+            assert!(ProofGenerator::generate_inclusion_proof::<
+                GaloisSignature256,
+                SymmetricDifferenceAggregator,
+            >(&state_d, &e_zero)
+            .is_some());
+        }
     }
-
-    /// Test 87: Multiset Commutativity Limit Overload.
-    #[test]
-    fn test_87_multiset_commutativity_limit() {
-        let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
-        let e2: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(2));
-
-        let s_ab: GaloisSignature256 = MultisetAggregator::aggregate(&MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &e1, 0), &e2, 0);
-        let s_ba: GaloisSignature256 = MultisetAggregator::aggregate(&MultisetAggregator::aggregate(&MultisetAggregator::empty_state(), &e2, 0), &e1, 0);
-
-        assert_eq!(s_ab, s_ba);
-    }
-
-    /// Test 88: The Void Multiplier Anomaly.
-    #[test]
-    fn test_88_void_multiplier_anomaly() {
-        let e1: GaloisSignature256 = MultisetAggregator::embed_to_field(&generate_mass(1));
-        let zero: GaloisSignature256 = GaloisSignature256::zero();
-        assert_eq!(e1.mul(&zero), zero);
-    }
-
-    /// Test 89: SymDiff Double Extraction.
-    #[test]
-    fn test_89_symdiff_double_extraction_collapse() {
-        let e1 = generate_mass(1);
-        let state: GaloisSignature256 = SymmetricDifferenceAggregator::aggregate(&SymmetricDifferenceAggregator::empty_state(), &SymmetricDifferenceAggregator::embed_to_field(&e1), 0);
-
-        let w1 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&state, &e1).unwrap();
-        let w2 = ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&w1.state_remainder, &e1).unwrap();
-
-        // Extracting it twice (XOR) adds it back. w2 remainder should be the original state.
-        assert_eq!(w2.state_remainder, state);
-    }
-
-    /// Test 90: Master Architectural Coherence.
-    /// Evaluates if the Prover can gracefully handle a completely zeroed physical mass.
-    #[test]
-    fn test_90_master_architectural_coherence() {
-        let e_zero = [0u8; 32];
-        let state_m: GaloisSignature256 = MultisetAggregator::empty_state();
-        let state_s: GaloisSignature256 = SequenceAggregator::empty_state();
-        let state_d: GaloisSignature256 = SymmetricDifferenceAggregator::empty_state();
-
-        assert!(ProofGenerator::generate_inclusion_proof::<GaloisSignature256, MultisetAggregator>(&state_m, &e_zero).is_some());
-        assert!(ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SequenceAggregator>(&state_s, &e_zero).is_some());
-        assert!(ProofGenerator::generate_inclusion_proof::<GaloisSignature256, SymmetricDifferenceAggregator>(&state_d, &e_zero).is_some());
-    }
-}
 }

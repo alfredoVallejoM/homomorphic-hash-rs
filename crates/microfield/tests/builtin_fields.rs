@@ -62,7 +62,7 @@ fn layouts_metadata_and_encodings_are_frozen() {
     assert_metadata::<Gf2_128V1>(
         "gf2_128_v1",
         "4825b6d5606e34af32722a4a6a96d04a1e21337be0fb734adb9c69f9b9d77d31",
-        "7be252a754124403744d441293d21e9e7d18e20b6a9ace12c175aba6cd50b188",
+        "872b55354bb91e13ca649f6907d0825cc1cfa055ceabd174d4e5b7debd3350cf",
     );
 
     assert_eq!(size_of::<Gf2_256HhV1>(), 32);
@@ -70,7 +70,7 @@ fn layouts_metadata_and_encodings_are_frozen() {
     assert_metadata::<Gf2_256HhV1>(
         "gf2_256_hh_v1",
         "6b62fea68b968fd4f8c39a4f69b78f714c80858b1d0f667ec5a63d4417b43ca8",
-        "61116d0c70d490cb8d210d35dddff0f638d75d7e08b6e8d138197594d42334cb",
+        "342b422453b4f67f56b44cdcffa7b3fa68024c8de6efbf74a14ba36d63b25e64",
     );
 
     assert_eq!(size_of::<Gf2_256AltV1>(), 32);
@@ -78,7 +78,7 @@ fn layouts_metadata_and_encodings_are_frozen() {
     assert_metadata::<Gf2_256AltV1>(
         "gf2_256_alt_v1",
         "5c78ea2f9ea1b2d59b88bf32e38ae33be4c2f977f0232c4441f7a16e4c9bb54d",
-        "e621b33392973099560d94540fde5c564edf8d3b1cbb467604c0f8d3934711de",
+        "88ac0bd22696d02bc0f5522701d5398b160f8fa9f539419217a0b30572a228c3",
     );
 
     assert_basis_encoding::<Gf2_128V1>();

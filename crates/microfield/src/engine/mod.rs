@@ -13,25 +13,45 @@
 //!
 //! let _ = KernelCatalog::<Gf2_256HhV1> {};
 //! ```
+//!
+//! CPU feature snapshots cannot be forged by consumers:
+//!
+//! ```compile_fail
+//! use microfield::{Architecture, CpuCapabilities};
+//!
+//! let _ = CpuCapabilities {
+//!     architecture: Architecture::X86_64,
+//!     features: u8::MAX,
+//! };
+//! ```
 
 mod batch;
 mod builder;
+mod capabilities;
+mod packed;
 mod policy;
 
-use crate::{BackendId, BatchError, BuiltinField, KernelMetadata, kernel::KernelSet};
+use crate::{__private::PortableField, BackendId, BatchError, KernelMetadata, kernel::KernelSet};
 
 pub use builder::{EngineBuildError, EngineBuilder};
+pub use capabilities::{Architecture, CpuCapabilities};
+#[cfg(feature = "alloc")]
+pub use packed::PackedBatch;
+pub use packed::{
+    PackError, PackedBatchView, PackedBatchViewMut, PackedLayout, PackingPlan, pack_into_storage,
+    required_packed_bytes,
+};
 pub use policy::ExecutionPolicy;
 
-/// Immutable batch execution façade for a maintained field.
+/// Immutable batch execution façade for any statically defined field.
 #[derive(Clone, Copy)]
-pub struct Engine<F: BuiltinField> {
+pub struct Engine<F: PortableField> {
     kernels: &'static KernelSet<F>,
     policy: ExecutionPolicy,
     expected_batch: Option<usize>,
 }
 
-impl<F: BuiltinField> Engine<F> {
+impl<F: PortableField> Engine<F> {
     pub(crate) const fn from_selection(
         kernels: &'static KernelSet<F>,
         policy: ExecutionPolicy,
@@ -47,9 +67,8 @@ impl<F: BuiltinField> Engine<F> {
     /// Creates an engine pinned to the portable strategy.
     #[must_use]
     pub fn portable() -> Self {
-        // Every maintained H4 field has one certified portable catalog.
         Self::from_selection(
-            F::__kernel_catalog().portable_kernels(),
+            F::__portable_strategy().kernels(),
             ExecutionPolicy::PortableOnly,
             None,
         )
@@ -91,6 +110,7 @@ impl<F: BuiltinField> Engine<F> {
     ///
     /// Returns [`BatchError::LengthMismatch`] before writing when slice lengths
     /// differ.
+    #[inline]
     pub fn add_into(&self, out: &mut [F], lhs: &[F], rhs: &[F]) -> Result<(), BatchError> {
         batch::validate_binary(out, lhs, rhs)?;
         (self.kernels.add)(out, lhs, rhs);
@@ -103,6 +123,7 @@ impl<F: BuiltinField> Engine<F> {
     ///
     /// Returns [`BatchError::LengthMismatch`] before writing when slice lengths
     /// differ.
+    #[inline]
     pub fn mul_into(&self, out: &mut [F], lhs: &[F], rhs: &[F]) -> Result<(), BatchError> {
         batch::validate_binary(out, lhs, rhs)?;
         (self.kernels.multiply)(out, lhs, rhs);
@@ -115,6 +136,7 @@ impl<F: BuiltinField> Engine<F> {
     ///
     /// Returns [`BatchError::LengthMismatch`] before writing when slice lengths
     /// differ.
+    #[inline]
     pub fn square_into(&self, out: &mut [F], values: &[F]) -> Result<(), BatchError> {
         batch::validate_unary(out, values)?;
         (self.kernels.square)(out, values);
@@ -127,6 +149,7 @@ impl<F: BuiltinField> Engine<F> {
     ///
     /// Returns [`BatchError::LengthMismatch`] before writing when slice lengths
     /// differ.
+    #[inline]
     pub fn mul_assign(&self, lhs: &mut [F], rhs: &[F]) -> Result<(), BatchError> {
         batch::validate_binary_assign(lhs, rhs)?;
         (self.kernels.multiply_assign)(lhs, rhs);
@@ -134,12 +157,37 @@ impl<F: BuiltinField> Engine<F> {
     }
 
     /// Squares every value in a batch in place.
+    #[inline]
     pub fn square_assign(&self, values: &mut [F]) {
         (self.kernels.square_assign)(values);
     }
+
+    /// Computes `lhs[i] * rhs[i] + addend[i]` into distinct output.
+    ///
+    /// This is a field operation fusion contract, not a claim that the target
+    /// ISA provides a native FMA instruction.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BatchError::LengthMismatch`] before writing when any slice
+    /// length differs.
+    #[inline]
+    pub fn mul_add_into(
+        &self,
+        out: &mut [F],
+        lhs: &[F],
+        rhs: &[F],
+        addend: &[F],
+    ) -> Result<(), BatchError> {
+        batch::validate_ternary(out, lhs, rhs, addend)?;
+        for (((output, left), right), addition) in out.iter_mut().zip(lhs).zip(rhs).zip(addend) {
+            *output = left.mul(*right).add(*addition);
+        }
+        Ok(())
+    }
 }
 
-impl<F: BuiltinField> Default for Engine<F> {
+impl<F: PortableField> Default for Engine<F> {
     fn default() -> Self {
         Self::portable()
     }

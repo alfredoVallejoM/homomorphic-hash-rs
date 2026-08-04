@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: microfield-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -16,27 +20,142 @@ jobs:
     name: Stable quality gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
       - name: Format
-        run: cargo +stable fmt -p microfield -- --check
+        run: cargo +stable fmt --all -- --check
+      - name: Format external generated-field fixture
+        run: cargo +stable fmt --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml -- --check
       - name: Test all Microfield targets
         run: cargo +stable test -p microfield --features generator --all-targets
       - name: Zero-allocation batch contract
         run: cargo +stable test -p microfield --all-features --test batch_allocations
       - name: Clippy
         run: cargo +stable clippy -p microfield --all-features --all-targets -- -D warnings
+      - name: Audit versioned calibration decisions
+        run: bash crates/microfield/tools/audit_calibration.sh
+      - name: Exercise calibration gate rejection paths
+        run: bash crates/microfield/tools/test_calibration_gate.sh
+      - name: Audit confined unsafe inventory
+        run: bash crates/microfield/tools/audit_unsafe_scope.sh
+      - name: Audit x86-64 PCLMUL assembly
+        run: bash crates/microfield/tools/audit_x86_pclmul.sh
+      - name: Audit x86-64 VPCLMUL assembly
+        run: bash crates/microfield/tools/audit_x86_vpclmul.sh
+      - name: Audit x86-64 prime-field assembly
+        run: bash crates/microfield/tools/audit_x86_prime.sh
+      - name: Install AArch64 target for PMULL assembly audit
+        run: rustup +stable target add aarch64-unknown-linux-gnu
+      - name: Audit AArch64 PMULL assembly
+        run: bash crates/microfield/tools/audit_aarch64_pmull.sh
       - name: Rustdoc
         env:
           RUSTDOCFLAGS: -D warnings
         run: cargo +stable doc -p microfield --all-features --no-deps
       - name: Compile-fail documentation contracts
         run: cargo +stable test -p microfield --all-features --doc
+      - name: External generated-field consumer
+        run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --all-targets
+      - name: External compile-fail contracts
+        run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --doc
+      - name: External generated-source Clippy
+        run: cargo +stable clippy --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --all-targets -- -D warnings
       - name: Legacy library regression
         run: cargo +stable test -p homomorphic-hash-rs --lib
       - name: Legacy field compatibility
         run: cargo +stable test -p homomorphic-hash-rs --test microfield_compat
+      - name: F6.V validation harness unit gates
+        run: cargo +stable test -p microfield-validation-lab --all-targets
+
+  root-quality:
+    name: Root workspace quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
+      - name: Compile every workspace target from Cargo.lock
+        run: cargo +stable test --workspace --all-features --all-targets --locked --no-run
+      - name: Workspace Clippy
+        run: cargo +stable clippy --workspace --all-features --all-targets --locked -- -D warnings
+      - name: Workspace Rustdoc
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo +stable doc --workspace --all-features --locked --no-deps
+
+  signatures-rc:
+    name: Signatures and protocols RC
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Homomorphic signatures, deltas, trees, DB and reconciliation
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs --all-features --locked
+          --test structural_signatures
+          --test rc_supported_surface
+          --test rc_signature_api
+          --test rc_delta_api
+          --test rc_summary_tree
+          --test rc_database_reconciliation
+
+  graphs-rc:
+    name: Graph pipeline and exact DAG RC
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Fast filters, exact canonization, deltas and DAG
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs --all-features --locked
+          --test fast_graph
+          --test graph_canonical
+          --test microcanon
+          --test graph_signatures_v2
+          --test graph_g12
+          --test graph_g13_g14
+          --test rc_graph_dag
+
+  f6-validation:
+    name: F6.V reproducibility (${{ matrix.arch }})
+    needs: stable
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Regenerate deterministic F6.V semantic evidence
+        run: >-
+          cargo +stable run --release -p microfield-validation-lab -- semantic
+          --manifest validation/f6/manifest.json
+          --out validation/f6/results/semantic-v1.json
+      - name: Verify semantic report is reproducible
+        run: git diff --exit-code -- validation/f6/results
+      - name: Capture host-specific performance evidence
+        run: >-
+          cargo +stable run --release -p microfield-validation-lab -- performance
+          --manifest validation/f6/manifest.json
+          --out f6-performance-${{ matrix.arch }}.json
+      - name: Upload F6.V performance evidence
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: f6-performance-${{ matrix.arch }}
+          path: f6-performance-${{ matrix.arch }}.json
+          if-no-files-found: error
 
   features:
     name: Runtime feature matrix
@@ -44,47 +163,212 @@ jobs:
     env:
       RUSTFLAGS: -D warnings
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
+      - name: Install AArch64 target
+        run: rustup +stable target add aarch64-unknown-linux-gnu
       - run: cargo +stable check -p microfield --no-default-features
       - run: cargo +stable check -p microfield --no-default-features --features builtin-fields
+      - run: cargo +stable check -p microfield --no-default-features --features portable
       - run: cargo +stable check -p microfield --no-default-features --features portable,builtin-fields
+      - run: cargo +stable check -p microfield --no-default-features --features prime-fields
+      - run: cargo +stable check -p microfield --no-default-features --features portable,prime-fields
+      - run: cargo +stable check -p microfield --no-default-features --features alloc,portable,builtin-fields
+      - run: cargo +stable check -p microfield --no-default-features --features alloc,portable,prime-fields
+      - name: no_std unit tests with binary and prime fields
+        run: >-
+          cargo +stable test -p microfield --no-default-features
+          --features alloc,portable,builtin-fields,prime-fields --lib
+      - run: cargo +stable check -p microfield --no-default-features --features std,portable
       - run: cargo +stable check -p microfield --no-default-features --features generator
+      - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable
+      - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable,builtin-fields
+      - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features portable,prime-fields
+      - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features std,portable,builtin-fields
+      - name: External ABI 3 scalar-only no_std
+        run: cargo +stable check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 
   msrv:
     name: MSRV 1.89
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install MSRV
         run: rustup toolchain install 1.89.0 --profile minimal
       - run: cargo +1.89.0 check -p microfield --no-default-features
       - run: cargo +1.89.0 test -p microfield --features generator --all-targets
+      - run: cargo +1.89.0 test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
+      - run: cargo +1.89.0 check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
 
   generated:
     name: Generated artifacts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
-      - name: Verify deterministic artifact sets
+      - name: Verify deterministic artifact sets and external prime profiles
         shell: bash
         run: |
           set -euo pipefail
           for manifest in crates/microfield/fields/*.toml; do
-            cargo +stable run -q -p microfield --features generator \
-              --bin microfield-gen -- check "$manifest" \
-              --out crates/microfield/artifacts
+            if grep -q '^prime_schema_version[[:space:]]*=' "$manifest"; then
+              cargo +stable run -q -p microfield --features generator \
+                --bin microfield-gen -- prime-validate "$manifest"
+            else
+              cargo +stable run -q -p microfield --features generator \
+                --bin microfield-gen -- check "$manifest" \
+                --out crates/microfield/artifacts
+            fi
           done
+      - name: Replay maintained prime certificates
+        run: >-
+          cargo +stable run -q -p microfield --features generator
+          --bin microfield-gen -- verify-primes --json
 
   miri:
     name: Miri runtime
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install nightly Miri
         run: rustup toolchain install nightly --profile minimal --component miri,rust-src
       - run: cargo +nightly miri setup
       - run: cargo +nightly miri test -p microfield --no-default-features --features portable,builtin-fields
+      - name: Miri owned aligned storage
+        run: >-
+          cargo +nightly miri test -p microfield --no-default-features
+          --features alloc,portable,builtin-fields --lib --test packed_batch
+      - name: Miri generated optimizer paths
+        run: cargo +nightly miri test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
+      - name: Miri H2.8 differential and ABI contracts
+        run: >-
+          cargo +nightly miri test -p microfield --no-default-features
+          --features generator,portable,builtin-fields
+          --test differential_corpus --test runtime_codegen_stability
+      - name: Miri Phase 4 portable prime fields
+        run: >-
+          cargo +nightly miri test -p microfield --no-default-features
+          --features portable,prime-fields --test prime_fields
+
+  x86-asan:
+    name: x86-64 PCLMUL/VPCLMUL AddressSanitizer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install nightly Rust with sources
+        run: rustup toolchain install nightly --profile minimal --component rust-src
+      - name: Test audited x86 binary and prime boundaries under ASan
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
+          -p microfield --all-features --test x86_pclmul --test x86_vpclmul
+          --test x86_prime --test external_prime_bmi2_bridge
+          --test external_prime_avx2_bridge
+          --test prime_fields --test prime_artifacts
+          --test packed_batch --test packed_views --test differential_corpus
+          --test phase3_algorithms
+      - name: Test generic BMI2 limb shapes under ASan
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
+          -p microfield --all-features --lib
+          backend::x86_prime::tests::bmi2_product_builder_covers_64_128_192_and_256_bit_shapes
+      - name: External profile PCLMUL AddressSanitizer
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target x86_64-unknown-linux-gnu
+          --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml
+          --lib
+
+  arm64:
+    name: AArch64 PMULL hardware gates
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal --component clippy
+      - name: Differential PMULL suite on hardware
+        run: >-
+          cargo +stable test -p microfield --all-features --test aarch64_pmull
+          --test packed_batch --test packed_views --test differential_corpus
+          --test phase3_algorithms --test prime_fields --test prime_artifacts
+      - name: Generated external profiles on PMULL
+        run: cargo +stable test --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --lib
+      - name: Zero-allocation PMULL gate
+        run: cargo +stable test -p microfield --all-features --test batch_allocations
+      - name: AArch64 Clippy
+        run: cargo +stable clippy -p microfield --all-features --all-targets -- -D warnings
+      - name: Audit native PMULL assembly
+        run: bash crates/microfield/tools/audit_aarch64_pmull.sh
+      - name: Build benchmark harness on real hardware
+        run: >-
+          cargo +stable bench -p microfield --bench portable_batch
+          --bench derived_algorithms --bench prime_fields --no-run
+      - name: Install nightly Rust with sources
+        run: rustup toolchain install nightly --profile minimal --component rust-src
+      - name: PMULL AddressSanitizer
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target aarch64-unknown-linux-gnu
+          -p microfield --no-default-features --features std,portable,builtin-fields,prime-fields
+          --test aarch64_pmull --test packed_batch --test packed_views
+          --test differential_corpus --test phase3_algorithms --test prime_fields
+      - name: External profile PMULL AddressSanitizer
+        env:
+          RUSTFLAGS: -Zsanitizer=address
+          ASAN_OPTIONS: detect_leaks=0
+        run: >-
+          cargo +nightly test -Zbuild-std --target aarch64-unknown-linux-gnu
+          --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml
+          --lib
+
+  required-gates:
+    name: Required gates
+    if: ${{ always() }}
+    needs:
+      - stable
+      - root-quality
+      - signatures-rc
+      - graphs-rc
+      - f6-validation
+      - features
+      - msrv
+      - generated
+      - miri
+      - x86-asan
+      - arm64
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      STABLE: ${{ needs.stable.result }}
+      ROOT_QUALITY: ${{ needs.root-quality.result }}
+      SIGNATURES_RC: ${{ needs.signatures-rc.result }}
+      GRAPHS_RC: ${{ needs.graphs-rc.result }}
+      F6_VALIDATION: ${{ needs.f6-validation.result }}
+      FEATURES: ${{ needs.features.result }}
+      MSRV: ${{ needs.msrv.result }}
+      GENERATED: ${{ needs.generated.result }}
+      MIRI: ${{ needs.miri.result }}
+      X86_ASAN: ${{ needs.x86-asan.result }}
+      ARM64: ${{ needs.arm64.result }}
+    steps:
+      - name: Require every semantic, portable and ISA gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          for result in \
+            "$STABLE" "$ROOT_QUALITY" "$SIGNATURES_RC" "$GRAPHS_RC" \
+            "$F6_VALIDATION" "$FEATURES" "$MSRV" "$GENERATED" "$MIRI" \
+            "$X86_ASAN" "$ARM64"; do
+            test "$result" = success
+          done

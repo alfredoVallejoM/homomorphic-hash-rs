@@ -1,0 +1,20 @@
+[package]
+name = "microfield-validation-lab"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Reproducible F6.V validation harness for homomorphic-hash-rs"
+
+[dependencies]
+homomorphic-hash-rs = { path = "../.." }
+microfield = { path = "../microfield" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10.9"
+
+[dev-dependencies]
+structural-field-fixture = { path = "../structural-field-fixture" }
+
+[[bin]]
+name = "f6-validation"
+path = "src/main.rs"

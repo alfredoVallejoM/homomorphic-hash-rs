@@ -10,7 +10,7 @@ use crate::spec::{
     model::{GeneratedArtifacts, GeneratedFile, GenerationPlan, ValidatedFieldSpec},
 };
 
-/// Stateless renderer for portable version-1 generated files.
+/// Stateless renderer for portable version-2 generated files.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct ArtifactGenerator;
 
@@ -48,6 +48,10 @@ impl ArtifactGenerator {
                 render_field_constants(validated, plan).into_bytes(),
             )?,
             GeneratedFile::new("generation-plan.json", pretty_json(plan)?)?,
+            GeneratedFile::new(
+                "verified-isa-profile.json",
+                pretty_json(plan.verified_isa_profile())?,
+            )?,
             GeneratedFile::new("metadata.json", pretty_json(&metadata)?)?,
             GeneratedFile::new(
                 "normalized.toml",

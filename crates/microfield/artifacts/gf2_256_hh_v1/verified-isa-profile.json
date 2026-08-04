@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "field_id": "6b62fea68b968fd4f8c39a4f69b78f714c80858b1d0f667ec5a63d4417b43ca8",
+  "profile_class": "power_of_two_limb_aligned",
+  "limb_bits": 64,
+  "input_limbs": 4,
+  "wide_limbs": 8,
+  "layout": "polynomial-limbs-little-endian-v1",
+  "product": "clmul64-schoolbook-v1",
+  "reduction_proof_digest": "476cb23704fa07610dfdaad7b662c365208583f9a05e61e3e2809f96da9851f3",
+  "backends": [
+    "x86_pclmul",
+    "x86_vpclmul",
+    "aarch64_pmull"
+  ],
+  "selection": "explicit_only",
+  "schedule": "fixed",
+  "profile_digest": "ea2c4ce19b04f1e9a905f6de469c36dcdda740356f072348a072bdc817fca524"
+}

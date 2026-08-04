@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "campaign_id": "f6-validation-v1",
+  "seed": 684033,
+  "signature": {
+    "alphabet_size": 4,
+    "exhaustive_max_length": 6,
+    "collision_max_length": 5,
+    "reconciliation_universe": 32,
+    "reconciliation_max_difference": 6
+  },
+  "graph": {
+    "exhaustive_max_vertices_ci": 7,
+    "exhaustive_max_vertices_full": 8,
+    "rounds": 8,
+    "exact_node_budget": 1000000,
+    "exact_retained_state_cells": 2000000
+  },
+  "performance": {
+    "warmup_iterations": 3,
+    "measured_iterations": 15,
+    "sparse_graph_vertices": [1000, 10000, 100000, 1000000]
+  }
+}

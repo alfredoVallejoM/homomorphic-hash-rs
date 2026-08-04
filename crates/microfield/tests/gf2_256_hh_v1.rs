@@ -43,10 +43,11 @@ fn public_contract_layout_metadata_and_formatting_are_frozen() {
     );
     assert_eq!(
         Gf2_256HhV1::spec().artifact_id().to_string(),
-        "61116d0c70d490cb8d210d35dddff0f638d75d7e08b6e8d138197594d42334cb"
+        "342b422453b4f67f56b44cdcffa7b3fa68024c8de6efbf74a14ba36d63b25e64"
     );
     assert_eq!(Gf2_256HhV1::spec().name(), "gf2_256_hh_v1");
     assert_eq!(Gf2_256HhV1::spec().characteristic(), 2);
+    assert_eq!(Gf2_256HhV1::spec().characteristic().decimal(), "2");
     assert_eq!(Gf2_256HhV1::spec().canonical_bytes(), 32);
 
     assert_eq!(Gf2_256HhV1::ZERO.to_string(), "0".repeat(64));

@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "policy": "Los datos crudos se descargan en una cache ignorada; no se redistribuyen en el repositorio.",
+  "sources": [
+    {
+      "id": "networkx-graph-atlas",
+      "domain": "atlas exhaustivo de grafos simples no etiquetados de hasta siete vertices",
+      "homepage": "https://networkx.org/documentation/stable/reference/generated/networkx.generators.atlas.graph_atlas_g.html",
+      "url": "https://raw.githubusercontent.com/networkx/networkx/networkx-3.6.1/networkx/generators/atlas.dat.gz",
+      "sha256": "73fc416df0164923607751cb759f4ae81deb5f6550bf25be59c86de3b747e41d",
+      "archive": "gzip",
+      "raw_name": "networkx-atlas.dat.gz",
+      "expanded": ["networkx-atlas.dat"],
+      "license": "NetworkX BSD-3-Clause; el atlas referencia Read y Wilson (1998)",
+      "citation": "Ronald C. Read and Robin J. Wilson, An Atlas of Graphs, 1998"
+    },
+    {
+      "id": "tudataset-mutag",
+      "domain": "188 moleculas con etiquetas discretas de atomos, enlaces y clase",
+      "homepage": "https://chrsmrrs.github.io/datasets/docs/datasets/",
+      "url": "https://www.chrsmrrs.com/graphkerneldatasets/MUTAG.zip",
+      "sha256": "c419bdc853c367d2d83da4973c45100954ae15e10f5ae2cddde6ca431f8207f6",
+      "archive": "zip",
+      "raw_name": "MUTAG.zip",
+      "expanded": [
+        "MUTAG/MUTAG_A.txt",
+        "MUTAG/MUTAG_edge_labels.txt",
+        "MUTAG/MUTAG_graph_indicator.txt",
+        "MUTAG/MUTAG_graph_labels.txt",
+        "MUTAG/MUTAG_node_labels.txt",
+        "MUTAG/README.txt"
+      ],
+      "license": "Consultar las condiciones y citas de TUDataset y del conjunto original; uso cache-only",
+      "citation": "Debnath et al. (1991); Kriege and Mutzel (2012); Morris et al. (2020)"
+    },
+    {
+      "id": "snap-email-eu-core",
+      "domain": "red real dirigida de correo con comunidades etiquetadas",
+      "homepage": "https://snap.stanford.edu/data/email-Eu-core.html",
+      "url": "https://snap.stanford.edu/data/email-Eu-core.txt.gz",
+      "sha256": "4b47acdb80197b085fe63c819c357ae488131ee904ed93d1b219a68b0f9e245f",
+      "archive": "gzip",
+      "raw_name": "email-Eu-core.txt.gz",
+      "expanded": ["email-Eu-core.txt"],
+      "license": "Consultar terminos y cita de SNAP; uso cache-only",
+      "citation": "Leskovec and Krevl, SNAP Datasets, 2014"
+    },
+    {
+      "id": "snap-email-eu-core-labels",
+      "domain": "etiquetas de departamento de la red email-Eu-core",
+      "homepage": "https://snap.stanford.edu/data/email-Eu-core.html",
+      "url": "https://snap.stanford.edu/data/email-Eu-core-department-labels.txt.gz",
+      "sha256": "e5abe5b4581a480032a63adcf2576c161785f45692642c6ebb0b1276f0f33669",
+      "archive": "gzip",
+      "raw_name": "email-Eu-core-department-labels.txt.gz",
+      "expanded": ["email-Eu-core-department-labels.txt"],
+      "license": "Consultar terminos y cita de SNAP; uso cache-only",
+      "citation": "Leskovec and Krevl, SNAP Datasets, 2014"
+    },
+    {
+      "id": "xgi-diseasome",
+      "domain": "hipergrafo biologico con enfermedades y genes etiquetados",
+      "homepage": "https://doi.org/10.5281/zenodo.10155812",
+      "url": "https://zenodo.org/records/10155812/files/diseasome.json?download=1",
+      "sha256": "1b8e89e6a42ca7c6a1e966f45b21928e5d04d437b02c80d0fc8b315a5b05807f",
+      "archive": "plain",
+      "raw_name": "diseasome.json",
+      "expanded": ["diseasome.json"],
+      "license": "CC-BY-4.0",
+      "citation": "Landry, Diseasome v0.0, Zenodo 10155812; Goh et al., PNAS 2007"
+    }
+  ]
+}

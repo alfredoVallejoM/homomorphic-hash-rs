@@ -24,9 +24,11 @@ generados. Para tails de grado máximo 32, un primer fold puede desbordar solo
 un limb y un segundo fold termina la reducción. La cota queda comprobada en el
 algoritmo y ambos módulos de grado 256 la satisfacen.
 
-La inversión sigue exactamente la cadena `binary-fixed-chain-v1` para
-`2^256-2`. Frobenius y traza reutilizan el cuadrado especializado. La norma a
-GF(2) usa el hecho de que todo elemento no nulo tiene norma uno.
+La decisión original usó `binary-fixed-chain-v1`. Desde Fase 3, ADR 0019 la
+reemplaza por `itoh-tsujii-binary-v1`: IR v4 describe la misma cadena que
+ejecuta el runtime y la verifica simbólicamente para `2^256-2`. Frobenius y
+traza reutilizan el cuadrado especializado. La norma a GF(2) usa el hecho de
+que todo elemento no nulo tiene norma uno.
 
 ## Evidencia
 

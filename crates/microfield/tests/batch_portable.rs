@@ -220,18 +220,55 @@ fn assert_builder_contract<F: BatchField>() {
         .expect("portable is available");
     assert_eq!(forced.backend_id(), BackendId::Portable);
 
-    for backend in [
-        BackendId::X86Pclmul,
-        BackendId::X86Vpclmul,
-        BackendId::Aarch64Pmull,
-    ] {
-        assert!(matches!(
-            EngineBuilder::<F>::new()
-                .force_backend(backend)
-                .build(),
-            Err(EngineBuildError::BackendUnavailable(found)) if found == backend
-        ));
-    }
+    let pclmul = EngineBuilder::<F>::new()
+        .force_backend(BackendId::X86Pclmul)
+        .build();
+    #[cfg(target_arch = "x86_64")]
+    assert!(matches!(
+        pclmul,
+        Err(EngineBuildError::BackendUnsupportedByCpu(
+            BackendId::X86Pclmul
+        ))
+    ));
+    #[cfg(not(target_arch = "x86_64"))]
+    assert!(matches!(
+        pclmul,
+        Err(EngineBuildError::BackendNotCompiled(BackendId::X86Pclmul))
+    ));
+
+    let vpclmul = EngineBuilder::<F>::new()
+        .force_backend(BackendId::X86Vpclmul)
+        .build();
+    #[cfg(target_arch = "x86_64")]
+    assert!(matches!(
+        vpclmul,
+        Err(EngineBuildError::BackendUnsupportedByCpu(
+            BackendId::X86Vpclmul
+        ))
+    ));
+    #[cfg(not(target_arch = "x86_64"))]
+    assert!(matches!(
+        vpclmul,
+        Err(EngineBuildError::BackendNotCompiled(BackendId::X86Vpclmul))
+    ));
+
+    let pmull = EngineBuilder::<F>::new()
+        .force_backend(BackendId::Aarch64Pmull)
+        .build();
+    #[cfg(target_arch = "aarch64")]
+    assert!(matches!(
+        pmull,
+        Err(EngineBuildError::BackendUnsupportedByCpu(
+            BackendId::Aarch64Pmull
+        ))
+    ));
+    #[cfg(not(target_arch = "aarch64"))]
+    assert!(matches!(
+        pmull,
+        Err(EngineBuildError::BackendNotCompiled(
+            BackendId::Aarch64Pmull
+        ))
+    ));
 
     assert!(matches!(
         EngineBuilder::<F>::new()

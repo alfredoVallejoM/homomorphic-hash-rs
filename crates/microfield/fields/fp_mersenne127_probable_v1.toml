@@ -1,0 +1,17 @@
+prime_schema_version = 1
+
+[prime]
+name = "fp_mersenne127_probable_v1"
+modulus = "170141183460469231731687303715884105727"
+
+[encoding]
+byte_order = "little"
+integer = "canonical"
+canonical_bytes = 16
+
+[validation]
+assurance = "probable_prime"
+rounds = 32
+
+[build]
+profile = "portable_only"

@@ -1,14 +1,14 @@
-use std::time::Instant;
+use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
-use rayon::prelude::*;
+use std::time::Instant;
 
 use crate::algebra::galois_256::GaloisSignature256;
-use crate::harness::experiment::{ScientificExperiment, ExperimentOutcome};
-use crate::harness::telemetry::TelemetryRecord;
-use crate::domains::chemistry::smiles_parser::{SmilesParser, MolecularComplex};
+use crate::domains::chemistry::smiles_parser::{MolecularComplex, SmilesParser};
 use crate::engine::canonizer::CellularGaloisCanonizer;
+use crate::harness::experiment::{ExperimentOutcome, ScientificExperiment};
+use crate::harness::telemetry::TelemetryRecord;
 
 // =========================================================================
 // DEMONSTRATION 2: 1-WL DEFEAT (Isomer Resolution & Tensor Extraction)
@@ -32,14 +32,19 @@ fn compute_algebraic_distance(tensor_a: &[[u64; 4]], tensor_b: &[[u64; 4]]) -> u
 fn serialize_tensor_to_hex(tensor: &[[u64; 4]]) -> String {
     let mut hex_string = String::with_capacity(tensor.len() * 64);
     for row in tensor {
-        hex_string.push_str(&format!("{:016X}{:016X}{:016X}{:016X}", row[0], row[1], row[2], row[3]));
+        hex_string.push_str(&format!(
+            "{:016X}{:016X}{:016X}{:016X}",
+            row[0], row[1], row[2], row[3]
+        ));
     }
     hex_string
 }
 
 /// Extracts the leading and trailing 64 bits for quick visual inspection.
 fn extract_head_tail(tensor: &[[u64; 4]]) -> (String, String) {
-    if tensor.is_empty() { return (String::new(), String::new()); }
+    if tensor.is_empty() {
+        return (String::new(), String::new());
+    }
     let head = format!("{:016X}", tensor[0][0]);
     let tail = format!("{:016X}", tensor.last().unwrap()[3]);
     (head, tail)
@@ -67,7 +72,9 @@ impl Demo2Level1Alkanes {
 }
 
 impl ScientificExperiment for Demo2Level1Alkanes {
-    fn setup(&mut self) { self.setup_time_ns = Instant::now().elapsed().as_nanos(); }
+    fn setup(&mut self) {
+        self.setup_time_ns = Instant::now().elapsed().as_nanos();
+    }
 
     fn execute(&self) -> (ExperimentOutcome, u128, u128) {
         let start = Instant::now();
@@ -77,7 +84,11 @@ impl ScientificExperiment for Demo2Level1Alkanes {
         ensure_results_dir();
         let export_path = "data/chemistry/results/demo2_L1_alkanes_hashes.csv";
         let mut file = File::create(export_path).expect("Failed to create Alkane hash file");
-        writeln!(file, "Isomer_Name,Head_Hash_64bit,Tail_Hash_64bit,Full_Algebraic_Signature").unwrap();
+        writeln!(
+            file,
+            "Isomer_Name,Head_Hash_64bit,Tail_Hash_64bit,Full_Algebraic_Signature"
+        )
+        .unwrap();
 
         for s in &self.smiles_targets {
             let c = SmilesParser::parse_to_complex(s);
@@ -95,12 +106,40 @@ impl ScientificExperiment for Demo2Level1Alkanes {
                 ok = false;
             }
         }
-        println!("    [METRIC] Hexane Isomer hashes exported to: {}", export_path);
+        println!(
+            "    [METRIC] Hexane Isomer hashes exported to: {}",
+            export_path
+        );
 
-        (ExperimentOutcome::IsomorphismMatch(ok), 0, start.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(ok),
+            0,
+            start.elapsed().as_nanos(),
+        )
     }
-    fn verify(&self, outcome: &ExperimentOutcome) -> bool { match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false } }
-    fn get_base_telemetry(&self) -> TelemetryRecord { TelemetryRecord { domain: "Chem".to_string(), experiment_name: "Demo2_L1".to_string(), vertices: 5, edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: 1, peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 } }
+    fn verify(&self, outcome: &ExperimentOutcome) -> bool {
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
+    }
+    fn get_base_telemetry(&self) -> TelemetryRecord {
+        TelemetryRecord {
+            domain: "Chem".to_string(),
+            experiment_name: "Demo2_L1".to_string(),
+            vertices: 5,
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: 1,
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
+    }
 }
 
 // =========================================================================
@@ -121,7 +160,9 @@ impl Demo2Level2Aromatic {
 }
 
 impl ScientificExperiment for Demo2Level2Aromatic {
-    fn setup(&mut self) { self.setup_time_ns = Instant::now().elapsed().as_nanos(); }
+    fn setup(&mut self) {
+        self.setup_time_ns = Instant::now().elapsed().as_nanos();
+    }
 
     fn execute(&self) -> (ExperimentOutcome, u128, u128) {
         let start = Instant::now();
@@ -130,7 +171,8 @@ impl ScientificExperiment for Demo2Level2Aromatic {
 
         ensure_results_dir();
         let hashes_path = "data/chemistry/results/demo2_L2_aromatic_hashes.csv";
-        let mut hashes_file = File::create(hashes_path).expect("Failed to create Aromatic hash file");
+        let mut hashes_file =
+            File::create(hashes_path).expect("Failed to create Aromatic hash file");
         writeln!(hashes_file, "Isomer_Name,Full_Algebraic_Signature").unwrap();
 
         for s in &self.smiles_targets {
@@ -143,27 +185,55 @@ impl ScientificExperiment for Demo2Level2Aromatic {
             writeln!(hashes_file, "{},{}", s, serialize_tensor_to_hex(&t)).unwrap();
 
             let unique_sig: HashSet<Vec<[u64; 4]>> = registry.values().cloned().collect();
-            if unique_sig.contains(&t) { ok = false; }
+            if unique_sig.contains(&t) {
+                ok = false;
+            }
             registry.insert(s.to_string(), t);
         }
 
         let dist_path = "data/chemistry/results/demo2_L2_aromatic_hamming_distances.csv";
-        let mut dist_file = File::create(dist_path).expect("Failed to create Hamming distance file");
+        let mut dist_file =
+            File::create(dist_path).expect("Failed to create Hamming distance file");
         writeln!(dist_file, "Isomer_A,Isomer_B,Hamming_Distance_Bits").unwrap();
 
         let keys: Vec<String> = registry.keys().cloned().collect();
         for i in 0..keys.len() {
-            for j in (i+1)..keys.len() {
+            for j in (i + 1)..keys.len() {
                 let dist = compute_algebraic_distance(&registry[&keys[i]], &registry[&keys[j]]);
                 writeln!(dist_file, "{},{},{}", keys[i], keys[j], dist).unwrap();
             }
         }
         println!("    [METRIC] Aromatic distances & hashes exported to data/chemistry/results/");
 
-        (ExperimentOutcome::IsomorphismMatch(ok), 0, start.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(ok),
+            0,
+            start.elapsed().as_nanos(),
+        )
     }
-    fn verify(&self, outcome: &ExperimentOutcome) -> bool { match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false } }
-    fn get_base_telemetry(&self) -> TelemetryRecord { TelemetryRecord { domain: "Chem".to_string(), experiment_name: "Demo2_L2".to_string(), vertices: 3, edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: 1, peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 } }
+    fn verify(&self, outcome: &ExperimentOutcome) -> bool {
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
+    }
+    fn get_base_telemetry(&self) -> TelemetryRecord {
+        TelemetryRecord {
+            domain: "Chem".to_string(),
+            experiment_name: "Demo2_L2".to_string(),
+            vertices: 3,
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: 1,
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
+    }
 }
 
 // =========================================================================
@@ -184,7 +254,9 @@ impl Demo2Level3WLParadox {
 }
 
 impl ScientificExperiment for Demo2Level3WLParadox {
-    fn setup(&mut self) { self.setup_time_ns = Instant::now().elapsed().as_nanos(); }
+    fn setup(&mut self) {
+        self.setup_time_ns = Instant::now().elapsed().as_nanos();
+    }
 
     fn execute(&self) -> (ExperimentOutcome, u128, u128) {
         let start = Instant::now();
@@ -194,7 +266,11 @@ impl ScientificExperiment for Demo2Level3WLParadox {
         ensure_results_dir();
         let export_path = "data/chemistry/results/demo2_L3_WL_paradox_hashes.csv";
         let mut file = File::create(export_path).expect("Failed to create WL Paradox hash file");
-        writeln!(file, "Molecule_Name,Head_Hash_64bit,Tail_Hash_64bit,Full_Algebraic_Signature").unwrap();
+        writeln!(
+            file,
+            "Molecule_Name,Head_Hash_64bit,Tail_Hash_64bit,Full_Algebraic_Signature"
+        )
+        .unwrap();
 
         for s in &self.smiles_targets {
             let c = SmilesParser::parse_to_complex(s);
@@ -207,14 +283,44 @@ impl ScientificExperiment for Demo2Level3WLParadox {
             let full_hex = serialize_tensor_to_hex(&t);
             writeln!(file, "{},{},{},{}", s, head, tail, full_hex).unwrap();
 
-            if !registry.insert(t) { ok = false; }
+            if !registry.insert(t) {
+                ok = false;
+            }
         }
-        println!("    [METRIC] 1-WL Paradox hashes exported to: {}", export_path);
+        println!(
+            "    [METRIC] 1-WL Paradox hashes exported to: {}",
+            export_path
+        );
 
-        (ExperimentOutcome::IsomorphismMatch(ok), 0, start.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(ok),
+            0,
+            start.elapsed().as_nanos(),
+        )
     }
-    fn verify(&self, outcome: &ExperimentOutcome) -> bool { match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false } }
-    fn get_base_telemetry(&self) -> TelemetryRecord { TelemetryRecord { domain: "Chem".to_string(), experiment_name: "Demo2_L3".to_string(), vertices: 2, edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: 1, peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 } }
+    fn verify(&self, outcome: &ExperimentOutcome) -> bool {
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
+    }
+    fn get_base_telemetry(&self) -> TelemetryRecord {
+        TelemetryRecord {
+            domain: "Chem".to_string(),
+            experiment_name: "Demo2_L3".to_string(),
+            vertices: 2,
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: 1,
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
+    }
 }
 
 // =========================================================================
@@ -227,7 +333,11 @@ pub struct Demo2Level4MassivePubChem {
 
 impl Demo2Level4MassivePubChem {
     pub fn new(csv_path: &str) -> Self {
-        Self { csv_path: csv_path.to_string(), parsed_graphs: Vec::new(), setup_time_ns: 0 }
+        Self {
+            csv_path: csv_path.to_string(),
+            parsed_graphs: Vec::new(),
+            setup_time_ns: 0,
+        }
     }
 }
 
@@ -255,17 +365,23 @@ impl ScientificExperiment for Demo2Level4MassivePubChem {
     fn execute(&self) -> (ExperimentOutcome, u128, u128) {
         let start_engine = Instant::now();
 
-        let topologies: Vec<(String, Vec<[u64; 4]>)> = self.parsed_graphs.par_iter().map(|(smiles, graph)| {
-            let nodes = CellularGaloisCanonizer::canonize(graph, graph.var_count);
-            let mut sigs: Vec<GaloisSignature256> = nodes.into_iter().map(|n| n.signature).collect();
-            sigs.sort_by(|a, b| a.0.cmp(&b.0));
-            (smiles.clone(), sigs.into_iter().map(|s| s.0).collect())
-        }).collect();
+        let topologies: Vec<(String, Vec<[u64; 4]>)> = self
+            .parsed_graphs
+            .par_iter()
+            .map(|(smiles, graph)| {
+                let nodes = CellularGaloisCanonizer::canonize(graph, graph.var_count);
+                let mut sigs: Vec<GaloisSignature256> =
+                    nodes.into_iter().map(|n| n.signature).collect();
+                sigs.sort_by(|a, b| a.0.cmp(&b.0));
+                (smiles.clone(), sigs.into_iter().map(|s| s.0).collect())
+            })
+            .collect();
 
         ensure_results_dir();
         let export_path = "data/chemistry/results/demo2_L4_massive_hashes.csv";
         // We write to a thread-local string first, or aggregate sequentially to avoid parallel file lock overhead
-        let mut file = File::create(export_path).expect("Failed to create Massive Isomer hash file");
+        let mut file =
+            File::create(export_path).expect("Failed to create Massive Isomer hash file");
         writeln!(file, "Isomer_Name,Full_Algebraic_Signature").unwrap();
 
         let mut registry = HashMap::new();
@@ -274,15 +390,47 @@ impl ScientificExperiment for Demo2Level4MassivePubChem {
             writeln!(file, "{},{}", smiles, serialize_tensor_to_hex(&topology)).unwrap();
 
             if let Some(existing) = registry.insert(topology, smiles.clone()) {
-                println!("🚨 [COLLISION] True 1-WL failure between: {} and {}", existing, smiles);
+                println!(
+                    "🚨 [COLLISION] True 1-WL failure between: {} and {}",
+                    existing, smiles
+                );
                 no_collisions = false;
             }
         }
-        println!("    [METRIC] Massive 1-WL Defeat dataset ({} hashes) exported to: {}", registry.len(), export_path);
+        println!(
+            "    [METRIC] Massive 1-WL Defeat dataset ({} hashes) exported to: {}",
+            registry.len(),
+            export_path
+        );
 
-        (ExperimentOutcome::IsomorphismMatch(no_collisions), 0, start_engine.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(no_collisions),
+            0,
+            start_engine.elapsed().as_nanos(),
+        )
     }
 
-    fn verify(&self, outcome: &ExperimentOutcome) -> bool { match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false } }
-    fn get_base_telemetry(&self) -> TelemetryRecord { TelemetryRecord { domain: "Chem".to_string(), experiment_name: "Demo2_L4_Massive".to_string(), vertices: self.parsed_graphs.len(), edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: rayon::current_num_threads(), peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 } }
+    fn verify(&self, outcome: &ExperimentOutcome) -> bool {
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
+    }
+    fn get_base_telemetry(&self) -> TelemetryRecord {
+        TelemetryRecord {
+            domain: "Chem".to_string(),
+            experiment_name: "Demo2_L4_Massive".to_string(),
+            vertices: self.parsed_graphs.len(),
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: rayon::current_num_threads(),
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
+    }
 }

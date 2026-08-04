@@ -1,0 +1,16 @@
+prime_schema_version = 1
+
+[prime]
+name = "fp65521_external_v1"
+modulus = "65521"
+
+[encoding]
+byte_order = "little"
+integer = "canonical"
+canonical_bytes = 2
+
+[validation]
+assurance = "proven"
+
+[build]
+profile = "multi_backend"

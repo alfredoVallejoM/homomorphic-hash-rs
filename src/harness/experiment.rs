@@ -21,7 +21,10 @@ pub trait ScientificExperiment: Send + Sync {
     /// Returns: (Outcome, L1_Shield_Time_ns, Galois_Engine_Time_ns)
     fn execute(&self) -> (ExperimentOutcome, u128, u128);
 
-    /// Validates the math (0% false negatives expected).
+    /// Applies the experiment's declared acceptance predicate.
+    ///
+    /// A successful demo is observational evidence only; it does not establish
+    /// collision freedom or exact graph canonization.
     fn verify(&self, outcome: &ExperimentOutcome) -> bool;
 
     /// Provides the base telemetry data to the orchestrator.

@@ -1,0 +1,10 @@
+selection_table_version,field,backend,minimum_batch,automatic_selection,evidence_profile,conservative_improvement_percent,reason
+1,gf2_128_v1,x86_pclmul,1,true,intel-i7-13700hx-2026-08-02,35.7,portable_crossover_certified
+1,gf2_256_hh_v1,x86_pclmul,1,true,intel-i7-13700hx-2026-08-02,24.6,portable_crossover_certified
+1,gf2_256_alt_v1,x86_pclmul,1,true,intel-i7-13700hx-2026-08-02,25.7,portable_crossover_certified
+1,gf2_128_v1,x86_vpclmul,64,false,intel-i7-13700hx-2026-08-02,2.8,insufficient_gain_and_cpu_diversity
+1,gf2_256_hh_v1,x86_vpclmul,none,false,intel-i7-13700hx-2026-08-02,-36.8,no_favorable_region
+1,gf2_256_alt_v1,x86_vpclmul,none,false,intel-i7-13700hx-2026-08-02,-38.0,no_favorable_region
+1,gf2_128_v1,aarch64_pmull,1,false,arm64-native-functional-30726735731,none,performance_profile_missing
+1,gf2_256_hh_v1,aarch64_pmull,1,false,arm64-native-functional-30726735731,none,performance_profile_missing
+1,gf2_256_alt_v1,aarch64_pmull,1,false,arm64-native-functional-30726735731,none,performance_profile_missing

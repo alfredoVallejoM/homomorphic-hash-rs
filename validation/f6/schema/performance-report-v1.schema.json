@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://microfield.invalid/schema/f6-performance-report-v1.json",
+  "title": "Microfield F6.V host-specific performance report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "campaign_id", "environment", "samples"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "campaign_id": { "type": "string", "minLength": 1 },
+    "environment": {
+      "type": "object",
+      "required": [
+        "architecture",
+        "operating_system",
+        "rustc",
+        "logical_threads",
+        "detected_features"
+      ]
+    },
+    "samples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "operation",
+          "input_size",
+          "iterations",
+          "median_ns",
+          "p95_ns",
+          "checksum"
+        ]
+      }
+    }
+  }
+}

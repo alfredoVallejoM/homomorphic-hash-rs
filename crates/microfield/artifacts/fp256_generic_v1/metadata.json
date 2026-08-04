@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "field_name": "fp256_generic_v1",
+  "field_id": "60cbdb42c3d6efbc7158144f6a42d015a708ca15ae47e5156204660f97681e8e",
+  "artifact_id": "ada93f06fbf2d8abac8885764ff3c20a220fd0e80287f9db924ff2ca9e310940",
+  "generator_version": "0.1.0",
+  "reproducible": true
+}

@@ -11,6 +11,9 @@ Una unidad tiene un motivo de cambio:
 - `backend`: ejecución concreta;
 - `spec`: descripción, validación y generación.
 
+Dentro de `spec`, `PortableOptimizer` solo clasifica planes; no valida
+polinomios, renderiza Rust, ejecuta benchmarks ni publica archivos.
+
 No se crearán módulos `utils` genéricos. Una utilidad pertenece al dominio que
 define sus invariantes.
 
@@ -19,6 +22,8 @@ define sus invariantes.
 Los algoritmos operan sobre traits internos y capacidades públicas. Añadir un
 campo genera un nuevo tipo, metadatos y catálogo; no introduce ramas por
 `FieldId`. Añadir un backend registra otra estrategia sin alterar el elemento.
+Las nuevas reducciones se añaden como variantes cerradas del IR versionado y
+helpers monomorfizados, sin editar los consumidores algebraicos.
 
 ## Sustitución de Liskov
 

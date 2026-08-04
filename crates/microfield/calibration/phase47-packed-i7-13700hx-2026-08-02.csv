@@ -1,0 +1,7 @@
+schema,field,backend,operation,batch_len,direct_lower_ns,direct_upper_ns,packed_lower_ns,packed_upper_ns,pack_lower_ns,pack_upper_ns,unpack_lower_ns,unpack_upper_ns,conservative_gain_percent,break_even_operations,decision
+1,external_fp65521,x86_prime_avx2_packed,mul,16,15.414,15.547,14.410,14.549,3.7612,3.7739,3.5837,3.6035,5.6,9,explicit_break_even
+1,external_fp65521,x86_prime_avx2_packed,mul,64,57.302,59.083,23.723,23.792,5.0071,5.0778,3.7443,3.7606,58.4,1,explicit_persistent_profile
+1,external_fp65521,x86_prime_avx2_packed,mul,256,210.45,210.62,62.827,63.092,7.8808,7.8989,5.6656,5.6870,70.0,1,explicit_persistent_profile
+1,external_fp65521,x86_prime_avx2_packed,mul,1024,888.81,919.57,228.48,229.28,19.854,20.231,15.881,16.063,74.2,1,explicit_persistent_profile
+1,external_fp65521,x86_prime_avx2_packed,mul,4096,3518.5,3617.5,930.73,977.61,90.214,90.378,55.232,55.830,72.2,1,explicit_persistent_profile
+1,external_fp65521,x86_prime_avx2_packed,mul,16384,13426,13832,3573.9,3651.6,654.03,655.56,509.54,512.78,72.8,1,explicit_persistent_profile

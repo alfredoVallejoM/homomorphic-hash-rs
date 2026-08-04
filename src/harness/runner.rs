@@ -64,3 +64,9 @@ impl BenchmarkRunner {
         println!("✅ Telemetry successfully exported to: {}", output_csv_path);
     }
 }
+
+impl Default for BenchmarkRunner {
+    fn default() -> Self {
+        Self::new()
+    }
+}

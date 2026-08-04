@@ -170,6 +170,8 @@ pub enum GenerationError {
     DuplicateArtifactPath(String),
     /// A plan from a different field was supplied to artifact generation.
     MismatchedPlan,
+    /// A generated inversion chain failed symbolic verification.
+    InvalidInversionPlan(String),
 }
 
 impl fmt::Display for GenerationError {
@@ -182,6 +184,9 @@ impl fmt::Display for GenerationError {
             }
             Self::MismatchedPlan => {
                 formatter.write_str("generation plan belongs to a different field")
+            }
+            Self::InvalidInversionPlan(message) => {
+                write!(formatter, "invalid inversion plan: {message}")
             }
         }
     }

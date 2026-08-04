@@ -6,8 +6,11 @@ mod validation;
 mod vectors;
 
 pub use generation::{
-    ExponentiationPlan, ExponentiationStep, FoldStep, GeneratedArtifacts, GeneratedFile,
-    GenerationPlan, ProductPlan, ReductionPlan,
+    ExponentiationCost, ExponentiationPlan, ExponentiationStep, ExponentiationVerificationError,
+    FoldStep, GeneratedArtifacts, GeneratedFile, GenerationPlan, IsaProfileBackend,
+    IsaProfileClass, IsaProfileSchedule, IsaProfileSelection, PortableDegreeClass,
+    PortableOptimizationPlan, PortableReductionStrategy, ProductPlan, ReductionPlan,
+    VerifiedIsaProfile,
 };
 pub use manifest::{
     CanonicalFieldDescriptor, FieldManifest, NormalizedBuild, NormalizedManifest,

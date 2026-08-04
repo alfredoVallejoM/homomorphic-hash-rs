@@ -1,12 +1,12 @@
 use crate::algebra::galois_256::GaloisSignature256;
 use crate::algebra::traits::FiniteField;
-use crate::topology::traits::HomomorphicAggregator;
-use crate::topology::symmetric_difference::SymmetricDifferenceAggregator as SymDiff;
 use crate::engine::canonizer::TopologyProvider;
 use crate::harness::mapper::DomainMapper;
+use crate::topology::symmetric_difference::SymmetricDifferenceAggregator as SymDiff;
+use crate::topology::traits::HomomorphicAggregator;
 
-use purr::graph::Builder;
 use purr::feature::{AtomKind, BondKind};
+use purr::graph::Builder;
 use purr::read::read;
 
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -19,7 +19,9 @@ struct DeterministicRng {
 
 impl DeterministicRng {
     fn new(seed: u64) -> Self {
-        Self { state: if seed == 0 { 1 } else { seed } }
+        Self {
+            state: if seed == 0 { 1 } else { seed },
+        }
     }
 
     fn next_usize(&mut self, bound: usize) -> usize {
@@ -34,7 +36,9 @@ impl DeterministicRng {
 
 fn deterministic_shuffle<T>(slice: &mut [T], rng: &mut DeterministicRng) {
     let len = slice.len();
-    if len < 2 { return; }
+    if len < 2 {
+        return;
+    }
     for i in (1..len).rev() {
         let j = rng.next_usize(i + 1);
         slice.swap(i, j);
@@ -81,9 +85,11 @@ impl MolecularComplex {
             new_seeds[var_map[i]] = self.seeds[i];
         }
 
-        let mut new_clauses: Vec<Vec<usize>> = self.clauses.iter().map(|clause| {
-            clause.iter().map(|&v| var_map[v]).collect()
-        }).collect();
+        let mut new_clauses: Vec<Vec<usize>> = self
+            .clauses
+            .iter()
+            .map(|clause| clause.iter().map(|&v| var_map[v]).collect())
+            .collect();
 
         deterministic_shuffle(&mut new_clauses, &mut rng);
 
@@ -104,13 +110,25 @@ impl MolecularComplex {
 }
 
 impl TopologyProvider for MolecularComplex {
-    fn num_variables(&self) -> usize { self.var_count }
-    fn num_clauses(&self) -> usize { self.clauses.len() }
-    fn variables_in_clause(&self, idx: usize) -> Vec<usize> { self.clauses[idx].clone() }
-    fn clauses_for_variable(&self, idx: usize) -> Vec<usize> { self.var_to_clauses[idx].clone() }
+    fn num_variables(&self) -> usize {
+        self.var_count
+    }
+    fn num_clauses(&self) -> usize {
+        self.clauses.len()
+    }
+    fn variables_in_clause(&self, idx: usize) -> Vec<usize> {
+        self.clauses[idx].clone()
+    }
+    fn clauses_for_variable(&self, idx: usize) -> Vec<usize> {
+        self.var_to_clauses[idx].clone()
+    }
 
     fn initial_state(&self, variable_index: usize) -> Option<GaloisSignature256> {
-        if variable_index < self.seeds.len() { Some(self.seeds[variable_index]) } else { None }
+        if variable_index < self.seeds.len() {
+            Some(self.seeds[variable_index])
+        } else {
+            None
+        }
     }
 }
 
@@ -119,11 +137,17 @@ pub struct SmilesParser;
 impl SmilesParser {
     /// Safe parsing method. Returns None if the SMILES string is mathematically or syntactically corrupt.
     pub fn try_parse_to_complex(raw_smiles: &str) -> Option<MolecularComplex> {
-        let smiles = raw_smiles.trim().trim_matches(|c| c == '\u{feff}' || c == '"' || c == '\'');
-        if smiles.is_empty() { return None; }
+        let smiles = raw_smiles
+            .trim()
+            .trim_matches(|c| c == '\u{feff}' || c == '"' || c == '\'');
+        if smiles.is_empty() {
+            return None;
+        }
 
         let mut builder = Builder::new();
-        if read(smiles, &mut builder, None).is_err() { return None; }
+        if read(smiles, &mut builder, None).is_err() {
+            return None;
+        }
 
         // Graceful handling: If the atom graph cannot be built (e.g. broken ring closures), abort safely.
         let atoms = match builder.build() {
@@ -165,13 +189,19 @@ impl SmilesParser {
 
     /// Legacy method for hardcoded tests where syntax is guaranteed to be 100% correct.
     pub fn parse_to_complex(raw_smiles: &str) -> MolecularComplex {
-        Self::try_parse_to_complex(raw_smiles).expect("CRITICAL: Hardcoded valid SMILES failed to parse.")
+        Self::try_parse_to_complex(raw_smiles)
+            .expect("CRITICAL: Hardcoded valid SMILES failed to parse.")
     }
 }
 
 impl DomainMapper for SmilesParser {
     type RawInput = String;
-    fn map_to_topology(smiles: &Self::RawInput) -> (Box<dyn TopologyProvider + Send + Sync>, Vec<GaloisSignature256>) {
+    fn map_to_topology(
+        smiles: &Self::RawInput,
+    ) -> (
+        Box<dyn TopologyProvider + Send + Sync>,
+        Vec<GaloisSignature256>,
+    ) {
         let complex = Self::parse_to_complex(smiles);
         let seeds = complex.seeds.clone();
         (Box::new(complex), seeds)

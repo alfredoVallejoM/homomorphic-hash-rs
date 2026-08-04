@@ -1,0 +1,27 @@
+{
+  "families": [
+    {
+      "isomorphic": false,
+      "left_vertices": 6,
+      "name": "C6 versus 2C3",
+      "right_vertices": 6
+    },
+    {
+      "isomorphic": false,
+      "left_vertices": 16,
+      "name": "Shrikhande versus 4x4 rook",
+      "right_vertices": 16
+    },
+    {
+      "isomorphic": false,
+      "left_edges": 60,
+      "left_vertices": 40,
+      "name": "CFI(K4) even versus one twisted edge",
+      "right_edges": 60,
+      "right_vertices": 40
+    }
+  ],
+  "oracle": "SageMath Graph.is_isomorphic",
+  "sage_version": "10.7",
+  "schema_version": 1
+}

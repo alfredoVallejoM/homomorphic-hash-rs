@@ -12,8 +12,13 @@ use std::{
 use microfield::spec::{
     ArtifactGenerator, Generator,
     error::GenerationError,
-    model::{ExponentiationStep, FieldManifest, FoldStep, GeneratedArtifacts},
+    model::{
+        ExponentiationStep, FieldManifest, FoldStep, GeneratedArtifacts, IsaProfileBackend,
+        IsaProfileClass, IsaProfileSchedule, IsaProfileSelection, PortableDegreeClass,
+        PortableReductionStrategy,
+    },
 };
+use microfield::{BinaryPolynomialField, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1, Invert, Square};
 use sha2::{Digest, Sha256};
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -28,24 +33,40 @@ struct TestBundleFile {
     sha256: String,
 }
 
+#[derive(serde::Deserialize, serde::Serialize)]
+struct TestUnsignedIsaProfile {
+    schema: u32,
+    field_id: String,
+    profile_class: String,
+    limb_bits: usize,
+    input_limbs: usize,
+    wide_limbs: usize,
+    layout: String,
+    product: String,
+    reduction_proof_digest: String,
+    backends: [String; 3],
+    selection: String,
+    schedule: String,
+}
+
 const GOLDEN: [(&str, &str, &str, &str); 3] = [
     (
         "gf2_128_v1.toml",
-        "7be252a754124403744d441293d21e9e7d18e20b6a9ace12c175aba6cd50b188",
+        "872b55354bb91e13ca649f6907d0825cc1cfa055ceabd174d4e5b7debd3350cf",
         "07545484d4a09b1d44c25d0a0042042046396f9b5e2467bc5b6b0d7a2c327220",
-        "ec1c4df1c9e47a73f24366a734863380ab9c62e44bd7241e1783e22762d56790",
+        "044f11d5b8060e73067130b8f6ef2b4ca8d4af0facb4f1aebb3cb0afa6252f9d",
     ),
     (
         "gf2_256_alt_v1.toml",
-        "e621b33392973099560d94540fde5c564edf8d3b1cbb467604c0f8d3934711de",
+        "88ac0bd22696d02bc0f5522701d5398b160f8fa9f539419217a0b30572a228c3",
         "f4a06836f946c87f3fda8f23889670e9182e3b23086cc7108a20879e3a5999e8",
-        "60ec052a38063924ec0437a32833fa2817af21e91ee7ca92ce1df21f0cf7816e",
+        "cae73003c73508f262576d806bc0337fce625ab56d9f48b80bbaa3b610ff742c",
     ),
     (
         "gf2_256_hh_v1.toml",
-        "61116d0c70d490cb8d210d35dddff0f638d75d7e08b6e8d138197594d42334cb",
+        "342b422453b4f67f56b44cdcffa7b3fa68024c8de6efbf74a14ba36d63b25e64",
         "476cb23704fa07610dfdaad7b662c365208583f9a05e61e3e2809f96da9851f3",
-        "19b1709ed1bc824f597575bdcca0333420cefb5c6c6fcf5af760788820f87a5d",
+        "a4ed4dfa7557810b8fb4c281a58d166b54082486b034becc6b830aaa95de5e4f",
     ),
 ];
 
@@ -60,11 +81,47 @@ fn product_reduction_and_identity_plans_have_frozen_shapes() {
         let descriptor = validated.normalized().descriptor();
         let degree = descriptor.degree();
 
+        assert_eq!(plan.schema_version(), 2);
+        assert_eq!(plan.ir_version(), 4);
+
         assert_eq!(plan.artifact_id().to_string(), artifact_id);
         assert_eq!(plan.product().limb_bits(), 64);
         assert_eq!(plan.product().input_limbs(), degree.div_ceil(64));
         assert_eq!(plan.product().wide_limbs(), degree.div_ceil(64) * 2);
         assert_eq!(plan.product().strategies(), &["schoolbook".to_owned()]);
+        let optimized = plan.portable_optimization();
+        assert_eq!(
+            optimized.degree_class(),
+            PortableDegreeClass::PowerOfTwoLimbAligned
+        );
+        assert_eq!(
+            optimized.reduction(),
+            PortableReductionStrategy::LowTailFold
+        );
+        assert_eq!(optimized.multiplication(), "set-bit-schoolbook-v1");
+        assert_eq!(optimized.squaring(), "bit-spread-v1");
+        assert_eq!(optimized.inversion(), "itoh-tsujii-binary-v1");
+        assert_eq!(
+            optimized.modulus_terms(),
+            descriptor.modulus_exponents().len()
+        );
+
+        let isa = plan.verified_isa_profile();
+        assert_eq!(isa.field_id(), validated.field_id());
+        assert_eq!(isa.profile_class(), IsaProfileClass::PowerOfTwoLimbAligned);
+        assert_eq!(isa.input_limbs(), degree / 64);
+        assert_eq!(isa.wide_limbs(), degree / 32);
+        assert_eq!(
+            isa.backends(),
+            &[
+                IsaProfileBackend::X86Pclmul,
+                IsaProfileBackend::X86Vpclmul,
+                IsaProfileBackend::Aarch64Pmull
+            ]
+        );
+        assert_eq!(isa.selection(), IsaProfileSelection::ExplicitOnly);
+        assert_eq!(isa.schedule(), IsaProfileSchedule::Fixed);
+        assert_eq!(isa.profile_digest().len(), 64);
 
         let reduction = plan.reduction();
         assert_eq!(reduction.input_bits(), degree * 2);
@@ -102,23 +159,44 @@ fn inversion_schedule_reaches_exact_fermat_exponent() {
             .expect("frozen manifest validates");
         let plan = generator.plan(&validated).expect("plan derives");
         let degree = validated.normalized().descriptor().degree();
-        let mut exponent_le_bits = vec![true];
-
-        for step in plan.inversion().steps() {
-            match step {
-                ExponentiationStep::Square { count } => {
-                    for _ in 0..*count {
-                        exponent_le_bits.insert(0, false);
-                    }
-                }
-                ExponentiationStep::MultiplyBase => add_one(&mut exponent_le_bits),
-            }
+        let inversion = plan.inversion();
+        inversion
+            .verify_symbolically()
+            .expect("generated Itoh--Tsujii chain verifies");
+        assert_eq!(inversion.algorithm(), "itoh-tsujii-binary-v1");
+        assert_eq!(inversion.degree(), degree);
+        assert_eq!(inversion.cost().squares(), degree - 1);
+        assert_eq!(inversion.cost().saved_values(), 1);
+        assert!(inversion.cost().multiplications() < degree / 4);
+        assert!(
+            inversion
+                .steps()
+                .iter()
+                .any(|step| matches!(step, ExponentiationStep::MultiplySaved))
+        );
+        match file {
+            "gf2_128_v1.toml" => assert_chain_evaluation::<Gf2_128V1>(inversion),
+            "gf2_256_alt_v1.toml" => assert_chain_evaluation::<Gf2_256AltV1>(inversion),
+            "gf2_256_hh_v1.toml" => assert_chain_evaluation::<Gf2_256HhV1>(inversion),
+            _ => unreachable!("golden manifest list is closed"),
         }
+    }
+}
 
-        assert_eq!(plan.inversion().steps().len(), degree * 2 - 3);
-        assert_eq!(exponent_le_bits.len(), degree);
-        assert!(!exponent_le_bits[0]);
-        assert!(exponent_le_bits[1..].iter().all(|bit| *bit));
+fn assert_chain_evaluation<F>(plan: &microfield::spec::model::ExponentiationPlan)
+where
+    F: BinaryPolynomialField + Square + Invert + core::fmt::Debug,
+{
+    for seed in 1_u64..=32 {
+        let mut bytes = [0_u8; 40];
+        bytes[..8].copy_from_slice(&seed.wrapping_mul(0x9e37_79b9_7f4a_7c15).to_le_bytes());
+        let value = F::from_polynomial_bytes_mod(&bytes);
+        let value = if value.is_zero() { F::ONE } else { value };
+        assert_eq!(
+            plan.evaluate_reference(value)
+                .expect("verified chain evaluates"),
+            value.invert().expect("test value is non-zero")
+        );
     }
 }
 
@@ -130,7 +208,7 @@ fn generated_repository_artifacts_equal_clean_in_memory_generation() {
         let artifacts = generator
             .generate(&manifest_path)
             .expect("generation succeeds");
-        assert_eq!(artifacts.files().len(), 7);
+        assert_eq!(artifacts.files().len(), 8);
         assert_eq!(artifacts.bundle_digest().to_string(), bundle_digest);
         assert_artifact_directory(&artifacts, &artifacts_directory());
         assert_cross_file_identity(&artifacts);
@@ -211,6 +289,7 @@ fn presentation_name_changes_files_but_not_semantic_or_representation_ids() {
         "certificate.json",
         "descriptor.json",
         "generation-plan.json",
+        "verified-isa-profile.json",
     ] {
         assert_eq!(original_map[unchanged], renamed_map[unchanged]);
     }
@@ -238,16 +317,6 @@ fn artifact_renderer_rejects_a_plan_from_another_field() {
         ArtifactGenerator.generate(&field_128, &wrong_plan),
         Err(GenerationError::MismatchedPlan)
     ));
-}
-
-fn add_one(bits: &mut Vec<bool>) {
-    for bit in bits.iter_mut() {
-        *bit = !*bit;
-        if *bit {
-            return;
-        }
-    }
-    bits.push(true);
 }
 
 fn assert_artifact_directory(artifacts: &GeneratedArtifacts, root: &Path) {
@@ -288,6 +357,8 @@ fn assert_cross_file_identity(artifacts: &GeneratedArtifacts) {
         serde_json::from_slice(files["descriptor.json"]).expect("descriptor JSON");
     let bundle: serde_json::Value =
         serde_json::from_slice(files["bundle.json"]).expect("bundle JSON");
+    let isa_profile: serde_json::Value = serde_json::from_slice(files["verified-isa-profile.json"])
+        .expect("verified ISA profile JSON");
 
     assert_eq!(metadata["field_name"], artifacts.field_name());
     assert_eq!(metadata["field_id"], artifacts.field_id().to_string());
@@ -295,12 +366,31 @@ fn assert_cross_file_identity(artifacts: &GeneratedArtifacts) {
     assert_eq!(plan["field_id"], metadata["field_id"]);
     assert_eq!(plan["artifact_id"], metadata["artifact_id"]);
     assert_eq!(certificate["field_id"], metadata["field_id"]);
+    assert_eq!(isa_profile["field_id"], metadata["field_id"]);
+    assert_eq!(plan["verified_isa_profile"], isa_profile);
+    assert_eq!(
+        isa_profile["reduction_proof_digest"],
+        plan["reduction"]["proof_digest"]
+    );
+    let unsigned: TestUnsignedIsaProfile =
+        serde_json::from_slice(files["verified-isa-profile.json"])
+            .expect("profile descriptor deserializes without trusting its digest");
+    let unsigned_bytes = serde_json::to_vec(&unsigned).expect("profile descriptor serializes");
+    let mut profile_hasher = Sha256::new();
+    profile_hasher.update(b"microfield:verified-isa-profile:v1\0");
+    profile_hasher.update(unsigned_bytes);
+    assert_eq!(
+        hex(&profile_hasher.finalize()),
+        isa_profile["profile_digest"]
+            .as_str()
+            .expect("digest string")
+    );
     assert_eq!(bundle["artifact_id"], metadata["artifact_id"]);
     assert_eq!(
         bundle["bundle_digest"],
         artifacts.bundle_digest().to_string()
     );
-    assert_eq!(bundle["files"].as_array().expect("file array").len(), 6);
+    assert_eq!(bundle["files"].as_array().expect("file array").len(), 7);
     assert_eq!(
         descriptor["degree"].as_u64(),
         plan["reduction"]["output_bits"].as_u64()

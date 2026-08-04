@@ -7,5 +7,10 @@ pub trait DomainMapper {
 
     /// Translates raw domain data (e.g., SMILES string, DIMACS file) into a mathematical graph.
     /// Returns the Bipartite Topology and the Initial Seed States for the variables.
-    fn map_to_topology(input: &Self::RawInput) -> (Box<dyn TopologyProvider + Send + Sync>, Vec<GaloisSignature256>);
+    fn map_to_topology(
+        input: &Self::RawInput,
+    ) -> (
+        Box<dyn TopologyProvider + Send + Sync>,
+        Vec<GaloisSignature256>,
+    );
 }

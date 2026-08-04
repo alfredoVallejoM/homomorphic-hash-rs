@@ -1,4 +1,7 @@
+#![allow(clippy::needless_range_loop)]
+
 use crate::engine::canonizer::TopologyProvider;
+use microfield::{CanonicalEncoding, Field, Fp251V1};
 
 /// Spectral Engine operating strictly over the Prime Field GF(251).
 /// Resolves local Betti numbers and closed-walk topologies to break symmetry
@@ -6,24 +9,9 @@ use crate::engine::canonizer::TopologyProvider;
 pub struct SpectralEngineF251;
 
 impl SpectralEngineF251 {
-    /// Prime characteristic of the finite field. Must fit in u8.
-    const PRIME: u64 = 251;
-
-    /// Modular addition in GF(251)
-    #[inline(always)]
-    fn add_mod(a: u64, b: u64) -> u64 {
-        let sum = a + b;
-        if sum >= Self::PRIME {
-            sum - Self::PRIME
-        } else {
-            sum
-        }
-    }
-
-    /// Modular multiplication in GF(251)
-    #[inline(always)]
-    fn mul_mod(a: u64, b: u64) -> u64 {
-        (a * b) % Self::PRIME
+    #[inline]
+    fn canonical_u64(value: Fp251V1) -> u64 {
+        u64::from(value.to_canonical()[0])
     }
 
     // =========================================================================
@@ -51,21 +39,21 @@ impl SpectralEngineF251 {
             }
         }
 
-        let mut current_state = vec![0u64; v_count];
-        let mut next_state = vec![0u64; v_count];
+        let mut current_state = vec![Fp251V1::ZERO; v_count];
+        let mut next_state = vec![Fp251V1::ZERO; v_count];
 
         for source_node in 0..v_count {
-            current_state.fill(0);
-            current_state[source_node] = 1;
+            current_state.fill(Fp251V1::ZERO);
+            current_state[source_node] = Fp251V1::ONE;
 
             for step in 0..l_max {
-                next_state.fill(0);
+                next_state.fill(Fp251V1::ZERO);
 
                 // Pass mass through the simple geometric edges
                 for i in 0..v_count {
-                    if current_state[i] > 0 {
+                    if !current_state[i].is_zero() {
                         for &neighbor in &unique_neighbors[i] {
-                            next_state[neighbor] = Self::add_mod(next_state[neighbor], current_state[i]);
+                            next_state[neighbor] = next_state[neighbor].add(current_state[i]);
                         }
                     }
                 }
@@ -74,7 +62,7 @@ impl SpectralEngineF251 {
                 // Since `unique_neighbors` enforces `u != v` (no self-loops),
                 // the topological walk count is natively correct without artificial corrections.
 
-                spectra[source_node][step] = next_state[source_node];
+                spectra[source_node][step] = Self::canonical_u64(next_state[source_node]);
                 current_state.copy_from_slice(&next_state);
             }
         }
@@ -94,7 +82,7 @@ impl SpectralEngineF251 {
         let mut spectra = vec![vec![0u64; l_max]; v_count];
 
         // 1. Build the Adjacency Matrix A over GF(251)
-        let mut adj_matrix = vec![0u64; v_count * v_count];
+        let mut adj_matrix = vec![Fp251V1::ZERO; v_count * v_count];
 
         for c_idx in 0..provider.num_clauses() {
             let vars = provider.variables_in_clause(c_idx);
@@ -105,7 +93,7 @@ impl SpectralEngineF251 {
                         // BINARY SQUASH FIX: Pure topological boolean mask.
                         // Whether they share 1 clause or 3 (e.g. triple bond), structurally they are adjacent.
                         // This prevents combinatorial explosion in the matrix trace.
-                        adj_matrix[idx] = 1;
+                        adj_matrix[idx] = Fp251V1::ONE;
                     }
                 }
             }
@@ -113,31 +101,37 @@ impl SpectralEngineF251 {
 
         // 2. Base case: M_1 = A
         let mut current_matrix = adj_matrix.clone();
-        let mut next_matrix = vec![0u64; v_count * v_count];
+        let mut next_matrix = vec![Fp251V1::ZERO; v_count * v_count];
 
         for step in 0..l_max {
             // Extract the diagonal (Traces of M_k) which represent closed walks
             for i in 0..v_count {
-                spectra[i][step] = current_matrix[i * v_count + i];
+                spectra[i][step] = Self::canonical_u64(current_matrix[i * v_count + i]);
             }
 
-            if step == l_max - 1 { break; }
+            if step == l_max - 1 {
+                break;
+            }
 
             // Matrix Multiplication: next_matrix = current_matrix * adj_matrix mod 251
             // Optimized loop order (i, k, j) for hardware cache prefetching
-            next_matrix.fill(0);
+            next_matrix.fill(Fp251V1::ZERO);
             for i in 0..v_count {
                 for k in 0..v_count {
                     let m_ik = current_matrix[i * v_count + k];
-                    if m_ik == 0 { continue; }
+                    if m_ik.is_zero() {
+                        continue;
+                    }
 
                     for j in 0..v_count {
                         let a_kj = adj_matrix[k * v_count + j];
-                        if a_kj == 0 { continue; }
+                        if a_kj.is_zero() {
+                            continue;
+                        }
 
-                        let product = Self::mul_mod(m_ik, a_kj);
+                        let product = m_ik.mul(a_kj);
                         let dest_idx = i * v_count + j;
-                        next_matrix[dest_idx] = Self::add_mod(next_matrix[dest_idx], product);
+                        next_matrix[dest_idx] = next_matrix[dest_idx].add(product);
                     }
                 }
             }

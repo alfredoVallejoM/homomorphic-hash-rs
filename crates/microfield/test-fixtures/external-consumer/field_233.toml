@@ -1,0 +1,24 @@
+schema_version = 1
+
+[field]
+name = "gf2_233_fixture"
+characteristic = 2
+degree = 233
+
+[field.basis]
+kind = "polynomial"
+coefficient_order = "ascending"
+
+[field.modulus]
+nonzero_exponents = [233, 74, 0]
+
+[field.encoding]
+byte_order = "little"
+bit_order = "lsb0"
+canonical_bytes = 30
+
+[build]
+limb_bits = 64
+product_strategies = ["schoolbook"]
+reduction_style = "generated_fold"
+requested_backends = ["portable"]

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "seed": 684033,
+  "terminal_tiers": {
+    "Degree": 1,
+    "Exact": 1,
+    "Metadata": 1,
+    "Patterns": 1
+  },
+  "verified_isomorphisms": 1,
+  "wrong_decisions": 0,
+  "delta_routes": {
+    "FullRebuild": 1,
+    "IncrementalCone": 1
+  },
+  "differential_updates": 2,
+  "maximum_local_audited_vertices": 1
+}

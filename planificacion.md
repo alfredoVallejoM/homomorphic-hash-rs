@@ -2,9 +2,9 @@
 title: "Especificación funcional de Microfield"
 subtitle: "Fases 0, 1 y 2: núcleo portable, factory binaria y backends x86-64/AArch64"
 author: "Plan de implementación derivado de Arquitectura desde primeros principios"
-date: "1 de agosto de 2026"
+date: "2 de agosto de 2026"
 lang: es-ES
-status: "fase-1-cerrada-fase-2-revisada"
+status: "fase-1-y-fase-2-cerradas"
 ---
 
 # Resumen ejecutivo
@@ -15,12 +15,14 @@ status: "fase-1-cerrada-fase-2-revisada"
 > neutral de kernels, puertos y adaptadores para el generador y una política
 > explícita de abstracciones de coste cero.
 
-> **Estado de implementación, 1 de agosto de 2026.** La Fase 1 está cerrada en
+> **Estado de implementación, 2 de agosto de 2026.** La Fase 1 está cerrada en
 > `main` mediante `95f82f5`. El esquema ejecutable v1 permanece limitado a
-> GF(2) en base polinómica con encoding `little`/`lsb0`. La Fase 2 revisada
-> comienza haciendo pública la factory estática de ese dominio antes de añadir
-> PCLMUL, PMULL y layouts packed. `Prime`, `Normal`, `Tower` y contextos
-> dinámicos siguen fuera del alcance.
+> GF(2) en base polinómica con encoding `little`/`lsb0`. La Fase 2, H2.1–H2.8,
+> está cerrada: factory estática, optimizador, selector, perfiles ABI 3,
+> PCLMUL, PMULL, packed batches, VPCLMUL y contratos de calibración/seguridad.
+> PCLMUL es automático; PMULL y VPCLMUL permanecen explícitos hasta superar el
+> gate multi-familia. `Prime`, `Normal`, `Tower` y contextos dinámicos
+> permanecen fuera del alcance.
 
 Este documento convierte `arquitectura_campos_finitos_vectorizados` en una
 especificación funcional implementable para sus tres fases iniciales:
@@ -222,7 +224,7 @@ estas fases: sigue siendo una API experimental. Se usarán:
 ```text
 src/backend/x86/
 src/backend/aarch64/
-src/packed/aligned.rs
+src/engine/packed/storage.rs
 ```
 
 Todo `unsafe fn` tendrá una sección `# Safety` que especifique:
@@ -1519,7 +1521,7 @@ fn square_portable(
 `Engine::portable()` estará disponible en Fase 1:
 
 ```rust
-impl<F: BuiltinField> Engine<F> {
+impl<F: PortableField + StaticField> Engine<F> {
     pub fn portable() -> Self;
 
     pub fn add_into(
@@ -1695,15 +1697,17 @@ un tipo Rust nominal, monomorfizado y sin coste adicional en el hot path.
 
 | Hito | Entrega | Dependencia |
 |---|---|---|
-| H2.1 | `BinaryFieldFactory` pública y consumidor externo portable | Fase 1 |
-| H2.2 | capacidades de CPU, catálogo ampliado y selección única | H2.1 |
-| H2.3 | backend x86 PCLMUL | H2.2 |
-| H2.4 | backend AArch64 PMULL | H2.2 |
-| H2.5 | `PackedBatch`, storage alineado y vistas | H2.3/H2.4 |
-| H2.6 | VPCLMUL y layouts de throughput | H2.5 |
-| H2.7 | calibración, auditoría, CI multi-ISA y cierre | H2.3-H2.6 |
+| H2.1 ✅ | `BinaryFieldFactory` pública y consumidor externo portable | Fase 1 |
+| H2.2 ✅ | optimizador portable estático para campos generados | H2.1 |
+| H2.3 ✅ | capacidades de CPU, catálogo ampliado y selección única | H2.2 |
+| H2.4 ✅ | backend x86 PCLMUL | H2.3 |
+| Puente ABI 3 ✅ | perfiles ISA verificados para campos externos | H2.4 |
+| H2.5 ✅ | backend AArch64 PMULL | H2.3/Puente ABI 3 |
+| H2.6 ✅ | `PackedBatch`, storage alineado y vistas | H2.4/H2.5 |
+| H2.7 ✅ | VPCLMUL y layouts de throughput | H2.6 |
+| H2.8 ✅ | calibración, auditoría, CI multi-ISA y cierre | H2.4-H2.7 |
 
-PCLMUL y PMULL son ramas independientes después de H2.2. VPCLMUL es
+PCLMUL y PMULL son ramas independientes después de H2.3. VPCLMUL es
 condicional: puede quedar implementado pero no seleccionado si no demuestra
 ventaja total incluyendo packing.
 
@@ -1721,7 +1725,7 @@ generación estática. El dominio inicial permanece deliberadamente limitado a:
 - módulo mónico expresado por exponentes o bytes canónicos;
 - encoding little-endian ya congelado por el esquema v1.
 
-Dentro de ese dominio se soportarán grados 2..=4096. La factory emitirá los
+Dentro de ese dominio se soportan grados 2..=4096. La factory emite los
 tamaños literales de limbs, producto ancho y representación canónica, además de
 la máscara de padding. La reducción usará el plan completo generado y no
 quedará limitada a módulos cuyo tail cabe en un `u64`. Los perfiles 128/256
@@ -1732,7 +1736,7 @@ Contrato objetivo:
 
 ```rust
 let package = BinaryFieldFactory::builder()
-    .name("Gf2_233Custom")
+    .name("gf2_233_custom")
     .degree(233)
     .modulus_exponents([233, 74, 0])
     .build()?
@@ -1741,8 +1745,8 @@ let package = BinaryFieldFactory::builder()
 package.emit_rust(output_dir)?;
 ```
 
-También se soportará `BinaryFieldFactory::from_manifest(path)` para `build.rs`
-y CLI. La salida será código Rust determinista que declara un newtype nominal,
+También se soporta `BinaryFieldFactory::from_manifest(path)` para `build.rs`.
+La salida es código Rust determinista que declara un newtype nominal,
 implementa los traits algebraicos, adjunta identidad/certificado/planes y
 registra la estrategia portable sin exponer `KernelSet` o punteros de función.
 
@@ -1761,8 +1765,10 @@ Reglas de la frontera:
   explícito en un hito posterior.
 
 `BuiltinField` continúa identificando presets mantenidos y catálogos ISA
-internos. H2.1 añadirá un contrato generado seguro para campos externos; no se
-abrirá la construcción pública de catálogos raw.
+internos. Para portable, `Engine<F>` acepta la capability segura que la factory
+implementa para cada tipo y la raíz de composición crea internamente un
+`KernelSet` seguro. No se ha abierto la
+construcción pública de catálogos raw.
 
 Criterios de salida H2.1:
 
@@ -1775,15 +1781,104 @@ Criterios de salida H2.1:
 7. `no_std` del runtime generado compila sin activar el generador;
 8. no aparece `unsafe` ni asignación en sus operaciones.
 
+Estado: vertical implementado. El fixture externo genera GF(2⁹) y GF(2²³³),
+compila en `no_std`, contiene pruebas compile-fail y usa scalar y batch. Los
+presets atraviesan la factory para verificar identidad, aunque conservan sus
+especializaciones 128/256 mientras sigan ganando en codegen. El ABI de codegen
+v1 se documenta en ADR 0010.
+
+## 6.1.3 H2.2 — Optimizador portable estático
+
+La factory no debe limitarse a ofrecer corrección mediante bucles bit a bit.
+El segundo hito selecciona durante generación un perfil auditable sin cambiar
+el tipo, `FieldId`, encoding o API:
+
+- producto escolar carry-less por bits activos;
+- cuadrado dedicado por expansión de bits;
+- reducción `LowTailFold` para grados alineados y tails de grado máximo 32;
+- reducción por términos para módulos dispersos;
+- reducción por palabras para módulos densos;
+- inversión mediante cadena binaria Itoh–Tsujii.
+
+La clase de grado distingue potencias de dos alineadas, otros grados alineados
+y grados no alineados. Las potencias de dos 64..=4096 tienen prioridad, pero la
+estructura del módulo prevalece: un grado no alineado con módulo disperso
+también recibe optimización y un módulo denso nunca fuerza codegen expandido
+sin cota.
+
+El plan portable forma parte del IR v2 y de `ArtifactId`; `FieldId` permanece
+idéntico. ABI de codegen 2 usa helpers nuevos y el runtime conserva ABI 1 para
+compatibilidad N-1. La implementación v1 queda como oráculo diferencial.
+
+Estado: implementado y medido. Las rutas se comparan con v1 en grados
+64/128/256/512/1024/2048/4096, con un fixture denso GF(2¹⁰), con el modelo exhaustivo
+GF(2⁹) y con vectores SageMath 10.7 de GF(2²³³). Los resultados locales están
+en `docs/microfield/portable-optimizer.md` y no se convierten en garantías
+universales de latencia.
+
+## 6.1.4 H2.3 — Capabilities y selector inmutable
+
+Antes de introducir instrucciones ISA, la selección separa cuatro dimensiones:
+backend compilado, estrategia certificada para el campo, soporte real de CPU y
+política. `CpuCapabilities` tiene campos privados y solo se obtiene mediante
+detección real con `std` o `portable_only`. Los tests internos pueden recorrer
+combinaciones sintéticas sin permitir que un consumidor falsee soporte ISA.
+
+`KernelCatalog<F>` contiene portable obligatorio y slots opcionales para
+PCLMUL, VPCLMUL y PMULL. Los módulos generados ABI 1/2 heredan un catálogo
+portable; ABI 3 adjunta adapters ISA propiedad del runtime mediante un perfil
+verificado. `EngineBuilder` elige una vez y `Engine` no almacena capabilities
+ni vuelve a detectar.
+
+Semántica implementada:
+
+- `Auto` usa capabilities y el tamaño esperado como umbral;
+- `LowLatency` prioriza PCLMUL/PMULL frente a vectorización;
+- `Throughput` prioriza VPCLMUL;
+- `PortableOnly` impide cualquier ISA;
+- `FixedSchedule` exige metadata de schedule fijo;
+- el backend forzado valida build, campo, CPU y política, en ese orden.
+
+Estado: implementado. La tabla unitaria cubre exhaustivamente las combinaciones
+forzadas y la matriz automática. Integración verifica detección real,
+concurrencia, cero asignaciones, `no_std` y compatibilidad ABI 1..=3. H2.4
+activa PCLMUL en x86-64 y H2.5 activa PMULL en AArch64; ambos exigen
+capabilities detectadas y catálogos certificados.
+
+## 6.1.5 Puente ABI 3 — perfiles ISA externos verificados
+
+Después de normalización, Rabin y planificación, todo campo válido del esquema
+v1 recibe un `VerifiedIsaProfile` target-neutral. El perfil autentica `FieldId`,
+layout, tamaños de limb/producto, digest de reducción, backends compatibles,
+política `explicit_only` y schedule completo. Se publica como
+`verified-isa-profile.json`, participa en `ArtifactId`/bundle y su digest queda
+embebido en la fuente.
+
+La fuente generada solo implementa un contrato seguro con arrays por valor y
+reducción generada. `VerifiedIsaStrategy` permanece opaca y construye dentro de
+Microfield los adapters PCLMUL/PMULL; el consumidor no puede registrar punteros,
+intrinsics ni falsificar capabilities. `Auto` conserva portable y una ISA solo
+se alcanza con `force_backend` tras `detect()`.
+
+El mismo módulo ABI 3 compila scalar-only `no_std` sin activar `portable`; en
+esa configuración el perfil no arrastra `Engine` ni adapters ISA. Activar batch
+no altera layout, identidad ni aritmética escalar.
+
+El producto schoolbook tiene calendario fijo. Low-tail publica perfil completo
+`fixed`; sparse/dense publican `data_dependent` porque su reducción inspecciona
+bits del producto. Esta clasificación autenticada gobierna `FixedSchedule`.
+Grados 9, 10 denso, 128, 192 y 233 prueban las tres clases estructurales y las
+tres familias de reducción bajo x86-64 y AArch64.
+
 ## 6.2 `BackendId`
 
 ```rust
 #[non_exhaustive]
 pub enum BackendId {
     Portable,
-    X86Pclmul128,
-    X86Vpclmul256,
-    Aarch64Pmull128,
+    X86Pclmul,
+    X86Vpclmul,
+    Aarch64Pmull,
 }
 ```
 
@@ -1793,12 +1888,8 @@ AVX-512, SVE y RISC-V quedan fuera de Fase 2.
 
 ```rust
 pub struct CpuCapabilities {
-    pub architecture: Architecture,
-    pub x86_pclmulqdq: bool,
-    pub x86_avx2: bool,
-    pub x86_vpclmulqdq: bool,
-    pub arm_neon: bool,
-    pub arm_pmull: bool,
+    architecture: Architecture,
+    features: u8,
 }
 ```
 
@@ -1808,6 +1899,12 @@ Funciones:
 impl CpuCapabilities {
     pub fn detect() -> Self;
     pub const fn portable_only() -> Self;
+    pub const fn architecture(self) -> Architecture;
+    pub const fn has_x86_pclmulqdq(self) -> bool;
+    pub const fn has_x86_avx2(self) -> bool;
+    pub const fn has_x86_vpclmulqdq(self) -> bool;
+    pub const fn has_aarch64_neon(self) -> bool;
+    pub const fn has_aarch64_pmull(self) -> bool;
 }
 ```
 
@@ -1922,11 +2019,11 @@ de layout y operaciones soportadas dentro del selector.
 ## 6.8 `EngineBuilder<F>`
 
 ```rust
-pub struct EngineBuilder<F: BuiltinField> {
+pub struct EngineBuilder<F: PortableField> {
     policy: ExecutionPolicy,
     expected_batch: Option<usize>,
     forced_backend: Option<BackendId>,
-    capabilities: Option<CpuCapabilities>,
+    capabilities: CpuCapabilities,
     _field: PhantomData<F>,
 }
 ```
@@ -1934,7 +2031,7 @@ pub struct EngineBuilder<F: BuiltinField> {
 Funciones:
 
 ```rust
-impl<F: BuiltinField> EngineBuilder<F> {
+impl<F: PortableField> EngineBuilder<F> {
     pub fn new() -> Self;
 
     pub fn policy(
@@ -1952,6 +2049,16 @@ impl<F: BuiltinField> EngineBuilder<F> {
         backend: BackendId,
     ) -> Self;
 
+    pub fn capabilities(
+        self,
+        capabilities: CpuCapabilities,
+    ) -> Self;
+
+    #[cfg(feature = "std")]
+    pub fn detect(
+        self,
+    ) -> Result<Engine<F>, EngineBuildError>;
+
     pub fn build(
         self,
     ) -> Result<Engine<F>, EngineBuildError>;
@@ -1959,13 +2066,15 @@ impl<F: BuiltinField> EngineBuilder<F> {
 ```
 
 `force_backend` no omite la comprobación de CPU. Si no está disponible devuelve
-error.
+un error que distingue backend no compilado, campo no elegible y CPU sin las
+features necesarias. `build` parte de `portable_only` y no detecta
+implícitamente; `detect` toma la instantánea real y termina la construcción.
 
 ## 6.9 `Engine<F>`
 
 ```rust
-#[derive(Clone)]
-pub struct Engine<F: BuiltinField> {
+#[derive(Clone, Copy)]
+pub struct Engine<F: PortableField> {
     kernels: &'static KernelSet<F>,
     policy: ExecutionPolicy,
 }
@@ -1996,12 +2105,12 @@ Proceso exacto:
 2. detectar o recibir capabilities;
 3. eliminar kernels no compilados;
 4. eliminar kernels incompatibles con CPU;
-5. aplicar `PortableOnly` o backend forzado;
-6. estimar coste con `expected_batch`;
-7. aplicar política;
-8. elegir `KernelSet`;
-9. guardar puntero;
-10. no repetir detección en operaciones.
+5. si hay backend forzado, validar campo y política y terminar;
+6. excluir perfiles `automatic_selection = false`;
+7. aplicar `PortableOnly` y la clasificación de schedule;
+8. estimar coste con `expected_batch`;
+9. elegir `KernelSet`;
+10. guardar la estrategia y no repetir detección en operaciones.
 
 Si `expected_batch` no está presente, `Auto` elige un backend conservador para
 lotes medianos. La operación puede usar un subkernel de tail, pero no cambiar
@@ -2055,6 +2164,17 @@ Se implementarán dos estrategias:
 Ambas deben producir el mismo resultado. Solo se registra como preferida la que
 gane en la familia de CPU medida.
 
+Estado H2.4: implementado. Los tres presets usan Karatsuba (tres productos en
+128 bits y nueve en 256), cuadrado dedicado y los reductores ya certificados.
+El selector requiere detección real, `PortableOnly` permanece intacto y los
+campos externos ABI 3 usan el adapter schoolbook explícito del runtime. Una
+fuente ABI 1/2 sin perfil recibe `BackendUnsupportedByField`. ASan, canarios,
+longitudes 0..16 384, in-place, cero asignaciones y desensamblado están
+cubiertos. En el i7-13700HX medido, el límite conservador de mejora supera 20 %
+desde un elemento; `minimum_batch` queda fijado en 1 para los presets. La
+frontera completa se documenta en
+`docs/microfield/adr/0013-x86-pclmul-backend.md`.
+
 ## 6.13 x86 VPCLMUL
 
 Intrinsic estable de 256 bits:
@@ -2104,39 +2224,45 @@ El uso de la mitad alta/PMULL2 se añade si los intrinsics estables o un wrapper
 estrecho permiten demostrar ventaja. PMULL básico es requisito; PMULL2 es una
 optimización condicionada, no una dependencia de la API.
 
+Estado H2.5: implementado. Los presets usan Karatsuba con 3/9 PMULL y cuadrado
+dedicado con 2/4; los perfiles ABI 3 usan schoolbook monomorfizado. Ambas rutas
+reutilizan reductores certificados, aceptan toda longitud, soportan in-place y
+no asignan. El selector exige NEON + PMULL detectados y el backend permanece
+`explicit_only` hasta calibración en hardware ARM real.
+
+QEMU 8.2 `-cpu max` ejecuta tres tests específicos sobre los presets y 11 del
+consumidor externo, también bajo AddressSanitizer. El audit release exige
+PMULL, especializaciones 128/256 y ausencia de `br`/`blr`/asignador. QEMU no
+produce cifras de rendimiento. La decisión se documenta en
+`docs/microfield/adr/0015-aarch64-pmull-backend.md`.
+
 ## 6.15 `PackingPlan`
 
 ```rust
 pub struct PackingPlan {
-    pub backend: BackendId,
-    pub layout: PackedLayout,
-    pub logical_len: usize,
-    pub padded_len: usize,
-    pub tile_elements: usize,
-    pub limb_count: usize,
-    pub alignment: usize,
+    // campos privados: backend, FieldId, layout, longitudes, tile,
+    // limb_count, element_size, alignment y data_bytes
 }
 
+#[non_exhaustive]
 pub enum PackedLayout {
     Aos,
-    Soa64,
-    HybridTile {
-        elements: u16,
-        limbs: u16,
-    },
 }
 ```
 
-La selección del layout depende de campo y backend, no del usuario.
+La selección del layout depende de campo y backend, no del usuario. H2.6
+publica únicamente AoS, el estado consumible por portable/PCLMUL/PMULL. SoA y
+tiles híbridos se incorporarán con H2.7; no se modelan variantes futuras
+parcialmente válidas.
 
 ## 6.16 `AlignedBuffer`
 
 ```rust
-pub(crate) struct AlignedBuffer {
-    ptr: NonNull<u8>,
-    len_bytes: usize,
-    capacity_bytes: usize,
-    alignment: usize,
+pub(crate) struct AlignedBuffer<F: Copy> {
+    ptr: NonNull<F>,
+    len: usize,
+    layout: Option<Layout>,
+    field: PhantomData<F>,
 }
 ```
 
@@ -2154,17 +2280,16 @@ Es el único `unsafe` de `packed`.
 ## 6.17 `PackedBatch<F>`
 
 ```rust
-pub struct PackedBatch<F: BuiltinField> {
-    storage: AlignedBuffer,
+pub struct PackedBatch<F: PortableField + StaticField> {
+    storage: AlignedBuffer<F>,
     plan: PackingPlan,
-    _field: PhantomData<F>,
 }
 ```
 
 Funciones:
 
 ```rust
-impl<F: BuiltinField> PackedBatch<F> {
+impl<F: PortableField + StaticField> PackedBatch<F> {
     pub fn new(
         engine: &Engine<F>,
         len: usize,
@@ -2218,6 +2343,11 @@ impl<F: BuiltinField> Engine<F> {
         out: &mut PackedBatch<F>,
         values: &PackedBatch<F>,
     ) -> Result<(), PackError>;
+
+    pub fn mul_packed_assign(...)
+        -> Result<(), PackError>;
+    pub fn square_packed_assign(...)
+        -> Result<(), PackError>;
 }
 ```
 
@@ -2237,7 +2367,7 @@ Para `no_std + alloc` limitado o scratch proporcionado:
 pub struct PackedBatchView<'a, F> { ... }
 pub struct PackedBatchViewMut<'a, F> { ... }
 
-pub fn required_packed_bytes<F>(
+pub fn required_packed_bytes(
     plan: &PackingPlan,
 ) -> Result<usize, PackError>;
 
@@ -2248,30 +2378,40 @@ pub fn pack_into_storage<'a, F>(
 ) -> Result<PackedBatchViewMut<'a, F>, PackError>;
 ```
 
-El batch owned es ergonomía; la vista es la ruta sin asignación oculta.
+El batch owned es ergonomía bajo `alloc`; la vista está disponible con
+`portable` sin `alloc`. Las mismas operaciones out-of-place e in-place existen
+para vistas.
 
 ## 6.20 Errores de Fase 2
 
 ```rust
 pub enum EngineBuildError {
-    NoCompiledBackend,
+    BackendNotCompiled(BackendId),
     BackendUnsupportedByCpu(BackendId),
     BackendUnsupportedByField(BackendId),
-    PolicyUnsatisfied,
+    PolicyUnsatisfied(ExecutionPolicy),
 }
 
 pub enum PackError {
-    LengthMismatch,
+    LengthMismatch { expected: usize, actual: usize },
     SizeOverflow,
+    ZeroSizedField,
+    InvalidAlignment { alignment: usize },
     AllocationFailed,
-    WrongBackend,
-    WrongLayout,
+    WrongBackend { expected: BackendId, actual: BackendId },
+    IncompatiblePlan,
     InsufficientStorage {
         required: usize,
         provided: usize,
     },
 }
 ```
+
+**Estado H2.6:** implementado. Los tres presets y los campos externos usan el
+mismo contrato. El storage owned y prestado pasa longitudes límite, offsets de
+alineamiento, Miri/ASan, errores transaccionales y contador de cero asignaciones
+durante reutilización. El benchmark separa pack, unpack, kernel persistente y
+pipeline total. Véase `docs/microfield/adr/0016-persistent-packed-batches.md`.
 
 ## 6.21 Pruebas diferenciales
 
@@ -2311,7 +2451,7 @@ QEMU sirve para corrección cruzada. No se usará para cifras de rendimiento.
 
 ## 6.23 Auditoría de instrucciones
 
-`microfield-gen asm-audit` comprobará:
+Los scripts de auditoría de Fase 2 comprueban:
 
 - presencia de `pclmulqdq` en kernel PCLMUL;
 - presencia de VPCLMUL en kernel correspondiente;
@@ -2375,6 +2515,10 @@ Objetivo del hito:
 - ninguna optimización se mantiene únicamente porque usa una instrucción más
   moderna.
 
+El objetivo PMULL de 2x no se interpreta como demostrado sin cifras nativas.
+La salida estable es conservar el backend correcto y forzable, pero excluido de
+`Auto`. La ausencia de evidencia nunca se convierte en una estimación.
+
 ## 6.26 Definición de terminado
 
 Fase 2 termina cuando:
@@ -2392,6 +2536,13 @@ Fase 2 termina cuando:
 - se publican benchmarks por CPU;
 - `PortableOnly` sigue funcionando;
 - la API pública no contiene tipos ISA.
+
+Estado H2.8: cerrado conservadoramente. La tabla v1 materializa nueve
+decisiones estáticas; PCLMUL mantiene su región publicada y PMULL/VPCLMUL quedan
+explícitos. La captura multi-runner produce perfiles candidatos con entorno y
+SHA-256, mientras la CI ordinaria valida contratos sin usar tiempos ruidosos.
+El inventario `unsafe`, el corpus diferencial y la matriz ABI completan los
+gates. Véase `docs/microfield/phase-2-final-report.md`.
 
 # 7. Procesos end-to-end
 
@@ -2763,17 +2914,20 @@ elimina duplicación con los otros dos.
 Orden revisado después del cierre de Fase 1:
 
 1. factory pública y generación estática de GF(2^m) externos;
-2. capabilities, `EngineBuilder` detectado y catálogo ampliado;
-3. PCLMUL;
-4. PMULL;
-5. `PackedBatch` y vistas sobre storage aportado;
-6. VPCLMUL y layouts persistentes;
-7. thresholds, auditoría, CI multi-ISA y cierre.
+2. optimizador portable estático para la mayoría de GF(2^m);
+3. capabilities, `EngineBuilder` detectado y catálogo ampliado;
+4. PCLMUL;
+5. perfiles ISA externos verificados mediante ABI 3;
+6. PMULL;
+7. `PackedBatch` y vistas sobre storage aportado;
+8. VPCLMUL y layouts persistentes;
+9. thresholds, auditoría, CI multi-ISA y cierre.
 
 PCLMUL y PMULL se desarrollan sobre el mismo conjunto de vectores. VPCLMUL no
 bloquea la corrección del motor si no alcanza aún el rendimiento esperado.
-Los campos externos comienzan con portable; la elegibilidad ISA no se infiere
-solo por grado o cardinalidad.
+Los campos externos conservan portable y reciben elegibilidad ISA estructural
+solo después de validación/certificación. Corrección no implica selección
+automática: esa decisión exige calibración por target.
 
 # 13. Ejemplo de uso objetivo
 
@@ -2926,7 +3080,8 @@ El repositorio contendrá un único paquete coherente capaz de:
 12. publicar la región de rendimiento de cada kernel;
 13. compilar tipos generados y portable en `no_std`.
 
-La biblioteca estará preparada para Fase 3, pero todavía no prometerá:
+Al cierre de Fase 2 la biblioteca quedó preparada para Fase 3, pero todavía no
+prometía:
 
 - inversión batch;
 - Itoh-Tsujii optimizado;
@@ -2934,6 +3089,425 @@ La biblioteca estará preparada para Fase 3, pero todavía no prometerá:
 - campos primos;
 - contextos dinámicos;
 - firmas algebraicas.
+
+La sección 18 materializa después inversión batch, Itoh–Tsujii verificado y
+Horner. Campos primos, contextos dinámicos y firmas permanecen en fases
+posteriores.
+
+# 18. Fase 3 implementada: algoritmos derivados
+
+La Fase 3 queda materializada sobre la arquitectura cerrada en Fase 2:
+
+1. IR v4 de inversión Itoh–Tsujii con verificación simbólica obligatoria;
+2. `BitMask` compacta y vista prestada;
+3. inversión batch tolerante a cero con un único inverso escalar;
+4. workspace tipado, reutilizable y naturalmente alineado;
+5. scans prefijo/sufijo, inclusivos y exclusivos;
+6. Horner para un polinomio/muchos puntos y muchos polinomios/un punto;
+7. layout de coeficientes explícito y sin transposición oculta;
+8. `mul_add_into` como operación derivada;
+9. tablas de potencias de base fija, prestadas y owned;
+10. planes inmutables ligados a `FieldId`, `BackendId` y longitud.
+
+Las rutas prestadas funcionan en `no_std` sin `alloc`, no detectan CPU, no
+crean hilos y no amplían el inventario `unsafe`. Toda validación ocurre antes
+de modificar la salida. La evidencia, los tests y los límites están en
+`docs/microfield/phase-3-plan.md`.
+
+# 19. Enriquecimiento vinculante de Fase 6
+
+Fase 6 ya no queda limitada a firmas algebraicas nuevas. Comenzará por la
+completación, corrección y extensión de todo el código legado mantenido,
+aplicándolo sobre los campos y engines de `microfield`. Se congelarán primero
+vectores y semántica; se conservará compatibilidad solo cuando esté demostrada,
+y se retirarán afirmaciones criptográficas o probatorias injustificadas.
+
+Esta ampliación sustituye expresamente la decisión `ARCH-109` de la
+especificación externa de Fases 3–7. La canonización entra en el programa, pero
+no en el núcleo algebraico: el dominio de grafos dependerá de `microfield`, y
+`field`, `kernel`, `backend` y los encodings canónicos de elementos no
+dependerán de grafos.
+
+La fase incluye también un track de análisis estructural de grafos:
+
+1. especificación exacta del modelo de grafo y su encoding;
+2. algoritmo determinista de etiquetado y firma lineal por ronda;
+3. perfiles sobre F251 y cualquier campo estático generado;
+4. huella híbrida de firma algebraica más SHA-256 invariante;
+5. pruebas masivas de renumeración y casos estructuralmente adversariales;
+6. canonización exacta únicamente como perfil optativo con presupuesto.
+
+La corrección no dependerá de una ausencia supuesta de colisiones. La igualdad
+de firmas, incluso acompañada por SHA-256, seguirá siendo una huella y no una
+prueba de isomorfismo. El desarrollo detallado está trazado en
+`docs/microfield/phases-3-7-roadmap.md` y
+`docs/microfield/phase-6-fast-graph.md`.
+
+# 20. Fase 4 implementada: campos primos
+
+La arquitectura soporta ya característica prima sin modificar `Field`, el
+elemento binario ni los algoritmos derivados. Se mantienen tres tipos
+nominales:
+
+1. `Fp251V1`, residuo canónico de un byte y backend AVX2;
+2. `FpGoldilocks64V1`, residuo canónico de palabra y reducciones Solinas y
+   Barrett verificadas;
+3. `Fp256GenericV1`, primo determinista de 256 bits en Montgomery CIOS y
+   primera instancia del backend BMI2 radix-64 genérico.
+
+`PrimeField`, `SquareRootField`, `PrimeRepresentationKind`, los planes de
+reducción y `PrimeKernelMetadata` forman contratos segregados. Los limbs,
+productos anchos, valores Montgomery y estados lazy siguen privados. El
+producto ancho se separa de la reducción mediante un trait interno estático;
+no existe `dyn Trait` ni dispatch en operaciones escalares.
+
+Cada campo posee `FieldId`, `ArtifactId`, certificado y bundle. El primo
+genérico se reproduce desde una semilla pública; Pocklington se verifica dentro
+del runtime sin depender de Sage. SageMath aporta un segundo oráculo y un corpus
+determinista para suma, resta, producto, cuadrado e inversa.
+
+La selección conserva la política de estabilidad: AVX2 para 251 entra en
+`Auto` desde 64 elementos porque gana en la región medida. La extensión
+F4.6-SIMD incorpora Goldilocks AVX2 de cuatro lanes, automático desde 4 tras
+medir producto, square y suma; ofrece además factories AVX2 explícitos para
+perfiles externos canónicos `u8`/`u16`. El puerto
+público-oculto `VerifiedPrimeMontgomery64Field<N, 2N>` y la estrategia opaca
+`VerifiedPrimeIsaStrategy` permiten formar candidatos BMI2 seguros para tipos
+mantenidos o generados externamente con 64, 128, 192, 256 bits de almacenamiento
+y anchuras posteriores, sin duplicar el producto `MULX`. Esto prueba
+compatibilidad, no velocidad: la promoción permanece ligada a cada campo y
+región medida. BMI2 de 256 bits es correcto y forzable, publica
+`Fixed` tras sustituir carry y corrección por recorridos completos y selección
+branchless. `FixedSchedule` lo acepta, pero permanece fuera de `Auto` porque la
+remedición no acredita una ventaja estable superior al 3 %. IFMA y un backend
+primo AArch64 no se anuncian sin hardware, cobertura y medición reproducible.
+
+VPCLMUL ejecuta dos pares independientes por iteración para mejorar ILP. Las
+mejoras largas observadas en GF(2²⁵⁶) no bastan para desplazar PCLMUL de forma
+estable, por lo que sigue fuera de `Auto`. La generalización AVX2 externa no
+presupone zero-copy: Fp251 conserva el kernel especializado porque convertir
+cada valor mediante el bridge resultó mucho más lento. Compatibilidad,
+representación y promoción medida permanecen como decisiones separadas.
+
+La factory TOML v1 no se amplía retrospectivamente: acepta solo campos
+binarios. La factory de primos externos, junto a assurance demostrado/probable,
+lock y contextos, abrirá la Fase 5 tras el cierre de F4.7-PACKED-SIMD. El plan y el
+informe autoritativos están en
+`docs/microfield/phase-4-plan.md` y
+`docs/microfield/phase-4-final-report.md`. La extensión está especificada en
+`docs/microfield/phase-4-6-plan.md`, `docs/microfield/phase-4-6-report.md` y ADR
+0024.
+
+## 20.1 Extensión completada F4.7-PACKED-SIMD
+
+Antes de abrir la generación prima externa de Fase 5 se ha desarrollado un
+puente persistente por lanes. El bridge AVX2 directo de F4.6 sigue siendo el
+fallback seguro para `&[F]`, mientras `PackedBatch<F>` puede almacenar
+internamente residuos `u8`, `u16` o `u32` y ejecutar una cadena sin volver a
+convertir cada elemento.
+
+La arquitectura añade un ABI `kernel::packed` neutral, storage tagged privado
+y codecs estáticos `F ↔ Lane` usados únicamente al entrar y salir. No se
+reinterpretará memoria externa ni se expondrán lanes. Fp251 y Goldilocks
+conservan sus kernels AoS directos especializados. Los candidatos externos
+siguen fuera de `Auto`, aunque el pipeline reutilizado sea favorable.
+
+El orden ejecutado ha sido:
+
+1. baseline y ADR propuesto;
+2. ABI packed y metadata de storage;
+3. owned/vistas alineadas para `u8`/`u16`;
+4. migración de kernels genéricos sin codecs dentro del loop;
+5. candidato `u32` con Barrett vectorial;
+6. cinco operaciones packed y pipelines repetidos;
+7. calibración, Miri/ASan/ASM, compatibilidad e informe final.
+
+`u64` genérico, AArch64 primo, AVX-512 e IFMA permanecen fuera. El plan
+autoritativo, la matriz de tests y los gates cuantitativos están en
+`docs/microfield/phase-4-7-plan.md`; ADR 0025 está aceptado después de superar
+el prototipo, la corrección y la medición. El resultado completo está en
+`docs/microfield/phase-4-7-final-report.md`.
+
+# 21. Fase 5 implementada: generación externa y contextos dinámicos
+
+La apertura a campos externos queda completada sin convertir el núcleo en una
+factory virtual. El schema binario v1 permanece cerrado y se añade un schema
+primo v1 separado. `ValidationAssurance` distingue prueba determinista de
+probable primalidad; únicamente `Proven` autoriza fuente Rust.
+
+`PrimeFieldFactory` genera tipos nominales canónicos `u8`, `u16`, `u32` o
+Montgomery radix-64 según el módulo. Cada paquete contiene descriptor,
+certificado, plan, vectores, fuente, `microfield.lock`, índice y README. La
+publicación es transaccional y la caché inmutable verifica digests en lectura.
+Los bridges AVX2/BMI2 son seguros y explícitos hasta calibración por campo.
+
+La ruta runtime añade `DynField`, `DynElement`, storage inline hasta ocho
+limbs, `DynBatch` y `DynEngine`. Rabin valida campos binarios; Miller–Rabin
+determinista o Pocklington prueba primos; probable permanece etiquetado. Los
+checks nominales se amortizan por lote. El puente `generate_static` reejecuta
+la certificación y comprueba igualdad de `FieldId`.
+
+SageMath 10.7 ha validado los cuatro perfiles externos de aceptación. La
+arquitectura, gates y límites se congelan en
+`docs/microfield/phase-5-plan.md`, ADR 0026 y
+`docs/microfield/phase-5-final-report.md`.
+
+# 22. Fase 6 implementada antes de canonización: firmas estructurales
+
+F6.0–F6.8 completan el inventario, corrección, generalización y migración de la parte algebraica
+del legado. `GaloisSignature256` preserva su layout y encoding, pero delega en
+`Gf2_256HhV1`; ya no existe una segunda implementación del mismo campo.
+`FiniteField`, `TopoHasher` y los agregadores antiguos permanecen como adapters
+de compatibilidad.
+
+El módulo `structural` introduce una API genérica sobre campos estáticos:
+
+1. `StructuralEncoder<F>` y encoders canónico, binario y primo;
+2. `EncoderId` y `SignatureId` para ligar campo, encoder, ley y parámetros;
+3. `AdditiveSignature` para suma y paridad con contador;
+4. `SequenceSignature` para Horner con longitud y concatenación exactas;
+5. `MultisetSignature` para producto con cardinalidad y factores cero;
+6. `TrackedSequence` y `TrackedMultiset` cuando se requiere orden o pertenencia
+   reales;
+7. `AlgebraicResidual` para relaciones inversas, sin llamarlas pruebas;
+8. wire `MFSG` schema 1 con parsing estricto;
+9. ingestión masiva transaccional y ruta inline sin asignaciones.
+10. ingestión directa de elementos para consumidores que ya trabajan en `F`;
+11. prueba de extensibilidad mediante un GF(2⁹) externo generado en build time;
+12. adapters `dynamic-fields` sobre `DynField`, separados de la ruta estática y
+    wire-compatibles para un mismo `FieldId`;
+13. `BidirectionalSequenceSignature` con Horner forward/reverse;
+14. `MultiEvaluationMultisetSignature<F, E, K>` con puntos distintos y conteo
+    de factores cero independiente por evaluación;
+15. equivalentes dinámicos con puntos runtime validados.
+
+El propósito queda fijado: son hashes homomórficos no criptográficos. Una
+evaluación pequeña puede capturar leyes útiles y combinar particiones, pero no
+es inyectiva ni autentica el historial. `crypto_mode` solo conserva código
+fuente antiguo y no promete tiempo constante o seguridad.
+
+La auditoría completa está en `docs/microfield/phase-6-legacy-audit.md`, la
+arquitectura ejecutada en `docs/microfield/phase-6-pre-canon-plan.md` y la
+decisión semántica en ADR 0027 y la frontera de generalización en ADR 0028.
+F6.G0–G2 añaden posteriormente `IncidenceGraph`,
+`FastGraphLabeler<F, E, K>`, el perfil F251, campos externos generados y el
+canal híbrido SHA-256 documentado en
+`docs/microfield/phase-6-fast-graph.md`. El nombre del canonizador legado
+permanece como compatibilidad, pero su implementación delega en el motor F251
+nuevo; la búsqueda exacta no entra en el hot path.
+
+# 23. F6.G0–G6: motor rápido, incrementalidad y canonización exacta acotada
+
+La discusión de grafos corrige la prioridad inicial: la búsqueda canónica
+potencialmente exponencial no será el flujo predeterminado. El producto central
+es `FastGraphLabeler<F, E, K>`, un etiquetador invariante por renumeración con
+coste `O(K R (V + I))`.
+
+`IncidenceGraph` normaliza en CSR un multigrafo dirigido relacional. Etiquetas,
+roles, dirección, bucles y multiplicidades se conservan exactamente. Las
+hiperaristas son nodos auxiliares y cuestan linealmente en su aridad. El adapter
+`from_legacy_topology` permite migración sin seguir expandiendo cláusulas a
+cliques.
+
+F251 se conserva como especialización prioritaria mediante
+`F251GraphLabeler<K>`. `FastGraphLabeler` también acepta campos binarios,
+primos mantenidos y cualquier tipo estático producido por la factory, con
+parámetros derivados o explícitos ligados a `GraphSignatureId`.
+
+El perfil `Fast` conserva los productos y contadores de cero de cada ronda;
+`combine_disjoint` produce exactamente la firma de la unión disjunta sin
+reprocesar sus componentes. Los perfiles adaptativos no exponen esa ley porque
+pueden detenerse bajo calendarios diferentes.
+
+Las capacidades públicas son:
+
+1. `Fast`, con rondas fijas y predecibles;
+2. `Robust`, con estabilización de partición y máximo estricto;
+3. `try_canonicalize`, que solo emite forma exacta si todas las clases son
+   unitarias y devuelve `SymmetryRemaining` en caso contrario;
+4. `diagnose_degeneracy`, que separa aliasing finito y ambigüedad exacta local;
+5. `MultiFieldGraphEvidenceBuilder`, que identifica conjuntos heterogéneos de
+   evidencia sin afirmar isomorfismo;
+6. `canonicalize_exact`, opt-in y con presupuesto explícito.
+
+`analyze_hybrid` añade un segundo canal SHA-256 calculado sobre histogramas
+invariantes de todas las rondas, etiquetas exactas y relaciones refinadas. No
+se calcula sobre índices ni sobre la firma de campo sola. La pareja reduce
+colisiones globales cuando los descriptores adicionales difieren, pero no se
+presenta como prueba de isomorfismo.
+
+Las primeras mediciones release con F251, tres lanes y cuatro rondas alcanzan
+entre 28,5 y 32,7 M incidencias-ronda/s para 16.384 vértices. El modo híbrido
+queda entre 8,53 y 9,34 M/s y GF(2²⁵⁶) alrededor de 155–157 K/s en el mismo
+flujo. Son cifras locales; establecen F251 como candidato prioritario y
+SHA-256 como opt-in.
+
+F6.G3 queda ejecutado: `PreparedGraph` y `GraphWorkspace` separan preparación
+de ejecución, precalculan constantes afines y permiten vistas prestadas sin
+asignaciones en el camino secuencial caliente. La comparación completa muestra
+que SoA+AVX2 acelera el caso monohilo, mientras AoS+Rayon domina en grafos
+grandes del host auditado; ambas estrategias son explícitas y producen bytes
+idénticos. `CellularGaloisCanonizer` se ha convertido en fachada sobre el mismo
+motor F251 y las pruebas de su antigua recurrencia se han sustituido por
+contratos del puente mantenido. F6.G4 queda también ejecutado:
+`IncrementalGraphState` conserva las capas de ronda, audita el nuevo CSR,
+recalcula únicamente el cono afectado y publica firma, partición y componentes
+de forma transaccional. Los benchmarks locales observan aproximadamente
+`2,0–2,5×` para una etiqueta y `1,6–2,1×` para una arista frente a recomputación
+completa.
+
+F6.G5 queda ejecutado con un diagnóstico exacto que distingue aliasing de campo
+de ambigüedad 1-WL, un umbral público de alta regularidad y bundles multi-campo
+ligados a `GraphEvidenceProfileId`. El corpus prueba desde seis vértices que
+`C6` y `C3 ⊔ C3` comparten firma local en F251, GF(2²⁵⁶) y SHA híbrido sin ser
+isomorfos. SageMath 10.7 confirma 35 pares entre 6 y 40 vértices; 128
+normalizaciones aleatorias y los universos completos de cuatro y cinco
+vértices aportan oráculos diferenciales adicionales. El par fuertemente
+regular Shrikhande/torres 4×4 cubre además la degeneración extrema de parámetros
+`(16,6,2,2)`.
+
+F6.G6 queda ejecutado mediante `canonicalize_exact`: ruta rápida para una
+partición discreta y DFS iterativo de individualización–refinamiento para las
+simetrías. `CanonicalSearchBudget` limita nodos y estado retenido. Solo un árbol
+completo produce `Exact`; cualquier límite produce `BudgetExhausted` sin forma
+parcial. Esta búsqueda es opt-in y no modifica `analyze`, batch ni incremental.
+Con ello la Fase 6 queda cerrada. El informe consolidado está en
+`docs/microfield/phase-6-final-report.md`; el detalle de los dos últimos cortes
+está en `docs/microfield/phase-6-g5-g6-final-report.md`.
+
+# 24. F6.G7: corrección del discriminador global y corpus externo
+
+El cierre anterior se reabre porque la colisión `C6`/`C3 ⊔ C3`, aunque estaba
+diagnosticada, hacía insuficiente la firma local como producto principal de
+clasificación. Se mantiene `FastGraphSignature` v1 para compatibilidad,
+composición y latencia mínima, y se introduce un perfil v2 recomendado.
+
+`GlobalGraphProfile` incorpora componentes débiles, SCC, tamaños, tipos y
+etiquetas, relaciones/roles, grados, multiplicidades, bucles, soporte simple y
+rango cíclico. La serialización exacta interna etiquetas y relaciones una vez;
+la igualdad no depende del SHA-256 que la identifica. Así `C6` y `C3 ⊔ C3` se
+separan antes de cualquier búsqueda.
+
+`GraphDiscriminationPolicy::Adaptive` añade triángulos y `K4` para grafos con
+particiones altamente regulares. Una cota de trabajo invariante decide la
+admisión; si no cabe, `SkippedBudget` no contiene resultados parciales. Esto
+separa Shrikhande de torres 4×4 (`K4=0` frente a `K4=8`). Comparar perfiles v2
+solo devuelve `Different` o `Indistinguishable`.
+
+`canonicalize_exact` descompone componentes débiles, consume el presupuesto de
+nodos restante por componente, ordena formas exactas y publica solo al
+completar toda la unidad de trabajo.
+
+La prueba externa queda separada de `cargo test`: un manifiesto con URL,
+SHA-256, licencia y cita alimenta un fetcher atómico/offline. El corpus cubre
+1.253 clases del Graph Atlas hasta siete vértices, 188 moléculas MUTAG, la red
+dirigida etiquetada email-Eu-core y el hipergrafo biológico diseasome. La Fase 6
+se vuelve a cerrar únicamente tras superar este corpus, las suites locales,
+Clippy/rustdoc y los benchmarks de coste aislado. El detalle está en
+`docs/microfield/phase-6-g7-final-report.md` y ADR 0030.
+
+# 25. F6.V: validación científica y aplicada antes de publicación
+
+F6.G7 cerró la implementación de firmas y grafos. F6.V1–V6 implementan el
+programa de validación bloqueante definido en
+`docs/microfield/phase-6-validation-plan.md`; su primera evidencia se conserva
+en `docs/microfield/phase-6-validation-final-report.md` y
+`validation/f6/results/semantic-v1.json`.
+
+El programa exige:
+
+1. leyes exhaustivas y metamórficas para cada firma;
+2. catálogo reproducible de colisiones, parámetros y límites;
+3. aplicaciones de agregación, reconciliación y secuencias comparadas con
+   baselines adecuados;
+4. corpus de grafos exhaustivo, adversarial y multiformato con oráculo exacto;
+5. tasas de indistinguibilidad por escalón v1/híbrido/v2/motivos/multi-campo;
+6. curvas de coste incremental, memoria, latencia y búsqueda exacta;
+7. repetición en varias familias x86-64 y ARM64;
+8. clasificación final de cada vía como validada, primitiva, experimental o
+   descartada.
+
+La reconciliación incluye ya recuperación acotada con distancia desconocida:
+63.232 pares exhaustivos hasta diferencia seis se recuperan y verifican. Sigue
+como `ValidatedPrimitive` hasta disponer de factorización escalable y API
+pública. El corpus de 12.346 clases de orden ocho deja 454 grafos ambiguos en
+v1 y 46 tras motivos adaptativos; SHA híbrido y multi-campo local no reducen la
+regularidad. En grafos, una igualdad continúa significando
+`Indistinguishable`; solo un oráculo exacto completado certifica la forma.
+
+La implementación V1–V6 queda cerrada. La publicación continúa bloqueada por
+la evidencia multi-microarquitectura y los baselines externos enumerados en el
+informe, no por falta de infraestructura.
+
+# 26. F6.G15: preparación para consumo interno
+
+Tras G8–G14, la biblioteca se considera un release candidate interno
+condicionado: firmas y filtros son utilizables como evidencias negativas, y
+`Microcanon` es utilizable como autoridad exacta siempre que `Inconclusive` se
+propague. Todavía no se aprueba usar una firma rápida como clave persistente ni
+integrar adapters de dominio sin schema explícito.
+
+G15 queda separada de publicación. Las firmas homomórficas son producto de
+primer nivel y grafos/canonización un vertical adicional. Sus hitos son:
+
+1. inventario de campos, encoders, firmas, protocolos y grafos;
+2. API soportada para suma, secuencias, multisets, multievaluación y tracking;
+3. wire/snapshots, agregación distribuida, streaming y reconciliación;
+4. deltas versionados y transaccionales por ley, sin claims criptográficos;
+5. aplicaciones sobre archivos, bases de datos y árboles jerárquicos;
+6. perfiles de campo por característica, cardinalidad, ley, K y backend;
+7. perfiles de grafos, DAG exacto y adapter de cliques/subredes;
+8. cierre de corpus, oráculos y colisiones residuales de ambos tracks;
+9. property/fuzz tests de firmas, deltas, wires, parser y `GraphDelta`;
+10. SLO por workload, consumidor, runbook y artefacto reproducible go/no-go.
+
+La salida será `ReadyForInternalUse`, `Conditional` o `NotReady`; nunca una
+aprobación narrativa. Quedan fuera licencia, crates.io, semver 1.0, claims
+multi-CPU, SLA externo y equivalencia científica general. El desarrollo
+completo, gates y Definition of Done están en
+`docs/microfield/phase-6-g15-internal-readiness-plan.md`. La auditoría de la
+capacidad existente y la frontera viable de deltas está en
+`docs/microfield/phase-6-signature-delta-audit.md`.
+
+El cierre transversal de campos, firmas, deltas, reconciliación, grafos,
+calidad y operabilidad hasta una release candidate técnica queda consolidado en
+`docs/microfield/release-candidate-readiness-plan.md`.
+
+RC.0 y RC.1 quedan completados localmente: el paquete separa `signatures`,
+`dynamic-signatures`, `graph` y `legacy`, y el inventario ejecutable valida
+campos mantenidos, un campo externo generado y su presentación runtime. El
+informe está en `docs/microfield/rc-0-rc-1-implementation-report.md`.
+
+RC.2 queda completado localmente con builders estáticos/runtime, perfiles de
+campo y evaluación, trait compacto sellado y snapshots exactos `MFTS` para
+`TrackedSequence`/`TrackedMultiset`. La evidencia está en
+`docs/microfield/rc-2-signature-api-report.md`.
+
+RC.3 queda completado localmente con envelopes `MFDE`, deltas segregados por
+ley, estado revisionado, aplicación preflight/candidate/commit y journal
+persistible `MFDJ`. Las campañas aleatorias comparan cada transición con
+rebuild y el replay repetido se reconoce por `DeltaId`. La evidencia está en
+`docs/microfield/rc-3-delta-core-report.md`.
+
+RC.4 queda completado localmente con chunking fijo identificado, framing
+`MFFC`, árbol ordenado `HomomorphicSummaryTree`, edits locales O(k log n),
+fallback completo al cambiar fronteras y checkpoints exactos `MFST`. La
+evidencia está en `docs/microfield/rc-4-summary-tree-report.md`.
+
+RC.5 queda completado localmente con schema y filas `MFRW`, tabla particionada,
+before/after images, transacciones `MFTX`, log `MFTL` y reconciliación pública
+`MFRS`. V1 declara claves primarias únicas y reconciliación de conjuntos sin
+multiplicidad. La evidencia está en
+`docs/microfield/rc-5-database-reconciliation-report.md`.
+
+RC.6 queda completado localmente con `CanonicalGraphDag`, snapshot persistente
+`MFGD`, restauración que vuelve a canonizar cada nodo, dependencias acíclicas y
+reutilización condicionada a igualdad de bytes canónicos completos. Los
+adapters separan subred inducida —pérdida de frontera explícita—, subred cerrada
+—pérdida rechazada— y clique relacional dirigido. `GraphDeltaUpdateReport`
+expone por separado cambios de labels y topología, pero ambos exigen una nueva
+canonización exacta antes de publicar identidad. La evidencia está en
+`docs/microfield/rc-6-graph-dag-report.md`.
 
 # Referencias técnicas
 

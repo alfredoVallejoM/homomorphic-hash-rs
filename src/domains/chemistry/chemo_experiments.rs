@@ -1,13 +1,13 @@
-use std::time::Instant;
+use rayon::prelude::*;
 use std::collections::HashSet;
 use std::fs::File;
-use rayon::prelude::*;
+use std::time::Instant;
 
 use crate::algebra::galois_256::GaloisSignature256;
-use crate::harness::experiment::{ScientificExperiment, ExperimentOutcome};
-use crate::harness::telemetry::TelemetryRecord;
-use crate::domains::chemistry::smiles_parser::{SmilesParser, MolecularComplex};
+use crate::domains::chemistry::smiles_parser::{MolecularComplex, SmilesParser};
 use crate::engine::canonizer::CellularGaloisCanonizer;
+use crate::harness::experiment::{ExperimentOutcome, ScientificExperiment};
+use crate::harness::telemetry::TelemetryRecord;
 
 // =========================================================================
 // DEMONSTRATION 1: UNIVERSAL INVARIANCE (The SMILES Shuffle)
@@ -49,7 +49,8 @@ impl ScientificExperiment for Demo1Level1PositionalIsomerism {
             for _ in 0..50 {
                 let perm = base_complex.generate_isomorphic_permutation();
                 let nodes = CellularGaloisCanonizer::canonize(&perm, perm.var_count);
-                let mut sigs: Vec<GaloisSignature256> = nodes.into_iter().map(|n| n.signature).collect();
+                let mut sigs: Vec<GaloisSignature256> =
+                    nodes.into_iter().map(|n| n.signature).collect();
                 sigs.sort_by(|a, b| a.0.cmp(&b.0));
 
                 let current_topology: Vec<[u64; 4]> = sigs.into_iter().map(|s| s.0).collect();
@@ -64,15 +65,36 @@ impl ScientificExperiment for Demo1Level1PositionalIsomerism {
                 }
             }
         }
-        (ExperimentOutcome::IsomorphismMatch(all_passed), 0, start_engine.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(all_passed),
+            0,
+            start_engine.elapsed().as_nanos(),
+        )
     }
 
     fn verify(&self, outcome: &ExperimentOutcome) -> bool {
-        match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false }
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
     }
 
     fn get_base_telemetry(&self) -> TelemetryRecord {
-        TelemetryRecord { domain: "Chemistry".to_string(), experiment_name: "Demo1_L1_Positional".to_string(), vertices: 100, edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: 1, peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 }
+        TelemetryRecord {
+            domain: "Chemistry".to_string(),
+            experiment_name: "Demo1_L1_Positional".to_string(),
+            vertices: 100,
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: 1,
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
     }
 }
 
@@ -89,7 +111,10 @@ impl Demo1Level2SymmetricStress {
         Self {
             smiles_targets: vec![
                 ("Benzene", "C1=CC=CC=C1"),
-                ("Coronene", "C1=CC2=C3C4=C1C=CC5=C4C6=C(C=C5)C=CC7=C6C3=C(C=C2)C=C7"),
+                (
+                    "Coronene",
+                    "C1=CC2=C3C4=C1C=CC5=C4C6=C(C=C5)C=CC7=C6C3=C(C=C2)C=C7",
+                ),
             ],
             setup_time_ns: 0,
         }
@@ -112,7 +137,8 @@ impl ScientificExperiment for Demo1Level2SymmetricStress {
             for _ in 0..50 {
                 let perm = base_complex.generate_isomorphic_permutation();
                 let nodes = CellularGaloisCanonizer::canonize(&perm, perm.var_count);
-                let mut sigs: Vec<GaloisSignature256> = nodes.into_iter().map(|n| n.signature).collect();
+                let mut sigs: Vec<GaloisSignature256> =
+                    nodes.into_iter().map(|n| n.signature).collect();
                 sigs.sort_by(|a, b| a.0.cmp(&b.0));
 
                 let current_topology: Vec<[u64; 4]> = sigs.into_iter().map(|s| s.0).collect();
@@ -127,20 +153,41 @@ impl ScientificExperiment for Demo1Level2SymmetricStress {
                 }
             }
         }
-        (ExperimentOutcome::IsomorphismMatch(all_passed), 0, start_engine.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(all_passed),
+            0,
+            start_engine.elapsed().as_nanos(),
+        )
     }
 
     fn verify(&self, outcome: &ExperimentOutcome) -> bool {
-        match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false }
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
     }
 
     fn get_base_telemetry(&self) -> TelemetryRecord {
-        TelemetryRecord { domain: "Chemistry".to_string(), experiment_name: "Demo1_L2_Symmetry".to_string(), vertices: 100, edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: 1, peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 }
+        TelemetryRecord {
+            domain: "Chemistry".to_string(),
+            experiment_name: "Demo1_L2_Symmetry".to_string(),
+            vertices: 100,
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: 1,
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
     }
 }
 
 /// LEVEL 3 (CHEMBL SCALE): Statistical Brute Force.
-/// Target: Massive chemical space evaluation to prove 0% collision rate.
+/// Target: measure observed collisions on a finite chemical corpus.
 pub struct Demo1Level3ChemblScale {
     csv_path: String,
     parsed_base_graphs: Vec<MolecularComplex>,
@@ -152,7 +199,7 @@ impl Demo1Level3ChemblScale {
         Self {
             csv_path: csv_path.to_string(),
             parsed_base_graphs: Vec::new(),
-            setup_time_ns: 0
+            setup_time_ns: 0,
         }
     }
 }
@@ -165,7 +212,11 @@ impl ScientificExperiment for Demo1Level3ChemblScale {
 
         for result in rdr.records().take(100_000) {
             if let Ok(record) = result {
-                let s = if record.len() > 1 { record.get(1).unwrap_or("").trim() } else { record.get(0).unwrap_or("").trim() };
+                let s = if record.len() > 1 {
+                    record.get(1).unwrap_or("").trim()
+                } else {
+                    record.get(0).unwrap_or("").trim()
+                };
                 if !s.is_empty() && s != "smiles" {
                     if let Some(complex) = SmilesParser::try_parse_to_complex(s) {
                         self.parsed_base_graphs.push(complex);
@@ -179,29 +230,34 @@ impl ScientificExperiment for Demo1Level3ChemblScale {
     fn execute(&self) -> (ExperimentOutcome, u128, u128) {
         let start_engine = Instant::now();
 
-        let results: Vec<(bool, Vec<[u64; 4]>)> = self.parsed_base_graphs.par_iter().map(|base_complex| {
-            let mut expected_topology: Option<Vec<[u64; 4]>> = None;
-            let mut invariant = true;
+        let results: Vec<(bool, Vec<[u64; 4]>)> = self
+            .parsed_base_graphs
+            .par_iter()
+            .map(|base_complex| {
+                let mut expected_topology: Option<Vec<[u64; 4]>> = None;
+                let mut invariant = true;
 
-            for _ in 0..5 {
-                let perm = base_complex.generate_isomorphic_permutation();
-                let nodes = CellularGaloisCanonizer::canonize(&perm, perm.var_count);
-                let mut sigs: Vec<GaloisSignature256> = nodes.into_iter().map(|n| n.signature).collect();
-                sigs.sort_by(|a, b| a.0.cmp(&b.0));
+                for _ in 0..5 {
+                    let perm = base_complex.generate_isomorphic_permutation();
+                    let nodes = CellularGaloisCanonizer::canonize(&perm, perm.var_count);
+                    let mut sigs: Vec<GaloisSignature256> =
+                        nodes.into_iter().map(|n| n.signature).collect();
+                    sigs.sort_by(|a, b| a.0.cmp(&b.0));
 
-                let current_topology: Vec<[u64; 4]> = sigs.into_iter().map(|s| s.0).collect();
+                    let current_topology: Vec<[u64; 4]> = sigs.into_iter().map(|s| s.0).collect();
 
-                match &expected_topology {
-                    None => expected_topology = Some(current_topology),
-                    Some(expected) => {
-                        if &current_topology != expected {
-                            invariant = false;
+                    match &expected_topology {
+                        None => expected_topology = Some(current_topology),
+                        Some(expected) => {
+                            if &current_topology != expected {
+                                invariant = false;
+                            }
                         }
                     }
                 }
-            }
-            (invariant, expected_topology.unwrap())
-        }).collect();
+                (invariant, expected_topology.unwrap())
+            })
+            .collect();
 
         let zero_false_negatives = results.iter().all(|(invariant, _)| *invariant);
 
@@ -211,15 +267,36 @@ impl ScientificExperiment for Demo1Level3ChemblScale {
         }
         let zero_collisions = unique_registry.len() == self.parsed_base_graphs.len();
 
-        (ExperimentOutcome::IsomorphismMatch(zero_false_negatives && zero_collisions), 0, start_engine.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(zero_false_negatives && zero_collisions),
+            0,
+            start_engine.elapsed().as_nanos(),
+        )
     }
 
     fn verify(&self, outcome: &ExperimentOutcome) -> bool {
-        match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false }
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
     }
 
     fn get_base_telemetry(&self) -> TelemetryRecord {
-        TelemetryRecord { domain: "Chemistry".to_string(), experiment_name: "Demo1_L3_Massive".to_string(), vertices: self.parsed_base_graphs.len() * 5, edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: rayon::current_num_threads(), peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 }
+        TelemetryRecord {
+            domain: "Chemistry".to_string(),
+            experiment_name: "Demo1_L3_Massive".to_string(),
+            vertices: self.parsed_base_graphs.len() * 5,
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: rayon::current_num_threads(),
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
     }
 }
 
@@ -240,7 +317,7 @@ impl Demo2Level1MassiveAlkanes {
         Self {
             csv_path: csv_path.to_string(),
             parsed_graphs: Vec::new(),
-            setup_time_ns: 0
+            setup_time_ns: 0,
         }
     }
 }
@@ -267,13 +344,18 @@ impl ScientificExperiment for Demo2Level1MassiveAlkanes {
     fn execute(&self) -> (ExperimentOutcome, u128, u128) {
         let start_engine = Instant::now();
 
-        let generated_topologies: Vec<Vec<[u64; 4]>> = self.parsed_graphs.par_iter().map(|graph| {
-            let nodes = CellularGaloisCanonizer::canonize(graph, graph.var_count);
-            let mut sigs: Vec<GaloisSignature256> = nodes.into_iter().map(|n| n.signature).collect();
-            sigs.sort_by(|a, b| a.0.cmp(&b.0));
+        let generated_topologies: Vec<Vec<[u64; 4]>> = self
+            .parsed_graphs
+            .par_iter()
+            .map(|graph| {
+                let nodes = CellularGaloisCanonizer::canonize(graph, graph.var_count);
+                let mut sigs: Vec<GaloisSignature256> =
+                    nodes.into_iter().map(|n| n.signature).collect();
+                sigs.sort_by(|a, b| a.0.cmp(&b.0));
 
-            sigs.into_iter().map(|s| s.0).collect()
-        }).collect();
+                sigs.into_iter().map(|s| s.0).collect()
+            })
+            .collect();
 
         let mut unique_registry: HashSet<Vec<[u64; 4]>> = HashSet::new();
         let mut no_collisions = true;
@@ -285,15 +367,36 @@ impl ScientificExperiment for Demo2Level1MassiveAlkanes {
             }
         }
 
-        (ExperimentOutcome::IsomorphismMatch(no_collisions), 0, start_engine.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(no_collisions),
+            0,
+            start_engine.elapsed().as_nanos(),
+        )
     }
 
     fn verify(&self, outcome: &ExperimentOutcome) -> bool {
-        match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false }
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
     }
 
     fn get_base_telemetry(&self) -> TelemetryRecord {
-        TelemetryRecord { domain: "Chemistry".to_string(), experiment_name: "Demo2_L1_Alkanes".to_string(), vertices: self.parsed_graphs.len(), edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: rayon::current_num_threads(), peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 }
+        TelemetryRecord {
+            domain: "Chemistry".to_string(),
+            experiment_name: "Demo2_L1_Alkanes".to_string(),
+            vertices: self.parsed_graphs.len(),
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: rayon::current_num_threads(),
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
     }
 }
 
@@ -330,7 +433,8 @@ impl ScientificExperiment for Demo2Level2AromaticSubstitution {
         for (_name, smiles) in &self.smiles_targets {
             let graph = SmilesParser::parse_to_complex(smiles);
             let nodes = CellularGaloisCanonizer::canonize(&graph, graph.var_count);
-            let mut sigs: Vec<GaloisSignature256> = nodes.into_iter().map(|n| n.signature).collect();
+            let mut sigs: Vec<GaloisSignature256> =
+                nodes.into_iter().map(|n| n.signature).collect();
             sigs.sort_by(|a, b| a.0.cmp(&b.0));
 
             let topology: Vec<[u64; 4]> = sigs.into_iter().map(|s| s.0).collect();
@@ -338,15 +442,36 @@ impl ScientificExperiment for Demo2Level2AromaticSubstitution {
                 no_collisions = false;
             }
         }
-        (ExperimentOutcome::IsomorphismMatch(no_collisions), 0, start_engine.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(no_collisions),
+            0,
+            start_engine.elapsed().as_nanos(),
+        )
     }
 
     fn verify(&self, outcome: &ExperimentOutcome) -> bool {
-        match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false }
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
     }
 
     fn get_base_telemetry(&self) -> TelemetryRecord {
-        TelemetryRecord { domain: "Chemistry".to_string(), experiment_name: "Demo2_L2_Xylene".to_string(), vertices: 3, edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: 1, peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 }
+        TelemetryRecord {
+            domain: "Chemistry".to_string(),
+            experiment_name: "Demo2_L2_Xylene".to_string(),
+            vertices: 3,
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: 1,
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
     }
 }
 
@@ -383,7 +508,8 @@ impl ScientificExperiment for Demo2Level3WLParadoxes {
         for (_name, smiles) in &self.smiles_targets {
             let graph = SmilesParser::parse_to_complex(smiles);
             let nodes = CellularGaloisCanonizer::canonize(&graph, graph.var_count);
-            let mut sigs: Vec<GaloisSignature256> = nodes.into_iter().map(|n| n.signature).collect();
+            let mut sigs: Vec<GaloisSignature256> =
+                nodes.into_iter().map(|n| n.signature).collect();
             sigs.sort_by(|a, b| a.0.cmp(&b.0));
 
             let topology: Vec<[u64; 4]> = sigs.into_iter().map(|s| s.0).collect();
@@ -391,14 +517,35 @@ impl ScientificExperiment for Demo2Level3WLParadoxes {
                 no_collisions = false;
             }
         }
-        (ExperimentOutcome::IsomorphismMatch(no_collisions), 0, start_engine.elapsed().as_nanos())
+        (
+            ExperimentOutcome::IsomorphismMatch(no_collisions),
+            0,
+            start_engine.elapsed().as_nanos(),
+        )
     }
 
     fn verify(&self, outcome: &ExperimentOutcome) -> bool {
-        match outcome { ExperimentOutcome::IsomorphismMatch(res) => *res, _ => false }
+        match outcome {
+            ExperimentOutcome::IsomorphismMatch(res) => *res,
+            _ => false,
+        }
     }
 
     fn get_base_telemetry(&self) -> TelemetryRecord {
-        TelemetryRecord { domain: "Chemistry".to_string(), experiment_name: "Demo2_L3_1WL_Paradox".to_string(), vertices: 2, edges: 0, density: 0.0, parse_time_ns: self.setup_time_ns, l1_shield_time_ns: 0, galois_engine_time_ns: 0, l1_rejection_rate: 0.0, threads_utilized: 1, peak_memory_mb: 0.0, isomorphism_verified: true, false_positives_detected: 0 }
+        TelemetryRecord {
+            domain: "Chemistry".to_string(),
+            experiment_name: "Demo2_L3_1WL_Paradox".to_string(),
+            vertices: 2,
+            edges: 0,
+            density: 0.0,
+            parse_time_ns: self.setup_time_ns,
+            l1_shield_time_ns: 0,
+            galois_engine_time_ns: 0,
+            l1_rejection_rate: 0.0,
+            threads_utilized: 1,
+            peak_memory_mb: 0.0,
+            isomorphism_verified: true,
+            false_positives_detected: 0,
+        }
     }
 }

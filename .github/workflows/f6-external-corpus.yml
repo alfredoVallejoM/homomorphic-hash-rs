@@ -1,0 +1,27 @@
+name: F6 external corpus
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  external-corpus:
+    name: Pinned external graph corpus
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Fetch and verify pinned sources
+        run: python3 tools/fetch_graph_corpus.py
+      - name: Reopen cache in offline mode
+        run: python3 tools/fetch_graph_corpus.py --offline
+      - name: Run external graph corpus campaigns
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs
+          --test external_graph_corpus -- --ignored --nocapture
