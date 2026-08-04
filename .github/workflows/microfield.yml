@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: microfield-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -16,7 +20,7 @@ jobs:
     name: Stable quality gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
       - name: Format
@@ -61,12 +65,62 @@ jobs:
         run: cargo +stable test -p homomorphic-hash-rs --lib
       - name: Legacy field compatibility
         run: cargo +stable test -p homomorphic-hash-rs --test microfield_compat
-      - name: Structural signatures and graph regressions
-        run: >-
-          cargo +stable test -p homomorphic-hash-rs
-          --test structural_signatures --test fast_graph --test graph_canonical
       - name: F6.V validation harness unit gates
         run: cargo +stable test -p microfield-validation-lab --all-targets
+
+  root-quality:
+    name: Root workspace quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
+      - name: Compile every workspace target from Cargo.lock
+        run: cargo +stable test --workspace --all-features --all-targets --locked --no-run
+      - name: Workspace Clippy
+        run: cargo +stable clippy --workspace --all-features --all-targets --locked -- -D warnings
+      - name: Workspace Rustdoc
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo +stable doc --workspace --all-features --locked --no-deps
+
+  signatures-rc:
+    name: Signatures and protocols RC
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Homomorphic signatures, deltas, trees, DB and reconciliation
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs --all-features --locked
+          --test structural_signatures
+          --test rc_supported_surface
+          --test rc_signature_api
+          --test rc_delta_api
+          --test rc_summary_tree
+          --test rc_database_reconciliation
+
+  graphs-rc:
+    name: Graph pipeline and exact DAG RC
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Fast filters, exact canonization, deltas and DAG
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs --all-features --locked
+          --test fast_graph
+          --test graph_canonical
+          --test microcanon
+          --test graph_signatures_v2
+          --test graph_g12
+          --test graph_g13_g14
+          --test rc_graph_dag
 
   f6-validation:
     name: F6.V reproducibility (${{ matrix.arch }})
@@ -81,7 +135,7 @@ jobs:
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
       - name: Regenerate deterministic F6.V semantic evidence
@@ -97,7 +151,7 @@ jobs:
           --manifest validation/f6/manifest.json
           --out f6-performance-${{ matrix.arch }}.json
       - name: Upload F6.V performance evidence
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: f6-performance-${{ matrix.arch }}
           path: f6-performance-${{ matrix.arch }}.json
@@ -109,7 +163,7 @@ jobs:
     env:
       RUSTFLAGS: -D warnings
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
       - name: Install AArch64 target
@@ -139,7 +193,7 @@ jobs:
     name: MSRV 1.89
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install MSRV
         run: rustup toolchain install 1.89.0 --profile minimal
       - run: cargo +1.89.0 check -p microfield --no-default-features
@@ -151,7 +205,7 @@ jobs:
     name: Generated artifacts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
       - name: Verify deterministic artifact sets and external prime profiles
@@ -177,7 +231,7 @@ jobs:
     name: Miri runtime
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install nightly Miri
         run: rustup toolchain install nightly --profile minimal --component miri,rust-src
       - run: cargo +nightly miri setup
@@ -202,7 +256,7 @@ jobs:
     name: x86-64 PCLMUL/VPCLMUL AddressSanitizer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install nightly Rust with sources
         run: rustup toolchain install nightly --profile minimal --component rust-src
       - name: Test audited x86 binary and prime boundaries under ASan
@@ -238,7 +292,7 @@ jobs:
     name: AArch64 PMULL hardware gates
     runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal --component clippy
       - name: Differential PMULL suite on hardware
@@ -277,3 +331,44 @@ jobs:
           cargo +nightly test -Zbuild-std --target aarch64-unknown-linux-gnu
           --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml
           --lib
+
+  required-gates:
+    name: Required gates
+    if: ${{ always() }}
+    needs:
+      - stable
+      - root-quality
+      - signatures-rc
+      - graphs-rc
+      - f6-validation
+      - features
+      - msrv
+      - generated
+      - miri
+      - x86-asan
+      - arm64
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      STABLE: ${{ needs.stable.result }}
+      ROOT_QUALITY: ${{ needs.root-quality.result }}
+      SIGNATURES_RC: ${{ needs.signatures-rc.result }}
+      GRAPHS_RC: ${{ needs.graphs-rc.result }}
+      F6_VALIDATION: ${{ needs.f6-validation.result }}
+      FEATURES: ${{ needs.features.result }}
+      MSRV: ${{ needs.msrv.result }}
+      GENERATED: ${{ needs.generated.result }}
+      MIRI: ${{ needs.miri.result }}
+      X86_ASAN: ${{ needs.x86-asan.result }}
+      ARM64: ${{ needs.arm64.result }}
+    steps:
+      - name: Require every semantic, portable and ISA gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          for result in \
+            "$STABLE" "$ROOT_QUALITY" "$SIGNATURES_RC" "$GRAPHS_RC" \
+            "$F6_VALIDATION" "$FEATURES" "$MSRV" "$GENERATED" "$MIRI" \
+            "$X86_ASAN" "$ARM64"; do
+            test "$result" = success
+          done

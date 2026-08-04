@@ -17,7 +17,7 @@ jobs:
     name: Calibration contract
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Validate committed profiles and selection table
         run: bash crates/microfield/tools/audit_calibration.sh
       - name: Exercise calibration gate rejection paths
@@ -31,7 +31,7 @@ jobs:
         runner: [ubuntu-22.04, ubuntu-24.04]
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
       - name: Capture PCLMUL and VPCLMUL Criterion evidence
@@ -39,7 +39,7 @@ jobs:
           crates/microfield/tools/capture_calibration.sh
           calibration-output
           'gf2_(128_v1|256_hh_v1|256_alt_v1)/batch/(1|64|4096|16384)/(mul_engine_(portable|forced_x86_pclmul|forced_x86_vpclmul)|pclmul_mul_packed_reused|pclmul_pipeline_reused_pack_mul_unpack|vpclmul_mul_packed_reused|vpclmul_pipeline_reused_pack_mul_unpack)'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: microfield-calibration-${{ matrix.runner }}
           path: calibration-output
@@ -49,7 +49,7 @@ jobs:
     name: AArch64 PMULL calibration
     runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal
       - name: Capture PMULL Criterion evidence on native hardware
@@ -57,7 +57,7 @@ jobs:
           crates/microfield/tools/capture_calibration.sh
           calibration-output
           'gf2_(128_v1|256_hh_v1|256_alt_v1)/batch/(1|64|4096|16384)/(mul_engine_(portable|forced_aarch64_pmull)|pmull_mul_packed_reused|pmull_pipeline_reused_pack_mul_unpack)'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: microfield-calibration-ubuntu-24.04-arm
           path: calibration-output

@@ -4,6 +4,13 @@ Fecha: 4 de agosto de 2026.
 
 Estado: RC.0–RC.6 completados localmente; RC.7 es el siguiente workstream.
 
+Antes de cerrar RC.7 se ejecutará el gate transversal de integración remota
+descrito en
+[`github-integration-and-remote-validation-plan.md`](github-integration-and-remote-validation-plan.md).
+Ese gate preserva el historial, integra la rama candidata en `main`, completa
+la cobertura CI y habilita las campañas remotas pesadas sobre una base
+recuperable.
+
 La evidencia de los dos primeros workstreams está en
 [`rc-0-rc-1-implementation-report.md`](rc-0-rc-1-implementation-report.md).
 El cierre de la fachada de firmas está en

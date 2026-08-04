@@ -146,7 +146,7 @@
     "recovered_pairs": 63232,
     "rejected_over_bound": 1,
     "maximum_symmetric_difference": 6,
-    "classification": "ValidatedPrimitive: end-to-end bounded recovery with unknown distance over F251; public API, multiset multiplicity and production-scale factorization remain pending"
+    "classification": "MaintainedPrimitive: public bounded set recovery over Fp251 with profile/wire/limits; v1 rejects multiset multiplicity"
   },
   "graphs": {
     "oracle": "SageMath 10.7 graphs.nauty_geng(8), one representative per isomorphism class",
