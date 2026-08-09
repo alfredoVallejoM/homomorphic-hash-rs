@@ -25,4 +25,20 @@ mod tests {
         assert_eq!(manifest.profile, CampaignProfile::Smoke);
         assert!(manifest.cells.len() >= 12);
     }
+
+    #[test]
+    fn scaling_manifests_share_the_same_complete_cell_inventory() {
+        let pilot = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/pilot-scaling-v1.json",
+        ))
+        .expect("pilot scaling manifest");
+        let publication = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/publication-informative-v1.json",
+        ))
+        .expect("publication scaling manifest");
+        assert_eq!(pilot.profile, CampaignProfile::Pilot);
+        assert_eq!(publication.profile, CampaignProfile::Publication);
+        assert_eq!(pilot.cells.len(), 44);
+        assert_eq!(publication.cells.len(), pilot.cells.len());
+    }
 }

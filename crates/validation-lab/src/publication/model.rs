@@ -34,6 +34,9 @@ pub struct BenchmarkManifest {
     pub maximum_batch_iterations: u64,
     pub bootstrap_resamples: usize,
     pub maximum_relative_ci_half_width: f64,
+    #[serde(default)]
+    pub cells_from: Option<String>,
+    #[serde(default)]
     pub cells: Vec<BenchmarkCell>,
 }
 
@@ -46,6 +49,8 @@ pub struct BenchmarkCell {
     pub scale_unit: String,
     #[serde(default = "default_payload_bytes")]
     pub payload_bytes: usize,
+    #[serde(default)]
+    pub dataset_size: Option<usize>,
     #[serde(default)]
     pub baseline_cell: Option<String>,
     #[serde(default)]

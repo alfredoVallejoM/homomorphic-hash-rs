@@ -55,6 +55,20 @@ pub fn quantile(values: &[f64], probability: f64) -> f64 {
     sorted[lower] + (sorted[upper] - sorted[lower]) * fraction
 }
 
+fn quantile_in_place(values: &mut [f64], probability: f64) -> f64 {
+    assert!(!values.is_empty());
+    let position = (values.len() - 1) as f64 * probability;
+    let lower = position.floor() as usize;
+    let upper = position.ceil() as usize;
+    values.select_nth_unstable_by(lower, f64::total_cmp);
+    let lower_value = values[lower];
+    if lower == upper {
+        return lower_value;
+    }
+    values.select_nth_unstable_by(upper, f64::total_cmp);
+    lower_value + (values[upper] - lower_value) * (position - lower as f64)
+}
+
 pub fn median(values: &[f64]) -> f64 {
     quantile(values, 0.5)
 }
@@ -89,7 +103,7 @@ pub fn bootstrap_quantile_ci(
                 sample.push(cluster[rng.index(cluster.len())]);
             }
         }
-        estimates.push(quantile(&sample, probability));
+        estimates.push(quantile_in_place(&mut sample, probability));
     }
     ConfidenceInterval {
         confidence_level: 0.95,
@@ -162,6 +176,8 @@ mod tests {
         assert_eq!(median(&[1.0, 3.0, 2.0]), 2.0);
         assert_eq!(median(&[1.0, 2.0, 3.0, 4.0]), 2.5);
         assert_eq!(mad(&[1.0, 2.0, 3.0, 100.0]), 1.0);
+        let mut values = [4.0, 1.0, 3.0, 2.0];
+        assert_eq!(quantile_in_place(&mut values, 0.5), 2.5);
     }
 
     #[test]

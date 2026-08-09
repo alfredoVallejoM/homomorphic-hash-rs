@@ -28,8 +28,29 @@ use super::{
 
 pub fn load_manifest(path: &Path) -> Result<BenchmarkManifest, String> {
     let bytes = fs::read(path).map_err(|error| format!("read {}: {error}", path.display()))?;
-    let manifest: BenchmarkManifest = serde_json::from_slice(&bytes)
+    let mut manifest: BenchmarkManifest = serde_json::from_slice(&bytes)
         .map_err(|error| format!("parse {}: {error}", path.display()))?;
+    if manifest.cells.is_empty() {
+        let reference = manifest
+            .cells_from
+            .as_deref()
+            .ok_or("benchmark manifest has neither cells nor cells_from")?;
+        if !valid_manifest_reference(reference) {
+            return Err("cells_from must be a sibling JSON filename".into());
+        }
+        let referenced_path = path
+            .parent()
+            .unwrap_or_else(|| Path::new("."))
+            .join(reference);
+        let referenced_bytes = fs::read(&referenced_path)
+            .map_err(|error| format!("read {}: {error}", referenced_path.display()))?;
+        let referenced: BenchmarkManifest = serde_json::from_slice(&referenced_bytes)
+            .map_err(|error| format!("parse {}: {error}", referenced_path.display()))?;
+        if referenced.cells.is_empty() {
+            return Err("cells_from may not reference another empty manifest".into());
+        }
+        manifest.cells = referenced.cells;
+    }
     validate_manifest(&manifest)?;
     Ok(manifest)
 }
@@ -262,6 +283,7 @@ fn validate_manifest(manifest: &BenchmarkManifest) -> Result<(), String> {
             || cell.scale_unit.is_empty()
             || cell.payload_bytes == 0
             || cell.payload_bytes > 1_048_576
+            || cell.dataset_size.is_some_and(|size| size < cell.scale)
             || cell.curve.is_some() != cell.strategy.is_some()
         {
             return Err(format!("invalid publication benchmark cell {}", cell.id));
@@ -285,24 +307,34 @@ fn valid_id(id: &str) -> bool {
             .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
 }
 
+fn valid_manifest_reference(reference: &str) -> bool {
+    reference.ends_with(".json")
+        && !reference.is_empty()
+        && reference
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
+}
+
 fn worker_seed(manifest: &BenchmarkManifest, cell: &BenchmarkCell, process_index: usize) -> u64 {
     let input_identity = cell.baseline_cell.as_deref().unwrap_or(&cell.id);
     derive_seed(manifest.seed, input_identity, process_index)
 }
 
 fn calibrate(manifest: &BenchmarkManifest, prepared: &mut PreparedOperation) -> u64 {
+    let maximum = prepared
+        .maximum_batch_iterations
+        .unwrap_or(manifest.maximum_batch_iterations)
+        .min(manifest.maximum_batch_iterations);
     let mut batch = 1_u64;
     loop {
         let start = Instant::now();
         black_box(run_batch(prepared, batch));
         if duration_ns(start.elapsed().as_nanos()) >= manifest.target_observation_ns
-            || batch >= manifest.maximum_batch_iterations
+            || batch >= maximum
         {
             return batch;
         }
-        batch = batch
-            .saturating_mul(2)
-            .min(manifest.maximum_batch_iterations);
+        batch = batch.saturating_mul(2).min(maximum);
     }
 }
 
@@ -758,6 +790,7 @@ mod tests {
             maximum_batch_iterations: 1_024,
             bootstrap_resamples: 100,
             maximum_relative_ci_half_width: 0.5,
+            cells_from: None,
             cells: vec![BenchmarkCell {
                 id: "field-gf2".into(),
                 family: "field".into(),
@@ -765,6 +798,7 @@ mod tests {
                 scale: 1,
                 scale_unit: "operations".into(),
                 payload_bytes: 16,
+                dataset_size: None,
                 baseline_cell: None,
                 curve: None,
                 strategy: None,

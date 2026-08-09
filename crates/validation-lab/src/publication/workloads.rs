@@ -28,15 +28,23 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "field.fp251.mul",
     "field.goldilocks.mul",
     "field.gf2-128.batch-detected",
+    "field.gf2-128.scalar-total",
+    "field.gf2-128.batch-detected-total",
     "signature.additive.build",
     "signature.sequence.build",
     "signature.bidirectional.build",
     "signature.multiset.build",
     "signature.multi-multiset-k2.build",
     "signature.multi-sequence-k2.build",
+    "signature.additive.build-total",
+    "signature.additive.merge-total",
     "delta.additive.end-to-end",
     "summary-tree.rebuild",
+    "summary-tree.local-edit-total",
+    "summary-tree.rebuild-edit-total",
     "database.rebuild",
+    "database.transaction-end-to-end",
+    "database.table-rebuild-total",
     "reconciliation.decode",
     "graph.fast-prepared",
     "graph.exact",
@@ -47,6 +55,7 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
 
 pub struct PreparedOperation {
     pub logical_units_per_action: u64,
+    pub maximum_batch_iterations: Option<u64>,
     pub run: Box<dyn FnMut() -> u64>,
 }
 
@@ -58,15 +67,23 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "field.fp251.mul" => field_fp251(seed),
         "field.goldilocks.mul" => field_goldilocks(seed),
         "field.gf2-128.batch-detected" => field_batch(cell.scale, seed),
+        "field.gf2-128.scalar-total" => field_scalar_total(cell.scale, seed),
+        "field.gf2-128.batch-detected-total" => field_batch_total(cell.scale, seed),
         "signature.additive.build" => signature_additive(cell, seed),
         "signature.sequence.build" => signature_sequence(cell, seed),
         "signature.bidirectional.build" => signature_bidirectional(cell, seed),
         "signature.multiset.build" => signature_multiset(cell, seed),
         "signature.multi-multiset-k2.build" => signature_multi_multiset(cell, seed),
         "signature.multi-sequence-k2.build" => signature_multi_sequence(cell, seed),
+        "signature.additive.build-total" => signature_additive_total(cell, seed),
+        "signature.additive.merge-total" => signature_additive_merge_total(cell, seed),
         "delta.additive.end-to-end" => delta_additive(cell, seed),
         "summary-tree.rebuild" => summary_tree_rebuild(cell, seed),
+        "summary-tree.local-edit-total" => summary_tree_local_edit_total(cell, seed),
+        "summary-tree.rebuild-edit-total" => summary_tree_rebuild_edit_total(cell, seed),
         "database.rebuild" => database_rebuild(cell, seed),
+        "database.transaction-end-to-end" => database_transaction_end_to_end(cell, seed),
+        "database.table-rebuild-total" => database_table_rebuild_total(cell, seed),
         "reconciliation.decode" => reconciliation_decode(cell),
         "graph.fast-prepared" => graph_fast(cell),
         "graph.exact" => graph_exact(cell),
@@ -139,11 +156,35 @@ fn field_batch(scale: usize, seed: u64) -> Result<PreparedOperation, String> {
         .map_err(debug_error)?;
     Ok(PreparedOperation {
         logical_units_per_action: scale as u64,
+        maximum_batch_iterations: None,
         run: Box::new(move || {
             engine.mul_into(&mut output, &lhs, &rhs).unwrap();
             checksum_field(output[scale - 1])
         }),
     })
+}
+
+fn field_scalar_total(scale: usize, seed: u64) -> Result<PreparedOperation, String> {
+    if scale == 0 {
+        return Err("scalar field scale must be positive".into());
+    }
+    let left = Gf2_128V1::from_polynomial_bytes_mod(&seed_bytes::<16>(seed));
+    let right = Gf2_128V1::from_polynomial_bytes_mod(&seed_bytes::<16>(seed.rotate_left(31)));
+    let lhs = vec![left; scale];
+    let rhs = vec![right; scale];
+    let mut output = vec![Gf2_128V1::ZERO; scale];
+    Ok(single_unit(move || {
+        for index in 0..scale {
+            output[index] = lhs[index] * rhs[index];
+        }
+        checksum_field(output[scale - 1])
+    }))
+}
+
+fn field_batch_total(scale: usize, seed: u64) -> Result<PreparedOperation, String> {
+    let mut operation = field_batch(scale, seed)?;
+    operation.logical_units_per_action = 1;
+    Ok(operation)
 }
 
 fn signature_additive(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
@@ -232,6 +273,30 @@ fn signature_multi_sequence(cell: &BenchmarkCell, seed: u64) -> Result<PreparedO
     }))
 }
 
+fn signature_additive_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let mut operation = signature_additive(cell, seed)?;
+    operation.logical_units_per_action = 1;
+    Ok(operation)
+}
+
+fn signature_additive_merge_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let midpoint = items.len() / 2;
+    let mut left = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+    left.absorb_many(items[..midpoint].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    let mut right = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+    right
+        .absorb_many(items[midpoint..].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    Ok(single_unit(move || {
+        checksum_field(left.combine(&right).unwrap().state())
+    }))
+}
+
 fn delta_additive(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
     let items = payloads(cell.scale, cell.payload_bytes, seed)?;
     let empty = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
@@ -260,6 +325,49 @@ fn summary_tree_rebuild(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOpera
     }))
 }
 
+fn summary_tree_local_edit_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let total = cell.dataset_size.unwrap_or(cell.scale);
+    if cell.scale > total || total < 4_096 {
+        return Err("invalid summary-tree edit/dataset scale".into());
+    }
+    let original = deterministic_bytes(total, seed);
+    let profile = FileChunkProfile::fixed(4_096).map_err(debug_error)?;
+    let mut tree = build_tree(profile, &original)?;
+    let start = (total - cell.scale) / 2;
+    let end = start + cell.scale;
+    let mut replacement = vec![0xa5; cell.scale];
+    let mut byte = 0xa5_u8;
+    Ok(single_unit(move || {
+        byte ^= 0xff;
+        replacement.fill(byte);
+        tree.replace_range(start..end, &replacement).unwrap();
+        checksum_field(tree.root().evaluation())
+    }))
+}
+
+fn summary_tree_rebuild_edit_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let total = cell.dataset_size.unwrap_or(cell.scale);
+    if cell.scale > total || total < 4_096 {
+        return Err("invalid summary-tree rebuild/dataset scale".into());
+    }
+    let mut bytes = deterministic_bytes(total, seed);
+    let profile = FileChunkProfile::fixed(4_096).map_err(debug_error)?;
+    let start = (total - cell.scale) / 2;
+    let end = start + cell.scale;
+    let mut byte = 0xa5_u8;
+    Ok(single_unit(move || {
+        byte ^= 0xff;
+        bytes[start..end].fill(byte);
+        checksum_field(build_tree(profile, &bytes).unwrap().root().evaluation())
+    }))
+}
+
 fn database_rebuild(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
     let schema = database_schema()?;
     let namespace = database_namespace();
@@ -272,6 +380,89 @@ fn database_rebuild(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation
         let mut candidate = rows.clone();
         if let Some(row) = candidate.first_mut() {
             *row = database_row(0, version);
+        }
+        let database = Database::from_rows(
+            namespace,
+            schema.clone(),
+            16,
+            binary_encoder(),
+            Gf2_128V1::ONE,
+            candidate,
+        )
+        .unwrap();
+        checksum_field(database.summary().unwrap().evaluation())
+    }))
+}
+
+fn database_transaction_end_to_end(
+    cell: &BenchmarkCell,
+    _seed: u64,
+) -> Result<PreparedOperation, String> {
+    let row_count = cell.dataset_size.unwrap_or(cell.scale);
+    if cell.scale > row_count || row_count == 0 {
+        return Err("invalid database mutation/dataset scale".into());
+    }
+    let schema = database_schema()?;
+    let namespace = database_namespace();
+    let rows = (0..row_count)
+        .map(|id| database_row(id as u64, 1))
+        .collect::<Vec<_>>();
+    let mut database = Database::from_rows(
+        namespace,
+        schema.clone(),
+        16,
+        binary_encoder(),
+        Gf2_128V1::ONE,
+        rows,
+    )
+    .map_err(debug_error)?;
+    let mut revision = 0_u64;
+    let mutation_count = cell.scale;
+    Ok(PreparedOperation {
+        logical_units_per_action: 1,
+        maximum_batch_iterations: Some(1),
+        run: Box::new(move || {
+            let mutations = (0..mutation_count)
+                .map(|id| homomorphic_hash_rs::RowMutation::Update {
+                    before: database_row(id as u64, revision + 1),
+                    after: database_row(id as u64, revision + 2),
+                })
+                .collect();
+            let transaction =
+                homomorphic_hash_rs::TransactionDelta::new(namespace, &schema, revision, mutations)
+                    .unwrap();
+            database
+                .apply_transaction(
+                    &transaction,
+                    homomorphic_hash_rs::DatabaseTransactionLimits::default(),
+                )
+                .unwrap();
+            revision += 1;
+            checksum_field(database.summary().unwrap().evaluation())
+        }),
+    })
+}
+
+fn database_table_rebuild_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let row_count = cell.dataset_size.unwrap_or(cell.scale);
+    if cell.scale > row_count || row_count == 0 {
+        return Err("invalid database rebuild/dataset scale".into());
+    }
+    let schema = database_schema()?;
+    let namespace = database_namespace();
+    let rows = (0..row_count)
+        .map(|id| database_row(id as u64, 1))
+        .collect::<Vec<_>>();
+    let mutation_count = cell.scale;
+    let mut version = seed;
+    Ok(single_unit(move || {
+        version = version.wrapping_add(1);
+        let mut candidate = rows.clone();
+        for (id, row) in candidate.iter_mut().enumerate().take(mutation_count) {
+            *row = database_row(id as u64, version);
         }
         let database = Database::from_rows(
             namespace,
@@ -378,6 +569,7 @@ fn tool_binary_manifest(generate: bool) -> Result<PreparedOperation, String> {
 fn single_unit(action: impl FnMut() -> u64 + 'static) -> PreparedOperation {
     PreparedOperation {
         logical_units_per_action: 1,
+        maximum_batch_iterations: None,
         run: Box::new(action),
     }
 }
@@ -385,6 +577,7 @@ fn single_unit(action: impl FnMut() -> u64 + 'static) -> PreparedOperation {
 fn scaled(scale: usize, action: impl FnMut() -> u64 + 'static) -> PreparedOperation {
     PreparedOperation {
         logical_units_per_action: scale.max(1) as u64,
+        maximum_batch_iterations: None,
         run: Box::new(action),
     }
 }
@@ -528,6 +721,7 @@ mod tests {
             scale,
             scale_unit: "units".into(),
             payload_bytes: 16,
+            dataset_size: None,
             baseline_cell: None,
             curve: None,
             strategy: None,
@@ -544,7 +738,11 @@ mod tests {
             } else {
                 16
             };
-            let mut prepared = prepare(&cell(operation, scale), 7)
+            let mut benchmark_cell = cell(operation, scale);
+            if operation.contains("summary-tree.") {
+                benchmark_cell.dataset_size = Some(4_096);
+            }
+            let mut prepared = prepare(&benchmark_cell, 7)
                 .unwrap_or_else(|error| panic!("prepare {operation}: {error}"));
             assert_ne!((prepared.run)(), u64::MAX, "{operation}");
             assert!(prepared.logical_units_per_action > 0);
