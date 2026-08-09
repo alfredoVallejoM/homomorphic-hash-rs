@@ -18,18 +18,20 @@ RC.0–RC.6 están implementados, integrados en `main` y fijados por el tag
 `internal-rc6-integrated`. La suite local completa, los corpus externos, el
 gate exhaustivo de grafos y la matriz remota x86-64/AArch64 están verdes.
 
-El proyecto aún no es una release pública ni una RC interna final. Su
-clasificación vigente es **candidato técnico para consumo interno
-condicionado**. RC.7–RC.10 están implementados y verdes localmente; el
-dictamen local RC.10 es `Conditional` hasta que el mismo commit limpio aporte
-todos los gates y evidencia x86-64/AArch64 en CI.
+El commit `fe528c4` es una **release candidate técnica apta para uso interno
+condicionado**. RC.7–RC.10 están implementados y el run remoto
+[`31331474150`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/31331474150)
+terminó con todos sus jobs verdes en x86-64 y AArch64. El gate RC.10 confirmó
+`ReadyForInternalUse`. La rama aún debe integrarse en `main`; esto no equivale
+a una publicación externa.
 
 La línea prioritaria de cierre son los hashes homomórficos —expuestos por la
 API como firmas algebraicas para dejar claro que **no son criptográficos**— y
 su aplicación a bases de datos. El sistema DB base ya existe: filas/schema,
 particiones, transacciones versionadas, log/replay y reconciliación acotada. Lo
-pendiente es integrar remotamente su endurecimiento, medición, consumidor
-persistente y dictamen RC.10; no reimplementar RC.5.
+pendiente es medirla con metodología publicable, conectarla a una base de
+datos real con persistencia/concurrencia y preparar la ingeniería de release;
+no reimplementar RC.5.
 
 La fotografía auditada, riesgos y orden siguiente están en
 [`current-status-and-next.md`](docs/microfield/current-status-and-next.md). El
@@ -145,6 +147,7 @@ cargo run -p microfield --features generator --bin microfield-gen -- \
 
 - [Estado actual y siguiente plan](docs/microfield/current-status-and-next.md)
 - [Plan maestro RC](docs/microfield/release-candidate-readiness-plan.md)
+- [Plan post-RC: benchmarks, DB real y publicación](docs/microfield/post-rc-benchmark-and-publication-plan.md)
 - [Contratos técnicos](docs/microfield/contracts.md)
 - [Arquitectura](docs/microfield/architecture.md)
 - [Auditoría de `unsafe`](docs/microfield/unsafe-audit.md)

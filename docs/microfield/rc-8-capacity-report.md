@@ -2,8 +2,9 @@
 
 Fecha: 9 de agosto de 2026.
 
-Estado: implementación y validación local completas; evidencia remota x86-64
-y AArch64 pendiente de ejecutar en GitHub antes de declarar RC.8 integrado.
+Estado: implementación completa y gate remoto verde en x86-64/AArch64 para el
+commit `fe528c4`, run
+[`31331474150`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/31331474150).
 
 ## Alcance ejecutable
 
@@ -73,6 +74,10 @@ cargo run --release -p microfield-validation-lab -- rc8-capacity …  37/37 PASS
 cargo run --release -p microfield-validation-lab -- rc8-compare …   37/37 PASS
 ```
 
-RC.8 se declarará integrado únicamente después de que ambas matrices remotas
-publiquen artifacts verdes. RC.9 y RC.10 ya están implementados localmente; el
-siguiente paso es publicar el commit y ejecutar el gate remoto conjunto.
+Ambas matrices remotas publicaron artifacts verdes y RC.10 consumió esos
+informes. Esta evidencia es suficiente para capacidad y regresión internas,
+pero no es todavía un benchmark publicable: faltan muestras crudas, intervalos
+de confianza, repeticiones independientes, hardware dedicado/controlado,
+curvas de escala más amplias y un vertical DB con I/O y concurrencia reales.
+Ese trabajo se define en
+[`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md).

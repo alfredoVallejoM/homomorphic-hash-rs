@@ -2,12 +2,12 @@
 
 Fecha inicial: 4 de agosto de 2026. Revisión de estado: 9 de agosto de 2026.
 
-Estado: RC.0–RC.6 implementados, integrados en `main` y fijados por el tag
-`internal-rc6-integrated`. RC.7–RC.10 están implementados y validados
-localmente en la rama RC. El dictamen local es `Conditional` porque un árbol
-de trabajo no puede aportar commit limpio ni la evidencia AArch64; la
-integración remota del mismo commit es el gate que puede emitir
-`ReadyForInternalUse`.
+Estado: RC.0–RC.10 implementados. RC.0–RC.6 están integrados en `main` y
+fijados por `internal-rc6-integrated`; RC.7–RC.10 están publicados en
+`rc/rc7-correctness`. El commit limpio `fe528c4` obtuvo
+`ReadyForInternalUse` en el run remoto
+[`31331474150`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/31331474150).
+Solo queda integrar esa rama en `main` para cerrar el checkpoint de repositorio.
 
 El gate transversal de integración remota descrito en
 [`github-integration-and-remote-validation-plan.md`](github-integration-and-remote-validation-plan.md)
@@ -168,7 +168,7 @@ wire schema
 límites aplicables
 ```
 
-Trabajo pendiente:
+Trabajo entregado:
 
 - feature pública `signatures` independiente de `graph`;
 - feature `dynamic-signatures` dependiente de campos runtime;
@@ -358,7 +358,7 @@ del DAG deriva de bytes canónicos exactos.
 
 Evidencia: `docs/microfield/rc-6-graph-dag-report.md`.
 
-### RC.7 — validación exhaustiva y adversarial — implementado localmente
+### RC.7 — validación exhaustiva y adversarial — validado remotamente
 
 Entregables:
 
@@ -372,12 +372,12 @@ Entregables:
 Gate: cero divergencias no clasificadas, cero mutaciones parciales y cero
 panics ante input externo dentro de los límites publicados.
 
-Evidencia local: `validation/rc/correctness-matrix-v1.json`, property tests de
+Evidencia: `validation/rc/correctness-matrix-v1.json`, property tests de
 campos y protocolos, tres targets de fuzz con corpus reproducible, smoke de
-15.000 ejecuciones sin divergencias y campaña semanal versionada. El cierre de
-integración exige el run remoto verde.
+15.000 ejecuciones sin divergencias y campaña semanal versionada. El gate
+remoto está verde en `fe528c4`.
 
-### RC.8 — rendimiento y capacidad — implementado localmente
+### RC.8 — rendimiento y capacidad — validado remotamente
 
 Escenarios:
 
@@ -407,9 +407,9 @@ decisión documentada.
 Evidencia: [`rc-8-capacity-report.md`](rc-8-capacity-report.md). El manifest
 congela 37 rutas y dos curvas de punto de equilibrio; `SummaryEditPolicy` y
 `DatabaseApplyPolicy` convierten los ceilings medidos en fallback ejecutable.
-El cierre de integración exige artifacts verdes en x86-64 y AArch64.
+Los artifacts de x86-64 y AArch64 están verdes y fueron consumidos por RC.10.
 
-### RC.9 — interoperabilidad y operabilidad — implementado localmente
+### RC.9 — interoperabilidad y operabilidad — validado remotamente
 
 Entregables:
 
@@ -426,11 +426,11 @@ reconstruye resultados sin tocar módulos privados.
 Evidencia: [`rc-9-integration-report.md`](rc-9-integration-report.md) y
 [`rc-9-operations-runbook.md`](rc-9-operations-runbook.md). El consumidor
 independiente también migra schema, rechaza corrupción/drift y conserva
-artifacts en CI. El cierre de integración exige ambas arquitecturas remotas.
+artifacts en CI. Ambas arquitecturas remotas están verdes.
 
-### RC.10 — artefacto go/no-go — implementado localmente
+### RC.10 — artefacto go/no-go — `ReadyForInternalUse`
 
-Se generará un resultado versionado con:
+Se genera un resultado versionado con:
 
 ```text
 commit

@@ -2,9 +2,10 @@
 
 Fecha: 9 de agosto de 2026.
 
-Estado: implementación y validación local completas. El dictamen local es
-`Conditional`; `ReadyForInternalUse` solo puede obtenerse en CI desde el mismo
-commit limpio, con RC.7–RC.9 verdes y evidencia x86-64/AArch64.
+Estado: cerrado. El dictamen remoto del commit limpio `fe528c4` es
+`ReadyForInternalUse`; el run
+[`31331474150`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/31331474150)
+terminó con `RC.10 reproducible go-no-go` y `Required gates` verdes.
 
 ## Contrato
 
@@ -32,7 +33,7 @@ La precedencia es fail-closed:
 La herramienta rechaza schemas desconocidos y más de un informe para la misma
 arquitectura. La falta de x86-64 o AArch64 no se interpreta como éxito.
 
-## Resultado local
+## Resultado local y remoto
 
 La ejecución local verificó la matriz RC.7, el inventario RC.9, los SLO RC.8
 y el consumidor RC.9 disponibles en x86-64. El resultado esperado y obtenido
@@ -43,8 +44,10 @@ es `Conditional` porque concurren condiciones deliberadamente no simuladas:
 - no existe un runner AArch64 local equivalente;
 - los gates requeridos de GitHub todavía no pertenecen al commit publicado.
 
-Esto no es un fallo de corrección. Es la forma prevista de impedir que una
-ejecución parcial se presente como cierre RC.
+Esto no era un fallo de corrección. Era la forma prevista de impedir que una
+ejecución parcial se presentase como cierre RC. Tras publicar el commit limpio,
+CI aportó x86-64, AArch64 y todos los gates requeridos; la decisión pasó a
+`ReadyForInternalUse`.
 
 ## Gate remoto
 
@@ -59,6 +62,10 @@ RC.9 de x86-64 y AArch64, genera `rc10-decision.json` y exige literalmente:
 
 El artifact resultante es la autoridad para ese commit. Si un gate previo
 falla, el job no puede crear una aprobación independiente.
+
+El artifact `rc10-decision` del run verde liga el resultado a `fe528c4`. La
+integración en `main`, el tag y cualquier publicación requieren acciones
+separadas; no cambian retroactivamente la evidencia de este commit.
 
 ## Alcance del resultado
 

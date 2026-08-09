@@ -2,8 +2,9 @@
 
 Fecha: 9 de agosto de 2026.
 
-Estado: implementación y validación local completas; matriz remota x86-64 y
-AArch64 pendiente antes de declarar integración.
+Estado: implementación completa y matriz remota x86-64/AArch64 verde para el
+commit `fe528c4`, run
+[`31331474150`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/31331474150).
 
 ## Consumidor independiente
 
@@ -72,6 +73,6 @@ bash tools/audit_rc_package.sh
     root inventory 100 files; microfield package 1.3 MiB; PASS
 ```
 
-El gate RC.9 se considerará integrado cuando ambas arquitecturas remotas estén
-verdes. RC.10 ya está implementado localmente y consume estos artifacts; el
-siguiente paso es publicar el commit y ejecutar el gate remoto conjunto.
+Ambas arquitecturas están verdes y RC.10 consumió sus artifacts. El siguiente
+vertical de producto es una integración DB real: persistencia durable,
+concurrencia, mapeo LSN/revisión, recuperación y medición end-to-end.

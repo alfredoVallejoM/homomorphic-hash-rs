@@ -10,9 +10,9 @@ inventario ejecutable
 
 ## Veredicto ejecutivo
 
-El proyecto es un **candidato técnico integrado para consumo interno
-condicionado**. No es todavía una release candidate final ni un producto listo
-para publicación externa.
+El commit `fe528c4` es una **release candidate técnica apta para consumo
+interno condicionado**. Todavía no está integrado en `main` ni preparado para
+publicación externa.
 
 La implementación funcional hasta RC.6 está integrada en `main`: campos
 finitos, generación estática y contextos runtime, firmas homomórficas,
@@ -20,13 +20,13 @@ snapshots, deltas, árbol de resúmenes, base de datos, reconciliación acotada,
 pipeline de grafos, canonización exacta presupuestada y DAG canónico. La
 corrección local y remota es fuerte y reproducible.
 
-Lo pendiente ya no es completar el núcleo RC.0–RC.6. RC.7–RC.10 están
-implementados y verdes localmente: inventario de corrección, property tests,
-fuzzing continuo, 37 SLO, regresión máxima del 3 %, break-even, fallback
-ejecutable, consumidor externo, restart/migración, runbook y dictamen
-reproducible. El resultado local RC.10 es correctamente `Conditional`: falta
-publicar el commit limpio y reproducir toda la evidencia en runners remotos
-x86-64/AArch64.
+RC.7–RC.10 están implementados y verdes local y remotamente: inventario de
+corrección, property tests, fuzzing continuo, 37 SLO, regresión máxima del 3
+%, break-even, fallback ejecutable, consumidor externo, restart/migración,
+runbook y dictamen reproducible. El run
+[`31331474150`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/31331474150)
+validó el mismo commit limpio en x86-64/AArch64 y RC.10 emitió
+`ReadyForInternalUse`.
 
 ### Línea de producto que queda por cerrar
 
@@ -41,29 +41,28 @@ versionadas `MFTX`, log/replay `MFTL`, firmas por partición y reconciliación
 acotada `MFRS`. Lo que quedó a medio cerrar es la maduración conjunta de estas
 firmas y protocolos:
 
-- integrar remotamente el fuzzing/property testing ya implementado para
-  firmas, snapshots, deltas, transacciones, logs y reconciliación;
-- integrar remotamente los SLO ya implementados de ingestión, merge,
-  apply/replay, rebuild y reconciliación;
-- integrar remotamente el consumidor externo ya implementado con
-  almacenamiento, restart, corrupción, migración y reconstrucción;
+- integrar la rama RC validada en `main` y fijar un checkpoint recuperable;
+- elevar RC.8 desde gate interno a benchmark estadístico publicable;
+- validar el consumidor sobre una base de datos real con I/O y concurrencia;
 - aplicar en un motor real el mapeo LSN/revisión fijado por el runbook;
 - decisión de congelar la reconciliación v1 como conjuntos o diseñar una v2
   para multiplicidad;
-- runbook, observabilidad y artefacto final de go/no-go.
+- completar licencia, seguridad, semver, advisories/SBOM y packaging externo.
 
-Por tanto, RC.7–RC.10 deben priorizar el cierre del producto de firmas
-homomórficas y su vertical de base de datos. Grafos permanece como otro
-consumidor importante, no como sustituto de esa línea de producto.
+Por tanto, el trabajo post-RC debe priorizar evidencia publicable y una
+integración de base de datos real para las firmas homomórficas. Grafos
+permanece como otro consumidor importante, no como sustituto de esa línea de
+producto.
 
 ## Base auditada
 
 | Elemento | Estado comprobado |
 |---|---|
-| Candidato de código | `2f1f1a858adaffd0bde5466dc7e47b3b5064652e` |
+| Candidato de código | `fe528c4f663aad9a2a07ab8c1f44b6e6e13a916a` |
 | Integración en `main` | `d0f4fcdb0cc0c0e4e18b12b0b33ed37389c43b47`, PR [#1](https://github.com/alfredoVallejoM/homomorphic-hash-rs/pull/1) |
 | Checkpoint | tag anotado `internal-rc6-integrated` sobre el merge |
 | Rama de trabajo RC | `rc/rc7-correctness`, creada desde la línea base integrada |
+| Validación RC.10 | run `31331474150`, x86-64/AArch64, `ReadyForInternalUse` |
 | Workspace | cuatro paquetes Cargo; dos productos, un laboratorio privado y un fixture generado |
 | Tamaño tras esta revisión | 492 ficheros, aproximadamente 109 MiB; 104 MiB corresponden a `data/` |
 | Implementación Rust | 271 ficheros y aproximadamente 84.600 líneas |
@@ -151,12 +150,10 @@ deterministas, RC de firmas y grafos y F6.V reproducible en x86-64 y AArch64.
 
 ## Riesgos y deuda abierta
 
-### Bloquean la decisión RC interna
+### Bloquean la integración del checkpoint
 
-1. RC.7–RC.10 aún no tienen evidencia remota del mismo commit limpio en
-   x86-64 y AArch64; localmente sus gates están verdes.
-2. El artifact RC.10 local es necesariamente `Conditional`. El job remoto ya
-   está definido y debe emitir `ReadyForInternalUse` para cerrar la RC.
+1. La rama validada aún no se ha integrado en `main`.
+2. Falta el run post-merge y un tag anotado sobre el merge verde.
 
 ### Bloquean publicación externa, no experimentación interna
 
@@ -194,58 +191,47 @@ deterministas, RC de firmas y grafos y F6.V reproducible en x86-64 y AArch64.
 
 ## Siguiente orden de trabajo
 
-### 0. Fijar esta nueva línea base
+### 0. Integrar y fijar esta nueva línea base
 
-- continuar desde `main` y conservar el tag `internal-rc6-integrated` como
-  checkpoint histórico;
-- revisar y versionar esta actualización documental;
-- mantener verde el job agregado `Required gates`.
+- abrir una PR de `rc/rc7-correctness` a `main`;
+- hacer merge, ejecutar CI post-merge y crear un tag anotado sobre el merge
+  verde;
+- conservar `internal-rc6-integrated` como checkpoint histórico.
 
-### 1. RC.7 — robustez adversarial — implementación local completa
+### 1. Benchmark publicable
 
-- crear targets de fuzz para manifests, encoding, todos los wires y parsers;
-- añadir campañas property/diferenciales de deltas, journals, DB, árbol y DAG;
-- persistir cada fallo mínimo como fixture;
-- definir ventanas nightly y límites de memoria/tiempo reproducibles.
+- conservar RC.8 como gate rápido de regresión interna;
+- añadir muestras crudas, repeticiones independientes, intervalos de
+  confianza, hardware controlado y curvas de escala amplias;
+- separar setup/generación/aplicación/persistencia y generar tablas/gráficas
+  reproducibles.
 
-Salida local obtenida: cero divergencias no clasificadas, panics de input o
-mutaciones parciales en la ventana ejecutada. Pendiente: gate remoto.
+Salida requerida: evidencia defendible para presentación, no solo un gate de
+CI sobre runners compartidos.
 
-### 2. RC.8 — capacidad y SLO — implementación local completa
+### 2. Base de datos real
 
-- congelar workloads internos representativos;
-- medir aplicación y generación de deltas por separado;
-- publicar p50/p95/p99, throughput, memoria, allocations y bytes persistidos;
-- fijar el punto de fallback incremental/rebuild y ceilings exactos.
+- implementar el adapter LSN/revisión y una persistencia WAL reproducible;
+- probar concurrencia, crash/restart, migración y rebuild autoritativo;
+- medir transacción, WAL, fsync, replay, reconciliación y fallback end-to-end.
 
-Salida local obtenida: 37/37 SLO, dos curvas de break-even y fallback
-ejecutable. Pendiente: artifacts remotos x86-64/AArch64 y baseline de PR.
+Salida requerida: equivalencia exacta tras restart y curvas de capacidad con
+I/O real.
 
-### 3. RC.9 — interoperabilidad y operabilidad — implementación local completa
+### 3. Publicación externa
 
-- construir un fixture consumidor end-to-end para firmas, archivo, DB,
-  reconciliación y DAG;
-- probar persistencia, restart, corrupción, schema drift y reconstrucción;
-- escribir runbook, observabilidad mínima e inventario de dependencias;
-- decidir defaults, alcance del legado y estrategia de datasets/packaging.
+- elegir licencia y añadir políticas de seguridad/contribución/changelog;
+- fijar semver, MSRV y compatibilidad de wires;
+- añadir advisories/SBOM y preparar una fuente publicable para `microfield`;
+- verificar archives desde un consumidor limpio.
 
-Salida local obtenida: consumo limpio, persistente y migrable sin módulos
-privados ni conocimiento de representaciones internas. Pendiente: matriz
-remota x86-64/AArch64.
+Salida requerida: package audit completo y claims públicos acotados.
 
-### 4. RC.10 — decisión reproducible — implementación local completa
+### Disciplina
 
-- artifact versionado con commit, toolchains, hardware, matrices, corpus,
-  gates, SLO y limitaciones;
-- precedencia fail-closed con salidas exactas `ReadyForInternalUse`,
-  `Conditional` o `NotReady`;
-- job requerido que ensambla RC.7–RC.9 y exige evidencia de ambas
-  arquitecturas desde un checkout limpio.
-
-Salida local obtenida: `Conditional`, por ausencia deliberada de AArch64,
-commit limpio y estado agregado de CI. Pendiente: publicar la rama y obtener
-el artifact remoto `ReadyForInternalUse`. Solo después se abrirá una fase
-separada de licencia, semver y publicación.
+Cada fase terminará con código/documentación, validación local, commit, push y
+CI remoto verde. El detalle normativo vive en
+[`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md).
 
 ## Autoridad documental
 
@@ -255,8 +241,10 @@ separada de licencia, semver y publicación.
 3. [`contracts.md`](contracts.md), [`architecture.md`](architecture.md), los
    ADR y los schemas versionados definen contratos técnicos.
 4. [`release-candidate-readiness-plan.md`](release-candidate-readiness-plan.md)
-   define RC.7–RC.10 implementados y pendientes de integración remota conjunta.
-5. Los informes `*-final-report.md` y planes de fases cerradas son evidencia
+   registra RC.7–RC.10 y su dictamen remoto.
+5. [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md)
+   define el backlog activo posterior a la RC interna.
+6. Los informes `*-final-report.md` y planes de fases cerradas son evidencia
    histórica; sus cifras y frases de “siguiente paso” conservan el contexto de
    su fecha.
 
