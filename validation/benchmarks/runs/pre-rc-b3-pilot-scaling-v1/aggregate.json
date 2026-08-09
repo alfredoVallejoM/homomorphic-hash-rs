@@ -1,0 +1,1830 @@
+{
+  "schema": "microfield-publication-aggregate-v1",
+  "campaign_id": "pre-rc-b3-pilot-scaling-v1",
+  "profile": "pilot",
+  "environment_classification": "informative",
+  "cells": [
+    {
+      "id": "field-scalar-1",
+      "family": "finite-field",
+      "operation": "field.gf2-128.scalar-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 225.88037109375,
+      "p95_ns_per_unit": 351.61452636718747,
+      "p99_ns_per_unit": 374.2559960937498,
+      "mad_ns_per_unit": 10.615966796875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 220.6229248046875,
+        "upper": 243.3914794921875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 266.8083416748046,
+        "upper": 362.8935546875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 332.5975439453125,
+        "upper": 405.115234375
+      },
+      "relative_median_ci_half_width": 0.050399586686640595,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-detected-1",
+      "family": "finite-field",
+      "operation": "field.gf2-128.batch-detected-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 27.4110107421875,
+      "p95_ns_per_unit": 67.21005859375,
+      "p99_ns_per_unit": 70.65021606445309,
+      "mad_ns_per_unit": 0.1521148681640625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 27.298446655273438,
+        "upper": 27.45098876953125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 27.782379150390625,
+        "upper": 68.8568115234375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 28.2774658203125,
+        "upper": 147.707275390625
+      },
+      "relative_median_ci_half_width": 0.0027824970719346606,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-scalar-8",
+      "family": "finite-field",
+      "operation": "field.gf2-128.scalar-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1629.404296875,
+      "p95_ns_per_unit": 2351.6177734374996,
+      "p99_ns_per_unit": 2702.2153515624996,
+      "mad_ns_per_unit": 73.8779296875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1506.09375,
+        "upper": 1716.65625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1746.6597387695313,
+        "upper": 2704.014257812499
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1907.01171875,
+        "upper": 2787.130859375
+      },
+      "relative_median_ci_half_width": 0.0646133376485607,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-detected-8",
+      "family": "finite-field",
+      "operation": "field.gf2-128.batch-detected-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 79.35528564453125,
+      "p95_ns_per_unit": 116.14413452148438,
+      "p99_ns_per_unit": 120.94637207031246,
+      "mad_ns_per_unit": 0.5960693359375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 79.00897216796875,
+        "upper": 97.6507568359375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 86.258056640625,
+        "upper": 120.15983276367177
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 115.94369262695312,
+        "upper": 129.929443359375
+      },
+      "relative_median_ci_half_width": 0.11745773779628152,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-scalar-64",
+      "family": "finite-field",
+      "operation": "field.gf2-128.scalar-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 12493.609375,
+      "p95_ns_per_unit": 20116.9640625,
+      "p99_ns_per_unit": 20305.4946875,
+      "mad_ns_per_unit": 874.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 12224.796875,
+        "upper": 15298.359375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16354.976015625001,
+        "upper": 20222.09375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 17925.8125,
+        "upper": 20388.25
+      },
+      "relative_median_ci_half_width": 0.1230053865038501,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-detected-64",
+      "family": "finite-field",
+      "operation": "field.gf2-128.batch-detected-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 483.49755859375,
+      "p95_ns_per_unit": 608.76865234375,
+      "p99_ns_per_unit": 615.817724609375,
+      "mad_ns_per_unit": 1.917724609375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 482.718994140625,
+        "upper": 486.3564453125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 492.4345703125,
+        "upper": 614.87890625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 528.6001610107422,
+        "upper": 617.4638671875
+      },
+      "relative_median_ci_half_width": 0.003761602418897943,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-scalar-512",
+      "family": "finite-field",
+      "operation": "field.gf2-128.scalar-total",
+      "scale": 512,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 101200.375,
+      "p95_ns_per_unit": 177017.8875,
+      "p99_ns_per_unit": 179415.26499999998,
+      "mad_ns_per_unit": 13888.625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 93428.4375,
+        "upper": 123864.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 123390.06874999998,
+        "upper": 178165.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 125637.57625,
+        "upper": 276421.25
+      },
+      "relative_median_ci_half_width": 0.1503727752985105,
+      "precision_met": false,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "field-detected-512",
+      "family": "finite-field",
+      "operation": "field.gf2-128.batch-detected-total",
+      "scale": 512,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 3702.888671875,
+      "p95_ns_per_unit": 5156.802539062499,
+      "p99_ns_per_unit": 8934.064140624998,
+      "mad_ns_per_unit": 33.99609375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3686.8515625,
+        "upper": 4566.6875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4586.88828125,
+        "upper": 8919.17368164062
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4629.569296875,
+        "upper": 9084.3203125
+      },
+      "relative_median_ci_half_width": 0.11880399540266019,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-scalar-4096",
+      "family": "finite-field",
+      "operation": "field.gf2-128.scalar-total",
+      "scale": 4096,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 836132.0,
+      "p95_ns_per_unit": 1030639.1499999999,
+      "p99_ns_per_unit": 1283419.3599999996,
+      "mad_ns_per_unit": 44705.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 781155.0,
+        "upper": 872745.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 892118.72375,
+        "upper": 1265092.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 907239.0,
+        "upper": 1308299.0
+      },
+      "relative_median_ci_half_width": 0.054770359225576826,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-detected-4096",
+      "family": "finite-field",
+      "operation": "field.gf2-128.batch-detected-total",
+      "scale": 4096,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 31662.6875,
+      "p95_ns_per_unit": 46001.1875,
+      "p99_ns_per_unit": 52910.1475,
+      "mad_ns_per_unit": 235.75,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 30544.3640625,
+        "upper": 37913.65625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 32551.518749999992,
+        "upper": 50437.946874999914
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 45913.24875,
+        "upper": 116528.875
+      },
+      "relative_median_ci_half_width": 0.11637186810974273,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-scalar-65536",
+      "family": "finite-field",
+      "operation": "field.gf2-128.scalar-total",
+      "scale": 65536,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 14161072.0,
+      "p95_ns_per_unit": 16585834.0,
+      "p99_ns_per_unit": 27939173.339999937,
+      "mad_ns_per_unit": 1106177.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 13081517.075000001,
+        "upper": 14767187.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 14784924.2775,
+        "upper": 24494932.43624992
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 15906807.949999996,
+        "upper": 43798951.0
+      },
+      "relative_median_ci_half_width": 0.05951773725181254,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "field-detected-65536",
+      "family": "finite-field",
+      "operation": "field.gf2-128.batch-detected-total",
+      "scale": 65536,
+      "scale_unit": "field-elements",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 492176.5,
+      "p95_ns_per_unit": 570337.3499999999,
+      "p99_ns_per_unit": 590453.2899999999,
+      "mad_ns_per_unit": 31393.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 466878.5,
+        "upper": 513112.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 517907.52875,
+        "upper": 584854.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 545923.0,
+        "upper": 634056.0
+      },
+      "relative_median_ci_half_width": 0.046968922734019196,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-rebuild-8",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.build-total",
+      "scale": 8,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1871.37109375,
+      "p95_ns_per_unit": 2019.5857421875,
+      "p99_ns_per_unit": 2188.3939843749995,
+      "mad_ns_per_unit": 8.0078125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1869.7012939453125,
+        "upper": 1885.263671875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1887.9439184570313,
+        "upper": 2110.3231445312485
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1944.6394999999998,
+        "upper": 2349.421875
+      },
+      "relative_median_ci_half_width": 0.004158014939330496,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-merge-8",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.merge-total",
+      "scale": 8,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 5.467437744140625,
+      "p95_ns_per_unit": 7.247977828979492,
+      "p99_ns_per_unit": 7.4583879089355465,
+      "mad_ns_per_unit": 0.057155609130859375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.446067810058594,
+        "upper": 6.3651123046875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6.3856353759765625,
+        "upper": 7.461586761474608
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6.9233396148681585,
+        "upper": 7.5625
+      },
+      "relative_median_ci_half_width": 0.08404709277337755,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-rebuild-64",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.build-total",
+      "scale": 64,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 11976.6171875,
+      "p95_ns_per_unit": 12613.2125,
+      "p99_ns_per_unit": 13381.218906249995,
+      "mad_ns_per_unit": 81.078125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11913.046875,
+        "upper": 12262.734375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 12366.5,
+        "upper": 13046.921875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 12483.388125,
+        "upper": 13927.296875
+      },
+      "relative_median_ci_half_width": 0.014598759170701765,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-merge-64",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.merge-total",
+      "scale": 64,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 5.926017761230469,
+      "p95_ns_per_unit": 8.259417724609374,
+      "p99_ns_per_unit": 8.503489837646482,
+      "mad_ns_per_unit": 0.0646514892578125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.919368743896484,
+        "upper": 8.181732177734375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 8.207839660644531,
+        "upper": 8.4052734375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 8.248825073242188,
+        "upper": 8.654449462890625
+      },
+      "relative_median_ci_half_width": 0.19088395656176174,
+      "precision_met": false,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "signature-rebuild-512",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.build-total",
+      "scale": 512,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 92054.125,
+      "p95_ns_per_unit": 97262.58125,
+      "p99_ns_per_unit": 107902.41249999999,
+      "mad_ns_per_unit": 795.8125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 91585.0,
+        "upper": 94103.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 93396.875,
+        "upper": 106013.96874999994
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 97226.4535,
+        "upper": 117420.0
+      },
+      "relative_median_ci_half_width": 0.013676736376561072,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-merge-512",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.merge-total",
+      "scale": 512,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 5.451145172119141,
+      "p95_ns_per_unit": 7.042743301391596,
+      "p99_ns_per_unit": 7.6031449890136695,
+      "mad_ns_per_unit": 0.026195526123046875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.44384765625,
+        "upper": 5.473907470703125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.669586563110351,
+        "upper": 7.484041595458976
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6.2689292907714735,
+        "upper": 8.441452026367188
+      },
+      "relative_median_ci_half_width": 0.002757201790081771,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-rebuild-4096",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.build-total",
+      "scale": 4096,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 735298.0,
+      "p95_ns_per_unit": 784799.75,
+      "p99_ns_per_unit": 833536.5499999998,
+      "mad_ns_per_unit": 5167.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 730698.0,
+        "upper": 739433.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 748712.2,
+        "upper": 811299.1999999995
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 768457.6179999998,
+        "upper": 926680.0
+      },
+      "relative_median_ci_half_width": 0.005939768638021591,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-merge-4096",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.merge-total",
+      "scale": 4096,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 5.449211120605469,
+      "p95_ns_per_unit": 7.403564453124996,
+      "p99_ns_per_unit": 33.70879486083981,
+      "mad_ns_per_unit": 0.021678924560546875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.442222595214844,
+        "upper": 5.456947326660156
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.6317291259765625,
+        "upper": 33.85207977294916
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6.230842590332031,
+        "upper": 61.78356170654297
+      },
+      "relative_median_ci_half_width": 0.001351088361178821,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-rebuild-65536",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.build-total",
+      "scale": 65536,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 11776942.5,
+      "p95_ns_per_unit": 12373958.55,
+      "p99_ns_per_unit": 12408363.29,
+      "mad_ns_per_unit": 66530.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11714689.0,
+        "upper": 11880494.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11900446.92375,
+        "upper": 12409798.45
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 12037582.0,
+        "upper": 12573110.0
+      },
+      "relative_median_ci_half_width": 0.007039390741697176,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "signature-merge-65536",
+      "family": "homomorphic-signature",
+      "operation": "signature.additive.merge-total",
+      "scale": 65536,
+      "scale_unit": "items",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 5.3750457763671875,
+      "p95_ns_per_unit": 5.528475570678709,
+      "p99_ns_per_unit": 6.4008719635009745,
+      "mad_ns_per_unit": 0.02099609375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.369804382324219,
+        "upper": 5.3858184814453125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.4176483154296875,
+        "upper": 6.184392433166481
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.578650447845457,
+        "upper": 6.7963409423828125
+      },
+      "relative_median_ci_half_width": 0.001489670952339046,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-rebuild-1",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-edit-total",
+      "scale": 1,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 3786597.0,
+      "p95_ns_per_unit": 3953399.1,
+      "p99_ns_per_unit": 4505364.899999996,
+      "mad_ns_per_unit": 4008.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3785192.1375,
+        "upper": 3790902.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3838312.9499999997,
+        "upper": 4208075.249999998
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3956214.01,
+        "upper": 4928389.0
+      },
+      "relative_median_ci_half_width": 0.0007539569830113706,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-incremental-1",
+      "family": "summary-tree",
+      "operation": "summary-tree.local-edit-total",
+      "scale": 1,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 65757.0625,
+      "p95_ns_per_unit": 70113.26249999997,
+      "p99_ns_per_unit": 83291.05374999999,
+      "mad_ns_per_unit": 405.3125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 65614.125,
+        "upper": 66029.375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 66728.79781249998,
+        "upper": 83023.75
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 70044.75249999999,
+        "upper": 319058.25
+      },
+      "relative_median_ci_half_width": 0.0031574555204621556,
+      "precision_met": true,
+      "allocation_count_median": 144.0,
+      "allocated_bytes_median": 110888.0,
+      "peak_allocated_bytes_median": 12709.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-rebuild-64",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-edit-total",
+      "scale": 64,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 3785470.0,
+      "p95_ns_per_unit": 3870782.65,
+      "p99_ns_per_unit": 4573890.799999996,
+      "mad_ns_per_unit": 3378.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3783935.5,
+        "upper": 3787439.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3810070.0,
+        "upper": 4204511.299999993
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3870164.13,
+        "upper": 5098799.0
+      },
+      "relative_median_ci_half_width": 0.0004628223179684425,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-incremental-64",
+      "family": "summary-tree",
+      "operation": "summary-tree.local-edit-total",
+      "scale": 64,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 130491.5,
+      "p95_ns_per_unit": 469775.325,
+      "p99_ns_per_unit": 471993.95,
+      "mad_ns_per_unit": 975.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 129994.25,
+        "upper": 130798.375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 131762.78749999998,
+        "upper": 471822.74375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 137094.02999999997,
+        "upper": 508323.0
+      },
+      "relative_median_ci_half_width": 0.003081139384557615,
+      "precision_met": true,
+      "allocation_count_median": 84.0,
+      "allocated_bytes_median": 109480.0,
+      "peak_allocated_bytes_median": 17021.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-rebuild-4096",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-edit-total",
+      "scale": 4096,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 3785310.5,
+      "p95_ns_per_unit": 3914017.55,
+      "p99_ns_per_unit": 7516307.239999964,
+      "mad_ns_per_unit": 3253.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3784404.45,
+        "upper": 3790671.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3842885.22125,
+        "upper": 7674732.199999932
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3904628.491,
+        "upper": 14141429.0
+      },
+      "relative_median_ci_half_width": 0.000827745834852889,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-incremental-4096",
+      "family": "summary-tree",
+      "operation": "summary-tree.local-edit-total",
+      "scale": 4096,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 130341.375,
+      "p95_ns_per_unit": 137607.92499999996,
+      "p99_ns_per_unit": 159501.12499999983,
+      "mad_ns_per_unit": 774.875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 130060.25,
+        "upper": 130597.25
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 131225.5,
+        "upper": 150340.25
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 137507.38499999998,
+        "upper": 250680.5
+      },
+      "relative_median_ci_half_width": 0.0020599751997399138,
+      "precision_met": true,
+      "allocation_count_median": 84.0,
+      "allocated_bytes_median": 109480.0,
+      "peak_allocated_bytes_median": 17021.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-rebuild-16384",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-edit-total",
+      "scale": 16384,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 3786324.0,
+      "p95_ns_per_unit": 3883569.55,
+      "p99_ns_per_unit": 4013826.7199999997,
+      "mad_ns_per_unit": 3367.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3784626.0,
+        "upper": 3790616.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3806596.015,
+        "upper": 4005681.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3832071.0,
+        "upper": 4551304.0
+      },
+      "relative_median_ci_half_width": 0.0007910707060462866,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-incremental-16384",
+      "family": "summary-tree",
+      "operation": "summary-tree.local-edit-total",
+      "scale": 16384,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 246688.25,
+      "p95_ns_per_unit": 256860.8625,
+      "p99_ns_per_unit": 261678.715,
+      "mad_ns_per_unit": 632.375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 246398.75,
+        "upper": 246974.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 249984.803125,
+        "upper": 261350.01249999998
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 256893.5843125,
+        "upper": 262830.0
+      },
+      "relative_median_ci_half_width": 0.0011669587019243924,
+      "precision_met": true,
+      "allocation_count_median": 108.0,
+      "allocated_bytes_median": 209872.0,
+      "peak_allocated_bytes_median": 25645.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-rebuild-65536",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-edit-total",
+      "scale": 65536,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 3791015.0,
+      "p95_ns_per_unit": 3908411.0,
+      "p99_ns_per_unit": 4045930.9,
+      "mad_ns_per_unit": 6383.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3788180.5,
+        "upper": 3799578.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3837909.8,
+        "upper": 4037878.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3885530.8612499996,
+        "upper": 4751198.0
+      },
+      "relative_median_ci_half_width": 0.0015032913349063508,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-incremental-65536",
+      "family": "summary-tree",
+      "operation": "summary-tree.local-edit-total",
+      "scale": 65536,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 955792.0,
+      "p95_ns_per_unit": 1000595.65,
+      "p99_ns_per_unit": 1081681.2299999995,
+      "mad_ns_per_unit": 1756.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 955576.5,
+        "upper": 957435.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 965359.0,
+        "upper": 1055096.0999999999
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1005367.7799999999,
+        "upper": 1126917.0
+      },
+      "relative_median_ci_half_width": 0.0009724919229288381,
+      "precision_met": true,
+      "allocation_count_median": 63.0,
+      "allocated_bytes_median": 204592.0,
+      "peak_allocated_bytes_median": 77389.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-rebuild-262144",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-edit-total",
+      "scale": 262144,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 3791918.5,
+      "p95_ns_per_unit": 3955544.449999999,
+      "p99_ns_per_unit": 4941293.429999995,
+      "mad_ns_per_unit": 4029.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3791455.0,
+        "upper": 3800199.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3821097.98625,
+        "upper": 4665285.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3858082.3337499993,
+        "upper": 10694831.0
+      },
+      "relative_median_ci_half_width": 0.0011530442967062715,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "file-incremental-262144",
+      "family": "summary-tree",
+      "operation": "summary-tree.local-edit-total",
+      "scale": 262144,
+      "scale_unit": "edited-bytes",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 3804410.5,
+      "p95_ns_per_unit": 3870860.7499999995,
+      "p99_ns_per_unit": 4807813.809999986,
+      "mad_ns_per_unit": 3995.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3802663.0,
+        "upper": 3815729.8625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3823374.0,
+        "upper": 4850507.649999972
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3854919.0,
+        "upper": 8295665.0
+      },
+      "relative_median_ci_half_width": 0.0017173307796306174,
+      "precision_met": true,
+      "allocation_count_median": 207.0,
+      "allocated_bytes_median": 815392.0,
+      "peak_allocated_bytes_median": 287744.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-rebuild-1",
+      "family": "database",
+      "operation": "database.table-rebuild-total",
+      "scale": 1,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1100833.0,
+      "p95_ns_per_unit": 1144992.4,
+      "p99_ns_per_unit": 1216950.9,
+      "mad_ns_per_unit": 4175.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1100197.0,
+        "upper": 1102779.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1117205.9225,
+        "upper": 1215091.95
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1152182.02,
+        "upper": 1499125.0
+      },
+      "relative_median_ci_half_width": 0.0011727482733529973,
+      "precision_met": true,
+      "allocation_count_median": 4182.0,
+      "allocated_bytes_median": 273913.0,
+      "peak_allocated_bytes_median": 114337.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-incremental-1",
+      "family": "database",
+      "operation": "database.transaction-end-to-end",
+      "scale": 1,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 45552.0,
+      "p95_ns_per_unit": 50565.04999999995,
+      "p99_ns_per_unit": 56132.68,
+      "mad_ns_per_unit": 825.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 45232.0,
+        "upper": 45878.8375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 47029.0,
+        "upper": 55950.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 52539.07174999994,
+        "upper": 70601.0
+      },
+      "relative_median_ci_half_width": 0.007099990121180205,
+      "precision_met": true,
+      "allocation_count_median": 120.0,
+      "allocated_bytes_median": 11904.0,
+      "peak_allocated_bytes_median": 8824.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-rebuild-8",
+      "family": "database",
+      "operation": "database.table-rebuild-total",
+      "scale": 8,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1106143.0,
+      "p95_ns_per_unit": 1228609.6999999983,
+      "p99_ns_per_unit": 2545940.78999999,
+      "mad_ns_per_unit": 7865.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1099650.0,
+        "upper": 1114510.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1133673.0,
+        "upper": 2591025.9499999806
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1176913.0,
+        "upper": 3200590.0
+      },
+      "relative_median_ci_half_width": 0.006717033873558844,
+      "precision_met": true,
+      "allocation_count_median": 4196.0,
+      "allocated_bytes_median": 274417.0,
+      "peak_allocated_bytes_median": 114337.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-incremental-8",
+      "family": "database",
+      "operation": "database.transaction-end-to-end",
+      "scale": 8,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 344360.0,
+      "p95_ns_per_unit": 540720.45,
+      "p99_ns_per_unit": 556584.12,
+      "mad_ns_per_unit": 6486.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 342727.225,
+        "upper": 348224.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 359144.1899999998,
+        "upper": 553824.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 368517.97024999995,
+        "upper": 631772.0
+      },
+      "relative_median_ci_half_width": 0.007981146184225844,
+      "precision_met": true,
+      "allocation_count_median": 899.0,
+      "allocated_bytes_median": 78456.0,
+      "peak_allocated_bytes_median": 53144.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-rebuild-32",
+      "family": "database",
+      "operation": "database.table-rebuild-total",
+      "scale": 32,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1102796.0,
+      "p95_ns_per_unit": 1165798.25,
+      "p99_ns_per_unit": 1207214.3599999996,
+      "mad_ns_per_unit": 4684.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1100576.0,
+        "upper": 1108073.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1120876.97625,
+        "upper": 1181288.2999999998
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1141744.5617499999,
+        "upper": 1240804.0
+      },
+      "relative_median_ci_half_width": 0.003399314107051531,
+      "precision_met": true,
+      "allocation_count_median": 4244.0,
+      "allocated_bytes_median": 276145.0,
+      "peak_allocated_bytes_median": 114337.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-incremental-32",
+      "family": "database",
+      "operation": "database.transaction-end-to-end",
+      "scale": 32,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1232705.5,
+      "p95_ns_per_unit": 1301304.15,
+      "p99_ns_per_unit": 1606785.0299999993,
+      "mad_ns_per_unit": 14740.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1229327.5,
+        "upper": 1236966.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1267625.32875,
+        "upper": 1567386.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1291399.6499999997,
+        "upper": 2260388.0
+      },
+      "relative_median_ci_half_width": 0.0030982663742475393,
+      "precision_met": true,
+      "allocation_count_median": 2207.0,
+      "allocated_bytes_median": 199392.0,
+      "peak_allocated_bytes_median": 96288.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-rebuild-128",
+      "family": "database",
+      "operation": "database.table-rebuild-total",
+      "scale": 128,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1110432.0,
+      "p95_ns_per_unit": 1142901.65,
+      "p99_ns_per_unit": 1238635.0899999999,
+      "mad_ns_per_unit": 4976.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1107939.5,
+        "upper": 1117999.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1122959.20625,
+        "upper": 1223554.4499999997
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1142053.0,
+        "upper": 1247303.0
+      },
+      "relative_median_ci_half_width": 0.004529543456960895,
+      "precision_met": true,
+      "allocation_count_median": 4436.0,
+      "allocated_bytes_median": 283057.0,
+      "peak_allocated_bytes_median": 114337.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-incremental-128",
+      "family": "database",
+      "operation": "database.transaction-end-to-end",
+      "scale": 128,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 4626843.0,
+      "p95_ns_per_unit": 4855623.699999999,
+      "p99_ns_per_unit": 7473369.469999998,
+      "mad_ns_per_unit": 70941.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4615307.5,
+        "upper": 4670366.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4727125.55,
+        "upper": 7330673.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4809442.0,
+        "upper": 7628451.0
+      },
+      "relative_median_ci_half_width": 0.00594989931579697,
+      "precision_met": true,
+      "allocation_count_median": 6012.0,
+      "allocated_bytes_median": 541304.0,
+      "peak_allocated_bytes_median": 128328.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-rebuild-512",
+      "family": "database",
+      "operation": "database.table-rebuild-total",
+      "scale": 512,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1132043.5,
+      "p95_ns_per_unit": 1219809.25,
+      "p99_ns_per_unit": 1351968.8999999994,
+      "mad_ns_per_unit": 6631.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1129333.0,
+        "upper": 1137083.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1161848.6787499997,
+        "upper": 1326372.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1220770.0,
+        "upper": 1985425.0
+      },
+      "relative_median_ci_half_width": 0.0034230133382683616,
+      "precision_met": true,
+      "allocation_count_median": 5204.0,
+      "allocated_bytes_median": 310705.0,
+      "peak_allocated_bytes_median": 114337.0,
+      "status": "Precise"
+    },
+    {
+      "id": "database-incremental-512",
+      "family": "database",
+      "operation": "database.transaction-end-to-end",
+      "scale": 512,
+      "scale_unit": "row-mutations",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 19029170.5,
+      "p95_ns_per_unit": 19572246.0,
+      "p99_ns_per_unit": 21164537.47999998,
+      "mad_ns_per_unit": 197871.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 18884480.0,
+        "upper": 19088610.5875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 19354075.45,
+        "upper": 20193014.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 19542437.42625,
+        "upper": 23986159.0
+      },
+      "relative_median_ci_half_width": 0.005363622852083818,
+      "precision_met": true,
+      "allocation_count_median": 20658.0,
+      "allocated_bytes_median": 1859640.0,
+      "peak_allocated_bytes_median": 352416.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [
+    {
+      "cell": "field-detected-1",
+      "baseline_cell": "field-scalar-1",
+      "paired_processes": 10,
+      "median_ratio": 0.12103892402571936,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.11227610171381705,
+        "upper": 0.12650920700903945
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "field-detected-8",
+      "baseline_cell": "field-scalar-8",
+      "paired_processes": 10,
+      "median_ratio": 0.05100586512190723,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.04731045111988842,
+        "upper": 0.058296131790324446
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "field-detected-64",
+      "baseline_cell": "field-scalar-64",
+      "paired_processes": 10,
+      "median_ratio": 0.038842859811373726,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.03264618320180462,
+        "upper": 0.0395757630175348
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "field-detected-512",
+      "baseline_cell": "field-scalar-512",
+      "paired_processes": 10,
+      "median_ratio": 0.03674990927613681,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.02979527950009688,
+        "upper": 0.0461851298887643
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "field-detected-4096",
+      "baseline_cell": "field-scalar-4096",
+      "paired_processes": 10,
+      "median_ratio": 0.03755915390852489,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.035455492535471755,
+        "upper": 0.04465341970666305
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "field-detected-65536",
+      "baseline_cell": "field-scalar-65536",
+      "paired_processes": 10,
+      "median_ratio": 0.03509014885519618,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.032369520425866875,
+        "upper": 0.038429895469916056
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "signature-merge-8",
+      "baseline_cell": "signature-rebuild-8",
+      "paired_processes": 10,
+      "median_ratio": 0.0029110586752558575,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.0028986473227785563,
+        "upper": 0.003401178172345668
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "signature-merge-64",
+      "baseline_cell": "signature-rebuild-64",
+      "paired_processes": 10,
+      "median_ratio": 0.0004949134609040502,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.0004802633581721114,
+        "upper": 0.0006875951818988233
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "signature-merge-512",
+      "baseline_cell": "signature-rebuild-512",
+      "paired_processes": 10,
+      "median_ratio": 0.00005928317755980637,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.000058371437625343435,
+        "upper": 0.00005954118276609502
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "signature-merge-4096",
+      "baseline_cell": "signature-rebuild-4096",
+      "paired_processes": 10,
+      "median_ratio": 7.45304692763e-6,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7.393879721532356e-6,
+        "upper": 7.493085144208784e-6
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "signature-merge-65536",
+      "baseline_cell": "signature-rebuild-65536",
+      "paired_processes": 10,
+      "median_ratio": 4.560977942710824e-7,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4.5425275696686987e-7,
+        "upper": 4.593247346923524e-7
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "file-incremental-1",
+      "baseline_cell": "file-rebuild-1",
+      "paired_processes": 10,
+      "median_ratio": 0.0173748193978671,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.017319627746228985,
+        "upper": 0.017415661953078285
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "file-incremental-64",
+      "baseline_cell": "file-rebuild-64",
+      "paired_processes": 10,
+      "median_ratio": 0.03446797605956524,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.03434124246778545,
+        "upper": 0.03453930023145536
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "file-incremental-4096",
+      "baseline_cell": "file-rebuild-4096",
+      "paired_processes": 10,
+      "median_ratio": 0.034402324880870125,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.0342902298126541,
+        "upper": 0.03450212498772458
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "file-incremental-16384",
+      "baseline_cell": "file-rebuild-16384",
+      "paired_processes": 10,
+      "median_ratio": 0.06514169389899868,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.06500422921472379,
+        "upper": 0.06519955878913283
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "file-incremental-65536",
+      "baseline_cell": "file-rebuild-65536",
+      "paired_processes": 10,
+      "median_ratio": 0.25213230342695825,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.2515955926212363,
+        "upper": 0.2524575475743637
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "file-incremental-262144",
+      "baseline_cell": "file-rebuild-262144",
+      "paired_processes": 10,
+      "median_ratio": 1.0029548745212316,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.001047520405657,
+        "upper": 1.0046304965341522
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "database-incremental-1",
+      "baseline_cell": "database-rebuild-1",
+      "paired_processes": 10,
+      "median_ratio": 0.04127965352608008,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.041095604154987996,
+        "upper": 0.04158709190472912
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "database-incremental-8",
+      "baseline_cell": "database-rebuild-8",
+      "paired_processes": 10,
+      "median_ratio": 0.31089732909480905,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.3079108661849774,
+        "upper": 0.31333599156202413
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "database-incremental-32",
+      "baseline_cell": "database-rebuild-32",
+      "paired_processes": 10,
+      "median_ratio": 1.1191306008175168,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.109183320933234,
+        "upper": 1.1228426606519948
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "database-incremental-128",
+      "baseline_cell": "database-rebuild-128",
+      "paired_processes": 10,
+      "median_ratio": 4.154288960766067,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4.135042160145045,
+        "upper": 4.195260573502057
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "database-incremental-512",
+      "baseline_cell": "database-rebuild-512",
+      "paired_processes": 10,
+      "median_ratio": 16.765195293591884,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16.652961550744866,
+        "upper": 16.887633241696257
+      },
+      "status": "Paired"
+    }
+  ],
+  "curves": [
+    {
+      "curve": "database-mutation-scaling",
+      "strategy": "incremental",
+      "points": 5,
+      "log_log_slope": 0.9617188181581336,
+      "status": "Estimated"
+    },
+    {
+      "curve": "database-mutation-scaling",
+      "strategy": "rebuild",
+      "points": 5,
+      "log_log_slope": 0.003790486339879471,
+      "status": "Estimated"
+    },
+    {
+      "curve": "field-gf2-128-scaling",
+      "strategy": "detected-engine",
+      "points": 6,
+      "log_log_slope": 0.9071163235177206,
+      "status": "Estimated"
+    },
+    {
+      "curve": "field-gf2-128-scaling",
+      "strategy": "scalar-direct",
+      "points": 6,
+      "log_log_slope": 0.997834729264538,
+      "status": "Estimated"
+    },
+    {
+      "curve": "signature-additive-scaling",
+      "strategy": "homomorphic-merge",
+      "points": 5,
+      "log_log_slope": -0.005366333166998985,
+      "status": "Estimated"
+    },
+    {
+      "curve": "signature-additive-scaling",
+      "strategy": "rebuild",
+      "points": 5,
+      "log_log_slope": 0.9751943040220538,
+      "status": "Estimated"
+    },
+    {
+      "curve": "summary-tree-edit-scaling",
+      "strategy": "incremental",
+      "points": 6,
+      "log_log_slope": 0.2697994704289612,
+      "status": "Estimated"
+    },
+    {
+      "curve": "summary-tree-edit-scaling",
+      "strategy": "rebuild",
+      "points": 6,
+      "log_log_slope": 0.00010408196492052779,
+      "status": "Estimated"
+    }
+  ],
+  "all_cells_precise": false,
+  "claims_allowed": false
+}
