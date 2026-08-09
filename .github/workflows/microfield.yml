@@ -64,7 +64,7 @@ jobs:
       - name: Legacy library regression
         run: cargo +stable test -p homomorphic-hash-rs --features legacy --lib
       - name: Legacy field compatibility
-        run: cargo +stable test -p homomorphic-hash-rs --test microfield_compat
+        run: cargo +stable test -p homomorphic-hash-rs --features legacy --test microfield_compat
       - name: F6.V validation harness unit gates
         run: cargo +stable test -p microfield-validation-lab --all-targets
 
