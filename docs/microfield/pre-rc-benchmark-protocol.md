@@ -2,7 +2,8 @@
 
 Fecha: 9 de agosto de 2026.
 
-Estado: protocolo v1 congelado para implementación. Este documento sustituye
+Estado: B.1 cerrada y B.2 implementada; B.3 está pendiente de sus curvas y
+ejecución profunda. Este documento sustituye
 la idea anterior de integrar primero la RC y medir después. La rama actual es
 un candidato técnico interno, pero no se integrará ni etiquetará como RC hasta
 que las fases B.1–B.3 definidas aquí produzcan evidencia reproducible.
@@ -269,6 +270,10 @@ artifacts efímeros.
 - calibración de operaciones rápidas y checksums semánticos;
 - tests unitarios de percentiles, MAD, bootstrap, pairing y schemas;
 - smoke completo en CI para todas las familias, con escalas reducidas.
+
+Implementado por el módulo `publication`, el manifest `smoke-v1.json` y el
+informe
+[`pre-rc-b2-benchmark-harness-report.md`](pre-rc-b2-benchmark-harness-report.md).
 
 ### B.3 — ejecución y curvas
 

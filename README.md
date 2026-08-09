@@ -122,6 +122,11 @@ cargo test -p homomorphic-hash-rs --all-features --release --locked \
 cargo run --release -p microfield-validation-lab --locked -- semantic \
   --manifest validation/f6/manifest.json \
   --out validation/f6/results/semantic-v1.json
+
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-campaign \
+  --manifest validation/benchmarks/manifests/smoke-v1.json \
+  --run-dir /tmp/microfield-publication-smoke
 ```
 
 Auditorías de kernels y artefactos:

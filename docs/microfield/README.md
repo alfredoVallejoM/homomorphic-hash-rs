@@ -38,6 +38,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`rc-9-operations-runbook.md`](rc-9-operations-runbook.md) | operación, recuperación y migración |
 | [`rc-10-decision-report.md`](rc-10-decision-report.md) | contrato, evidencia y estados del dictamen RC.10 |
 | [`pre-rc-benchmark-protocol.md`](pre-rc-benchmark-protocol.md) | metodología, matriz y gates B.1–B.3 previos a RC |
+| [`pre-rc-b2-benchmark-harness-report.md`](pre-rc-b2-benchmark-harness-report.md) | workers, raw data, estadística y smoke B.2 |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |
 | [`phase-6-g15-internal-readiness-plan.md`](phase-6-g15-internal-readiness-plan.md) | desglose histórico G15 y correspondencia con RC |
 | [`contracts.md`](contracts.md) | contratos algebraicos, batch, generación y firmas |

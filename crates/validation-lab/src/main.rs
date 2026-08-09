@@ -1,8 +1,8 @@
 use std::{env, path::PathBuf, process::ExitCode};
 
 use microfield_validation_lab::{
-    capacity, decision, g11, g12, g13_g14, load_manifest, performance, run_semantic, write_json,
-    write_semantic_csv,
+    capacity, decision, g11, g12, g13_g14, load_manifest, performance, publication, run_semantic,
+    write_json, write_semantic_csv,
 };
 
 fn main() -> ExitCode {
@@ -21,6 +21,9 @@ fn run() -> Result<(), String> {
     let mut manifest = match command.as_str() {
         "rc8-capacity" | "rc8-compare" => PathBuf::from("validation/rc/capacity-manifest-v1.json"),
         "rc10-decision" => PathBuf::from("validation/rc/decision-manifest-v1.json"),
+        "publication-campaign" | "publication-worker" | "publication-analyse" => {
+            PathBuf::from("validation/benchmarks/manifests/smoke-v1.json")
+        }
         _ => PathBuf::from("validation/f6/manifest.json"),
     };
     let mut output = None;
@@ -29,6 +32,9 @@ fn run() -> Result<(), String> {
     let mut capacity_reports = Vec::new();
     let mut consumer_reports = Vec::new();
     let mut required_ci_gates_passed = false;
+    let mut cell = None;
+    let mut process_index = None;
+    let mut run_directory = None;
     while let Some(argument) = args.next() {
         match argument.as_str() {
             "--manifest" => {
@@ -52,8 +58,54 @@ fn run() -> Result<(), String> {
                 args.next().ok_or("--consumer-report requires a path")?,
             )),
             "--required-ci-gates-passed" => required_ci_gates_passed = true,
+            "--cell" => cell = Some(args.next().ok_or("--cell requires an id")?),
+            "--process-index" => {
+                process_index = Some(
+                    args.next()
+                        .ok_or("--process-index requires an integer")?
+                        .parse::<usize>()
+                        .map_err(|error| format!("invalid --process-index: {error}"))?,
+                )
+            }
+            "--run-dir" => {
+                run_directory = Some(PathBuf::from(
+                    args.next().ok_or("--run-dir requires a path")?,
+                ))
+            }
             _ => return Err(format!("unknown argument {argument:?}\n{}", usage())),
         }
+    }
+    if command == "publication-worker" {
+        let destination = output.ok_or("publication-worker requires --out")?;
+        publication::run_worker(
+            &manifest,
+            &cell.ok_or("publication-worker requires --cell")?,
+            process_index.ok_or("publication-worker requires --process-index")?,
+            &destination,
+        )?;
+        return Ok(());
+    }
+    if command == "publication-campaign" {
+        let destination = run_directory.ok_or("publication-campaign requires --run-dir")?;
+        let report = publication::run_campaign(&manifest, &destination)?;
+        println!(
+            "wrote {} benchmark cells to {} ({:?}, claims_allowed={})",
+            report.cells.len(),
+            destination.display(),
+            report.environment_classification,
+            report.claims_allowed,
+        );
+        return Ok(());
+    }
+    if command == "publication-analyse" {
+        let destination = run_directory.ok_or("publication-analyse requires --run-dir")?;
+        let report = publication::analyse_run(&manifest, &destination)?;
+        println!(
+            "regenerated {} benchmark cells below {}",
+            report.cells.len(),
+            destination.display(),
+        );
+        return Ok(());
     }
     if command == "rc8-capacity" {
         let destination = output.ok_or("rc8-capacity requires --out; results are host-specific")?;
@@ -172,5 +224,5 @@ fn run() -> Result<(), String> {
 }
 
 fn usage() -> String {
-    "usage: f6-validation <semantic|performance|g11|g12|g13-g14|rc8-capacity|rc8-compare|rc10-decision> [--manifest PATH] [--out PATH] [--baseline PATH] [--candidate PATH] [--capacity-report PATH]... [--consumer-report PATH]... [--required-ci-gates-passed]".into()
+    "usage: f6-validation <semantic|performance|g11|g12|g13-g14|rc8-capacity|rc8-compare|rc10-decision|publication-campaign|publication-worker|publication-analyse> [--manifest PATH] [--out PATH] [--run-dir PATH] [--cell ID] [--process-index N] [--baseline PATH] [--candidate PATH] [--capacity-report PATH]... [--consumer-report PATH]... [--required-ci-gates-passed]".into()
 }

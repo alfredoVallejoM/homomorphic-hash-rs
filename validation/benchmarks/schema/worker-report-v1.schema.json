@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Microfield publication worker report v1",
+  "type": "object",
+  "required": ["schema", "campaign_id", "cell", "process_index", "seed", "pid", "setup_ns", "batch_iterations", "observations"],
+  "properties": {
+    "schema": { "const": "microfield-publication-worker-v1" },
+    "campaign_id": { "type": "string" },
+    "process_index": { "type": "integer", "minimum": 0 },
+    "seed": { "type": "integer", "minimum": 0 },
+    "pid": { "type": "integer", "minimum": 1 },
+    "setup_ns": { "type": "integer", "minimum": 0 },
+    "batch_iterations": { "type": "integer", "minimum": 1 },
+    "observations": { "type": "array", "minItems": 3 }
+  }
+}

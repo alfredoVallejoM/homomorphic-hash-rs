@@ -11,6 +11,10 @@ memoria temporal pico, bytes persistidos/comunicados, I/O evitado y curvas de
 punto de equilibrio. Los resultados de tiempo nunca se versionan como golden
 entre máquinas.
 
+El harness pre-RC publicable es una campaña separada: lanza procesos aislados,
+guarda observaciones crudas y aplica bootstrap jerárquico. El perfil `smoke`
+comprueba el mecanismo, pero nunca habilita claims.
+
 ```bash
 cargo run -p microfield-validation-lab -- semantic \
   --manifest validation/f6/manifest.json \
@@ -50,6 +54,16 @@ cargo run -p microfield-validation-lab -- rc10-decision \
   --consumer-report /tmp/rc9-aarch64/rc9-report.json \
   --required-ci-gates-passed \
   --out /tmp/rc10-decision.json
+
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-campaign \
+  --manifest validation/benchmarks/manifests/smoke-v1.json \
+  --run-dir /tmp/microfield-publication-smoke
+
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-analyse \
+  --manifest validation/benchmarks/manifests/smoke-v1.json \
+  --run-dir /tmp/microfield-publication-smoke
 ```
 
 `semantic`, `g11`, `g12` y `g13-g14` son deterministas. `g11` fija un split
@@ -61,6 +75,12 @@ los pares adversariales CFI/SRG.
 la equivalencia diferencial de las rutas incremental/fallback.
 `performance` captura hardware y tiempos y nunca se usa como golden test entre
 máquinas.
+
+`publication-campaign` rechaza directorios no vacíos, baraja celdas con semilla
+versionada y ejecuta cada par celda/réplica en un proceso nuevo.
+`publication-analyse` regenera JSON, CSV, comparaciones, informe y checksums
+desde `raw/workers.jsonl`. `Smoke` y `Informative` mantienen
+`claims_allowed=false`.
 
 `rc8-capacity` ejecuta 37 rutas congeladas sobre campos, todas las familias de
 firmas estáticas, deltas, archivos/árbol, base de datos, reconciliación y

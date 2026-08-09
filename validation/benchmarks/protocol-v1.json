@@ -1,0 +1,32 @@
+{
+  "schema": "microfield-publication-protocol-v1",
+  "protocol_id": "pre-rc-benchmark-protocol-v1",
+  "security_classification": "non-cryptographic-algebraic-fingerprints",
+  "primary_experimental_unit": "fresh-process",
+  "raw_observations_required": true,
+  "outlier_policy": "retain-and-flag",
+  "primary_estimator": "median-of-process-medians",
+  "confidence_level": 0.95,
+  "tail_interval": "hierarchical-bootstrap",
+  "comparison_design": "paired-by-process-and-input-seed",
+  "precision": {
+    "statistic": "median",
+    "maximum_relative_ci_half_width": 0.05,
+    "failure_status": "Inconclusive"
+  },
+  "profiles": {
+    "smoke": {
+      "minimum_processes": 2,
+      "publication_claims_allowed": false
+    },
+    "pilot": {
+      "minimum_processes": 5,
+      "publication_claims_allowed": false
+    },
+    "publication": {
+      "minimum_processes": 30,
+      "maximum_processes": 100,
+      "publication_claims_require_controlled_environment": true
+    }
+  }
+}

@@ -211,6 +211,10 @@ Salida requerida: protocolo versionado y auditable.
 Salida requerida: un commit limpio regenera agregados desde observaciones
 crudas.
 
+Estado: implementado localmente en B.2. El smoke cubre 21 celdas en 42
+procesos aislados, conserva 210 observaciones y regenera los mismos checksums.
+CI repite el gate en x86-64/AArch64; sus cifras son `Smoke`, no publicables.
+
 ### 3. Ejecutar piloto, escalabilidad y comparaciones
 
 - medir al menos cinco escalas en directo/incremental/rebuild;

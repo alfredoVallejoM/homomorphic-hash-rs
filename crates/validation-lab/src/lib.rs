@@ -8,6 +8,7 @@ pub mod g13_g14;
 pub mod graphs;
 pub mod model;
 pub mod performance;
+pub mod publication;
 pub mod reconciliation;
 pub mod signatures;
 

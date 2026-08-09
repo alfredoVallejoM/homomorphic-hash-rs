@@ -8,7 +8,7 @@ description = "Reproducible F6.V validation harness for homomorphic-hash-rs"
 [dependencies]
 allocation-counter = "0.8.1"
 homomorphic-hash-rs = { path = "../.." }
-microfield = { path = "../microfield" }
+microfield = { path = "../microfield", features = ["generator"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10.9"
