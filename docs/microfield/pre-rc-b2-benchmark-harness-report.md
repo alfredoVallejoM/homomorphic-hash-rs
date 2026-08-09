@@ -75,13 +75,15 @@ Cada run nuevo contiene:
 
 ```text
 manifest.json              environment.json
-execution-order.json       raw/workers/*.json
-raw/workers.jsonl          aggregate.json
-aggregate.csv              comparisons.csv
-report.md                  checksums.txt
+execution-order.json       raw/workers.jsonl
+aggregate.json             aggregate.csv
+comparisons.csv            report.md
+checksums.txt
 ```
 
-El launcher rechaza sobrescribir un directorio no vacío.
+El launcher rechaza sobrescribir un directorio no vacío. Los JSON temporales
+de cada worker se consolidan en el JSONL y se eliminan después de verificar su
+parseo, evitando duplicar los datos crudos.
 
 ## Evidencia local
 

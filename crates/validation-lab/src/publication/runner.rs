@@ -218,6 +218,8 @@ pub fn run_campaign(manifest_path: &Path, run_directory: &Path) -> Result<Aggreg
         &execution_order,
     )?;
     write_raw_jsonl(&run_directory.join("raw/workers.jsonl"), &reports)?;
+    fs::remove_dir_all(run_directory.join("raw/workers"))
+        .map_err(|error| format!("remove consolidated worker files: {error}"))?;
     write_outputs(&manifest, &captured_environment, &reports, run_directory)
 }
 
