@@ -36,9 +36,19 @@ mod tests {
             "../../validation/benchmarks/manifests/publication-informative-v1.json",
         ))
         .expect("publication scaling manifest");
+        let controlled = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/publication-controlled-v1.json",
+        ))
+        .expect("controlled scaling manifest");
         assert_eq!(pilot.profile, CampaignProfile::Pilot);
         assert_eq!(publication.profile, CampaignProfile::Publication);
+        assert_eq!(controlled.profile, CampaignProfile::Publication);
+        assert_eq!(controlled.host_mode, HostMode::Dedicated);
         assert_eq!(pilot.cells.len(), 44);
         assert_eq!(publication.cells.len(), pilot.cells.len());
+        assert_eq!(
+            serde_json::to_value(&controlled.cells).expect("serialize controlled cells"),
+            serde_json::to_value(&pilot.cells).expect("serialize pilot cells")
+        );
     }
 }

@@ -12,8 +12,10 @@ punto de equilibrio. Los resultados de tiempo nunca se versionan como golden
 entre máquinas.
 
 El harness pre-RC publicable es una campaña separada: lanza procesos aislados,
-guarda observaciones crudas y aplica bootstrap jerárquico. El perfil `smoke`
-comprueba el mecanismo, pero nunca habilita claims.
+guarda observaciones crudas y aplica bootstrap jerárquico. B.3 conserva una
+campaña profunda de 66.500 observaciones con 44/44 celdas precisas. Su perfil
+`Informative`, igual que `Smoke`, nunca habilita claims; la réplica pendiente
+usa `publication-controlled-v1.json` en hardware realmente dedicado.
 
 ```bash
 cargo run -p microfield-validation-lab -- semantic \
@@ -80,7 +82,8 @@ máquinas.
 versionada y ejecuta cada par celda/réplica en un proceso nuevo.
 `publication-analyse` regenera JSON, CSV, comparaciones, informe y checksums
 desde `raw/workers.jsonl`. `Smoke` y `Informative` mantienen
-`claims_allowed=false`.
+`claims_allowed=false`. El resultado B.3 y sus límites están en
+`docs/microfield/pre-rc-b3-benchmark-results.md`.
 
 `rc8-capacity` ejecuta 37 rutas congeladas sobre campos, todas las familias de
 firmas estáticas, deltas, archivos/árbol, base de datos, reconciliación y

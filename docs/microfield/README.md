@@ -39,6 +39,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`rc-10-decision-report.md`](rc-10-decision-report.md) | contrato, evidencia y estados del dictamen RC.10 |
 | [`pre-rc-benchmark-protocol.md`](pre-rc-benchmark-protocol.md) | metodología, matriz y gates B.1–B.3 previos a RC |
 | [`pre-rc-b2-benchmark-harness-report.md`](pre-rc-b2-benchmark-harness-report.md) | workers, raw data, estadística y smoke B.2 |
+| [`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md) | piloto, campaña profunda, curvas, cruces y límites B.3 |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |
 | [`phase-6-g15-internal-readiness-plan.md`](phase-6-g15-internal-readiness-plan.md) | desglose histórico G15 y correspondencia con RC |
 | [`contracts.md`](contracts.md) | contratos algebraicos, batch, generación y firmas |
@@ -58,8 +59,9 @@ G6–G7 y ADR 0032–0034 fijan assurance, comparación pareada y pipeline/delta
 - `release-candidate-readiness-plan.md`: RC.0–RC.10 implementados; RC.7–RC.10
   tienen gate remoto verde en la rama RC y están pendientes de integración en
   `main`.
-- `pre-rc-benchmark-protocol.md`: B.1–B.3 activos; la evidencia publicable es
-  ahora precondición para promover o integrar la RC.
+- `pre-rc-benchmark-protocol.md`: B.1–B.3 cerrados con evidencia informativa;
+  la réplica `Controlled` es ahora precondición para promover o integrar la
+  RC.
 - `post-rc-benchmark-and-publication-plan.md`: integración aplazada, DB real y
   release externa después de reevaluar B.1–B.3.
 - `phase-6-g15-internal-readiness-plan.md`: G15.0–G15.4 materializados por

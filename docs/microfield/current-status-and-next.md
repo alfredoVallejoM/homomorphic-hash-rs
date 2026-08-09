@@ -11,8 +11,11 @@ inventario ejecutable
 ## Veredicto ejecutivo
 
 El commit `fe528c4` obtuvo un dictamen técnico de **consumo interno
-condicionado**, pero la promoción e integración de la RC se han aplazado. Antes
-de ello debe completarse el protocolo publicable de benchmarks B.1–B.3.
+condicionado**. B.1–B.3 ya están implementadas y ejecutadas: el harness cubre
+todas las familias en smoke y la matriz profunda obtuvo 44/44 celdas precisas,
+22 comparaciones pareadas y ocho curvas. La promoción e integración de la RC
+siguen aplazadas hasta replicar la campaña en un host dedicado `Controlled`;
+la ejecución actual es `Informative` y bloquea por diseño los claims externos.
 
 La implementación funcional hasta RC.6 está integrada en `main`: campos
 finitos, generación estática y contextos runtime, firmas homomórficas,
@@ -41,33 +44,36 @@ versionadas `MFTX`, log/replay `MFTL`, firmas por partición y reconciliación
 acotada `MFRS`. Lo que quedó a medio cerrar es la maduración conjunta de estas
 firmas y protocolos:
 
-- elevar RC.8 desde gate interno mediante una campaña estadística publicable
-  separada;
-- solo después, reevaluar la integración y fijar un checkpoint recuperable;
+- replicar en entorno controlado la campaña estadística ya implementada y
+  ejecutada como `Informative`;
+- reevaluar después la integración y fijar un checkpoint recuperable;
 - validar el consumidor sobre una base de datos real con I/O y concurrencia;
 - aplicar en un motor real el mapeo LSN/revisión fijado por el runbook;
 - decisión de congelar la reconciliación v1 como conjuntos o diseñar una v2
   para multiplicidad;
 - completar licencia, seguridad, semver, advisories/SBOM y packaging externo.
 
-Por tanto, el trabajo pre-RC debe priorizar evidencia publicable; después se
-abordará una integración de base de datos real para las firmas homomórficas.
-Grafos permanece como otro consumidor importante, no como sustituto de esa
-línea de producto.
+Por tanto, el siguiente trabajo pre-RC es operacional: obtener la réplica
+controlada de la evidencia ya reproducible. Después se abordará una integración
+de base de datos real para las firmas homomórficas. Grafos permanece como otro
+consumidor importante, no como sustituto de esa línea de producto.
 
 ## Base auditada
 
 | Elemento | Estado comprobado |
 |---|---|
-| Candidato de código | `fe528c4f663aad9a2a07ab8c1f44b6e6e13a916a` |
+| Candidato funcional RC.10 | `fe528c4f663aad9a2a07ab8c1f44b6e6e13a916a` |
 | Integración en `main` | `d0f4fcdb0cc0c0e4e18b12b0b33ed37389c43b47`, PR [#1](https://github.com/alfredoVallejoM/homomorphic-hash-rs/pull/1) |
 | Checkpoint | tag anotado `internal-rc6-integrated` sobre el merge |
 | Rama de trabajo RC | `rc/rc7-correctness`, creada desde la línea base integrada |
 | Validación RC.10 | run `31331474150`, x86-64/AArch64, `ReadyForInternalUse` |
+| Harness publicable B.2 | `42874c7`, 21 celdas smoke y regeneración desde raw |
+| Piloto B.3 | evidencia en `49828e3`, 6.600 observaciones, 42/44 celdas precisas |
+| Campaña profunda B.3 | evidencia en `36ec77d`, 66.500 observaciones, 44/44 precisas, `Informative` |
 | Workspace | cuatro paquetes Cargo; dos productos, un laboratorio privado y un fixture generado |
-| Tamaño tras esta revisión | 492 ficheros, aproximadamente 109 MiB; 104 MiB corresponden a `data/` |
-| Implementación Rust | 271 ficheros y aproximadamente 84.600 líneas |
-| Documentación Markdown | 99 ficheros y aproximadamente 17.800 líneas |
+| Tamaño tras B.3 | 583 ficheros versionables, aproximadamente 120 MiB; 104 MiB son `data/` y 12 MiB evidencia B.3 |
+| Implementación Rust | 290 ficheros y aproximadamente 92.000 líneas |
+| Documentación Markdown | 112 ficheros y aproximadamente 19.300 líneas |
 
 Para iniciar trabajo nuevo debe usarse una rama creada desde `main`, no
 continuar sobre `agent/h2-5-verified-profiles-pmull`, aunque hoy ambos árboles
@@ -153,8 +159,11 @@ deterministas, RC de firmas y grafos y F6.V reproducible en x86-64 y AArch64.
 
 ### Bloquean la integración del checkpoint
 
-1. La rama validada aún no se ha integrado en `main`.
-2. Falta el run post-merge y un tag anotado sobre el merge verde.
+1. Falta repetir la campaña profunda como `Controlled` en un host dedicado;
+   la evidencia `Informative` no autoriza los claims que motivaron aplazar la
+   RC.
+2. La rama validada aún no se ha integrado en `main`.
+3. Falta el run post-merge y un tag anotado sobre el merge verde.
 
 ### Bloquean publicación externa, no experimentación interna
 
@@ -192,16 +201,16 @@ deterministas, RC de firmas y grafos y F6.V reproducible en x86-64 y AArch64.
 
 ## Siguiente orden de trabajo
 
-### 1. Investigar y congelar el protocolo pre-RC
+### 1. Investigar y congelar el protocolo pre-RC — cerrado
 
 - separar el gate RC.8 de la evidencia destinada a publicación;
 - definir unidad experimental, repetición adaptativa, estadística, entorno,
   baselines, matriz completa y límites de claims;
 - mantener explícita la clasificación no criptográfica.
 
-Salida requerida: protocolo versionado y auditable.
+Salida obtenida: protocolo versionado y auditable en B.1.
 
-### 2. Implementar el harness publicable
+### 2. Implementar el harness publicable — cerrado
 
 - conservar RC.8 como gate rápido de regresión interna;
 - añadir workers independientes, raw JSONL, calibración, intervalos
@@ -211,22 +220,28 @@ Salida requerida: protocolo versionado y auditable.
 Salida requerida: un commit limpio regenera agregados desde observaciones
 crudas.
 
-Estado: implementado localmente en B.2. El smoke cubre 21 celdas en 42
+Estado: implementado y publicado en B.2. El smoke cubre 21 celdas en 42
 procesos aislados, conserva 210 observaciones y regenera los mismos checksums.
 CI repite el gate en x86-64/AArch64; sus cifras son `Smoke`, no publicables.
 
-### 3. Ejecutar piloto, escalabilidad y comparaciones
+### 3. Ejecutar piloto, escalabilidad y comparaciones — cerrado informativo
 
 - medir al menos cinco escalas en directo/incremental/rebuild;
 - ejecutar el piloto completo y una campaña controlada o informativa;
 - publicar incertidumbre, puntos de equilibrio y resultados inconclusos.
 
-Salida requerida: evidencia defendible para presentación, no solo un gate de
-CI sobre runners compartidos.
+Salida obtenida: 6.600 observaciones de piloto y 66.500 profundas; 44/44 celdas
+profundas precisas, 22 ratios pareados y ocho curvas regenerables. El árbol
+cruza entre 64 y 256 KiB editados; la DB en memoria de 512 filas cruza entre 8
+y 32 mutaciones. Véase
+[`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md).
 
-### 4. Reevaluar RC e integración
+### 4. Replicar como `Controlled` y reevaluar RC — siguiente
 
-- decidir go/no-go con la evidencia B.1–B.3;
+- ejecutar `publication-controlled-v1.json` en x86-64 dedicado, con afinidad
+  fijada y atestiguaciones completas;
+- replicar después en AArch64 sin cambiar workload ni análisis;
+- decidir go/no-go comparando efectos e intervalos con la campaña informativa;
 - solo entonces abrir PR, integrar, ejecutar CI post-merge y etiquetar.
 
 ### 5. Base de datos real

@@ -2,14 +2,15 @@
 
 Fecha: 9 de agosto de 2026.
 
-Estado inicial: `fe528c4` obtuvo `ReadyForInternalUse` en x86-64/AArch64, pero
-la integración se ha aplazado. La metodología y ejecución de benchmarks
-publicables pasan a ser una precondición de la RC, definida normativamente en
+Estado actual: `fe528c4` obtuvo `ReadyForInternalUse` en x86-64/AArch64 y
+B.1–B.3 ya entregaron protocolo, harness, piloto y campaña profunda. La
+ejecución profunda es `Informative`; la integración continúa aplazada hasta su
+réplica `Controlled`, definida normativamente en
 [`pre-rc-benchmark-protocol.md`](pre-rc-benchmark-protocol.md). Este plan no
 cambia la semántica de las firmas homomórficas: son resúmenes algebraicos no
 criptográficos.
 
-## P.0 — integrar y fijar el checkpoint — aplazado hasta B.1–B.3
+## P.0 — integrar y fijar el checkpoint — aplazado hasta réplica controlada
 
 - abrir una PR de `rc/rc7-correctness` a `main`;
 - revisar el diff RC.7–RC.10, hacer merge sin perder historia y ejecutar CI
@@ -20,11 +21,13 @@ criptográficos.
 Gate: `main` y el tag apuntan a un commit verde y recuperable. PR, merge y tag
 son escrituras remotas distintas y requieren autorización explícita.
 
-## B.1–B.3 — benchmark publicable — movido antes de P.0
+## B.1–B.3 — benchmark profundo — cerrado informativo antes de P.0
 
-RC.8 ya es un gate sólido de capacidad y regresión interna. B.1–B.3 construyen
-una campaña distinta, destinada a presentar resultados reproducibles. El
-protocolo pre-RC prevalece sobre este resumen:
+RC.8 ya es un gate sólido de capacidad y regresión interna. B.1–B.3 han
+construido y ejecutado una campaña distinta, destinada a presentar resultados
+reproducibles. Conserva 66.500 observaciones profundas, 44/44 celdas precisas,
+22 comparaciones y ocho curvas. El protocolo pre-RC prevalece sobre este
+resumen:
 
 - guardar cada observación cruda, no solo p50/p95/p99;
 - ejecutar procesos independientes por celda, con mínimo 30, parada por
@@ -45,10 +48,11 @@ No se comparará con otra biblioteca hasta congelar una operación equivalente,
 el mismo nivel de seguridad —aquí ninguno criptográfico—, hardware, inputs y
 tratamiento estadístico. Un gráfico no sustituirá los datos crudos.
 
-Gate: una máquina limpia reproduce tablas y gráficas; ninguna conclusión
-depende de un único runner compartido ni de una sola ejecución.
+Gate local satisfecho: una máquina limpia reproduce tablas desde raw. Gate de
+claims pendiente: ejecutar `publication-controlled-v1.json` en x86-64 y
+AArch64 dedicados; ninguna conclusión pública dependerá de un único host.
 
-## B.2 — vertical de base de datos real
+## B.4 — vertical de base de datos real
 
 - definir un adapter público que mapee commit/LSN a revisión y namespace;
 - implementar primero un fixture durable reproducible con WAL y después el

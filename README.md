@@ -19,21 +19,23 @@ RC.0–RC.6 están implementados, integrados en `main` y fijados por el tag
 gate exhaustivo de grafos y la matriz remota x86-64/AArch64 están verdes.
 
 El commit `fe528c4` obtuvo un **dictamen técnico apto para uso interno
-condicionado**, pero la promoción a RC se ha aplazado hasta completar una
-campaña de benchmarks publicable. RC.7–RC.10 están implementados y el run
-remoto
+condicionado**. Las fases de benchmark pre-RC B.1–B.3 ya están implementadas y
+ejecutadas: la campaña profunda conserva 66.500 observaciones en 1.330
+procesos, 44/44 celdas precisas, 22 comparaciones pareadas y ocho curvas.
+RC.7–RC.10 están implementados y el run remoto
 [`31331474150`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/31331474150)
 terminó con todos sus jobs verdes en x86-64 y AArch64. El gate RC.10 confirmó
-`ReadyForInternalUse`. La rama no se integrará ni etiquetará todavía; esto no
-equivale a una publicación externa ni a evidencia publicable de rendimiento.
+`ReadyForInternalUse`. La rama no se integrará ni etiquetará todavía: la
+campaña profunda es `Informative`, no `Controlled`, y por diseño mantiene
+`claims_allowed=false` hasta repetirla en hardware dedicado.
 
 La línea prioritaria de cierre son los hashes homomórficos —expuestos por la
 API como firmas algebraicas para dejar claro que **no son criptográficos**— y
 su aplicación a bases de datos. El sistema DB base ya existe: filas/schema,
 particiones, transacciones versionadas, log/replay y reconciliación acotada. Lo
-pendiente es medirla con metodología publicable, conectarla a una base de
-datos real con persistencia/concurrencia y preparar la ingeniería de release;
-no reimplementar RC.5.
+pendiente es replicar en entorno controlado la medición ya ejecutada,
+conectarla a una base de datos real con persistencia/concurrencia y preparar la
+ingeniería de release; no reimplementar RC.5.
 
 La fotografía auditada, riesgos y orden siguiente están en
 [`current-status-and-next.md`](docs/microfield/current-status-and-next.md). El
@@ -127,6 +129,11 @@ cargo run --release -p microfield-validation-lab --locked -- \
   publication-campaign \
   --manifest validation/benchmarks/manifests/smoke-v1.json \
   --run-dir /tmp/microfield-publication-smoke
+
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-analyse \
+  --manifest validation/benchmarks/manifests/publication-informative-v1.json \
+  --run-dir validation/benchmarks/runs/pre-rc-b3-publication-informative-v1
 ```
 
 Auditorías de kernels y artefactos:
@@ -155,6 +162,7 @@ cargo run -p microfield --features generator --bin microfield-gen -- \
 - [Estado actual y siguiente plan](docs/microfield/current-status-and-next.md)
 - [Plan maestro RC](docs/microfield/release-candidate-readiness-plan.md)
 - [Protocolo pre-RC de benchmarks](docs/microfield/pre-rc-benchmark-protocol.md)
+- [Resultados B.3 de escalabilidad](docs/microfield/pre-rc-b3-benchmark-results.md)
 - [Plan de maduración, integración y publicación](docs/microfield/post-rc-benchmark-and-publication-plan.md)
 - [Contratos técnicos](docs/microfield/contracts.md)
 - [Arquitectura](docs/microfield/architecture.md)

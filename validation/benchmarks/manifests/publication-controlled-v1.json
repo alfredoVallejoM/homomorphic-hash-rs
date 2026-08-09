@@ -1,0 +1,17 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "pre-rc-b3-publication-controlled-v1",
+  "profile": "publication",
+  "seed": 13503953896175478587,
+  "host_mode": "dedicated",
+  "minimum_processes": 30,
+  "maximum_processes": 50,
+  "precision_check_every": 5,
+  "warmup_observations": 10,
+  "measured_observations": 50,
+  "target_observation_ns": 1000000,
+  "maximum_batch_iterations": 1048576,
+  "bootstrap_resamples": 2000,
+  "maximum_relative_ci_half_width": 0.05,
+  "cells_from": "pilot-scaling-v1.json"
+}

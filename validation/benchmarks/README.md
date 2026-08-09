@@ -23,7 +23,34 @@ cargo run --release -p microfield-validation-lab --locked -- \
 checks the harness and always has `claims_allowed=false`. Host-specific timing
 is never a cross-machine golden test.
 
-Pilot and publication/scaling manifests are delivered by B.3. A run can only
-be classified `Controlled` when it uses a release binary from a clean tree,
-the manifest declares a dedicated host, frequency metadata is visible and the
-operator explicitly attests dedicated execution and fixed affinity.
+B.3 delivers `pilot-scaling-v1.json`, `publication-informative-v1.json` and
+the ready-to-run `publication-controlled-v1.json`. The versioned results live
+below `runs/`:
+
+- `pre-rc-b3-pilot-scaling-v1`: 6,600 observations, 42/44 precise cells;
+- `pre-rc-b3-publication-informative-v1`: 66,500 observations, 44/44 precise
+  cells, 22 paired comparisons and eight scaling curves.
+
+Both runs are `Informative` and therefore have `claims_allowed=false`. Their
+timings guide internal decisions but are not public performance claims. See
+`docs/microfield/pre-rc-b3-benchmark-results.md` for interpretation and limits.
+
+A run can only be classified `Controlled` when it uses a release binary from a
+clean tree, the manifest declares a dedicated host, frequency metadata is
+visible and the operator explicitly attests dedicated execution and fixed
+affinity. A new campaign must use a new directory; existing evidence is never
+overwritten.
+
+Only after those conditions are true, replace `<isolated-cpus>` and run:
+
+```text
+MICROFIELD_BENCH_DEDICATED=1 MICROFIELD_BENCH_AFFINITY_FIXED=1 \
+taskset -c <isolated-cpus> \
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-campaign \
+  --manifest validation/benchmarks/manifests/publication-controlled-v1.json \
+  --run-dir validation/benchmarks/runs/<new-controlled-campaign-id>
+```
+
+The environment variables are operator attestations, not switches that make a
+shared host controlled. Never set them unless the statements are true.

@@ -2,11 +2,13 @@
 
 Fecha: 9 de agosto de 2026.
 
-Estado: B.1 cerrada y B.2 implementada; B.3 está pendiente de sus curvas y
-ejecución profunda. Este documento sustituye
-la idea anterior de integrar primero la RC y medir después. La rama actual es
-un candidato técnico interno, pero no se integrará ni etiquetará como RC hasta
-que las fases B.1–B.3 definidas aquí produzcan evidencia reproducible.
+Estado: B.1–B.3 cerradas el 9 de agosto de 2026. El piloto y la campaña
+profunda informativa están versionados y se regeneran desde sus observaciones
+crudas; el informe de cierre es
+[`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md). Este
+documento sustituye la idea anterior de integrar primero la RC y medir después.
+La rama actual continúa como candidato técnico interno: antes de promoverla se
+repetirá la campaña sin cambios metodológicos en un host dedicado `controlled`.
 
 Las firmas o «hashes homomórficos» de este proyecto son resúmenes algebraicos
 **no criptográficos**. Los benchmarks no medirán ni sugerirán resistencia a
@@ -92,16 +94,21 @@ número de procesos.
 
 - `smoke`: 2 procesos, 3 warmups y 5 observaciones; solo valida el harness.
 - `pilot`: 10 procesos, 5 warmups y 15 observaciones; estima varianza y coste.
-- `publication`: mínimo 30 y máximo 100 procesos por celda, 10 warmups y 50
-  observaciones por proceso.
+- `publication`: mínimo 30 y máximo normal de 50 procesos por celda, 10
+  warmups y 50 observaciones por proceso;
+- si una celda no alcanza precisión en 50 procesos, un perfil extendido eleva
+  el máximo a 100 y conserva la celda como `Inconclusive` si tampoco converge;
 - después de 30 procesos se comprueba la precisión cada 5 procesos;
 - una celda puede parar cuando el intervalo bootstrap del 95 % de la mediana
   tenga semianchura relativa <= 5 %;
 - si alcanza 100 procesos sin esa precisión, se publica como `Inconclusive` y
   no se deriva un claim cuantitativo fuerte.
 
-Los límites son defaults versionados. El piloto puede justificar aumentarlos,
-nunca reducirlos silenciosamente.
+Los límites son defaults versionados. El máximo normal de 50 quedó congelado
+tras el piloto: la campaña profunda alcanzó 44/44 celdas precisas y solo una
+necesitó superar el mínimo, deteniéndose en 40. El máximo extendido de 100 no
+se ejecutó porque ninguna celda activó esa condición; ningún límite se reduce
+silenciosamente.
 
 ### 3.3 Operaciones rápidas y calibración
 
@@ -237,7 +244,8 @@ La implementación B.2 generará, sin sobrescribir campañas anteriores:
 ```text
 validation/benchmarks/
   protocol-v1.json
-  manifests/{smoke,pilot,publication}-v1.json
+  manifests/{smoke-v1,pilot-scaling-v1,publication-informative-v1,
+             publication-controlled-v1}.json
   schema/*.schema.json
   runs/<campaign-id>/
     manifest.json
@@ -284,8 +292,17 @@ informe
 - informe regenerable desde raw, sin edición manual de cifras;
 - resultados inconclusos identificados, nunca ocultos.
 
-Solo después de B.1–B.3 se reevalúa si existe una RC. La integración, PR, merge
-y tag quedan aplazados; no forman parte de estas tres fases.
+Implementado mediante `pilot-scaling-v1.json` y
+`publication-informative-v1.json`. El piloto conservó 6.600 observaciones y la
+campaña profunda 66.500, con 44/44 celdas precisas en esta última. Ambas son
+`Informative`: orientan el producto, pero `claims_allowed=false` impide usar
+sus cifras como claims principales. Detalle, límites y decisión en
+[`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md).
+
+B.1–B.3 permiten ya reevaluar el candidato, pero la decisión actual es
+`NO-GO` para claims externos y promoción inmediata: falta la réplica
+`Controlled` en hardware dedicado. La integración, PR, merge y tag quedan
+aplazados; no forman parte de estas tres fases.
 
 ## 9. Criterio de cierre por fase
 
