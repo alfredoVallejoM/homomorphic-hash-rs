@@ -18,12 +18,14 @@ RC.0–RC.6 están implementados, integrados en `main` y fijados por el tag
 `internal-rc6-integrated`. La suite local completa, los corpus externos, el
 gate exhaustivo de grafos y la matriz remota x86-64/AArch64 están verdes.
 
-El commit `fe528c4` es una **release candidate técnica apta para uso interno
-condicionado**. RC.7–RC.10 están implementados y el run remoto
+El commit `fe528c4` obtuvo un **dictamen técnico apto para uso interno
+condicionado**, pero la promoción a RC se ha aplazado hasta completar una
+campaña de benchmarks publicable. RC.7–RC.10 están implementados y el run
+remoto
 [`31331474150`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/31331474150)
 terminó con todos sus jobs verdes en x86-64 y AArch64. El gate RC.10 confirmó
-`ReadyForInternalUse`. La rama aún debe integrarse en `main`; esto no equivale
-a una publicación externa.
+`ReadyForInternalUse`. La rama no se integrará ni etiquetará todavía; esto no
+equivale a una publicación externa ni a evidencia publicable de rendimiento.
 
 La línea prioritaria de cierre son los hashes homomórficos —expuestos por la
 API como firmas algebraicas para dejar claro que **no son criptográficos**— y
@@ -147,7 +149,8 @@ cargo run -p microfield --features generator --bin microfield-gen -- \
 
 - [Estado actual y siguiente plan](docs/microfield/current-status-and-next.md)
 - [Plan maestro RC](docs/microfield/release-candidate-readiness-plan.md)
-- [Plan post-RC: benchmarks, DB real y publicación](docs/microfield/post-rc-benchmark-and-publication-plan.md)
+- [Protocolo pre-RC de benchmarks](docs/microfield/pre-rc-benchmark-protocol.md)
+- [Plan de maduración, integración y publicación](docs/microfield/post-rc-benchmark-and-publication-plan.md)
 - [Contratos técnicos](docs/microfield/contracts.md)
 - [Arquitectura](docs/microfield/architecture.md)
 - [Auditoría de `unsafe`](docs/microfield/unsafe-audit.md)

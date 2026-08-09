@@ -10,9 +10,9 @@ inventario ejecutable
 
 ## Veredicto ejecutivo
 
-El commit `fe528c4` es una **release candidate técnica apta para consumo
-interno condicionado**. Todavía no está integrado en `main` ni preparado para
-publicación externa.
+El commit `fe528c4` obtuvo un dictamen técnico de **consumo interno
+condicionado**, pero la promoción e integración de la RC se han aplazado. Antes
+de ello debe completarse el protocolo publicable de benchmarks B.1–B.3.
 
 La implementación funcional hasta RC.6 está integrada en `main`: campos
 finitos, generación estática y contextos runtime, firmas homomórficas,
@@ -41,18 +41,19 @@ versionadas `MFTX`, log/replay `MFTL`, firmas por partición y reconciliación
 acotada `MFRS`. Lo que quedó a medio cerrar es la maduración conjunta de estas
 firmas y protocolos:
 
-- integrar la rama RC validada en `main` y fijar un checkpoint recuperable;
-- elevar RC.8 desde gate interno a benchmark estadístico publicable;
+- elevar RC.8 desde gate interno mediante una campaña estadística publicable
+  separada;
+- solo después, reevaluar la integración y fijar un checkpoint recuperable;
 - validar el consumidor sobre una base de datos real con I/O y concurrencia;
 - aplicar en un motor real el mapeo LSN/revisión fijado por el runbook;
 - decisión de congelar la reconciliación v1 como conjuntos o diseñar una v2
   para multiplicidad;
 - completar licencia, seguridad, semver, advisories/SBOM y packaging externo.
 
-Por tanto, el trabajo post-RC debe priorizar evidencia publicable y una
-integración de base de datos real para las firmas homomórficas. Grafos
-permanece como otro consumidor importante, no como sustituto de esa línea de
-producto.
+Por tanto, el trabajo pre-RC debe priorizar evidencia publicable; después se
+abordará una integración de base de datos real para las firmas homomórficas.
+Grafos permanece como otro consumidor importante, no como sustituto de esa
+línea de producto.
 
 ## Base auditada
 
@@ -191,25 +192,40 @@ deterministas, RC de firmas y grafos y F6.V reproducible en x86-64 y AArch64.
 
 ## Siguiente orden de trabajo
 
-### 0. Integrar y fijar esta nueva línea base
+### 1. Investigar y congelar el protocolo pre-RC
 
-- abrir una PR de `rc/rc7-correctness` a `main`;
-- hacer merge, ejecutar CI post-merge y crear un tag anotado sobre el merge
-  verde;
-- conservar `internal-rc6-integrated` como checkpoint histórico.
+- separar el gate RC.8 de la evidencia destinada a publicación;
+- definir unidad experimental, repetición adaptativa, estadística, entorno,
+  baselines, matriz completa y límites de claims;
+- mantener explícita la clasificación no criptográfica.
 
-### 1. Benchmark publicable
+Salida requerida: protocolo versionado y auditable.
+
+### 2. Implementar el harness publicable
 
 - conservar RC.8 como gate rápido de regresión interna;
-- añadir muestras crudas, repeticiones independientes, intervalos de
-  confianza, hardware controlado y curvas de escala amplias;
-- separar setup/generación/aplicación/persistencia y generar tablas/gráficas
-  reproducibles.
+- añadir workers independientes, raw JSONL, calibración, intervalos
+  bootstrap, pairing y metadatos de hardware;
+- ejecutar smoke de todas las familias en CI.
+
+Salida requerida: un commit limpio regenera agregados desde observaciones
+crudas.
+
+### 3. Ejecutar piloto, escalabilidad y comparaciones
+
+- medir al menos cinco escalas en directo/incremental/rebuild;
+- ejecutar el piloto completo y una campaña controlada o informativa;
+- publicar incertidumbre, puntos de equilibrio y resultados inconclusos.
 
 Salida requerida: evidencia defendible para presentación, no solo un gate de
 CI sobre runners compartidos.
 
-### 2. Base de datos real
+### 4. Reevaluar RC e integración
+
+- decidir go/no-go con la evidencia B.1–B.3;
+- solo entonces abrir PR, integrar, ejecutar CI post-merge y etiquetar.
+
+### 5. Base de datos real
 
 - implementar el adapter LSN/revisión y una persistencia WAL reproducible;
 - probar concurrencia, crash/restart, migración y rebuild autoritativo;
@@ -218,7 +234,7 @@ CI sobre runners compartidos.
 Salida requerida: equivalencia exacta tras restart y curvas de capacidad con
 I/O real.
 
-### 3. Publicación externa
+### 6. Publicación externa
 
 - elegir licencia y añadir políticas de seguridad/contribución/changelog;
 - fijar semver, MSRV y compatibilidad de wires;
@@ -232,6 +248,8 @@ Salida requerida: package audit completo y claims públicos acotados.
 Cada fase terminará con código/documentación, validación local, commit, push y
 CI remoto verde. El detalle normativo vive en
 [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md).
+El protocolo estadístico normativo está en
+[`pre-rc-benchmark-protocol.md`](pre-rc-benchmark-protocol.md).
 
 ## Autoridad documental
 
@@ -242,9 +260,11 @@ CI remoto verde. El detalle normativo vive en
    ADR y los schemas versionados definen contratos técnicos.
 4. [`release-candidate-readiness-plan.md`](release-candidate-readiness-plan.md)
    registra RC.7–RC.10 y su dictamen remoto.
-5. [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md)
-   define el backlog activo posterior a la RC interna.
-6. Los informes `*-final-report.md` y planes de fases cerradas son evidencia
+5. [`pre-rc-benchmark-protocol.md`](pre-rc-benchmark-protocol.md) define los
+   gates de benchmark que preceden a la promoción RC.
+6. [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md)
+   conserva el backlog de integración, DB real y publicación.
+7. Los informes `*-final-report.md` y planes de fases cerradas son evidencia
    histórica; sus cifras y frases de “siguiente paso” conservan el contexto de
    su fecha.
 

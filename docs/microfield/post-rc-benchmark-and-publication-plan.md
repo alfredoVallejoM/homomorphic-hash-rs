@@ -1,12 +1,15 @@
-# Plan post-RC: integración, benchmarks y publicación
+# Plan de maduración: benchmarks, integración y publicación
 
 Fecha: 9 de agosto de 2026.
 
-Estado inicial: `fe528c4` es `ReadyForInternalUse` en x86-64/AArch64. Este
-plan empieza después de la RC técnica interna y no cambia la semántica de las
-firmas homomórficas: son resúmenes algebraicos no criptográficos.
+Estado inicial: `fe528c4` obtuvo `ReadyForInternalUse` en x86-64/AArch64, pero
+la integración se ha aplazado. La metodología y ejecución de benchmarks
+publicables pasan a ser una precondición de la RC, definida normativamente en
+[`pre-rc-benchmark-protocol.md`](pre-rc-benchmark-protocol.md). Este plan no
+cambia la semántica de las firmas homomórficas: son resúmenes algebraicos no
+criptográficos.
 
-## P.0 — integrar y fijar el checkpoint
+## P.0 — integrar y fijar el checkpoint — aplazado hasta B.1–B.3
 
 - abrir una PR de `rc/rc7-correctness` a `main`;
 - revisar el diff RC.7–RC.10, hacer merge sin perder historia y ejecutar CI
@@ -17,14 +20,15 @@ firmas homomórficas: son resúmenes algebraicos no criptográficos.
 Gate: `main` y el tag apuntan a un commit verde y recuperable. PR, merge y tag
 son escrituras remotas distintas y requieren autorización explícita.
 
-## B.1 — benchmark publicable
+## B.1–B.3 — benchmark publicable — movido antes de P.0
 
-RC.8 ya es un gate sólido de capacidad y regresión interna. B.1 construirá una
-campaña distinta, destinada a presentar resultados reproducibles:
+RC.8 ya es un gate sólido de capacidad y regresión interna. B.1–B.3 construyen
+una campaña distinta, destinada a presentar resultados reproducibles. El
+protocolo pre-RC prevalece sobre este resumen:
 
 - guardar cada observación cruda, no solo p50/p95/p99;
-- ejecutar al menos 30 procesos independientes por celda, con warmup y orden
-  aleatorizado reproducible;
+- ejecutar procesos independientes por celda, con mínimo 30, parada por
+  precisión, warmup y orden aleatorizado reproducible;
 - publicar mediana, p95/p99, MAD e intervalos bootstrap del 95 %;
 - registrar CPU exacta, microcode, kernel, governor, turbo, frecuencia,
   memoria, toolchain, flags, backend detectado y temperatura cuando exista;
