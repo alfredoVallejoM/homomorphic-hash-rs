@@ -1,14 +1,21 @@
 # F6.G15 — preparación interna de firmas, campos y grafos
 
-Fecha de planificación: 4 de agosto de 2026.
+Fecha de planificación: 4 de agosto de 2026. Revisión: 9 de agosto de 2026.
 
-Estado: planificado. G15 no es una fase de grafos: convierte la biblioteca
-completa —campos finitos, firmas homomórficas, protocolos derivados y motor de
-grafos— en una capacidad interna gobernada, reproducible y operable.
+Estado: G15.0–G15.4 materializados e integrados mediante RC.0–RC.6. G15.5 está
+parcialmente cubierto; G15.6–G15.9 permanecen abiertos y se ejecutarán como
+RC.7–RC.10. G15 no es una fase de grafos: convierte la biblioteca completa
+—campos finitos, firmas homomórficas, protocolos derivados y motor de grafos—
+en una capacidad interna gobernada, reproducible y operable.
 
 Las firmas son un producto de primer nivel. El motor de grafos es una aplicación
 importante de esas primitivas y de `Microcanon`, pero no define por sí solo el
 alcance ni la API de la biblioteca.
+
+El vertical de base de datos ya es funcional desde RC.5: schema y filas
+canónicas, particiones, transacciones, log/replay y reconciliación acotada. Los
+gates restantes perfeccionan esa línea y la prueban en operación real; no deben
+describirse como si el sistema DB todavía estuviera por desarrollar.
 
 La auditoría específica de deltas para archivos, bases de datos y árboles
 jerárquicos está en
@@ -16,29 +23,28 @@ jerárquicos está en
 
 ## 1. Decisión ejecutiva actual
 
-La biblioteca es hoy un **release candidate interno condicionado**:
+La biblioteca es hoy un **candidato técnico interno condicionado**:
 
 | Uso | Estado actual | Condición |
 |---|---|---|
 | Campos estáticos/generados | Apto | identidad y assurance obligatorios |
 | Firmas aditiva, secuencia y multiset | Apto como primitivas | igualdad significa `Indistinguishable` |
-| Bidireccional y multievaluación | Candidato | congelar perfiles y coste/beneficio |
+| Bidireccional y multievaluación | Experimental | medir perfiles y coste/beneficio antes de promoción |
 | `TrackedSequence`/`TrackedMultiset` | Apto | exactitud a costa de memoria O(n) |
 | Residuales algebraicos | Rechazado como prueba | exponer solo como ecuación algebraica |
-| Reconciliación acotada | Validada pero no productizada | mover el decoder desde validation-lab |
+| Reconciliación acotada | Soportada | `BoundedSetReconciler` v1 acepta conjuntos y rechaza multiplicidad |
 | Campos runtime | Apto condicionado | conservar assurance y límites explícitos |
 | Prefiltro de grafos | Apto | usar identidad completa de perfil |
 | Comparación exacta puntual | Apto | manejar siempre `Inconclusive` |
-| Clave canónica para deduplicación | Candidato | congelar schema, envelope y política de persistencia |
+| Clave canónica para deduplicación | Condicionada | `MFGD` y bytes exactos; `Inconclusive` nunca inserta ni fusiona |
 | Actualización local de labels | Apto | estado versionado y fallback habilitado |
 | Edición topológica incremental | Correcta, no optimizada | no prometer mejora hasta medir CSR end-to-end |
 | Química/redes/hipergrafos | Experimental | cerrar adapters y equivalencia de dominio |
 | API pública o servicio con SLA | No apto todavía | queda fuera de G15 interno |
 
 Por tanto, ya puede emplearse en experimentos internos y herramientas
-controladas. G15 será el gate para depender de ella tanto en agregación,
-streaming, reconciliación e índices compactos como en deduplicación de cliques y
-subredes convertidas en DAG.
+controladas. RC.7–RC.10 son ahora el gate para depender de ella en un workload
+operativo declarado; no queda otro vertical funcional G15 previo a esos gates.
 
 ## 2. Separación entre cierre interno y publicación
 
@@ -180,7 +186,7 @@ probabilística en prueba de igualdad.
 
 ## 4. Hitos
 
-### G15.0 — inventario y superficie soportada
+### G15.0 — inventario y superficie soportada — integrado en RC.0–RC.1
 
 Entregables:
 
@@ -201,7 +207,7 @@ Gate:
 - ninguna API legacy aparece en el flujo recomendado;
 - claims y assurance son coherentes en Rustdoc, README e informes.
 
-### G15.1 — API soportada de firmas homomórficas
+### G15.1 — API soportada de firmas homomórficas — integrado en RC.2
 
 Entregables:
 
@@ -225,7 +231,7 @@ Gate:
 - ejemplos y compile-fail impiden combinar identidades incompatibles;
 - el residual no puede consumirse desde una API llamada `verify_membership`.
 
-### G15.2 — protocolos y persistencia de firmas
+### G15.2 — protocolos y persistencia de firmas — integrado en RC.2–RC.3/RC.5
 
 Entregables:
 
@@ -256,7 +262,7 @@ Gate:
 - replay, revisión obsoleta y retirada no autorizada fallan sin mutar estado;
 - un delta aplicado coincide con reconstrucción completa tras cada operación.
 
-### G15.3 — aplicaciones internas de las firmas
+### G15.3 — aplicaciones internas de las firmas — vertical funcional en RC.4–RC.5
 
 Verticales obligatorios:
 
@@ -284,7 +290,7 @@ Gate:
 - el árbol recompone una edición de hoja en O(log n) para su forma congelada;
 - ningún canal algebraico se documenta como raíz autenticada.
 
-### G15.4 — grafos, DAG y adapters de dominio
+### G15.4 — grafos, DAG y adapters de dominio — integrado en RC.6
 
 Entregables de infraestructura:
 
@@ -328,7 +334,7 @@ Además:
 - `Inconclusive` no crea ni fusiona nodos;
 - inserciones concurrentes equivalentes convergen en una identidad.
 
-### G15.5 — cierre de oráculos y corpus
+### G15.5 — cierre de oráculos y corpus — parcial
 
 Entregables:
 
@@ -356,7 +362,7 @@ Gate:
 - presupuesto insuficiente produce exclusivamente `Inconclusive`;
 - todos los manifests regeneran con diff vacío.
 
-### G15.6 — concurrencia, fuzzing y robustez
+### G15.6 — concurrencia, fuzzing y robustez — parcial; fuzzing abierto en RC.7
 
 Entregables:
 
@@ -381,7 +387,7 @@ Gate:
 - fuzzing nocturno cumple la ventana acordada sin crash ni divergencia;
 - las carreras optimistas producen éxito único o revision mismatch tipado.
 
-### G15.7 — rendimiento y planificación de capacidad
+### G15.7 — rendimiento y planificación de capacidad — abierto en RC.8
 
 Escenarios obligatorios:
 
@@ -418,7 +424,7 @@ Gate:
   rebuild; de lo contrario se enrutan directamente al fallback;
 - toda ruta respeta presupuestos incluso al devolver `Inconclusive`.
 
-### G15.8 — runbook y release candidate interno
+### G15.8 — runbook y release candidate interno — abierto en RC.9
 
 Entregables:
 
@@ -440,7 +446,7 @@ Gate:
   schema drift;
 - resultados deterministas coinciden en x86-64 y AArch64.
 
-### G15.9 — auditoría go/no-go
+### G15.9 — auditoría go/no-go — abierto en RC.10
 
 Se generará `validation/f6/results/g15-internal-readiness-v1.json` con:
 
@@ -477,13 +483,17 @@ No se aceptará un “aprobado” narrativo sin artefacto reproducible.
 
 ## 6. Trazabilidad del estado actual
 
-Ya satisfecho:
+Ya satisfecho e integrado:
 
-- cinco firmas segregadas más secuencia multievaluada y variantes dinámicas;
+- seis firmas segregadas y variantes dinámicas;
 - leyes de partición/concatenación, identidades, wire y atomicidad;
 - 145.636 ecuaciones metamórficas y colisiones mínimas congeladas;
 - tracking exacto, factores cero y compatibilidad static/dynamic;
-- reconciliación acotada validada en 63.232 pares dentro de validation-lab;
+- reconciliación pública acotada validada en 63.232 pares, con wire `MFRS`;
+- snapshots compactos `MFSG`, rastreados `MFTS`, deltas `MFDE` y journals
+  `MFDJ` con límites y restauración/replay fail-closed;
+- chunks/árbol `MFFC`/`MFST`, filas/transacciones `MFRW`/`MFTX`/`MFTL` y
+  campañas diferenciales frente a rebuild;
 - campos mantenidos, externos generados y runtime con assurance;
 - autoridad exacta independiente del campo;
 - mappings verificados y resultado fail-closed;
@@ -491,21 +501,19 @@ Ya satisfecho:
 - corpus nauty n=8 autenticado;
 - CFI, Shrikhande/rook y C6/2C3;
 - pipeline G13, delta G14 y campaña reproducible;
+- `CanonicalGraphDag`, snapshot `MFGD` y adapters explícitos de
+  subred/clique;
 - Clippy, Rustdoc, x86/AArch64 CI y gates Microfield.
 
 Parcial o pendiente para aprobar consumo persistente:
 
-- decidir la allowlist definitiva de firmas y profiles K;
-- productizar reconciliación y declarar el soporte de multiplicidad;
 - validar aplicaciones y baselines de firmas fuera del dominio pequeño;
-- persistencia soportada de snapshots compactos y rastreados;
 - consumidor externo centrado en firmas, no solo tests internos;
 - canonizar todos los 12.346 representantes y buckets residuales en un gate
   específico de clave exacta;
 - oráculo independiente del modelo relacional completo;
-- adapter de cliques/subredes y contrato de frontera;
-- envelope y prueba transaccional del DAG;
-- fuzzing de GraphDelta/pipeline/parser;
+- fuzzing continuo de fields, wires, journals, DB, árbol,
+  `GraphDelta`/pipeline/parser y DAG;
 - SLO y budgets del workload real;
 - prueba end-to-end de consumidor interno y runbook.
 

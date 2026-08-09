@@ -871,6 +871,152 @@ where
         })
     }
 
+    /// Applies a transaction incrementally or rebuilds from authoritative rows
+    /// according to an explicit measured capacity policy.
+    ///
+    /// The authoritative-row closure is evaluated only when the mutation count
+    /// exceeds the incremental threshold. Its rows must equal the exact result
+    /// of applying every before/after image; otherwise the operation fails
+    /// without publishing state or revision changes.
+    pub fn apply_transaction_with_policy<I, P>(
+        &mut self,
+        transaction: &TransactionDelta,
+        limits: DatabaseTransactionLimits,
+        policy: DatabaseApplyPolicy,
+        authoritative_target_rows: P,
+    ) -> Result<DatabasePolicyApplyReport, DatabaseError>
+    where
+        I: IntoIterator<Item = DatabaseRow>,
+        P: FnOnce() -> I,
+    {
+        if self.applied.contains(&transaction.transaction_id) {
+            return Ok(DatabasePolicyApplyReport {
+                status: DatabaseApplyStatus::AlreadyApplied,
+                path: DatabaseApplyPath::AlreadyApplied,
+                revision: self.revision,
+                touched_partitions: 0,
+            });
+        }
+        if transaction.mutations.len() <= policy.max_incremental_mutations {
+            let report = self.apply_transaction(transaction, limits)?;
+            return Ok(DatabasePolicyApplyReport {
+                status: report.status,
+                path: DatabaseApplyPath::Incremental,
+                revision: report.revision,
+                touched_partitions: report.touched_partitions,
+            });
+        }
+
+        self.preflight_transaction(transaction, limits)?;
+        let expected = self.expected_rows_after(transaction, limits)?;
+        let target_rows = authoritative_target_rows().into_iter().collect::<Vec<_>>();
+        let mut target = BTreeMap::new();
+        for row in &target_rows {
+            checked_row_bytes(&self.schema, row, limits)?;
+            let key = self.schema.row_key(row)?;
+            if target.insert(key, row.clone()).is_some() {
+                return Err(DatabaseError::Conflict(
+                    "duplicate primary key in authoritative rebuild",
+                ));
+            }
+        }
+        if target != expected {
+            return Err(DatabaseError::Conflict(
+                "authoritative rebuild target mismatch",
+            ));
+        }
+
+        let mut candidate = Self::from_rows(
+            self.namespace,
+            self.schema.clone(),
+            self.partitions.len(),
+            self.encoder.clone(),
+            self.offset,
+            target_rows,
+        )?;
+        candidate.revision = transaction.target_revision;
+        candidate.applied = self.applied.clone();
+        candidate.applied.insert(transaction.transaction_id);
+        let touched_partitions = candidate.partitions.len();
+        *self = candidate;
+        Ok(DatabasePolicyApplyReport {
+            status: DatabaseApplyStatus::Applied,
+            path: DatabaseApplyPath::AuthoritativeRebuild,
+            revision: self.revision,
+            touched_partitions,
+        })
+    }
+
+    fn preflight_transaction(
+        &self,
+        transaction: &TransactionDelta,
+        limits: DatabaseTransactionLimits,
+    ) -> Result<(), DatabaseError> {
+        if transaction.namespace != self.namespace {
+            return Err(DatabaseError::NamespaceMismatch);
+        }
+        if transaction.schema_id != self.schema.schema_id {
+            return Err(DatabaseError::SchemaMismatch);
+        }
+        if transaction.source_revision != self.revision {
+            return Err(DatabaseError::RevisionMismatch {
+                expected: transaction.source_revision,
+                actual: self.revision,
+            });
+        }
+        if transaction.mutations.len() > limits.max_mutations {
+            return Err(DatabaseError::LimitExceeded("mutations"));
+        }
+        if transaction.to_canonical_bytes().len() > limits.max_transaction_bytes {
+            return Err(DatabaseError::LimitExceeded("transaction bytes"));
+        }
+        Ok(())
+    }
+
+    fn expected_rows_after(
+        &self,
+        transaction: &TransactionDelta,
+        limits: DatabaseTransactionLimits,
+    ) -> Result<BTreeMap<DatabaseRowKey, DatabaseRow>, DatabaseError> {
+        let mut expected = BTreeMap::new();
+        for row in self.rows() {
+            let key = self.schema.row_key(&row)?;
+            expected.insert(key, row);
+        }
+        for mutation in &transaction.mutations {
+            match mutation {
+                RowMutation::Insert(after) => {
+                    checked_row_bytes(&self.schema, after, limits)?;
+                    let key = self.schema.row_key(after)?;
+                    if expected.insert(key, after.clone()).is_some() {
+                        return Err(DatabaseError::Conflict("inserted key already exists"));
+                    }
+                }
+                RowMutation::Delete(before) => {
+                    checked_row_bytes(&self.schema, before, limits)?;
+                    let key = self.schema.row_key(before)?;
+                    if expected.get(&key) != Some(before) {
+                        return Err(DatabaseError::Conflict("delete before image mismatch"));
+                    }
+                    expected.remove(&key);
+                }
+                RowMutation::Update { before, after } => {
+                    checked_row_bytes(&self.schema, before, limits)?;
+                    checked_row_bytes(&self.schema, after, limits)?;
+                    let key = self.schema.row_key(before)?;
+                    if self.schema.row_key(after)? != key {
+                        return Err(DatabaseError::InvalidTransaction("primary-key update"));
+                    }
+                    if expected.get(&key) != Some(before) {
+                        return Err(DatabaseError::Conflict("update before image mismatch"));
+                    }
+                    expected.insert(key, after.clone());
+                }
+            }
+        }
+        Ok(expected)
+    }
+
     fn apply_candidate_mutation(
         &self,
         candidates: &mut BTreeMap<usize, DatabasePartition<F, E>>,
@@ -948,6 +1094,83 @@ where
         self.partitions[index].signature.insert(&bytes)?;
         self.partitions[index].rows.insert(key, row);
         Ok(())
+    }
+}
+
+/// Capacity policy for incremental transaction application.
+///
+/// The threshold is deliberately supplied by the application because the
+/// break-even point depends on its schema, partition count and hardware.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DatabaseApplyPolicy {
+    max_incremental_mutations: usize,
+}
+
+impl DatabaseApplyPolicy {
+    /// Creates a policy with an inclusive incremental mutation ceiling.
+    #[must_use]
+    pub const fn new(max_incremental_mutations: usize) -> Self {
+        Self {
+            max_incremental_mutations,
+        }
+    }
+
+    /// Largest transaction routed through partition-local candidates.
+    #[must_use]
+    pub const fn max_incremental_mutations(self) -> usize {
+        self.max_incremental_mutations
+    }
+}
+
+impl Default for DatabaseApplyPolicy {
+    fn default() -> Self {
+        Self::new(usize::MAX)
+    }
+}
+
+/// Route selected by [`PartitionedDatabase::apply_transaction_with_policy`].
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DatabaseApplyPath {
+    /// Partition-local before/after images were applied transactionally.
+    Incremental,
+    /// Exact authoritative target rows were rebuilt and verified before commit.
+    AuthoritativeRebuild,
+    /// The exact transaction ID had already been committed.
+    AlreadyApplied,
+}
+
+/// Observable result of policy-driven transaction application.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DatabasePolicyApplyReport {
+    status: DatabaseApplyStatus,
+    path: DatabaseApplyPath,
+    revision: u64,
+    touched_partitions: usize,
+}
+
+impl DatabasePolicyApplyReport {
+    /// Commit/replay outcome.
+    #[must_use]
+    pub const fn status(self) -> DatabaseApplyStatus {
+        self.status
+    }
+
+    /// Capacity route selected for this call.
+    #[must_use]
+    pub const fn path(self) -> DatabaseApplyPath {
+        self.path
+    }
+
+    /// Revision after the call.
+    #[must_use]
+    pub const fn revision(self) -> u64 {
+        self.revision
+    }
+
+    /// Partition candidates published, or total rebuilt partitions.
+    #[must_use]
+    pub const fn touched_partitions(self) -> usize {
+        self.touched_partitions
     }
 }
 

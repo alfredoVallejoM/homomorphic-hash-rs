@@ -2,7 +2,7 @@
 
 Fecha: 4 de agosto de 2026.
 
-Estado: completado localmente.
+Estado: integrado en `main` mediante `d0f4fcd`; evidencia histórica RC.2.
 
 ## Resultado
 

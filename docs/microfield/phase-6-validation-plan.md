@@ -275,9 +275,10 @@ F6.V termina únicamente cuando:
 9. toda afirmación comercial o científica queda trazada a un artefacto;
 10. el informe puede concluir honestamente que una vía no aporta valor.
 
-Hasta entonces quedan bloqueados Fase 7, estabilización pública, elección de
-licencia y publicación. Correcciones de defectos y mejoras necesarias para
-ejecutar F6.V sí están permitidas; ampliar el núcleo con nuevas familias no.
+La implementación V1–V6 ya superó los gates semánticos y multi-arquitectura
+disponibles. Los requisitos residuales se siguen ahora en RC.7–RC.10; la
+estabilización pública, elección de licencia y publicación continúan en una
+fase posterior. Ampliar el núcleo con nuevas familias no sustituye esos gates.
 
 ## Fundamentación
 

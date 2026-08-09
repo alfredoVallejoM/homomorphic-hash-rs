@@ -76,11 +76,12 @@ pub use graph::{
 pub use structural::{
     AdditiveDelta, AdditiveSignature, AlgebraicResidual, ApplicationNamespace,
     BidirectionalSequenceSignature, BinaryPolynomialEncoder, BoundedSetReconciler,
-    CanonicalElementEncoder, CompactSignature, DatabaseApplyReport, DatabaseApplyStatus,
-    DatabaseColumn, DatabaseColumnType, DatabaseError, DatabaseReplayReport, DatabaseRow,
-    DatabaseRowKey, DatabaseSchema, DatabaseSchemaId, DatabaseSummary, DatabaseTransactionLimits,
-    DatabaseTransactionLog, DatabaseValue, DeltaApplyReport, DeltaApplyStatus, DeltaEnvelope,
-    DeltaError, DeltaId, DeltaJournal, DeltaJournalLimits, DeltaReplayReport, DeltaVerification,
+    CanonicalElementEncoder, CompactSignature, DatabaseApplyPath, DatabaseApplyPolicy,
+    DatabaseApplyReport, DatabaseApplyStatus, DatabaseColumn, DatabaseColumnType, DatabaseError,
+    DatabasePolicyApplyReport, DatabaseReplayReport, DatabaseRow, DatabaseRowKey, DatabaseSchema,
+    DatabaseSchemaId, DatabaseSummary, DatabaseTransactionLimits, DatabaseTransactionLog,
+    DatabaseValue, DeltaApplyReport, DeltaApplyStatus, DeltaEnvelope, DeltaError, DeltaId,
+    DeltaJournal, DeltaJournalLimits, DeltaReplayReport, DeltaVerification,
     DomainSeparatedHashToFieldEncoder, EncoderId, FileChunkProfile, FileChunkProfileId,
     HomomorphicSummaryRoot, HomomorphicSummaryTree, LegacyAffineEncoderV1, LegacyLinearEncoderV1,
     MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature, MultisetDelta,
@@ -90,8 +91,8 @@ pub use structural::{
     SignatureAssurance, SignatureBuilder, SignatureContext, SignatureDelta, SignatureError,
     SignatureEvaluationProfile, SignatureFieldBinding, SignatureFieldProfile, SignatureId,
     SignatureLaw, SignatureProfile, StructuralEncoder, StructuralLaneEncoder, SummaryEditPath,
-    SummaryEditReport, SummaryTreeError, SummaryTreeLimits, TrackedMultiset, TrackedSequence,
-    TrackedSnapshotLimits, TransactionDelta, TransactionId,
+    SummaryEditPolicy, SummaryEditReport, SummaryTreeError, SummaryTreeLimits, TrackedMultiset,
+    TrackedSequence, TrackedSnapshotLimits, TransactionDelta, TransactionId,
 };
 #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 pub use structural::{

@@ -166,9 +166,9 @@
     },
     {
       "id": "graph.canonical-dag",
-      "status": "planned",
+      "status": "conditional",
       "feature": "graph",
-      "contract": "persistent identity derived only from exact canonical bytes"
+      "contract": "MFGD persistence and reuse derived only from complete exact canonical bytes; Inconclusive never inserts or merges"
     },
     {
       "id": "legacy.proof-facade",

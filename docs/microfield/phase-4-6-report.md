@@ -108,6 +108,6 @@ asignador o dispatch indirecto. ASan ejecuta también ambos campos externos.
   mantenida o packed persistente será necesaria para una ruta externa
   sin repacking entre operaciones.
 
-Con estas condiciones, F4.6-SIMD queda cerrada localmente. El siguiente corte
-es [`F4.7-PACKED-SIMD`](phase-4-7-plan.md), que implementará el storage por
-lanes antes de que Fase 5 genere perfiles primos externos completos.
+Con estas condiciones, F4.6-SIMD quedó cerrada. El corte siguiente fue
+[`F4.7-PACKED-SIMD`](phase-4-7-plan.md), ya implementado e integrado; después
+Fase 5 añadió los perfiles primos externos completos.

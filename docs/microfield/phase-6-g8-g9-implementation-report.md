@@ -2,7 +2,7 @@
 
 Fecha: 3 de agosto de 2026.
 
-Estado: completado localmente. F6.G10 se cerró posteriormente; véase el
+Estado: integrado en `main`. F6.G10 se cerró posteriormente; véase el
 [`informe G10`](phase-6-g10-final-report.md).
 
 ## Resultado
@@ -110,7 +110,7 @@ Resultado observado:
 También quedaron verdes `cargo test --workspace --all-features`, Clippy con
 `-D warnings`, formato y `git diff --check`.
 
-## Límites y siguiente hito
+## Límites y siguiente hito en el momento del informe — ejecutado
 
 G9 es deliberadamente una referencia clara, no el motor industrial final:
 

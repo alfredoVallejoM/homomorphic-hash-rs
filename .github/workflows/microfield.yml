@@ -62,7 +62,7 @@ jobs:
       - name: External generated-source Clippy
         run: cargo +stable clippy --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --all-targets -- -D warnings
       - name: Legacy library regression
-        run: cargo +stable test -p homomorphic-hash-rs --lib
+        run: cargo +stable test -p homomorphic-hash-rs --features legacy --lib
       - name: Legacy field compatibility
         run: cargo +stable test -p homomorphic-hash-rs --test microfield_compat
       - name: F6.V validation harness unit gates
@@ -122,6 +122,67 @@ jobs:
           --test graph_g13_g14
           --test rc_graph_dag
 
+  rc7-properties:
+    name: RC.7 property and model contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Finite-field laws and reference arithmetic
+        run: >-
+          cargo +stable test -p microfield --all-features --locked
+          --test property_fields
+      - name: Executable correctness inventory and state-machine properties
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs --all-features --locked
+          --test rc_correctness_inventory
+          --test rc_property_contracts
+          --test rc_graph_properties
+
+  rc7-fuzz-smoke:
+    name: RC.7 fuzz smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ASAN_OPTIONS: detect_leaks=0
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install nightly Rust
+        run: rustup toolchain install nightly --profile minimal
+      - name: Install pinned cargo-fuzz
+        run: cargo install cargo-fuzz --locked --version 0.13.2
+      - name: Compile every locked fuzz target
+        run: cargo check --manifest-path fuzz/Cargo.toml --bins --locked
+      - name: Regenerate deterministic valid seeds
+        run: cargo run --manifest-path fuzz/Cargo.toml --bin generate_seed_corpus --locked
+      - name: Verify seed corpus is reproducible
+        run: git diff --exit-code -- fuzz/corpus
+      - name: Prepare disposable fuzz corpora
+        shell: bash
+        run: |
+          set -euo pipefail
+          for target in microfield_manifests structural_wires graph_wires; do
+            mkdir -p "$RUNNER_TEMP/rc7-corpus/$target"
+            cp -a "fuzz/corpus/$target/." "$RUNNER_TEMP/rc7-corpus/$target/"
+          done
+      - name: Fuzz manifests
+        run: >-
+          cargo +nightly fuzz run microfield_manifests
+          "$RUNNER_TEMP/rc7-corpus/microfield_manifests"
+          -- -runs=5000 -max_len=65536 -timeout=10
+      - name: Fuzz structural, delta and database wires
+        run: >-
+          cargo +nightly fuzz run structural_wires
+          "$RUNNER_TEMP/rc7-corpus/structural_wires"
+          -- -runs=5000 -max_len=4096 -timeout=10
+      - name: Fuzz exact graph and DAG wires
+        run: >-
+          cargo +nightly fuzz run graph_wires
+          "$RUNNER_TEMP/rc7-corpus/graph_wires"
+          -- -runs=5000 -max_len=4096 -timeout=10
+
   f6-validation:
     name: F6.V reproducibility (${{ matrix.arch }})
     needs: stable
@@ -157,6 +218,178 @@ jobs:
           path: f6-performance-${{ matrix.arch }}.json
           if-no-files-found: error
 
+  rc8-capacity:
+    name: RC.8 capacity and regression (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Run frozen RC.8 capacity campaign
+        run: >-
+          cargo +stable run --release -p microfield-validation-lab --bin f6-validation
+          --locked -- rc8-capacity
+          --manifest validation/rc/capacity-manifest-v1.json
+          --out rc8-capacity-candidate-${{ matrix.arch }}.json
+      - name: Check out pull-request baseline
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: rc8-baseline
+      - name: Detect an RC.8-aware baseline
+        if: github.event_name == 'pull_request'
+        id: baseline-support
+        shell: bash
+        run: |
+          if test -f rc8-baseline/validation/rc/capacity-manifest-v1.json && \
+             grep -q 'rc8-compare' rc8-baseline/crates/validation-lab/src/main.rs; then
+            echo 'available=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+            echo 'The target branch predates RC.8; this run bootstraps the baseline.'
+          fi
+      - name: Measure the pull-request baseline on the same runner
+        if: github.event_name == 'pull_request' && steps.baseline-support.outputs.available == 'true'
+        working-directory: rc8-baseline
+        run: >-
+          cargo +stable run --release -p microfield-validation-lab --bin f6-validation
+          --locked -- rc8-capacity
+          --manifest validation/rc/capacity-manifest-v1.json
+          --out ../rc8-capacity-baseline-${{ matrix.arch }}.json
+      - name: Enforce the frozen-route regression threshold
+        if: github.event_name == 'pull_request' && steps.baseline-support.outputs.available == 'true'
+        run: >-
+          cargo +stable run --release -p microfield-validation-lab --bin f6-validation
+          --locked -- rc8-compare
+          --manifest validation/rc/capacity-manifest-v1.json
+          --baseline rc8-capacity-baseline-${{ matrix.arch }}.json
+          --candidate rc8-capacity-candidate-${{ matrix.arch }}.json
+          --out rc8-regression-${{ matrix.arch }}.json
+      - name: Upload RC.8 capacity evidence
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: rc8-capacity-${{ matrix.arch }}
+          path: |
+            rc8-capacity-candidate-${{ matrix.arch }}.json
+            rc8-capacity-baseline-${{ matrix.arch }}.json
+            rc8-regression-${{ matrix.arch }}.json
+          if-no-files-found: error
+
+  rc9-consumer:
+    name: RC.9 external consumer (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
+      - name: Format the independent consumer
+        run: >-
+          cargo +stable fmt --manifest-path test-fixtures/rc-consumer/Cargo.toml
+          -- --check
+      - name: Compile and test persist/restart/rebuild contracts
+        run: >-
+          cargo +stable test --manifest-path test-fixtures/rc-consumer/Cargo.toml
+          --all-targets --locked
+      - name: External consumer Clippy
+        run: >-
+          cargo +stable clippy --manifest-path test-fixtures/rc-consumer/Cargo.toml
+          --all-targets --locked -- -D warnings
+      - name: Execute the clean end-to-end consumer
+        run: >-
+          cargo +stable run --manifest-path test-fixtures/rc-consumer/Cargo.toml
+          --locked -- rc9-consumer-${{ matrix.arch }}
+      - name: Audit dependency and package boundary
+        if: matrix.arch == 'x86_64'
+        run: bash tools/audit_rc_package.sh
+      - name: Upload persisted RC.9 artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: rc9-consumer-${{ matrix.arch }}
+          path: rc9-consumer-${{ matrix.arch }}
+          if-no-files-found: error
+
+  rc10-decision:
+    name: RC.10 reproducible go-no-go
+    needs:
+      - stable
+      - root-quality
+      - signatures-rc
+      - graphs-rc
+      - rc7-properties
+      - rc7-fuzz-smoke
+      - rc8-capacity
+      - rc9-consumer
+      - f6-validation
+      - features
+      - msrv
+      - generated
+      - miri
+      - x86-asan
+      - arm64
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Download x86-64 capacity evidence
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: rc8-capacity-x86_64
+          path: ${{ runner.temp }}/rc10-evidence/rc8-x86_64
+      - name: Download AArch64 capacity evidence
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: rc8-capacity-aarch64
+          path: ${{ runner.temp }}/rc10-evidence/rc8-aarch64
+      - name: Download x86-64 consumer evidence
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: rc9-consumer-x86_64
+          path: ${{ runner.temp }}/rc10-evidence/rc9-x86_64
+      - name: Download AArch64 consumer evidence
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: rc9-consumer-aarch64
+          path: ${{ runner.temp }}/rc10-evidence/rc9-aarch64
+      - name: Assemble the machine-readable RC decision
+        run: >-
+          cargo +stable run -p microfield-validation-lab --bin f6-validation --locked --
+          rc10-decision --manifest validation/rc/decision-manifest-v1.json
+          --capacity-report "${{ runner.temp }}/rc10-evidence/rc8-x86_64/rc8-capacity-candidate-x86_64.json"
+          --capacity-report "${{ runner.temp }}/rc10-evidence/rc8-aarch64/rc8-capacity-candidate-aarch64.json"
+          --consumer-report "${{ runner.temp }}/rc10-evidence/rc9-x86_64/rc9-report.json"
+          --consumer-report "${{ runner.temp }}/rc10-evidence/rc9-aarch64/rc9-report.json"
+          --required-ci-gates-passed
+          --out rc10-decision.json
+      - name: Require ReadyForInternalUse
+        run: jq -e '.final_decision == "ReadyForInternalUse"' rc10-decision.json
+      - name: Upload RC.10 decision artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: rc10-decision
+          path: rc10-decision.json
+          if-no-files-found: error
+
   features:
     name: Runtime feature matrix
     runs-on: ubuntu-latest
@@ -188,6 +421,29 @@ jobs:
       - run: cargo +stable check -p microfield --target aarch64-unknown-linux-gnu --no-default-features --features std,portable,builtin-fields
       - name: External ABI 3 scalar-only no_std
         run: cargo +stable check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
+      - name: Root package feature boundaries
+        run: |
+          cargo +stable check -p homomorphic-hash-rs --no-default-features --locked
+          cargo +stable check -p homomorphic-hash-rs --no-default-features --features signatures --locked
+          cargo +stable check -p homomorphic-hash-rs --no-default-features --features dynamic-signatures --locked
+          cargo +stable check -p homomorphic-hash-rs --no-default-features --features graph --locked
+          cargo +stable check -p homomorphic-hash-rs --no-default-features --features legacy --locked
+      - name: Signatures and protocols without graph or legacy
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs --no-default-features
+          --features signatures --locked
+          --test rc_supported_surface
+          --test rc_property_contracts
+          --test rc_signature_api
+          --test rc_delta_api
+          --test rc_summary_tree
+          --test rc_database_reconciliation
+      - name: Runtime signatures without graph or legacy
+        run: >-
+          cargo +stable test -p homomorphic-hash-rs --no-default-features
+          --features dynamic-signatures --locked
+          --test rc_supported_surface
+          --test rc_signature_api
 
   msrv:
     name: MSRV 1.89
@@ -340,6 +596,11 @@ jobs:
       - root-quality
       - signatures-rc
       - graphs-rc
+      - rc7-properties
+      - rc7-fuzz-smoke
+      - rc8-capacity
+      - rc9-consumer
+      - rc10-decision
       - f6-validation
       - features
       - msrv
@@ -354,6 +615,11 @@ jobs:
       ROOT_QUALITY: ${{ needs.root-quality.result }}
       SIGNATURES_RC: ${{ needs.signatures-rc.result }}
       GRAPHS_RC: ${{ needs.graphs-rc.result }}
+      RC7_PROPERTIES: ${{ needs.rc7-properties.result }}
+      RC7_FUZZ_SMOKE: ${{ needs.rc7-fuzz-smoke.result }}
+      RC8_CAPACITY: ${{ needs.rc8-capacity.result }}
+      RC9_CONSUMER: ${{ needs.rc9-consumer.result }}
+      RC10_DECISION: ${{ needs.rc10-decision.result }}
       F6_VALIDATION: ${{ needs.f6-validation.result }}
       FEATURES: ${{ needs.features.result }}
       MSRV: ${{ needs.msrv.result }}
@@ -368,6 +634,8 @@ jobs:
           set -euo pipefail
           for result in \
             "$STABLE" "$ROOT_QUALITY" "$SIGNATURES_RC" "$GRAPHS_RC" \
+            "$RC7_PROPERTIES" "$RC7_FUZZ_SMOKE" "$RC8_CAPACITY" \
+            "$RC9_CONSUMER" "$RC10_DECISION" \
             "$F6_VALIDATION" "$FEATURES" "$MSRV" "$GENERATED" "$MIRI" \
             "$X86_ASAN" "$ARM64"; do
             test "$result" = success

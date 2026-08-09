@@ -170,7 +170,7 @@ fn sample(
     }
 }
 
-fn environment() -> EnvironmentReport {
+pub(crate) fn environment() -> EnvironmentReport {
     let rustc = Command::new("rustc")
         .arg("--version")
         .output()

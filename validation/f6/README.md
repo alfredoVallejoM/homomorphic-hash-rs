@@ -1,5 +1,9 @@
 # Artefactos F6.V
 
+Estado, 9 de agosto de 2026: los resultados semánticos versionados son
+reproducibles byte a byte. Los resultados de rendimiento siguen siendo
+host-specific y no constituyen SLO; esos gates pertenecen a RC.8.
+
 - `manifest.json`: parámetros congelados antes de observar resultados.
 - `schema/`: contratos JSON versionados para semántica y rendimiento.
 - `corpora/`: corpus matemáticos u oráculos versionados con procedencia.

@@ -1,0 +1,40 @@
+{
+  "schema": "microfield-rc9-dependency-inventory-v1",
+  "generated_on": "2026-08-09",
+  "authority": "Cargo.lock plus the independently locked fixture manifests",
+  "lockfiles": [
+    { "path": "Cargo.lock", "packages": 179, "scope": "workspace and RC product" },
+    { "path": "fuzz/Cargo.lock", "packages": 121, "scope": "RC.7 fuzz tooling" },
+    { "path": "test-fixtures/rc-consumer/Cargo.lock", "packages": 127, "scope": "RC.9 external consumer" },
+    { "path": "crates/microfield/test-fixtures/external-consumer/Cargo.lock", "packages": 36, "scope": "generated-field consumer" }
+  ],
+  "root_runtime_dependencies": [
+    "bincode@1.3.3",
+    "csv@1.4.0",
+    "flate2@1.1.9",
+    "microfield@0.1.0",
+    "purr@0.9.0",
+    "rand@0.8.5",
+    "rayon@1.11.0",
+    "serde@1.0.228",
+    "sha2@0.10.9",
+    "ureq@2.12.1"
+  ],
+  "package_boundary": {
+    "root_maximum_files": 150,
+    "observed_root_files": 100,
+    "excluded_prefixes": ["data/", "fuzz/", "target/", "test-fixtures/"],
+    "microfield_archive_dry_run": "passed",
+    "root_archive": "deferred-until-microfield-has-registry-or-staging-source"
+  },
+  "feature_policy": {
+    "root_defaults": ["signatures", "graph"],
+    "legacy_default": false,
+    "external_consumer_defaults": false
+  },
+  "advisory_audit": {
+    "status": "not-configured",
+    "classification": "external-publication-blocker",
+    "required_action": "add a pinned advisory/SBOM gate before external publication"
+  }
+}

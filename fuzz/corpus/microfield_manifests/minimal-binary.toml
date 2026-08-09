@@ -1,0 +1,24 @@
+schema_version = 1
+
+[field]
+name = "fuzz_field"
+characteristic = 2
+degree = 5
+
+[field.basis]
+kind = "polynomial"
+coefficient_order = "ascending"
+
+[field.modulus]
+nonzero_exponents = [5, 2, 0]
+
+[field.encoding]
+canonical_bytes = 1
+byte_order = "little"
+bit_order = "lsb0"
+
+[build]
+limb_bits = 64
+reduction_style = "generated_fold"
+product_strategies = ["schoolbook"]
+requested_backends = ["portable"]

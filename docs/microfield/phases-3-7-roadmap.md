@@ -1,5 +1,9 @@
 # Roadmap corregido de Fases 3–7
 
+> Revisión de ciclo de vida, 9 de agosto de 2026: Fases 3–6 y RC.0–RC.6 están
+> integradas. Este roadmap conserva la secuencia histórica; el trabajo activo
+> es RC.7–RC.10 y se mantiene en `current-status-and-next.md`.
+
 Este documento adapta la especificación funcional externa al estado real del
 workspace. Conserva un único crate `microfield` dentro del workspace, features
 actuales, catálogo sellado y generación ABI v3.
@@ -54,7 +58,7 @@ externa. Se conserva su intención de no contaminar el núcleo algebraico:
 posterior que consume `microfield`; no pasarán a formar parte de `field`,
 `kernel` ni de la representación de los elementos.
 
-Estado a 3 de agosto de 2026: F6.0–F6.8 están implementados localmente y
+Fotografía histórica del 3 de agosto de 2026: F6.0–F6.8 estaban implementados y
 documentados en [phase-6-legacy-audit.md](phase-6-legacy-audit.md),
 [phase-6-pre-canon-plan.md](phase-6-pre-canon-plan.md) y
 [ADR 0027](adr/0027-structural-signatures-not-proofs.md). F6.G0–G7 están
@@ -93,7 +97,7 @@ Introducir `EncoderId` y `SignatureId`. Campo, encoder, ley, parámetros,
 evaluaciones y schema forman la compatibilidad; dos estados incompatibles no se
 combinan aunque compartan `FieldId`.
 
-### F6.3–F6.6 — leyes estructurales — completado localmente
+### F6.3–F6.6 — leyes estructurales — integrado
 
 - secuencias con longitud y potencia de concatenación;
 - multiconjuntos con multiplicidad y conteo de factores cero;
@@ -101,7 +105,7 @@ combinan aunque compartan `FieldId`.
 - `Residual` sin presentarlo como prueba criptográfica;
 - serialización canónica y migración explícita del legado.
 
-### F6.7 — generalización de campos — completado localmente
+### F6.7 — generalización de campos — integrado
 
 - ingestión directa de elementos para evitar round-trips canónicos;
 - fixture GF(2⁹) externo generado por `BinaryFieldFactory` durante el build;
@@ -110,7 +114,7 @@ combinan aunque compartan `FieldId`.
   mismo campo;
 - rechazo transaccional de campos mezclados y encoders de familia incorrecta.
 
-### F6.8 — firmas enriquecidas — completado localmente
+### F6.8 — firmas enriquecidas — integrado
 
 - secuencia bidireccional con evaluaciones Horner forward/reverse y ley exacta
   de concatenación;
@@ -122,19 +126,19 @@ combinan aunque compartan `FieldId`.
   segunda evaluación;
 - benchmark comparativo registrado sin atribuir seguridad criptográfica.
 
-### F6.G0 — contrato estructural rápido — completado localmente
+### F6.G0 — contrato estructural rápido — integrado
 
 Se separan etiquetado, firma y canonización exacta. El modelo es un multigrafo
 dirigido relacional con etiquetas, roles, bucles y multiplicidades exactos.
 Hipergrafos usan nodos de incidencia y no expansión a cliques.
 
-### F6.G1 — motor lineal genérico — completado localmente
+### F6.G1 — motor lineal genérico — integrado
 
 `FastGraphLabeler<F, E, K>` ejecuta propagación con productos multi-evaluación
 y transcript de rondas en `O(K R (V + I))`. No incorpora índices de entrada.
 F251, campos mantenidos y un GF(2⁹) externo generado ejecutan el mismo contrato.
 
-### F6.G2 — perfiles y huella híbrida — completado localmente
+### F6.G2 — perfiles y huella híbrida — integrado
 
 `Fast` tiene rondas fijas; `Robust` busca estabilización hasta un máximo.
 `analyze_hybrid` combina la firma algebraica con SHA-256 de histogramas de
@@ -142,7 +146,7 @@ ronda y relaciones refinadas exactas. `try_canonicalize` emite bytes exactos
 solo para una partición discreta y devuelve `SymmetryRemaining` en cualquier
 otro caso. No hay búsqueda oculta.
 
-### F6.G3 — rendimiento a gran escala — completado localmente
+### F6.G3 — rendimiento a gran escala — integrado
 
 - `PreparedGraph` precalcula etiquetas iniciales, descriptores, constantes
   afines y tokens de ronda;
@@ -157,7 +161,7 @@ otro caso. No hay búsqueda oculta.
   el mismo `F251GraphLabeler`; se retiraron las aserciones de la recurrencia
   histórica que ya no representaban el contrato.
 
-### F6.G4 — incrementalidad — completado localmente
+### F6.G4 — incrementalidad — integrado
 
 - estado owned con todas las capas `0..R` y workspace transaccional;
 - auditoría semántica fail-closed de vértices y ambas filas CSR;
@@ -167,7 +171,7 @@ otro caso. No hay búsqueda oculta.
 - composición y descomposición exacta de componentes tras editar aristas;
 - partición persistente `O(V + C log C)` y diferencial multi-campo completo.
 
-### F6.G5 — robustez adversarial — completado localmente
+### F6.G5 — robustez adversarial — integrado
 
 - diagnóstico exacto de aliasing de campo frente a ambigüedad local;
 - umbral versionado de alta regularidad y recomendación de escalado;
@@ -178,7 +182,7 @@ otro caso. No hay búsqueda oculta.
   isomorfa en seis vértices, más el par fuertemente regular
   Shrikhande/torres 4×4.
 
-### F6.G6 — canonización exacta optativa — completado localmente
+### F6.G6 — canonización exacta optativa — integrado como baseline
 
 `canonicalize_exact` usa individualización–refinamiento exacto, DFS iterativo y
 límites independientes de nodos y estado retenido. Solo publica
@@ -187,7 +191,7 @@ límites independientes de nodos y estado retenido. Solo publica
 predeterminado. El cierre está en
 [phase-6-g5-g6-final-report.md](phase-6-g5-g6-final-report.md).
 
-### F6.G7 — discriminación global rápida — completado localmente
+### F6.G7 — discriminación global rápida — integrado como baseline
 
 - v1 permanece estable y componible; v2 es la fachada recomendada;
 - componentes débiles, SCC, tamaños, labels, relaciones, grados, bucles,
@@ -208,14 +212,14 @@ metamórficas, catálogo de colisiones, aplicaciones con baselines, corpus de
 grafos exhaustivo/adversarial, oráculos independientes, curvas de escalado e
 incrementalidad y reproducción multi-CPU.
 
-Cada firma y cada aplicación terminará clasificada como aplicación validada,
-primitiva validada, experimental o descartada. La ausencia de colisiones en un
-corpus no se convertirá en un claim universal. El
+Cada firma y aplicación se clasifica como soportada, condicionada,
+experimental, restringida o descartada. La ausencia de colisiones en un corpus
+no se convierte en un claim universal. El
 [informe F6.V1–V6](phase-6-validation-final-report.md) contiene la primera
-clasificación. Fase 7, estabilización pública, licencia y publicación quedan
-pospuestas hasta completar el núcleo v1 y su nueva campaña.
+clasificación histórica. Los gates restantes se trasladaron a RC.7–RC.10;
+estabilización pública, licencia y publicación quedan en una fase posterior.
 
-### F6.G8–G9 — contrato y baseline Microcanon — completados localmente
+### F6.G8–G9 — contrato y baseline Microcanon — integrados
 
 - identidad y encoding canónicos independientes del perfil;
 - parser, mappings inversos y verificador exacto;
@@ -224,7 +228,7 @@ pospuestas hasta completar el núcleo v1 y su nueva campaña.
 - gate exhaustivo de 32.768 grafos simples de seis vértices, agrupados en las
   156 clases exactas del oráculo.
 
-### F6.G10 — motor Microcanon industrial — completado localmente
+### F6.G10 — motor Microcanon industrial — integrado
 
 - refinamiento compacto, trazas, automorfismos, órbitas, podas demostradas y
   presupuesto integral de memoria/tiempo/nodos.
@@ -238,7 +242,7 @@ framed y estabilidad. Véase el
 WL permanece como refinador; no define la corrección. Cambiar campo, lanes,
 motivos o planner no puede cambiar los bytes exactos.
 
-### F6.G11 — firmas v2 y expansión relacional por loops/Green — completado localmente
+### F6.G11 — firmas v2 y expansión relacional por loops/Green — integrado
 
 - assurance acotado para multievaluación y nueva secuencia multievaluada;
 - encodings realmente separados por lane;
@@ -254,7 +258,7 @@ característica dos están en el
 homomorfismos, zeta, resolventes y rank-one IR permanece como investigación,
 no como funcionalidad implícitamente completada.
 
-### F6.G12–G14 — comparación, regularidad e incrementalidad — completado localmente
+### F6.G12–G14 — comparación, regularidad e incrementalidad — integrado
 
 - descomposición exacta, matcher pareado y mapping siempre verificado;
 - motivos tipados y 2-WL localizado para celdas ambiguas;
@@ -265,9 +269,9 @@ no como funcionalidad implícitamente completada.
 G12 aporta el matcher exacto; G13 el pipeline de seis niveles y 2-WL
 localizado; G14 `GraphDelta`, replay y fallback. El
 [informe G13/G14](phase-6-g13-g14-final-report.md) contiene gates y límites.
-G15 queda planificado como preparación de toda la biblioteca para consumo
-interno: campos y firmas homomórficas son el producto primario; grafos/DAG son
-un vertical adicional. La
+G15.0–G15.4 quedaron materializados por RC.0–RC.6. G15.5–G15.9 se ejecutan
+ahora como RC.7–RC.10 para completar consumo interno: campos y firmas
+homomórficas son el producto primario; grafos/DAG son un vertical adicional. La
 publicación y estabilización pública serán una fase posterior separada; véase
 el [plan G15 interno](phase-6-g15-internal-readiness-plan.md).
 
@@ -292,9 +296,9 @@ como prueba de isomorfismo. Presupuesto agotado produce `Inconclusive` sin forma
 ni mapping parcial. El gate exhaustivo y adversarial completo se define en el
 [plan v2](phase-6-canonization-v2-plan.md#criterio-final-de-cierre).
 
-## Fase 7 — extensiones y aplicaciones — bloqueada por F6.V
+## Fase 7 histórica — extensiones aplazadas; preparación interna en RC.7–RC.10
 
-Torres/extensiones, FFT, reconciliación y backends adicionales se mantienen
+Torres/extensiones, FFT y backends adicionales se mantienen
 como tracks independientes. `BaseEmbedding` será una capacidad separada; no se
 amplía retrospectivamente `ExtensionField`. Las transformaciones entre campos
 isomorfos serán adapters generados y certificados, no una matriz genérica con

@@ -1,7 +1,8 @@
 use std::{env, path::PathBuf, process::ExitCode};
 
 use microfield_validation_lab::{
-    g11, g12, g13_g14, load_manifest, performance, run_semantic, write_json, write_semantic_csv,
+    capacity, decision, g11, g12, g13_g14, load_manifest, performance, run_semantic, write_json,
+    write_semantic_csv,
 };
 
 fn main() -> ExitCode {
@@ -17,16 +18,93 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let mut args = env::args().skip(1);
     let command = args.next().ok_or_else(usage)?;
-    let mut manifest = PathBuf::from("validation/f6/manifest.json");
+    let mut manifest = match command.as_str() {
+        "rc8-capacity" | "rc8-compare" => PathBuf::from("validation/rc/capacity-manifest-v1.json"),
+        "rc10-decision" => PathBuf::from("validation/rc/decision-manifest-v1.json"),
+        _ => PathBuf::from("validation/f6/manifest.json"),
+    };
     let mut output = None;
+    let mut baseline = None;
+    let mut candidate = None;
+    let mut capacity_reports = Vec::new();
+    let mut consumer_reports = Vec::new();
+    let mut required_ci_gates_passed = false;
     while let Some(argument) = args.next() {
         match argument.as_str() {
             "--manifest" => {
                 manifest = PathBuf::from(args.next().ok_or("--manifest requires a path")?)
             }
             "--out" => output = Some(PathBuf::from(args.next().ok_or("--out requires a path")?)),
+            "--baseline" => {
+                baseline = Some(PathBuf::from(
+                    args.next().ok_or("--baseline requires a path")?,
+                ))
+            }
+            "--candidate" => {
+                candidate = Some(PathBuf::from(
+                    args.next().ok_or("--candidate requires a path")?,
+                ))
+            }
+            "--capacity-report" => capacity_reports.push(PathBuf::from(
+                args.next().ok_or("--capacity-report requires a path")?,
+            )),
+            "--consumer-report" => consumer_reports.push(PathBuf::from(
+                args.next().ok_or("--consumer-report requires a path")?,
+            )),
+            "--required-ci-gates-passed" => required_ci_gates_passed = true,
             _ => return Err(format!("unknown argument {argument:?}\n{}", usage())),
         }
+    }
+    if command == "rc8-capacity" {
+        let destination = output.ok_or("rc8-capacity requires --out; results are host-specific")?;
+        let capacity_manifest = capacity::load_manifest(&manifest)?;
+        let report = capacity::run_campaign(&capacity_manifest)?;
+        write_json(&destination, &report)?;
+        println!(
+            "wrote host-specific RC.8 capacity report to {}",
+            destination.display()
+        );
+        if !report.passed {
+            return Err("one or more RC.8 capacity SLOs failed".into());
+        }
+        return Ok(());
+    }
+    if command == "rc8-compare" {
+        let destination = output.ok_or("rc8-compare requires --out")?;
+        let baseline = baseline.ok_or("rc8-compare requires --baseline")?;
+        let candidate = candidate.ok_or("rc8-compare requires --candidate")?;
+        let capacity_manifest = capacity::load_manifest(&manifest)?;
+        let report = capacity::compare_reports(
+            &baseline,
+            &candidate,
+            capacity_manifest.maximum_regression_percent(),
+        )?;
+        write_json(&destination, &report)?;
+        println!("wrote RC.8 regression report to {}", destination.display());
+        if !report.passed {
+            return Err("one or more frozen RC.8 routes regressed beyond the threshold".into());
+        }
+        return Ok(());
+    }
+    if command == "rc10-decision" {
+        let destination = output.ok_or("rc10-decision requires --out")?;
+        let decision_manifest = decision::load_manifest(&manifest)?;
+        let report = decision::build_report(
+            &decision_manifest,
+            &capacity_reports,
+            &consumer_reports,
+            required_ci_gates_passed,
+        )?;
+        write_json(&destination, &report)?;
+        println!(
+            "wrote RC.10 {} decision to {}",
+            report.final_decision,
+            destination.display()
+        );
+        if report.final_decision == "NotReady" {
+            return Err("RC.10 emitted NotReady because one or more gates failed".into());
+        }
+        return Ok(());
     }
     let manifest_data = load_manifest(&manifest)?;
     let root = manifest
@@ -94,6 +172,5 @@ fn run() -> Result<(), String> {
 }
 
 fn usage() -> String {
-    "usage: f6-validation <semantic|performance|g11|g12|g13-g14> [--manifest PATH] [--out PATH]"
-        .into()
+    "usage: f6-validation <semantic|performance|g11|g12|g13-g14|rc8-capacity|rc8-compare|rc10-decision> [--manifest PATH] [--out PATH] [--baseline PATH] [--candidate PATH] [--capacity-report PATH]... [--consumer-report PATH]... [--required-ci-gates-passed]".into()
 }

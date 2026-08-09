@@ -90,10 +90,10 @@ ni una promesa contractual.
 - SageMath 10.7: cuatro perfiles, 16 vectores exactos por perfil;
 - paquete legado: 447 de 447 tests de biblioteca en verde.
 
-El `cargo test --workspace` global sigue intentando compilar el ejemplo legado
-`chemistry_paper.rs` y falla en su uso preexistente de `Response::body_mut`.
-No pertenece a Fase 5 ni ha sido ocultado: su corrección forma parte del
-inventario/migración del legado planificado para Fase 6.
+En el momento de este cierre, `cargo test --workspace` intentaba compilar el
+ejemplo legado `chemistry_paper.rs` y fallaba en su uso de
+`Response::body_mut`. Fase 6 resolvió posteriormente esa deuda; la auditoría del
+9 de agosto ejecuta todos los targets del workspace sin fallos.
 
 ## Límites deliberados
 
@@ -104,9 +104,9 @@ inventario/migración del legado planificado para Fase 6.
 - el oráculo Sage es un gate de certificación, no dependencia runtime;
 - benchmarks publican comparaciones, no una promesa universal de ratio.
 
-## Continuación
+## Continuación histórica — ejecutada posteriormente
 
-La siguiente fase es la Fase 6 corregida del roadmap: inventario y congelación
+La fase siguiente fue la Fase 6 corregida del roadmap: inventario y congelación
 del legado, migración sobre `microfield`, identidades de encoder/firma y el
-track exacto de canonización de grafos. Ninguna de esas capas se añadirá a
+track exacto de canonización de grafos. Ninguna de esas capas se añadió a
 `field`, `kernel` o `dynamic`.

@@ -2,6 +2,11 @@
 
 Núcleo portable para campos finitos binarios y primos con abstracciones de coste cero.
 
+Estado de producto, 9 de agosto de 2026: núcleo funcional integrado y validado
+como dependencia interna del workspace; el crate conserva `publish = false`.
+La clasificación vigente y los gates restantes están en
+[`current-status-and-next.md`](../../docs/microfield/current-status-and-next.md).
+
 La Fase 1 portable está completa e integrada. El paquete incluye:
 
 - contratos algebraicos segregados;
@@ -46,8 +51,10 @@ CPU. Los perfiles externos son `explicit_only`; `Auto` conserva portable.
 
 H2.5 activa PMULL en AArch64 para presets y campos externos ABI 3. Producto y
 cuadrado usan wrappers ISA estrechos, reducción certificada y alineamiento
-natural. PMULL queda `explicit_only` hasta calibración en hardware ARM real;
-QEMU se usa exclusivamente para demostrar corrección.
+natural. La corrección, ASan y el ensamblado se validan también sobre hardware
+ARM64 real. PMULL permanece `explicit_only` porque aún no existe evidencia de
+rendimiento favorable y representativa en varias familias; QEMU queda como
+apoyo funcional, no como fuente de claims de rendimiento.
 
 H2.6 añade batches persistentes. `Engine::packing_plan` fija backend, campo,
 layout, longitud y alineamiento; `PackedBatch<F>` posee storage bajo `alloc`, y

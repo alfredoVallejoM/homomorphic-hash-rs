@@ -135,8 +135,9 @@ tres multiplicaciones de campo exigidas por elemento.
 
 ## Decisión de continuación
 
-El siguiente paso no es optimizar el canonizador histórico. Es cerrar F6.G0:
+El paso siguiente fue F6.G0, ya ejecutado; no era optimizar el canonizador
+histórico:
 definir qué grafo se acepta y cuál es el objeto canónico exacto. Sobre esa base
-se diseñará un algoritmo individualización–refinamiento autoritativo; las
-firmas de esta entrega podrán acelerar colores, particiones o descarte, pero
-todo empate terminará en comparación estructural exacta.
+se diseñó posteriormente el núcleo de individualización–refinamiento
+autoritativo; las firmas de esta entrega aceleran colores, particiones o
+descarte, pero toda identidad termina en comparación estructural exacta.

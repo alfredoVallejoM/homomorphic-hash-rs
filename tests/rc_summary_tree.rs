@@ -4,7 +4,7 @@
 
 use homomorphic_hash_rs::{
     BinaryPolynomialEncoder, FileChunkProfile, HomomorphicSummaryTree, SummaryEditPath,
-    SummaryTreeError, SummaryTreeLimits,
+    SummaryEditPolicy, SummaryTreeError, SummaryTreeLimits,
 };
 use microfield::{BinaryPolynomialField, Gf2_128V1};
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -73,6 +73,29 @@ fn local_replacement_touches_only_leaf_paths_and_matches_rebuild() {
     assert_eq!(report.touched_leaves(), 4);
     assert!(report.recomputed_nodes() < tree.chunk_count());
     assert_eq!(tree.root(), rebuild(profile, &exact).root());
+}
+
+#[test]
+fn measured_policy_routes_large_equal_length_edits_to_exact_rebuild() {
+    let profile = FileChunkProfile::fixed(64).unwrap();
+    let mut exact = (0..4_096).map(|index| index as u8).collect::<Vec<_>>();
+    let mut tree = rebuild(profile, &exact);
+    let policy = SummaryEditPolicy::new(128);
+
+    exact[100..164].fill(0x41);
+    let local = tree
+        .replace_range_with_policy(100..164, &[0x41; 64], policy)
+        .unwrap();
+    assert_eq!(local.path(), SummaryEditPath::LocalTree);
+
+    exact[512..768].fill(0x52);
+    let fallback = tree
+        .replace_range_with_policy(512..768, &[0x52; 256], policy)
+        .unwrap();
+    assert_eq!(fallback.path(), SummaryEditPath::BoundaryRebuild);
+    assert_eq!(tree.to_file_bytes().unwrap(), exact);
+    assert_eq!(tree.root(), rebuild(profile, &exact).root());
+    assert_eq!(policy.max_local_edited_bytes(), 128);
 }
 
 #[test]

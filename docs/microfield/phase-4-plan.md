@@ -32,7 +32,7 @@ módulo primo, el grado y el encoding pertenecen a `FieldId`.
 | F4.4 | `Fp256GenericV1` | Montgomery CIOS portable de cuatro limbs | completado |
 | F4.5 | Batch e ISA | AVX2 rentable; BMI2 radix-64 genérico y diferencial | completado |
 | F4.6 | Certificados, bundles y Sage | replay interno y corpus externo determinista | completado |
-| F4.7 | Calidad | `no_std`, Clippy, Miri, ASan y cero asignaciones | completado localmente; CI se valida tras push |
+| F4.7 | Calidad | `no_std`, Clippy, Miri, ASan y cero asignaciones | integrado; CI local/remota verde |
 | F4.8 | Rendimiento y documentación | medición por estrategia y selección conservadora | completado |
 
 ## Campos congelados

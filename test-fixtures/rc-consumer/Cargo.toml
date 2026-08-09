@@ -1,0 +1,18 @@
+[package]
+name = "homomorphic-hash-rc-consumer"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+resolver = "2"
+
+[dependencies]
+homomorphic-hash-rs = { path = "../..", default-features = false, features = ["signatures", "graph"] }
+microfield = { path = "../../crates/microfield" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+structural-field-fixture = { path = "../../crates/structural-field-fixture" }
+
+[dev-dependencies]
+tempfile = "3.23.0"

@@ -2,8 +2,9 @@
 
 Fecha: 3 de agosto de 2026.
 
-Estado: F6.G8–G14 completados localmente; F6.G15 queda planificado como cierre
-de consumo interno, separado de una futura fase de publicación.
+Estado: F6.G8–G14 integrados. Los verticales G15.0–G15.4 quedaron materializados
+por RC.0–RC.6; G15.5–G15.9 se corresponden ahora con RC.7–RC.10, separados de
+una futura fase de publicación.
 
 La entrega G8/G9 se documenta en
 [`phase-6-g8-g9-implementation-report.md`](phase-6-g8-g9-implementation-report.md).
@@ -412,7 +413,7 @@ inlining. El canonizador no expondrá factories dinámicas ni plugins de poda.
 
 ## Hitos
 
-### F6.G8 — contrato exacto e identidad estable — completado localmente
+### F6.G8 — contrato exacto e identidad estable — integrado
 
 Entregables:
 
@@ -429,7 +430,7 @@ Estado del gate: superado. `Microcanon`, encoding, parser, key, mappings y
 verifier solo dependen de `IncidenceGraph` y `GraphSchemaId`. El método legacy
 delega en esta fachada y ya no incorpora `GraphSignatureId` en los bytes.
 
-### F6.G9 — baseline exacto independiente — baseline completado localmente
+### F6.G9 — baseline exacto independiente — integrado
 
 Entregables:
 
@@ -448,7 +449,7 @@ vértices, perfiles F251/GF(2^256), encoders, lanes, rondas y renumeraciones. G9
 no contiene aún arenas compactas, podas, órbitas ni un presupuesto físico total;
 esas propiedades continúan bloqueando el cierre G10.
 
-### F6.G10 — motor de refinamiento y búsqueda industrial — completado localmente
+### F6.G10 — motor de refinamiento y búsqueda industrial — integrado
 
 Entregables:
 
@@ -486,7 +487,7 @@ frontera y artefactos de componentes. No pretende medir metadata del allocator,
 el grafo de entrada, el resultado entregado al caller ni todos los temporales
 atómicos. Por ello la API lo denomina `peak_tracked_bytes`, no memoria RSS.
 
-### F6.G11 — firmas v2 y assurance — completado localmente
+### F6.G11 — firmas v2 y assurance — integrado
 
 Entregables:
 
@@ -516,7 +517,7 @@ promocionan aún. Véase el
 
 ### F6.G12 — descomposición y comparación pareada
 
-Estado: completado localmente.
+Estado: integrado.
 
 Entregables:
 
@@ -540,7 +541,7 @@ n=1.024 frente a dos canonizaciones. Véanse el
 [informe G12](phase-6-g12-final-report.md) y la
 [ADR 0033](adr/0033-paired-comparison-and-long-walks.md).
 
-### F6.G13 — ambigüedad de alta regularidad — completado localmente
+### F6.G13 — ambigüedad de alta regularidad — integrado
 
 Entregables:
 
@@ -557,7 +558,7 @@ ninguna se marca isomorfa por heurística.
 Implementado mediante `AdaptiveGraphPipeline`, ceilings fail-closed, catálogo
 L0–L3 con skip atómico y `LocalPairRefinementProfile` admitido por `a³·r`.
 
-### F6.G14 — incrementalidad real — completado localmente
+### F6.G14 — incrementalidad real — integrado
 
 Entregables:
 
@@ -576,7 +577,7 @@ Implementado con `GraphDelta`, revisión optimista, invalidación tipada,
 estimador y tres rutas. En n=1.024, label delta mejora 2,78× frente al rebuild;
 la ruta topológica conserva como límite la construcción del CSR candidato.
 
-### F6.G15 — cierre científico e interno — planificado
+### F6.G15 — cierre científico e interno — plan histórico, materializado localmente hasta RC.10
 
 La ejecución detallada, los niveles de uso admitidos y el artefacto go/no-go se
 definen en el [plan G15 interno](phase-6-g15-internal-readiness-plan.md).

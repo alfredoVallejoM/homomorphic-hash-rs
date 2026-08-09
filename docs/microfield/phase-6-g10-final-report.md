@@ -2,7 +2,8 @@
 
 Fecha: 3 de agosto de 2026.
 
-Estado: completado localmente; pendiente de commit y CI remoto.
+Estado: integrado en `main` mediante `d0f4fcd` y validado por CI remota; este
+informe conserva la evidencia histórica de G10.
 
 ## Resultado
 
@@ -138,7 +139,7 @@ optimizaciones. G10 no ofrece aún switches públicos para desactivar cada poda
 por separado. Tampoco implementa árboles/bloques, matcher pareado, 2-WL
 localizado ni firmas de loops; corresponden a G11–G13.
 
-## Siguiente paso
+## Siguiente paso en el momento del informe — ejecutado posteriormente
 
 F6.G11 debe reforzar las firmas sin convertirlas en autoridad exacta:
 assurance explícito, encodings de lane realmente independientes, secuencias

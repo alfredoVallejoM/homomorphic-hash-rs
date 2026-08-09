@@ -6,6 +6,7 @@ publish = false
 description = "Reproducible F6.V validation harness for homomorphic-hash-rs"
 
 [dependencies]
+allocation-counter = "0.8.1"
 homomorphic-hash-rs = { path = "../.." }
 microfield = { path = "../microfield" }
 serde = { version = "1.0.228", features = ["derive"] }

@@ -1,0 +1,209 @@
+{
+  "schema": "microfield-rc-correctness-matrix-v1",
+  "workstream": "RC.7",
+  "entries": [
+    {
+      "capability": "field.static.binary",
+      "status": "covered",
+      "methods": ["laws", "canonical-roundtrip", "reference-differential", "isa-differential"],
+      "evidence": ["crates/microfield/tests/property_fields.rs", "crates/microfield/tests/differential_corpus.rs"],
+      "fuzz_targets": ["microfield_manifests"]
+    },
+    {
+      "capability": "field.static.prime",
+      "status": "covered",
+      "methods": ["laws", "integer-reference", "sage-vectors", "canonical-roundtrip"],
+      "evidence": ["crates/microfield/tests/property_fields.rs", "crates/microfield/tests/prime_sage_vectors.rs"],
+      "fuzz_targets": ["microfield_manifests"]
+    },
+    {
+      "capability": "field.generated.binary",
+      "status": "covered",
+      "methods": ["artifact-replay", "external-consumer", "reference-differential"],
+      "evidence": ["crates/microfield/tests/generator_phase.rs", "crates/microfield/tests/runtime_codegen_stability.rs"],
+      "fuzz_targets": ["microfield_manifests"]
+    },
+    {
+      "capability": "field.generated.prime",
+      "status": "covered",
+      "methods": ["certificate-replay", "artifact-replay", "external-consumer"],
+      "evidence": ["crates/microfield/tests/prime_artifacts.rs", "crates/microfield/tests/phase5_generator.rs"],
+      "fuzz_targets": ["microfield_manifests"]
+    },
+    {
+      "capability": "field.runtime",
+      "status": "covered",
+      "methods": ["static-runtime-parity", "context-mismatch", "batch-differential"],
+      "evidence": ["crates/microfield/tests/phase5_dynamic.rs", "crates/microfield/tests/binary_field_factory.rs"],
+      "fuzz_targets": ["microfield_manifests"]
+    },
+    {
+      "capability": "signature.additive",
+      "status": "covered",
+      "methods": ["partition-law", "canonical-roundtrip", "delta-state-machine"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/structural_signatures.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.sequence",
+      "status": "covered",
+      "methods": ["concatenation-law", "canonical-roundtrip", "append-trim-state-machine"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/structural_signatures.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.multiset",
+      "status": "covered",
+      "methods": ["partition-law", "permutation-invariance", "multiplicity", "zero-factor"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_delta_api.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.bidirectional-sequence",
+      "status": "covered",
+      "methods": ["concatenation-law", "canonical-roundtrip", "reverse-state"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/structural_signatures.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.multi-evaluation-multiset",
+      "status": "covered",
+      "methods": ["partition-law", "permutation-invariance", "canonical-roundtrip"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/structural_signatures.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.multi-evaluation-sequence",
+      "status": "covered",
+      "methods": ["concatenation-law", "canonical-roundtrip", "bounded-collision-exhaustion"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/structural_signatures.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.tracked",
+      "status": "covered",
+      "methods": ["exact-content", "exact-multiplicity", "snapshot-roundtrip"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_signature_api.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.runtime",
+      "status": "covered",
+      "methods": ["static-runtime-wire-parity", "all-partition-laws", "context-mismatch"],
+      "evidence": ["tests/structural_signatures.rs", "tests/rc_signature_api.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.builder",
+      "status": "covered",
+      "methods": ["external-visibility", "typed-construction", "compile-contract"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_signature_api.rs"],
+      "fuzz_targets": []
+    },
+    {
+      "capability": "signature.compact-snapshot",
+      "status": "covered",
+      "methods": ["wire-roundtrip", "context-rejection", "truncation"],
+      "evidence": ["tests/rc_signature_api.rs", "tests/structural_signatures.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.tracked-snapshot",
+      "status": "covered",
+      "methods": ["exact-roundtrip", "bounded-parser", "arbitrary-input-no-panic"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_signature_api.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "signature.residual",
+      "status": "covered",
+      "methods": ["algebraic-classification", "claim-boundary"],
+      "evidence": ["tests/structural_signatures.rs", "tests/rc_supported_surface.rs"],
+      "fuzz_targets": []
+    },
+    {
+      "capability": "protocol.reconciliation",
+      "status": "covered",
+      "methods": ["exact-recovery-in-bound", "typed-out-of-bound", "wire-roundtrip"],
+      "evidence": ["tests/rc_database_reconciliation.rs", "tests/rc_property_contracts.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "protocol.database-rows",
+      "status": "covered",
+      "methods": ["schema-validation", "canonical-row", "exact-key-lookup"],
+      "evidence": ["tests/rc_database_reconciliation.rs", "tests/rc_property_contracts.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "protocol.database-transactions",
+      "status": "covered",
+      "methods": ["exact-state-machine", "atomic-apply", "log-replay"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_database_reconciliation.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "protocol.data-delta",
+      "status": "covered",
+      "methods": ["exact-state-machine", "atomic-rejection", "wire-roundtrip"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_delta_api.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "protocol.delta-journal",
+      "status": "covered",
+      "methods": ["roundtrip", "idempotent-replay", "atomic-replay"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_delta_api.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "protocol.file-chunks",
+      "status": "covered",
+      "methods": ["exact-content", "boundary-edits", "profile-binding"],
+      "evidence": ["tests/rc_summary_tree.rs", "tests/rc_property_contracts.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "protocol.summary-tree",
+      "status": "covered",
+      "methods": ["edit-state-machine", "root-vs-rebuild", "fallback"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_summary_tree.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "protocol.summary-checkpoint",
+      "status": "covered",
+      "methods": ["checkpoint-after-every-edit", "bounded-parser", "arbitrary-input-no-panic"],
+      "evidence": ["tests/rc_property_contracts.rs", "tests/rc_summary_tree.rs"],
+      "fuzz_targets": ["structural_wires"]
+    },
+    {
+      "capability": "graph.filter",
+      "status": "covered",
+      "methods": ["negative-evidence", "exact-escalation", "collision-classification"],
+      "evidence": ["tests/fast_graph.rs", "tests/graph_signatures_v2.rs"],
+      "fuzz_targets": []
+    },
+    {
+      "capability": "graph.microcanon",
+      "status": "covered",
+      "methods": ["reference-differential", "renumbering-invariance", "budget-fail-closed"],
+      "evidence": ["tests/microcanon.rs", "tests/rc_graph_properties.rs"],
+      "fuzz_targets": ["graph_wires"]
+    },
+    {
+      "capability": "graph.canonical-dag",
+      "status": "covered",
+      "methods": ["exact-byte-reuse", "renumbering-property", "snapshot-roundtrip"],
+      "evidence": ["tests/rc_graph_properties.rs", "tests/rc_graph_dag.rs"],
+      "fuzz_targets": ["graph_wires"]
+    },
+    {
+      "capability": "legacy.proof-facade",
+      "status": "baseline",
+      "methods": ["source-compatibility", "non-cryptographic-claim-boundary"],
+      "evidence": ["tests/microfield_compat.rs", "tests/rc_supported_surface.rs"],
+      "fuzz_targets": []
+    }
+  ]
+}

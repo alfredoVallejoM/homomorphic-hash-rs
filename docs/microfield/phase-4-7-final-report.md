@@ -2,8 +2,8 @@
 
 Fecha de cierre local: 2 de agosto de 2026.
 
-Estado: implementación terminada y gates locales superados. La validación
-remota se vincula al commit publicado por GitHub Actions.
+Estado: implementación integrada en `main`; gates locales y remotos superados.
+Este informe conserva la evidencia histórica de F4.7.
 
 ## Resultado
 
@@ -198,6 +198,6 @@ F4.7 cumple su objetivo: el bridge genérico deja de pagar conversión por
 elemento en cada operación y conserva estabilidad nominal, seguridad de layout
 y selección conservadora. ADR 0025 queda aceptado.
 
-El siguiente corte es Fase 5: generación certificada de perfiles primos
-externos y selección del codec `u8`/`u16`/`u32` apropiado sin exponer las tablas
-internas implementadas aquí.
+El corte siguiente fue Fase 5, ya integrado: generación certificada de perfiles
+primos externos y selección del codec `u8`/`u16`/`u32` apropiado sin exponer
+las tablas internas implementadas aquí.

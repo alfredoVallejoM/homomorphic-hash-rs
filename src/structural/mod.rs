@@ -56,7 +56,8 @@ pub use bidirectional_sequence::BidirectionalSequenceSignature;
 pub use builder::DynamicSignatureBuilder;
 pub use builder::SignatureBuilder;
 pub use database::{
-    DatabaseApplyReport, DatabaseApplyStatus, DatabaseColumn, DatabaseColumnType, DatabaseError,
+    DatabaseApplyPath, DatabaseApplyPolicy, DatabaseApplyReport, DatabaseApplyStatus,
+    DatabaseColumn, DatabaseColumnType, DatabaseError, DatabasePolicyApplyReport,
     DatabaseReplayReport, DatabaseRow, DatabaseRowKey, DatabaseSchema, DatabaseSchemaId,
     DatabaseSummary, DatabaseTransactionLimits, DatabaseTransactionLog, DatabaseValue,
     PartitionedDatabase, RowMutation, TransactionDelta, TransactionId,
@@ -103,5 +104,5 @@ pub use sequence::{SequenceSignature, TrackedSequence};
 pub use snapshot::TrackedSnapshotLimits;
 pub use summary_tree::{
     FileChunkProfile, FileChunkProfileId, HomomorphicSummaryRoot, HomomorphicSummaryTree,
-    SummaryEditPath, SummaryEditReport, SummaryTreeError, SummaryTreeLimits,
+    SummaryEditPath, SummaryEditPolicy, SummaryEditReport, SummaryTreeError, SummaryTreeLimits,
 };

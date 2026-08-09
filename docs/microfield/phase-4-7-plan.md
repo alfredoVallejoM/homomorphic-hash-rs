@@ -2,7 +2,7 @@
 
 Fecha de planificación: 2 de agosto de 2026.
 
-Estado: completada localmente. El resultado y las diferencias materializadas
+Estado: completada e integrada. El resultado y las diferencias materializadas
 se documentan en [`phase-4-7-final-report.md`](phase-4-7-final-report.md).
 
 Este archivo conserva el plan aprobado y, por ello, mantiene redacción en

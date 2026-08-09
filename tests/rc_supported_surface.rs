@@ -80,12 +80,19 @@ fn rc_inventory_is_well_formed_and_unique() {
         "protocol.database-transactions",
         "graph.filter",
         "graph.microcanon",
+        "graph.canonical-dag",
     ] {
         assert!(
             ids.contains(required),
             "missing required capability: {required}"
         );
     }
+
+    let canonical_dag = capabilities
+        .iter()
+        .find(|capability| capability["id"] == "graph.canonical-dag")
+        .expect("canonical DAG capability");
+    assert_eq!(canonical_dag["status"], "conditional");
 }
 
 #[test]

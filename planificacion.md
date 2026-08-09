@@ -4,10 +4,17 @@ subtitle: "Fases 0, 1 y 2: núcleo portable, factory binaria y backends x86-64/A
 author: "Plan de implementación derivado de Arquitectura desde primeros principios"
 date: "2 de agosto de 2026"
 lang: es-ES
-status: "fase-1-y-fase-2-cerradas"
+status: "especificacion-historica-f0-f2-con-apendices-f6"
 ---
 
 # Resumen ejecutivo
+
+> **Ciclo de vida documental, 9 de agosto de 2026.** Este archivo conserva la
+> especificación que guio F0–F2 y los apéndices añadidos hasta F6/RC.6. No es
+> el backlog ni la fotografía actual. RC.0–RC.6 están integrados en `main`; el
+> estado, los riesgos y RC.7–RC.10 se mantienen en
+> `docs/microfield/current-status-and-next.md` y
+> `docs/microfield/release-candidate-readiness-plan.md`.
 
 > **Revisión SOLID v1.** Este documento se aplica junto con los ADR y la
 > documentación de `docs/microfield/`. Ante una contradicción, prevalecen los
@@ -15,14 +22,16 @@ status: "fase-1-y-fase-2-cerradas"
 > neutral de kernels, puertos y adaptadores para el generador y una política
 > explícita de abstracciones de coste cero.
 
-> **Estado de implementación, 2 de agosto de 2026.** La Fase 1 está cerrada en
-> `main` mediante `95f82f5`. El esquema ejecutable v1 permanece limitado a
+> **Fotografía histórica de implementación, 2 de agosto de 2026.** La Fase 1
+> estaba cerrada en `main` mediante `95f82f5`. El esquema ejecutable v1
+> permanecía limitado a
 > GF(2) en base polinómica con encoding `little`/`lsb0`. La Fase 2, H2.1–H2.8,
-> está cerrada: factory estática, optimizador, selector, perfiles ABI 3,
+> quedaba cerrada: factory estática, optimizador, selector, perfiles ABI 3,
 > PCLMUL, PMULL, packed batches, VPCLMUL y contratos de calibración/seguridad.
-> PCLMUL es automático; PMULL y VPCLMUL permanecen explícitos hasta superar el
+> PCLMUL era automático; PMULL y VPCLMUL permanecían explícitos hasta superar el
 > gate multi-familia. `Prime`, `Normal`, `Tower` y contextos dinámicos
-> permanecen fuera del alcance.
+> permanecían fuera del alcance de F0–F2, aunque las fases posteriores del
+> workspace ya implementan campos primos y contextos dinámicos.
 
 Este documento convierte `arquitectura_campos_finitos_vectorizados` en una
 especificación funcional implementable para sus tres fases iniciales:
@@ -3428,11 +3437,12 @@ El programa exige:
    descartada.
 
 La reconciliación incluye ya recuperación acotada con distancia desconocida:
-63.232 pares exhaustivos hasta diferencia seis se recuperan y verifican. Sigue
-como `ValidatedPrimitive` hasta disponer de factorización escalable y API
-pública. El corpus de 12.346 clases de orden ocho deja 454 grafos ambiguos en
-v1 y 46 tras motivos adaptativos; SHA híbrido y multi-campo local no reducen la
-regularidad. En grafos, una igualdad continúa significando
+63.232 pares exhaustivos hasta diferencia seis se recuperan y verifican. RC.5
+promovió después el decoder acotado a la API mantenida como
+`BoundedSetReconciler`, con wire `MFRS`, límites explícitos y semántica de
+conjuntos sin multiplicidad. El corpus de 12.346 clases de orden ocho deja 454
+grafos ambiguos en v1 y 46 tras motivos adaptativos; SHA híbrido y multi-campo
+local no reducen la regularidad. En grafos, una igualdad continúa significando
 `Indistinguishable`; solo un oráculo exacto completado certifica la forma.
 
 La implementación V1–V6 queda cerrada. La publicación continúa bloqueada por
@@ -3478,29 +3488,29 @@ RC.0 y RC.1 quedan completados localmente: el paquete separa `signatures`,
 campos mantenidos, un campo externo generado y su presentación runtime. El
 informe está en `docs/microfield/rc-0-rc-1-implementation-report.md`.
 
-RC.2 queda completado localmente con builders estáticos/runtime, perfiles de
+RC.2 quedó integrado con builders estáticos/runtime, perfiles de
 campo y evaluación, trait compacto sellado y snapshots exactos `MFTS` para
 `TrackedSequence`/`TrackedMultiset`. La evidencia está en
 `docs/microfield/rc-2-signature-api-report.md`.
 
-RC.3 queda completado localmente con envelopes `MFDE`, deltas segregados por
+RC.3 quedó integrado con envelopes `MFDE`, deltas segregados por
 ley, estado revisionado, aplicación preflight/candidate/commit y journal
 persistible `MFDJ`. Las campañas aleatorias comparan cada transición con
 rebuild y el replay repetido se reconoce por `DeltaId`. La evidencia está en
 `docs/microfield/rc-3-delta-core-report.md`.
 
-RC.4 queda completado localmente con chunking fijo identificado, framing
+RC.4 quedó integrado con chunking fijo identificado, framing
 `MFFC`, árbol ordenado `HomomorphicSummaryTree`, edits locales O(k log n),
 fallback completo al cambiar fronteras y checkpoints exactos `MFST`. La
 evidencia está en `docs/microfield/rc-4-summary-tree-report.md`.
 
-RC.5 queda completado localmente con schema y filas `MFRW`, tabla particionada,
+RC.5 quedó integrado con schema y filas `MFRW`, tabla particionada,
 before/after images, transacciones `MFTX`, log `MFTL` y reconciliación pública
 `MFRS`. V1 declara claves primarias únicas y reconciliación de conjuntos sin
 multiplicidad. La evidencia está en
 `docs/microfield/rc-5-database-reconciliation-report.md`.
 
-RC.6 queda completado localmente con `CanonicalGraphDag`, snapshot persistente
+RC.6 quedó integrado con `CanonicalGraphDag`, snapshot persistente
 `MFGD`, restauración que vuelve a canonizar cada nodo, dependencias acíclicas y
 reutilización condicionada a igualdad de bytes canónicos completos. Los
 adapters separan subred inducida —pérdida de frontera explícita—, subred cerrada

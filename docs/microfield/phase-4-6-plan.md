@@ -41,7 +41,7 @@ mantienen forzables y fuera de `Auto`.
 | F4.6-S2 | Goldilocks AVX2 | diferencial de producto ancho, fronteras, in-place y selector | completado |
 | F4.6-S3 | VPCLMUL desenrollado | presets y ABI 3 coinciden con portable; sin cambio de política | completado |
 | F4.6-S4 | especialización estática | suma/producto/square sin enum de operación en el loop | completado |
-| F4.6-S5 | seguridad y ensamblado | ASan, inventario SHA-256 e instrucciones requeridas | completado localmente |
+| F4.6-S5 | seguridad y ensamblado | ASan, inventario SHA-256 e instrucciones requeridas | integrado |
 | F4.6-S6 | documentación y cierre | ADR, informe, contratos y roadmap coherentes | completado |
 
 ## Diseño de coste cero

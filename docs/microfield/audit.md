@@ -1,5 +1,10 @@
 # Auditoría inicial de Microfield
 
+> Documento histórico. Describe la línea base anterior a Fase 1 y no el estado
+> actual. Los fallos, tamaños y conteos de esta página se conservan como
+> procedencia; consulte `current-status-and-next.md` para la auditoría del 9 de
+> agosto de 2026.
+
 ## Estado observado
 
 - El repositorio era un único paquete `homomorphic-hash-rs`.

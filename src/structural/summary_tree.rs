@@ -232,6 +232,38 @@ pub enum SummaryEditPath {
     BoundaryRebuild,
 }
 
+/// Capacity policy for choosing local recomputation versus exact rebuild.
+///
+/// The threshold is workload- and host-specific. Applications should derive it
+/// from their own RC.8-style capacity campaign instead of treating the default
+/// as a universal performance claim.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SummaryEditPolicy {
+    max_local_edited_bytes: usize,
+}
+
+impl SummaryEditPolicy {
+    /// Creates a policy that rebuilds equal-length replacements above `bytes`.
+    #[must_use]
+    pub const fn new(max_local_edited_bytes: usize) -> Self {
+        Self {
+            max_local_edited_bytes,
+        }
+    }
+
+    /// Largest equal-length replacement routed through local recomputation.
+    #[must_use]
+    pub const fn max_local_edited_bytes(self) -> usize {
+        self.max_local_edited_bytes
+    }
+}
+
+impl Default for SummaryEditPolicy {
+    fn default() -> Self {
+        Self::new(usize::MAX)
+    }
+}
+
 /// Observable work and revision of one committed edit.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SummaryEditReport {
@@ -417,11 +449,25 @@ where
         range: Range<usize>,
         replacement: &[u8],
     ) -> Result<SummaryEditReport, SummaryTreeError> {
+        self.replace_range_with_policy(range, replacement, SummaryEditPolicy::default())
+    }
+
+    /// Replaces one byte range using an explicit measured fallback threshold.
+    ///
+    /// Equal-length edits at or below the threshold use local tree
+    /// recomputation. Larger edits, and every length-changing edit, rebuild
+    /// from the exact retained bytes before publishing one new revision.
+    pub fn replace_range_with_policy(
+        &mut self,
+        range: Range<usize>,
+        replacement: &[u8],
+        policy: SummaryEditPolicy,
+    ) -> Result<SummaryEditReport, SummaryTreeError> {
         validate_range(&range, self.byte_len)?;
         if range.start == range.end && replacement.is_empty() {
             return Ok(self.no_change_report());
         }
-        if range.len() == replacement.len() {
+        if range.len() == replacement.len() && range.len() <= policy.max_local_edited_bytes {
             self.replace_fixed(range, replacement)
         } else {
             self.replace_with_rebuild(range, replacement)

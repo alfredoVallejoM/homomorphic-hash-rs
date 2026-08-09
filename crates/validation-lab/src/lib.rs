@@ -1,5 +1,7 @@
 //! Reproducible, non-production harness for F6.V.
 
+pub mod capacity;
+pub mod decision;
 pub mod g11;
 pub mod g12;
 pub mod g13_g14;

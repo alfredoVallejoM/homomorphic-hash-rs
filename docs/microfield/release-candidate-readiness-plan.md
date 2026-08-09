@@ -1,15 +1,22 @@
 # Plan maestro para alcanzar la release candidate técnica
 
-Fecha: 4 de agosto de 2026.
+Fecha inicial: 4 de agosto de 2026. Revisión de estado: 9 de agosto de 2026.
 
-Estado: RC.0–RC.6 completados localmente; RC.7 es el siguiente workstream.
+Estado: RC.0–RC.6 implementados, integrados en `main` y fijados por el tag
+`internal-rc6-integrated`. RC.7–RC.10 están implementados y validados
+localmente en la rama RC. El dictamen local es `Conditional` porque un árbol
+de trabajo no puede aportar commit limpio ni la evidencia AArch64; la
+integración remota del mismo commit es el gate que puede emitir
+`ReadyForInternalUse`.
 
-Antes de cerrar RC.7 se ejecutará el gate transversal de integración remota
-descrito en
-[`github-integration-and-remote-validation-plan.md`](github-integration-and-remote-validation-plan.md).
-Ese gate preserva el historial, integra la rama candidata en `main`, completa
-la cobertura CI y habilita las campañas remotas pesadas sobre una base
-recuperable.
+El gate transversal de integración remota descrito en
+[`github-integration-and-remote-validation-plan.md`](github-integration-and-remote-validation-plan.md)
+se ejecutó mediante la PR
+[#1](https://github.com/alfredoVallejoM/homomorphic-hash-rs/pull/1). El merge
+`d0f4fcd` y el run post-merge
+[`30910486012`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30910486012)
+preservan el historial, completan la cobertura CI y proporcionan una base
+recuperable. Ese plan queda como registro histórico, no como gate pendiente.
 
 La evidencia de los dos primeros workstreams está en
 [`rc-0-rc-1-implementation-report.md`](rc-0-rc-1-implementation-report.md).
@@ -33,6 +40,13 @@ La RC cubre cuatro pilares de producto:
 La publicación externa —licencia definitiva, crates.io, semver 1.0, soporte
 comercial y SLA público— seguirá siendo una fase posterior. Esta separación no
 rebaja los gates de corrección, reproducibilidad o estabilidad interna.
+
+La prioridad de RC.7–RC.10 es terminar y perfeccionar la línea de firmas
+homomórficas no criptográficas y su vertical de base de datos. RC.5 ya entregó
+el sistema funcional de filas, particiones, transacciones, log/replay y
+reconciliación; los gates abiertos cubren su endurecimiento adversarial,
+capacidad, integración persistente externa y operación. Grafos debe conservar
+sus gates, pero no desplazar este cierre de producto.
 
 ## 2. Reglas no negociables
 
@@ -71,9 +85,9 @@ Disponible:
 - bridges static/runtime y perfiles ISA externos verificados;
 - referencia Sage y vectores externos.
 
-Estado: funcional y avanzado. Falta convertir la selección campo/perfil para
-firmas en una política de producto y cerrar una matriz RC única sobre todas las
-familias admitidas.
+Estado posterior a RC.1: soportado según la matriz versionada. Los perfiles
+runtime continúan condicionados a assurance y límites; ampliar selección
+automática ISA exige nueva calibración, no reabrir la infraestructura base.
 
 ### 3.2 Firmas homomórficas
 
@@ -96,8 +110,9 @@ Disponible:
 - 145.636 ecuaciones metamórficas/de partición verificadas;
 - colisiones y degeneraciones mínimas congeladas.
 
-Estado: primitivas validadas, todavía no producto completo. Falta estabilizar
-la fachada, los perfiles, snapshots, protocolos y consumidores reales.
+Estado posterior a RC.2–RC.5: fachada, profiles, snapshots y protocolos
+soportados. Las variantes bidireccional y multievaluadas permanecen
+experimentales; RC.8–RC.9 deben cerrar coste/beneficio y consumo end-to-end.
 
 ### 3.3 Reconciliación
 
@@ -122,12 +137,18 @@ Disponible:
 - block-cut, bosques exactos, matcher pareado y fallback fail-closed;
 - `GraphDelta` transaccional e incrementalidad de labels;
 - corpus exhaustivo n=6, nauty n=8, CFI, SRG y otros adversariales;
-- DAG y adapters planificados para cierre.
+- `CanonicalGraphDag`, snapshot `MFGD` y adapters de subred/clique ya
+  implementados.
 
-Estado: núcleo exacto y pipeline utilizables bajo condiciones. Falta cerrar la
-persistencia canónica, adapters de consumo y gates de capacidad.
+Estado posterior a RC.6: núcleo exacto, persistencia y adapters integrados.
+La capacidad es condicional porque `Inconclusive` debe propagarse y aún faltan
+SLO, fuzzing continuo y un consumidor persistente end-to-end.
 
-## 4. Dos ampliaciones obligatorias de firmas
+## 4. Dos ampliaciones obligatorias de firmas — entregadas en RC.2–RC.6
+
+Esta sección conserva los requisitos que guiaron la implementación. Sus
+entregables funcionales ya existen; los gates operativos restantes se siguen
+en RC.7–RC.10.
 
 ### 4.1 Firmas como producto público de primer nivel
 
@@ -229,7 +250,7 @@ El análisis detallado se encuentra en
 
 ## 5. Workstreams hasta RC
 
-### RC.0 — congelar inventario y claims — completado localmente
+### RC.0 — congelar inventario y claims — integrado
 
 Entregables:
 
@@ -242,7 +263,7 @@ Entregables:
 Gate: todo símbolo público tiene owner, estado y contrato; ningún flujo
 recomendado depende del legado.
 
-### RC.1 — cerrar infraestructura de campos — completado localmente
+### RC.1 — cerrar infraestructura de campos — integrado
 
 Entregables:
 
@@ -261,7 +282,7 @@ Gate:
 - ningún backend modifica encoding, identidad o semántica;
 - fallback portable disponible para todo perfil soportado.
 
-### RC.2 — estabilizar API de firmas — completado localmente
+### RC.2 — estabilizar API de firmas — integrado
 
 Entregables:
 
@@ -275,7 +296,7 @@ Entregables:
 Gate: suite genérica única sobre cada combinación admitida, compile-fail para
 contextos incompatibles y consumidor externo sin APIs privadas.
 
-### RC.3 — implementar núcleo de deltas — completado localmente
+### RC.3 — implementar núcleo de deltas — integrado
 
 Entregables:
 
@@ -291,7 +312,7 @@ paso y todo fallo conserva bytes y revisión anteriores.
 
 Evidencia: `docs/microfield/rc-3-delta-core-report.md`.
 
-### RC.4 — archivos y árbol jerárquico — completado localmente
+### RC.4 — archivos y árbol jerárquico — integrado
 
 Entregables:
 
@@ -307,7 +328,7 @@ activan un fallback correcto.
 
 Evidencia: `docs/microfield/rc-4-summary-tree-report.md`.
 
-### RC.5 — base de datos y reconciliación — completado localmente
+### RC.5 — base de datos y reconciliación — integrado
 
 Entregables:
 
@@ -322,7 +343,7 @@ recupera exactamente dentro de cota y devuelve error tipado fuera de ella.
 
 Evidencia: `docs/microfield/rc-5-database-reconciliation-report.md`.
 
-### RC.6 — cerrar grafos/DAG/adapters — completado localmente
+### RC.6 — cerrar grafos/DAG/adapters — integrado
 
 Entregables:
 
@@ -337,7 +358,7 @@ del DAG deriva de bytes canónicos exactos.
 
 Evidencia: `docs/microfield/rc-6-graph-dag-report.md`.
 
-### RC.7 — validación exhaustiva y adversarial
+### RC.7 — validación exhaustiva y adversarial — implementado localmente
 
 Entregables:
 
@@ -351,7 +372,12 @@ Entregables:
 Gate: cero divergencias no clasificadas, cero mutaciones parciales y cero
 panics ante input externo dentro de los límites publicados.
 
-### RC.8 — rendimiento y capacidad
+Evidencia local: `validation/rc/correctness-matrix-v1.json`, property tests de
+campos y protocolos, tres targets de fuzz con corpus reproducible, smoke de
+15.000 ejecuciones sin divergencias y campaña semanal versionada. El cierre de
+integración exige el run remoto verde.
+
+### RC.8 — rendimiento y capacidad — implementado localmente
 
 Escenarios:
 
@@ -378,7 +404,12 @@ Gate: SLO por workload y fallback explícito fuera de su región rentable. No se
 promociona una optimización con regresión mayor del 3 % en su ruta congelada sin
 decisión documentada.
 
-### RC.9 — interoperabilidad y operabilidad
+Evidencia: [`rc-8-capacity-report.md`](rc-8-capacity-report.md). El manifest
+congela 37 rutas y dos curvas de punto de equilibrio; `SummaryEditPolicy` y
+`DatabaseApplyPolicy` convierten los ceilings medidos en fallback ejecutable.
+El cierre de integración exige artifacts verdes en x86-64 y AArch64.
+
+### RC.9 — interoperabilidad y operabilidad — implementado localmente
 
 Entregables:
 
@@ -392,7 +423,12 @@ Entregables:
 Gate: un consumidor limpio compila, persiste, reinicia, aplica deltas y
 reconstruye resultados sin tocar módulos privados.
 
-### RC.10 — artefacto go/no-go
+Evidencia: [`rc-9-integration-report.md`](rc-9-integration-report.md) y
+[`rc-9-operations-runbook.md`](rc-9-operations-runbook.md). El consumidor
+independiente también migra schema, rechaza corrupción/drift y conserva
+artifacts en CI. El cierre de integración exige ambas arquitecturas remotas.
+
+### RC.10 — artefacto go/no-go — implementado localmente
 
 Se generará un resultado versionado con:
 
@@ -415,6 +451,14 @@ Decisiones posibles:
 - `ReadyForInternalUse`;
 - `Conditional`, con restricciones ejecutables;
 - `NotReady`, con gate bloqueante concreto.
+
+Evidencia: `validation/rc/decision-manifest-v1.json` y
+[`rc-10-decision-report.md`](rc-10-decision-report.md). El comando
+`rc10-decision` liga la decisión a un commit, rechaza reports duplicados o con
+schema incorrecto, exige x86-64 y AArch64 y aplica precedencia
+`Fail → NotReady`, `Missing → Conditional`, todo verde →
+`ReadyForInternalUse`. El job requerido `RC.10 reproducible go-no-go` descarga
+los artifacts RC.8/RC.9 de ambas arquitecturas y solo acepta la última salida.
 
 ## 6. Matriz de pruebas obligatoria
 

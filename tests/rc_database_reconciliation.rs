@@ -5,10 +5,10 @@
 use std::collections::BTreeMap;
 
 use homomorphic_hash_rs::{
-    ApplicationNamespace, BinaryPolynomialEncoder, BoundedSetReconciler, DatabaseApplyStatus,
-    DatabaseColumn, DatabaseColumnType, DatabaseError, DatabaseRow, DatabaseSchema,
-    DatabaseTransactionLimits, DatabaseTransactionLog, DatabaseValue, PartitionedDatabase,
-    ReconciliationError, ReconciliationLimits, RowMutation, TransactionDelta,
+    ApplicationNamespace, BinaryPolynomialEncoder, BoundedSetReconciler, DatabaseApplyPath,
+    DatabaseApplyPolicy, DatabaseApplyStatus, DatabaseColumn, DatabaseColumnType, DatabaseError,
+    DatabaseRow, DatabaseSchema, DatabaseTransactionLimits, DatabaseTransactionLog, DatabaseValue,
+    PartitionedDatabase, ReconciliationError, ReconciliationLimits, RowMutation, TransactionDelta,
 };
 use microfield::{Field, Gf2_128V1};
 use rand::{rngs::StdRng, seq::IteratorRandom, Rng, SeedableRng};
@@ -289,6 +289,95 @@ fn multi_row_transaction_commits_insert_update_delete_as_one_revision() {
     assert_eq!(table.row_count(), 2);
     assert_eq!(table.get_by_row_key(&updated).unwrap(), Some(&updated));
     assert_eq!(table.get_by_row_key(&inserted).unwrap(), Some(&inserted));
+}
+
+#[test]
+fn measured_policy_selects_verified_authoritative_rebuild_atomically() {
+    let schema = schema();
+    let initial = (0..4).map(|id| row(id, 1, 10 + id)).collect::<Vec<_>>();
+    let mut table = Table::from_rows(
+        namespace(),
+        schema.clone(),
+        4,
+        encoder(),
+        Gf2_128V1::ONE,
+        initial.clone(),
+    )
+    .unwrap();
+    let target = vec![
+        row(0, 2, 100),
+        row(1, 2, 101),
+        initial[2].clone(),
+        initial[3].clone(),
+    ];
+    let transaction = TransactionDelta::new(
+        namespace(),
+        &schema,
+        0,
+        vec![
+            RowMutation::Update {
+                before: initial[0].clone(),
+                after: target[0].clone(),
+            },
+            RowMutation::Update {
+                before: initial[1].clone(),
+                after: target[1].clone(),
+            },
+        ],
+    )
+    .unwrap();
+
+    let report = table
+        .apply_transaction_with_policy(
+            &transaction,
+            DatabaseTransactionLimits::default(),
+            DatabaseApplyPolicy::new(1),
+            || target.clone(),
+        )
+        .unwrap();
+    assert_eq!(report.path(), DatabaseApplyPath::AuthoritativeRebuild);
+    assert_eq!(report.status(), DatabaseApplyStatus::Applied);
+    assert_eq!(report.revision(), 1);
+    assert_eq!(report.touched_partitions(), 4);
+
+    let rebuilt = Table::from_rows(
+        namespace(),
+        schema.clone(),
+        4,
+        encoder(),
+        Gf2_128V1::ONE,
+        target.clone(),
+    )
+    .unwrap();
+    assert_eq!(table.summary().unwrap(), rebuilt.summary().unwrap());
+    let replay = table
+        .apply_transaction_with_policy(
+            &transaction,
+            DatabaseTransactionLimits::default(),
+            DatabaseApplyPolicy::new(0),
+            || -> Vec<DatabaseRow> {
+                panic!("idempotent replay must not request authoritative rows")
+            },
+        )
+        .unwrap();
+    assert_eq!(replay.path(), DatabaseApplyPath::AlreadyApplied);
+
+    let mut rejected =
+        Table::from_rows(namespace(), schema, 4, encoder(), Gf2_128V1::ONE, initial).unwrap();
+    let before = rejected.summary().unwrap();
+    assert_eq!(
+        rejected.apply_transaction_with_policy(
+            &transaction,
+            DatabaseTransactionLimits::default(),
+            DatabaseApplyPolicy::new(1),
+            || vec![target[0].clone()],
+        ),
+        Err(DatabaseError::Conflict(
+            "authoritative rebuild target mismatch"
+        ))
+    );
+    assert_eq!(rejected.revision(), 0);
+    assert_eq!(rejected.summary().unwrap(), before);
 }
 
 #[test]

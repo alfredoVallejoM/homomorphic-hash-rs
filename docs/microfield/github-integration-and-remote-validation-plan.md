@@ -1,9 +1,14 @@
-# Plan de integración GitHub y validación remota integral
+# Plan ejecutado de integración GitHub y validación remota integral
 
-Fecha de auditoría: 4 de agosto de 2026.
+Fecha de auditoría inicial: 4 de agosto de 2026. Revisión: 9 de agosto de 2026.
 
-Estado: planificado. Este documento no autoriza todavía merges, reescrituras de
-historia, tags, reglas de repositorio ni ejecución de campañas con coste.
+Estado: integración ejecutada. La PR
+[#1](https://github.com/alfredoVallejoM/homomorphic-hash-rs/pull/1) integró el
+candidato `2f1f1a8` en `main` mediante el merge `d0f4fcd`; el tag anotado
+`internal-rc6-integrated` fija el checkpoint y el run post-merge
+[`30910486012`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30910486012)
+terminó verde. Este archivo conserva la auditoría y secuencia originales; no
+es el backlog vigente ni autoriza nuevas mutaciones remotas.
 
 ## 1. Objetivo
 
@@ -29,17 +34,17 @@ Repositorio: `alfredoVallejoM/homomorphic-hash-rs`.
 
 | Elemento | Evidencia observada | Diagnóstico |
 |---|---|---|
-| Rama por defecto | `main` en `d45f434` | 17 commits por detrás del desarrollo |
-| Rama candidata | `agent/h2-5-verified-profiles-pmull` en `c22323ff892c4eddb7afd9e7e12444d9cc7f9105` | sincronizada local/remoto |
-| Relación entre ramas | `main` es ancestro de la candidata; candidata está 17/0 ahead/behind | integración sin conflictos y sin rebase |
-| Ramas locales/remotas históricas | todas son ancestros de `c22323f` | ningún trabajo lateral visible queda fuera |
+| Rama por defecto | `main` en `d0f4fcdb0cc0c0e4e18b12b0b33ed37389c43b47` | contiene el candidato completo |
+| Rama candidata | `agent/h2-5-verified-profiles-pmull` en `2f1f1a858adaffd0bde5466dc7e47b3b5064652e` | integrada; no usar como base de trabajo nuevo |
+| Relación entre ramas | la candidata es el segundo padre del merge y ambos trees son idénticos | historia preservada sin squash ni rebase |
+| Ramas locales/remotas históricas | ancestros del candidato auditado | no se observó trabajo lateral fuera de la integración |
 | Commits no alcanzables | ninguno; `git fsck` solo encontró blobs/trees temporales | no hay commits perdidos en el object store local |
-| PR abiertas o históricas | ninguna | falta una revisión de integración formal |
-| Tags | ninguno | falta checkpoint recuperable de Fase 6/RC |
-| Protección/rulesets de `main` | ninguna | hoy puede recibir force-push o cambios sin gates |
-| Workflow registrado en default | `Microfield` | los workflows nuevos no quedan activos hasta llegar a `main` |
-| Último baseline anterior | run `30799055245`, verde en `4b7d956` | baseline remoto válido anterior a RC.0–RC.6 |
-| Run de `c22323f` | `30906168149`: Stable, MSRV, artifacts, features, x86-ASan y AArch64-PMULL verdes; F6.V falla igual en ambas arquitecturas | candidato todavía no integrable |
+| PR | #1 cerrada e integrada el 4 de agosto | revisión formal completada |
+| Tags | `internal-rc6-integrated` sobre `d0f4fcd` | checkpoint recuperable disponible |
+| Protección/rulesets de `main` | no reauditorados en esta revisión local | mantener como decisión de gobernanza pendiente de verificación |
+| Workflows en default | `Microfield`, `F6 external corpus` y `Microfield calibration` | gates PR/push, campaña semanal y calibración manual separados |
+| Run del candidato | `30909370895`, 13 jobs verdes | `Required gates` permitió integrar |
+| Run post-merge | `30910486012`, 13 jobs verdes | baseline remoto autoritativo de RC.6 integrada |
 | Clon limpio remoto | HEAD y tree correctos; `cargo metadata --locked --offline` correcto | lockfile y workspace autocontenidos |
 | Compilación limpia | `cargo test --workspace --all-targets --all-features --locked --no-run` correcto | todos los targets publicados son compilables |
 
@@ -47,12 +52,16 @@ La rama candidata contiene también los commits de las ramas H2.1–H2.4, H3,
 H4 y todos los commits posteriores de campos, ISA, firmas, validación y grafos.
 No hace falta fusionar esas ramas individualmente.
 
-## 3. Riesgos detectados
+## 3. Riesgos detectados en la auditoría inicial y resultado
 
 ### 3.1 Cobertura remota incompleta
 
-El job `Stable quality gates` ejecuta Microfield, legado y tres suites raíz,
-pero todavía no ejecuta explícitamente:
+Resuelto por el commit `2f1f1a8`: los jobs `Signatures and protocols RC`,
+`Graph pipeline and exact DAG RC`, `Root workspace quality` y el agregador
+`Required gates` ejecutan ya las suites que faltaban.
+
+En la auditoría inicial, `Stable quality gates` ejecutaba Microfield, legado y
+tres suites raíz, pero dejaba fuera:
 
 - `microcanon`;
 - `graph_signatures_v2`;
@@ -64,14 +73,20 @@ pero todavía no ejecuta explícitamente:
 - `rc_database_reconciliation`;
 - `rc_graph_dag`.
 
-Estas suites pasan localmente y compilan desde el clon remoto, pero esa
-evidencia aún no es un required check de GitHub. Tampoco existe Miri/ASan
-específico para los nuevos wires, journals, reconciliación y DAG.
+La corrección no las concentró en `Stable quality gates`: las distribuyó entre
+jobs dedicados y las incorporó al agregador `Required gates`. El run post-merge
+`30910486012` confirma los 13 jobs verdes. Miri y ASan siguen siendo gates
+generales; RC.7 debe ampliar la presión adversarial específica sobre wires,
+journals, reconciliación y DAG.
 
 ### 3.1.1 Bloqueo reproducido de F6.V
 
-Los jobs `F6.V reproducibility (x86_64)` y `(aarch64)` del run `30906168149`
-fallan porque la regeneración modifica una línea de
+Resuelto antes de la PR: el artefacto semántico se regeneró, el segundo diff
+quedó vacío y F6.V pasó en x86-64 y AArch64 tanto en el candidato como después
+del merge.
+
+En el run histórico `30906168149`, los jobs `F6.V reproducibility (x86_64)` y
+`(aarch64)` fallaron porque la regeneración modificaba una línea de
 `validation/f6/results/semantic-v1.json`:
 
 ```text
@@ -80,30 +95,36 @@ ValidatedPrimitive: ... public API ... pending
 MaintainedPrimitive: public bounded set recovery ... v1 rejects multiplicity
 ```
 
-El cambio es coherente con RC.5 y se reproduce desde el clon limpio. No es una
-divergencia entre arquitecturas ni un fallo del decoder: el artefacto semántico
-versionado quedó desactualizado al promover reconciliación a API pública.
-
-Debe regenerarse y revisarse el informe, comprobar un segundo diff vacío y
-repetir el workflow completo antes de abrir la integración. Hasta entonces el
-SHA `c22323f` se clasifica como **no integrable**, aunque compile y sus gates
-funcionales sean verdes.
+El cambio era coherente con RC.5 y se reproducía desde el clon limpio. No era
+una divergencia entre arquitecturas ni un fallo del decoder: el artefacto
+semántico versionado había quedado desactualizado al promover reconciliación a
+API pública. Se regeneró, revisó y reprodujo con segundo diff vacío; por eso el
+SHA histórico `c22323f` fue sustituido por el candidato integrable `2f1f1a8`.
 
 ### 3.2 `main` sin gobernanza
 
-No hay rulesets, protección, required checks, PR de integración ni tag. Un push
-accidental puede publicar o reescribir `main` sin que GitHub exija evidencia.
+La integración formal y el check agregado ya existen. La protección/ruleset de
+la rama no se revalidó en esta auditoría y continúa como control de gobernanza
+que debe comprobarse antes de una RC final.
+
+En la auditoría inicial no había rulesets, required checks, PR de integración
+ni tag. La PR, el tag y `Required gates` ya existen; solo falta volver a
+verificar la protección/ruleset efectiva de `main`.
 
 ### 3.3 Workflows aún no activos desde default
 
-`f6-external-corpus.yml` y `microfield-calibration.yml` están en la rama
-candidata, pero GitHub solo registra de forma estable workflows presentes en
-la rama por defecto. Sus schedules/manual dispatch deben validarse después de
-integrarlos en `main`.
+Resuelto por el merge `d0f4fcd`: los tres workflows están presentes en
+`main`.
+
+Antes del merge, `f6-external-corpus.yml` y `microfield-calibration.yml` solo
+estaban en la rama candidata y GitHub no podía registrarlos de forma estable.
+El merge resolvió esa condición; las próximas ejecuciones programada y manual
+deben conservarse como evidencia operativa continua, no como bloqueo de la
+integración ya realizada.
 
 ### 3.4 Peso histórico
 
-Un clon limpio ocupa aproximadamente 442 MiB de `.git`. Los primeros commits
+El repositorio local ocupa aproximadamente 459 MiB de `.git`. Los primeros commits
 incluyeron artefactos de `target/`; ya no están en el tree actual, pero siguen
 en la historia. El tree conserva además datos grandes, incluido
 `data/chemistry/results/hts_1m_cache.bin` de unos 83 MiB.
@@ -115,10 +136,12 @@ limpieza futura necesitará bundle/mirror verificable y ventana específica.
 
 ### 3.5 Paquete y metadatos
 
-`cargo package --list` delimita correctamente la raíz a 255 archivos y no
-incluye los datasets masivos, pero avisa de que todavía faltan licencia,
-repository, homepage y documentation. Esto no bloquea consumo Git interno;
-sí bloqueará el cierre de publicación externa.
+`cargo package -p homomorphic-hash-rs --list --allow-dirty` enumera hoy 257
+rutas e incluye los 20 archivos de `data/` (unos 104 MiB). También avisa de que
+faltan licencia, repository, homepage y documentation. Esto no bloquea el
+consumo Git interno, pero sí una publicación externa razonable: RC.9 debe
+decidir si excluir, separar o versionar explícitamente esos datasets, y la fase
+de publicación debe completar los metadatos.
 
 ### 3.6 Rendimiento sobre runners compartidos
 
@@ -129,8 +152,8 @@ dedicado o perfiles agrupados por CPU exacta.
 
 ## 4. Invariantes de integración
 
-- No usar squash ni rebase para integrar los 17 commits auditados.
-- El commit `c22323f` debe quedar como ancestro de `main`.
+- No usar squash ni rebase para integrar los 18 commits auditados.
+- El candidato final `2f1f1a8` debe quedar como ancestro de `main`.
 - El tree de la integración debe ser idéntico al tree candidato salvo los
   commits posteriores dedicados exclusivamente a CI/planificación.
 - Antes de integrar se registrará el SHA exacto del nuevo candidato y todos sus
@@ -143,9 +166,14 @@ dedicado o perfiles agrupados por CPU exacta.
 - Ninguna igualdad de firma rápida se interpreta como identidad exacta.
 - No borrar ramas ni objetos hasta crear tag, bundle y manifest de hashes.
 
-## 5. Secuencia de integración propuesta
+## 5. Secuencia de integración y resultado
 
-### GI.0 — congelar y manifestar
+GI.1, GI.3 y GI.4 están comprobados. GI.0 dejó candidato y checkpoint
+reproducibles, aunque cualquier bundle almacenado fuera del repositorio no se
+revalidó aquí. La configuración efectiva de GI.2 debe volver a comprobarse en
+GitHub antes del go/no-go RC.10.
+
+### GI.0 — congelar y manifestar — ejecutado; backup externo no revalidado
 
 Entregables:
 
@@ -159,7 +187,7 @@ Entregables:
 Gate: el bundle se clona y reproduce el mismo tree; ningún ref contiene commits
 fuera del candidato.
 
-### GI.1 — completar CI bloqueante en la rama candidata
+### GI.1 — completar CI bloqueante en la rama candidata — completado
 
 Separar el workflow rápido en jobs observables:
 
@@ -179,7 +207,7 @@ del mismo run. Los benches se compilarán, pero no se medirán en PR.
 Gate: todos los jobs pasan sobre un clon GitHub y `required-gates` no puede
 quedar verde si un job fue omitido, cancelado o falló.
 
-### GI.2 — proteger `main`
+### GI.2 — proteger `main` — estado remoto pendiente de reauditoría
 
 Crear un ruleset con:
 
@@ -193,7 +221,7 @@ Crear un ruleset con:
 
 Gate: una PR de prueba no puede integrarse con un check fallido o ausente.
 
-### GI.3 — PR única de integración
+### GI.3 — PR única de integración — completado
 
 - base exacta: `main`;
 - head exacta: `agent/h2-5-verified-profiles-pmull` o su sucesora CI;
@@ -206,7 +234,7 @@ Gate: una PR de prueba no puede integrarse con un check fallido o ausente.
 Gate: `main` contiene todo el candidato, no contiene commits divergentes y el
 run post-merge es verde.
 
-### GI.4 — checkpoint recuperable
+### GI.4 — checkpoint recuperable — tag completado
 
 Crear tag anotado provisional `internal-rc6-integrated` sobre el commit de
 `main`, junto con:
@@ -362,6 +390,7 @@ La integración GitHub estará cerrada solo cuando:
 10. no haya cambios de tree, refs no alcanzables ni archivos locales necesarios
     para construir.
 
-Solo después se iniciará RC.7 sobre una base remota integrada. RC.7 añadirá las
-campañas pesadas descritas, pero no volverá a resolver deuda básica de ramas,
-protección, reproducibilidad o cobertura CI.
+La integración dejó la base remota necesaria para iniciar RC.7. RC.7 añade las
+campañas pesadas descritas, pero no vuelve a resolver deuda básica de ramas,
+reproducibilidad o cobertura CI; la protección de `main` debe reauditarse como
+control de gobernanza.

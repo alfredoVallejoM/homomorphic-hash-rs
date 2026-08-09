@@ -123,6 +123,7 @@ exhaustivas, colisiones mínimas, reconciliación acotada, 12.346 clases de orde
 8, CFI/SRG/ciclos, cuatro pilotos tipados, curva incremental y rendimiento
 hasta un millón de vértices.
 
-Fase 7, estabilización pública, licencia y publicación continúan bloqueadas por
-la matriz multi-CPU y los baselines externos que el informe enumera. La
-búsqueda exacta sigue fuera del flujo predeterminado.
+La estabilización pública, licencia y publicación continúan fuera de esta fase.
+El trabajo vigente se reorganizó como RC.7–RC.10: robustez/fuzzing, capacidad,
+operabilidad y artefacto go/no-go. La búsqueda exacta sigue fuera del flujo
+predeterminado.

@@ -2,7 +2,8 @@
 
 Fecha: 3 de agosto de 2026.
 
-Estado: implementación y gates locales completados.
+Estado: integrado en `main` mediante `d0f4fcd` y validado por CI remota; este
+informe conserva la evidencia histórica de G12.
 
 ## Resultado ejecutivo
 

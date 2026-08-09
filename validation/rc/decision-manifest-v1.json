@@ -1,0 +1,68 @@
+{
+  "schema": "microfield-rc10-decision-manifest-v1",
+  "campaign_id": "internal-rc-v1",
+  "required_architectures": ["x86_64", "aarch64"],
+  "inputs": {
+    "supported_surface": "validation/rc/supported-surface-v1.json",
+    "correctness_matrix": "validation/rc/correctness-matrix-v1.json",
+    "capacity_manifest": "validation/rc/capacity-manifest-v1.json",
+    "dependency_inventory": "validation/rc/dependency-inventory-v1.json"
+  },
+  "corpus_paths": [
+    "validation/f6/manifest.json",
+    "validation/rc/correctness-matrix-v1.json",
+    "fuzz/corpus",
+    "tests/data/external/README.md"
+  ],
+  "required_features": [
+    "signatures",
+    "graph",
+    "dynamic-signatures",
+    "dynamic-fields",
+    "legacy-explicit-only"
+  ],
+  "known_limitations": [
+    {
+      "id": "non-cryptographic-signatures",
+      "scope": "internal-and-external",
+      "condition": "algebraic fingerprints do not authenticate, prove membership or authorize removal",
+      "blocks_internal_use": false,
+      "blocks_external_publication": false
+    },
+    {
+      "id": "bounded-exact-graph-canonization",
+      "scope": "internal-and-external",
+      "condition": "budget exhaustion must remain Inconclusive and must never authorize DAG reuse",
+      "blocks_internal_use": false,
+      "blocks_external_publication": false
+    },
+    {
+      "id": "set-reconciliation-v1",
+      "scope": "internal-and-external",
+      "condition": "v1 supports unique u16 sets within explicit universe and difference bounds, not multiplicity",
+      "blocks_internal_use": false,
+      "blocks_external_publication": false
+    },
+    {
+      "id": "consumer-owned-durability",
+      "scope": "internal-and-external",
+      "condition": "canonical bytes do not provide fsync, writer coordination or cross-filesystem atomicity",
+      "blocks_internal_use": false,
+      "blocks_external_publication": false
+    },
+    {
+      "id": "host-specific-capacity",
+      "scope": "internal-and-external",
+      "condition": "RC.8 ceilings must be recalibrated for materially different hardware or workloads",
+      "blocks_internal_use": false,
+      "blocks_external_publication": false
+    },
+    {
+      "id": "external-publication-metadata",
+      "scope": "external-publication",
+      "condition": "license, security policy, changelog, advisory/SBOM gate and a staged microfield registry source remain required",
+      "blocks_internal_use": false,
+      "blocks_external_publication": true
+    }
+  ]
+}

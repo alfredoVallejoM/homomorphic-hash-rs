@@ -130,7 +130,7 @@ cifras son evidencia local, no un ABI de rendimiento.
   canonización únicamente discreta;
 - suite raíz, workspace, Clippy, rustdoc, Miri focalizado y benchmark release.
 
-## Límite y siguiente hito
+## Límite y siguiente hito en el momento del informe — ejecutado
 
 F6.G3 no proporcionaba actualización incremental ni canonización exacta con
 simetrías. F6.G4 ha cerrado posteriormente el primer límite mediante índice de

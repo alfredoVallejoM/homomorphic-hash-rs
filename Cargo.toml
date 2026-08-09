@@ -2,7 +2,12 @@
 name = "homomorphic-hash-rs"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.89"
 description = "Firmas algebraicas homomorficas no criptograficas sobre campos finitos"
+repository = "https://github.com/alfredoVallejoM/homomorphic-hash-rs"
+homepage = "https://github.com/alfredoVallejoM/homomorphic-hash-rs"
+documentation = "https://docs.rs/homomorphic-hash-rs"
+include = ["src/**/*.rs", "Cargo.toml", "README.md"]
 autobenches = false
 
 [workspace]
@@ -11,7 +16,11 @@ members = [
     "crates/structural-field-fixture",
     "crates/validation-lab",
 ]
-exclude = ["crates/microfield/test-fixtures/external-consumer"]
+exclude = [
+    "crates/microfield/test-fixtures/external-consumer",
+    "test-fixtures/rc-consumer",
+    "fuzz",
+]
 default-members = ["crates/microfield"]
 resolver = "2"
 
@@ -24,7 +33,7 @@ rayon = "1.11.0"
 serde = { version = "1.0.228", features = ["derive"] }
 ureq = "2.9.1"                                         # HTTP client (Robusto, sin overhead asíncrono)
 flate2 = "1.0.28"                                      # Streaming GZIP decompression
-microfield = { path = "crates/microfield" }
+microfield = { version = "0.1.0", path = "crates/microfield" }
 sha2 = "0.10.9"
 # Dependencias futuras para paralelismo o utilidades
 # rayon = "1.5"
@@ -32,6 +41,7 @@ sha2 = "0.10.9"
 [dev-dependencies]
 allocation-counter = "0.8.1"
 criterion = "0.5" # Para el perfilado termodinamico (benches)
+proptest = "1.11.0"
 serde_json = "1.0"
 structural-field-fixture = { path = "crates/structural-field-fixture" }
 
@@ -42,7 +52,7 @@ codegen-units = 1
 # `target-cpu` se configura mediante RUSTFLAGS en mediciones controladas.
 
 [features]
-default = ["legacy", "signatures", "graph"]
+default = ["signatures", "graph"]
 # Maintained homomorphic-signature API. This feature deliberately does not
 # compile the graph or legacy modules.
 signatures = []

@@ -85,7 +85,7 @@ monomorfizados. No se introduce `dyn Trait` en el hot path.
 - combinación de particiones e ingestión masiva transaccional;
 - `TrackedMultiset` con bytes y multiplicidad exactos.
 
-### F6.6 — interoperabilidad y evidencia: completado localmente
+### F6.6 — interoperabilidad y evidencia: integrado
 
 - formato `MFSG` schema 1;
 - parser estricto y validación de invariantes;
@@ -93,7 +93,7 @@ monomorfizados. No se introduce `dyn Trait` en el hot path.
 - benchmark mantenido para las cinco firmas;
 - matriz específica, exhaustiva, genérica, de compatibilidad y asignaciones.
 
-### F6.7 — campos externos y runtime: completado localmente
+### F6.7 — campos externos y runtime: integrado
 
 - API directa de elementos con `CanonicalElementEncoder`, sin serializar y
   volver a decodificar un elemento ya validado;
@@ -106,7 +106,7 @@ La ruta runtime es una frontera de conveniencia y descubrimiento/configuración.
 La ruta recomendada para ejecución repetida es generar un tipo estático y
 beneficiarse de monomorfización, layout fijo y backends seleccionables.
 
-### F6.8 — enriquecimiento estructural: completado localmente
+### F6.8 — enriquecimiento estructural: integrado
 
 - `BidirectionalSequenceSignature`: Horner en ambos sentidos y composición de
   particiones sin conservar los elementos;

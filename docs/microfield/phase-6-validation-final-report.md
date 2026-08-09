@@ -2,6 +2,11 @@
 
 Fecha: 3 de agosto de 2026.
 
+> Nota posterior, 9 de agosto de 2026: este informe conserva la primera
+> clasificación F6.V. RC.5 promovió después la reconciliación acotada a la API
+> mantenida y RC.6 cerró DAG/adapters. La clasificación vigente está en
+> `validation/rc/supported-surface-v1.json`.
+
 ## Resultado ejecutivo
 
 F6.V1–F6.V6 ya disponen de implementación reproducible. Se ha añadido un
@@ -127,9 +132,10 @@ Pasaron 63.232 pares exhaustivos de subconjuntos del universo de ocho elementos
 con diferencia simétrica `≤ 6`. El decoder no recibe la distancia exacta. Un
 caso de siete diferencias se rechaza fail-closed.
 
-Clasificación: `ValidatedPrimitive`. Antes de API pública faltan factorización
-escalable, multiplicidades, negociación de parámetros, límites de memoria y
-comparación con un sketch de reconciliación mantenido.
+Clasificación posterior a RC.5: capacidad soportada dentro de perfil y límites
+explícitos mediante `BoundedSetReconciler`. V1 acepta conjuntos, rechaza
+multiplicidades y no promete factorización escalable fuera del universo/cota
+declarados.
 
 ## F6.V4 — grafos simples y adversariales
 
@@ -213,7 +219,7 @@ la captura están completos, la evidencia de hardware no se inventa.
 | multiconjunto K=1 | `ValidatedPrimitive` | mantener como componente barato |
 | multievaluación K=2/K=4 | `Experimental` | medir coste/beneficio a mayor escala |
 | residual | `Rejected` como pertenencia | conservar solo como ecuación algebraica |
-| reconciliación acotada | `ValidatedPrimitive` | productizar decoder antes de estabilizar |
+| reconciliación acotada | `Supported` desde RC.5 | mantener universo/cota/memoria explícitos; v1 rechaza multiplicidad |
 | grafo rápido v1 | `ValidatedPrimitive` | filtro lineal, no canonizador |
 | SHA híbrido | `Rejected` como solución a regularidad | útil solo ante descriptores adicionales distintos |
 | bundle multi-campo local | `Rejected` como solución a 1-WL | útil únicamente contra aliasing de campo |
@@ -246,9 +252,9 @@ La implementación F6.V1–V6 queda completada. La campaña semántica es
 reproducible y bloqueante en CI; rendimiento se captura en dos arquitecturas y
 los corpus externos se programan semanalmente.
 
-Fase 7 y la publicación siguen bloqueadas por evidencia, no por falta de
-harness: faltan la matriz multi-microarquitectura completa, baselines externos
-de reconciliación y dominio, intervalos estadísticos consolidados y campañas de
-grafos de orden 9 o mayores. Esas tareas no deben modificar claims históricos
-ni seleccionar parámetros después de observar resultados sin crear un nuevo
-manifiesto.
+Los huecos de evidencia se siguen ahora en RC.7–RC.10, no en una reapertura del
+harness: faltan fuzzing continuo, matriz multi-microarquitectura completa,
+baselines externos de dominio, intervalos estadísticos consolidados y campañas
+de grafos de orden 9 o mayores. Esas tareas no deben modificar claims
+históricos ni seleccionar parámetros después de observar resultados sin crear
+un nuevo manifiesto. La publicación permanece en una fase posterior.

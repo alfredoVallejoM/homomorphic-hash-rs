@@ -2,7 +2,7 @@
 
 Fecha: 4 de agosto de 2026.
 
-Estado: completado localmente.
+Estado: integrado en `main` mediante `d0f4fcd`; evidencia histórica RC.0–RC.1.
 
 ## Resultado
 
@@ -71,8 +71,7 @@ test enlaza tipos mantenidos, generados y runtime con el contrato público.
 La selección automática `SignatureFieldProfile` pertenece a RC.2 porque es una
 política de las firmas, no una nueva capacidad matemática de los campos.
 
-## Siguiente paso
+## Siguiente paso en el momento del informe — ejecutado
 
-RC.2 estabilizará builders, profiles, snapshots y nombres de la API de firmas.
-Después RC.3 podrá introducir deltas versionados sin depender de grafos ni del
-legado.
+RC.2 estabilizó builders, profiles, snapshots y nombres de la API de firmas.
+Después RC.3 introdujo deltas versionados sin depender de grafos ni del legado.
