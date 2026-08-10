@@ -1,0 +1,2693 @@
+{
+  "schema": "microfield-publication-aggregate-v1",
+  "campaign_id": "pre-rc-bulk-scaling-pilot-v1",
+  "profile": "pilot",
+  "environment_classification": "informative",
+  "cells": [
+    {
+      "id": "st-r-s256k-e4-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 4,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 3791693.0,
+      "p95_ns_per_unit": 3811664.2,
+      "p99_ns_per_unit": 3866449.04,
+      "mad_ns_per_unit": 3502.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3788623.0,
+        "upper": 3795135.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3800577.895,
+        "upper": 3892578.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3802526.0,
+        "upper": 3892578.0
+      },
+      "relative_median_ci_half_width": 0.0008587193108724783,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-q-s256k-e4-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.sequential-batch-total",
+      "scale": 4,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 262051.0,
+      "p95_ns_per_unit": 270042.8,
+      "p99_ns_per_unit": 275687.4,
+      "mad_ns_per_unit": 387.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 261896.0,
+        "upper": 262197.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 266145.2,
+        "upper": 279335.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 266697.177,
+        "upper": 279335.0
+      },
+      "relative_median_ci_half_width": 0.00057431568664115,
+      "precision_met": true,
+      "allocation_count_median": 72.0,
+      "allocated_bytes_median": 55444.0,
+      "peak_allocated_bytes_median": 12709.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s256k-e4-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 4,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 255747.0,
+      "p95_ns_per_unit": 310592.8,
+      "p99_ns_per_unit": 343614.1600000001,
+      "mad_ns_per_unit": 1280.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 255673.0,
+        "upper": 301350.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 260242.0,
+        "upper": 361560.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 261181.0,
+        "upper": 361560.0
+      },
+      "relative_median_ci_half_width": 0.08930114527247632,
+      "precision_met": true,
+      "allocation_count_median": 30.0,
+      "allocated_bytes_median": 54508.0,
+      "peak_allocated_bytes_median": 25781.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s256k-e4-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 4,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 255515.0,
+      "p95_ns_per_unit": 262090.6,
+      "p99_ns_per_unit": 269032.68,
+      "mad_ns_per_unit": 397.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 255371.0,
+        "upper": 259316.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 259840.6,
+        "upper": 272620.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 261133.0,
+        "upper": 272620.0
+      },
+      "relative_median_ci_half_width": 0.007719703344226367,
+      "precision_met": true,
+      "allocation_count_median": 30.0,
+      "allocated_bytes_median": 54508.0,
+      "peak_allocated_bytes_median": 25781.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s256k-e32-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 32,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 3789093.0,
+      "p95_ns_per_unit": 3907004.5999999996,
+      "p99_ns_per_unit": 5095944.440000005,
+      "mad_ns_per_unit": 3031.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3785579.0,
+        "upper": 3817919.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3792408.28,
+        "upper": 6009274.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3802037.0,
+        "upper": 6009274.0
+      },
+      "relative_median_ci_half_width": 0.0042675120404804,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s256k-e32-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 32,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1944792.0,
+      "p95_ns_per_unit": 1971801.8,
+      "p99_ns_per_unit": 2048417.5200000003,
+      "mad_ns_per_unit": 2951.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1941236.0,
+        "upper": 1949140.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1947369.0,
+        "upper": 2076178.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1950798.0,
+        "upper": 2076178.0
+      },
+      "relative_median_ci_half_width": 0.002032093920583795,
+      "precision_met": true,
+      "allocation_count_median": 125.0,
+      "allocated_bytes_median": 417528.0,
+      "peak_allocated_bytes_median": 150632.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s256k-e32-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 32,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 3803936.0,
+      "p95_ns_per_unit": 14707229.4,
+      "p99_ns_per_unit": 14911989.440000001,
+      "mad_ns_per_unit": 10332.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3797108.0,
+        "upper": 14685758.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3810684.2,
+        "upper": 15057750.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3811106.8,
+        "upper": 15057750.0
+      },
+      "relative_median_ci_half_width": 1.431234647480925,
+      "precision_met": false,
+      "allocation_count_median": 210.0,
+      "allocated_bytes_median": 1076016.0,
+      "peak_allocated_bytes_median": 549240.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "st-r-s256k-e32-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 32,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 3795022.0,
+      "p95_ns_per_unit": 4091855.399999999,
+      "p99_ns_per_unit": 8968044.720000014,
+      "mad_ns_per_unit": 6677.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3789078.0,
+        "upper": 3804319.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3806403.2,
+        "upper": 11721537.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3809915.4,
+        "upper": 11721537.0
+      },
+      "relative_median_ci_half_width": 0.0020080252499194997,
+      "precision_met": true,
+      "allocation_count_median": 203.0,
+      "allocated_bytes_median": 813000.0,
+      "peak_allocated_bytes_median": 286224.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s256k-e32-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 32,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1903896.0,
+      "p95_ns_per_unit": 1908839.4,
+      "p99_ns_per_unit": 1909049.68,
+      "mad_ns_per_unit": 2093.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1902780.0,
+        "upper": 1905510.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1906732.25,
+        "upper": 1909095.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1907704.4,
+        "upper": 1909095.0
+      },
+      "relative_median_ci_half_width": 0.00071695092589091,
+      "precision_met": true,
+      "allocation_count_median": 125.0,
+      "allocated_bytes_median": 411576.0,
+      "peak_allocated_bytes_median": 147253.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s256k-e32-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 32,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 3804850.0,
+      "p95_ns_per_unit": 4237890.399999999,
+      "p99_ns_per_unit": 7346398.2800000105,
+      "mad_ns_per_unit": 5901.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3798130.0,
+        "upper": 4025505.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3809854.0,
+        "upper": 9463640.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3812844.109,
+        "upper": 9463640.0
+      },
+      "relative_median_ci_half_width": 0.029879627317765483,
+      "precision_met": true,
+      "allocation_count_median": 210.0,
+      "allocated_bytes_median": 1076016.0,
+      "peak_allocated_bytes_median": 549240.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s4m-e64-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 64,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 61275871.0,
+      "p95_ns_per_unit": 78410882.99999999,
+      "p99_ns_per_unit": 86963679.96000001,
+      "mad_ns_per_unit": 51051.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61195727.0,
+        "upper": 61374377.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61395749.779999994,
+        "upper": 87606758.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 62394061.547000006,
+        "upper": 87606758.0
+      },
+      "relative_median_ci_half_width": 0.001457751616456011,
+      "precision_met": true,
+      "allocation_count_median": 3088.0,
+      "allocated_bytes_median": 13006344.0,
+      "peak_allocated_bytes_median": 4579536.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-q-s4m-e64-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.sequential-batch-total",
+      "scale": 64,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 4547879.0,
+      "p95_ns_per_unit": 4563481.8,
+      "p99_ns_per_unit": 4573583.28,
+      "mad_ns_per_unit": 3946.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4544197.0,
+        "upper": 4555146.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4555254.0,
+        "upper": 4574568.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4560007.0139999995,
+        "upper": 4574568.0
+      },
+      "relative_median_ci_half_width": 0.0012037479449211379,
+      "precision_met": true,
+      "allocation_count_median": 1664.0,
+      "allocated_bytes_median": 942400.0,
+      "peak_allocated_bytes_median": 12805.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s4m-e64-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 64,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 4138329.0,
+      "p95_ns_per_unit": 4173152.0,
+      "p99_ns_per_unit": 4338310.84,
+      "mad_ns_per_unit": 4847.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4134402.0,
+        "upper": 4143430.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4147421.0,
+        "upper": 4387795.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4150027.0,
+        "upper": 4387795.0
+      },
+      "relative_median_ci_half_width": 0.0010907784277180475,
+      "precision_met": true,
+      "allocation_count_median": 240.0,
+      "allocated_bytes_median": 871984.0,
+      "peak_allocated_bytes_median": 336592.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s4m-e64-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 64,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 4133012.0,
+      "p95_ns_per_unit": 6762069.999999998,
+      "p99_ns_per_unit": 14992396.800000003,
+      "mad_ns_per_unit": 5160.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4128480.0,
+        "upper": 4215820.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4137535.0,
+        "upper": 15469700.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4145000.601,
+        "upper": 15469700.0
+      },
+      "relative_median_ci_half_width": 0.010566144013131343,
+      "precision_met": true,
+      "allocation_count_median": 240.0,
+      "allocated_bytes_median": 871984.0,
+      "peak_allocated_bytes_median": 336592.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s4m-e512-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 512,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 61254772.0,
+      "p95_ns_per_unit": 63668631.6,
+      "p99_ns_per_unit": 82876616.36000006,
+      "mad_ns_per_unit": 95397.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61145732.0,
+        "upper": 62758270.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61349638.0,
+        "upper": 93690763.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61391150.0,
+        "upper": 93690763.0
+      },
+      "relative_median_ci_half_width": 0.013162550013246314,
+      "precision_met": true,
+      "allocation_count_median": 3088.0,
+      "allocated_bytes_median": 13006344.0,
+      "peak_allocated_bytes_median": 4579536.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s4m-e512-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 512,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 31585542.0,
+      "p95_ns_per_unit": 31714188.2,
+      "p99_ns_per_unit": 32237035.84,
+      "mad_ns_per_unit": 35771.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 31496375.0,
+        "upper": 31624433.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 31640328.0,
+        "upper": 32498325.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 31658532.0,
+        "upper": 32498325.0
+      },
+      "relative_median_ci_half_width": 0.002027161667828907,
+      "precision_met": true,
+      "allocation_count_median": 1735.0,
+      "allocated_bytes_median": 6683872.0,
+      "peak_allocated_bytes_median": 2410144.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s4m-e512-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 512,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 61901095.0,
+      "p95_ns_per_unit": 63077731.199999996,
+      "p99_ns_per_unit": 70200103.92,
+      "mad_ns_per_unit": 132913.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61671129.0,
+        "upper": 61936892.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61941338.4,
+        "upper": 70215243.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 62166318.0,
+        "upper": 70215243.0
+      },
+      "relative_median_ci_half_width": 0.0021466744651286057,
+      "precision_met": true,
+      "allocation_count_median": 3174.0,
+      "allocated_bytes_median": 17214536.0,
+      "peak_allocated_bytes_median": 8787728.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s4m-e512-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 512,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 61320665.0,
+      "p95_ns_per_unit": 61849622.0,
+      "p99_ns_per_unit": 75105440.20000005,
+      "mad_ns_per_unit": 80263.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61191952.0,
+        "upper": 61458729.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61463961.0,
+        "upper": 85318432.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61581214.0,
+        "upper": 85318432.0
+      },
+      "relative_median_ci_half_width": 0.0021752617979599537,
+      "precision_met": true,
+      "allocation_count_median": 3088.0,
+      "allocated_bytes_median": 13006344.0,
+      "peak_allocated_bytes_median": 4579536.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s4m-e512-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 512,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 30834054.0,
+      "p95_ns_per_unit": 36381221.19999998,
+      "p99_ns_per_unit": 41163362.720000006,
+      "mad_ns_per_unit": 56953.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 30622669.0,
+        "upper": 31606857.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 30859609.04,
+        "upper": 42653956.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 30873620.48,
+        "upper": 42653956.0
+      },
+      "relative_median_ci_half_width": 0.015959432386023584,
+      "precision_met": true,
+      "allocation_count_median": 1735.0,
+      "allocated_bytes_median": 6585760.0,
+      "peak_allocated_bytes_median": 2316112.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s4m-e512-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 512,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 61901229.0,
+      "p95_ns_per_unit": 62309328.8,
+      "p99_ns_per_unit": 68474896.36000003,
+      "mad_ns_per_unit": 134507.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 61751541.0,
+        "upper": 62048012.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 62045902.6,
+        "upper": 73008109.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 62072359.791,
+        "upper": 73008109.0
+      },
+      "relative_median_ci_half_width": 0.0023947101276454463,
+      "precision_met": true,
+      "allocation_count_median": 3174.0,
+      "allocated_bytes_median": 17214536.0,
+      "peak_allocated_bytes_median": 8787728.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s64m-e1024-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 1024,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 981844871.0,
+      "p95_ns_per_unit": 1015515372.4,
+      "p99_ns_per_unit": 1081694172.08,
+      "mad_ns_per_unit": 1326177.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 980595158.0,
+        "upper": 984106365.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 983548229.0,
+        "upper": 1086644862.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 985014981.0,
+        "upper": 1086644862.0
+      },
+      "relative_median_ci_half_width": 0.001788066070164357,
+      "precision_met": true,
+      "allocation_count_median": 49172.0,
+      "allocated_bytes_median": 208093704.0,
+      "peak_allocated_bytes_median": 73269456.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-q-s64m-e1024-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.sequential-batch-total",
+      "scale": 1024,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 78872675.0,
+      "p95_ns_per_unit": 79768537.2,
+      "p99_ns_per_unit": 88701460.04000004,
+      "mad_ns_per_unit": 44583.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 78825434.0,
+        "upper": 78976277.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 78956155.265,
+        "upper": 95584637.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 79097722.14400001,
+        "upper": 95584637.0
+      },
+      "relative_median_ci_half_width": 0.0009562437181191078,
+      "precision_met": true,
+      "allocation_count_median": 34816.0,
+      "allocated_bytes_median": 15963136.0,
+      "peak_allocated_bytes_median": 12901.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s64m-e1024-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 1024,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 68043711.0,
+      "p95_ns_per_unit": 70881090.4,
+      "p99_ns_per_unit": 71636617.96,
+      "mad_ns_per_unit": 60067.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 67862836.0,
+        "upper": 68958533.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 68087548.725,
+        "upper": 71713240.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 68098302.0,
+        "upper": 71713240.0
+      },
+      "relative_median_ci_half_width": 0.008051420064375972,
+      "precision_met": true,
+      "allocation_count_median": 3455.0,
+      "allocated_bytes_median": 13967912.0,
+      "peak_allocated_bytes_median": 5386136.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s64m-e1024-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 1024,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 68035604.0,
+      "p95_ns_per_unit": 68224527.6,
+      "p99_ns_per_unit": 75153035.68000002,
+      "mad_ns_per_unit": 94332.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 67810047.0,
+        "upper": 68109228.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 68093368.2,
+        "upper": 80549274.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 68114653.0,
+        "upper": 80549274.0
+      },
+      "relative_median_ci_half_width": 0.0021987090759126647,
+      "precision_met": true,
+      "allocation_count_median": 3455.0,
+      "allocated_bytes_median": 13967912.0,
+      "peak_allocated_bytes_median": 5386136.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s64m-e8192-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 8192,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 981574989.0,
+      "p95_ns_per_unit": 999359613.0,
+      "p99_ns_per_unit": 1005596195.44,
+      "mad_ns_per_unit": 735509.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 981461375.0,
+        "upper": 988365052.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 982937202.0,
+        "upper": 1008588503.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 985104621.0,
+        "upper": 1008588503.0
+      },
+      "relative_median_ci_half_width": 0.0035166324923545907,
+      "precision_met": true,
+      "allocation_count_median": 49172.0,
+      "allocated_bytes_median": 208093704.0,
+      "peak_allocated_bytes_median": 73269456.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s64m-e8192-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 8192,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 509815175.0,
+      "p95_ns_per_unit": 514192101.8,
+      "p99_ns_per_unit": 525140215.04,
+      "mad_ns_per_unit": 648379.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 509279742.0,
+        "upper": 510288877.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 510664375.0,
+        "upper": 527892144.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 511629024.24,
+        "upper": 527892144.0
+      },
+      "relative_median_ci_half_width": 0.0009897067108683064,
+      "precision_met": true,
+      "allocation_count_median": 27350.0,
+      "allocated_bytes_median": 107022104.0,
+      "peak_allocated_bytes_median": 38564968.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s64m-e8192-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 8192,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 990907186.0,
+      "p95_ns_per_unit": 1003382511.6,
+      "p99_ns_per_unit": 1126388027.6000004,
+      "mad_ns_per_unit": 808514.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 989486935.0,
+        "upper": 991555291.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 991604397.675,
+        "upper": 1187471560.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 992939336.0,
+        "upper": 1187471560.0
+      },
+      "relative_median_ci_half_width": 0.0010436678778914417,
+      "precision_met": true,
+      "allocation_count_median": 50540.0,
+      "allocated_bytes_median": 275494320.0,
+      "peak_allocated_bytes_median": 140604536.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s64m-e8192-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 8192,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 981930097.0,
+      "p95_ns_per_unit": 993145157.8,
+      "p99_ns_per_unit": 1019924673.36,
+      "mad_ns_per_unit": 549957.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 981634115.0,
+        "upper": 983739211.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 983616866.0,
+        "upper": 1031867409.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 987883255.3740001,
+        "upper": 1031867409.0
+      },
+      "relative_median_ci_half_width": 0.0010719174442414508,
+      "precision_met": true,
+      "allocation_count_median": 49172.0,
+      "allocated_bytes_median": 208093704.0,
+      "peak_allocated_bytes_median": 73269456.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s64m-e8192-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 8192,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 497318244.0,
+      "p95_ns_per_unit": 499664619.0,
+      "p99_ns_per_unit": 540391067.44,
+      "mad_ns_per_unit": 355554.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 497203165.0,
+        "upper": 497479299.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 498170231.4,
+        "upper": 560398747.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 498677206.2,
+        "upper": 560398747.0
+      },
+      "relative_median_ci_half_width": 0.00027762303447689325,
+      "precision_met": true,
+      "allocation_count_median": 27350.0,
+      "allocated_bytes_median": 105449432.0,
+      "peak_allocated_bytes_median": 37057816.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s64m-e8192-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 8192,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 990635144.0,
+      "p95_ns_per_unit": 997740793.8,
+      "p99_ns_per_unit": 1078200900.4000003,
+      "mad_ns_per_unit": 455204.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 989828287.0,
+        "upper": 990948703.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 991303769.0,
+        "upper": 1130829417.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 991518716.84,
+        "upper": 1130829417.0
+      },
+      "relative_median_ci_half_width": 0.0005655038622372961,
+      "precision_met": true,
+      "allocation_count_median": 50540.0,
+      "allocated_bytes_median": 275494320.0,
+      "peak_allocated_bytes_median": 140604536.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s512-m32-sc",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 32,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1122569.0,
+      "p95_ns_per_unit": 1196079.5999999999,
+      "p99_ns_per_unit": 1336733.6400000001,
+      "mad_ns_per_unit": 4447.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1119550.0,
+        "upper": 1172535.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1128478.2,
+        "upper": 1355750.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1136829.4000000001,
+        "upper": 1355750.0
+      },
+      "relative_median_ci_half_width": 0.023599885619503123,
+      "precision_met": true,
+      "allocation_count_median": 4244.0,
+      "allocated_bytes_median": 276145.0,
+      "peak_allocated_bytes_median": 114337.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s512-m32-sc",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 32,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 705311.0,
+      "p95_ns_per_unit": 1212406.5999999999,
+      "p99_ns_per_unit": 1220395.24,
+      "mad_ns_per_unit": 24170.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 695550.0,
+        "upper": 1192206.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 723079.0,
+        "upper": 1223785.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 731248.76,
+        "upper": 1223785.0
+      },
+      "relative_median_ci_half_width": 0.35208298183354575,
+      "precision_met": false,
+      "allocation_count_median": 2225.0,
+      "allocated_bytes_median": 203152.0,
+      "peak_allocated_bytes_median": 97280.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "db-a-s512-m32-sc",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 32,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 703049.0,
+      "p95_ns_per_unit": 1202993.2,
+      "p99_ns_per_unit": 1222027.6,
+      "mad_ns_per_unit": 20904.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 688601.0,
+        "upper": 985705.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 723325.0,
+        "upper": 1223000.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 726946.92,
+        "upper": 1223000.0
+      },
+      "relative_median_ci_half_width": 0.2112967943912871,
+      "precision_met": false,
+      "allocation_count_median": 2225.0,
+      "allocated_bytes_median": 203152.0,
+      "peak_allocated_bytes_median": 97280.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "db-r-s512-m256-sc",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1134488.0,
+      "p95_ns_per_unit": 1180204.4,
+      "p99_ns_per_unit": 1186878.4,
+      "mad_ns_per_unit": 4190.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1133536.0,
+        "upper": 1142007.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1144576.2,
+        "upper": 1187512.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1147301.708,
+        "upper": 1187512.0
+      },
+      "relative_median_ci_half_width": 0.0037334022043423996,
+      "precision_met": true,
+      "allocation_count_median": 4692.0,
+      "allocated_bytes_median": 292273.0,
+      "peak_allocated_bytes_median": 114337.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s512-m256-sc",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 2017042.0,
+      "p95_ns_per_unit": 2057122.6,
+      "p99_ns_per_unit": 2109085.44,
+      "mad_ns_per_unit": 8843.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2010744.0,
+        "upper": 2018691.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2038916.5999999999,
+        "upper": 2127840.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2044098.0,
+        "upper": 2127840.0
+      },
+      "relative_median_ci_half_width": 0.001969963937290349,
+      "precision_met": true,
+      "allocation_count_median": 10955.0,
+      "allocated_bytes_median": 1008808.0,
+      "peak_allocated_bytes_median": 176288.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s512-m256-sc",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 2366745.0,
+      "p95_ns_per_unit": 2537450.1999999997,
+      "p99_ns_per_unit": 2955772.5200000014,
+      "mad_ns_per_unit": 11207.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2361458.0,
+        "upper": 2377915.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2386040.6,
+        "upper": 3268059.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2410073.28,
+        "upper": 3268059.0
+      },
+      "relative_median_ci_half_width": 0.0034767159115156048,
+      "precision_met": true,
+      "allocation_count_median": 13003.0,
+      "allocated_bytes_median": 1156264.0,
+      "peak_allocated_bytes_median": 176288.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s512-m32-cl",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 32,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1128823.0,
+      "p95_ns_per_unit": 1157212.6,
+      "p99_ns_per_unit": 2184589.720000004,
+      "mad_ns_per_unit": 4225.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1126853.0,
+        "upper": 1136785.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1137115.3,
+        "upper": 2912531.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1140036.77,
+        "upper": 2912531.0
+      },
+      "relative_median_ci_half_width": 0.0043992725165947185,
+      "precision_met": true,
+      "allocation_count_median": 4244.0,
+      "allocated_bytes_median": 276145.0,
+      "peak_allocated_bytes_median": 114337.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s512-m32-cl",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 32,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 222470.0,
+      "p95_ns_per_unit": 494232.2,
+      "p99_ns_per_unit": 499766.92,
+      "mad_ns_per_unit": 7481.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 216590.0,
+        "upper": 376603.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 229711.0,
+        "upper": 500276.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 396105.6810000005,
+        "upper": 500276.0
+      },
+      "relative_median_ci_half_width": 0.3596282644850991,
+      "precision_met": false,
+      "allocation_count_median": 1317.0,
+      "allocated_bytes_median": 121144.0,
+      "peak_allocated_bytes_median": 22176.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "db-a-s512-m32-cl",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 32,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 240403.0,
+      "p95_ns_per_unit": 644071.8,
+      "p99_ns_per_unit": 653267.3200000001,
+      "mad_ns_per_unit": 4968.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 239377.0,
+        "upper": 641110.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 251072.0,
+        "upper": 657127.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 255692.00000000003,
+        "upper": 657127.0
+      },
+      "relative_median_ci_half_width": 0.8355407378443697,
+      "precision_met": false,
+      "allocation_count_median": 1445.0,
+      "allocated_bytes_median": 130360.0,
+      "peak_allocated_bytes_median": 22176.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "db-r-s4096-m256-sc",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 9338101.0,
+      "p95_ns_per_unit": 9571912.0,
+      "p99_ns_per_unit": 9585071.44,
+      "mad_ns_per_unit": 45775.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9275604.0,
+        "upper": 9503600.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9357147.780000001,
+        "upper": 9592551.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9378828.72,
+        "upper": 9592551.0
+      },
+      "relative_median_ci_half_width": 0.01220783540465026,
+      "precision_met": true,
+      "allocation_count_median": 33834.0,
+      "allocated_bytes_median": 2127185.0,
+      "peak_allocated_bytes_median": 831041.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s4096-m256-sc",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 2500834.0,
+      "p95_ns_per_unit": 2760383.7999999993,
+      "p99_ns_per_unit": 2944880.3200000003,
+      "mad_ns_per_unit": 33832.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2487245.0,
+        "upper": 2563250.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2556846.43,
+        "upper": 2966472.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2568214.5779999997,
+        "upper": 2966472.0
+      },
+      "relative_median_ci_half_width": 0.015195930637539316,
+      "precision_met": true,
+      "allocation_count_median": 18593.0,
+      "allocated_bytes_median": 1610824.0,
+      "peak_allocated_bytes_median": 759080.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s4096-m256-sc",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 2513945.0,
+      "p95_ns_per_unit": 2657720.4,
+      "p99_ns_per_unit": 2798719.7600000007,
+      "mad_ns_per_unit": 26472.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2482789.0,
+        "upper": 2536882.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2563196.0,
+        "upper": 2892878.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2580560.72,
+        "upper": 2892878.0
+      },
+      "relative_median_ci_half_width": 0.010758588592829198,
+      "precision_met": true,
+      "allocation_count_median": 18593.0,
+      "allocated_bytes_median": 1610824.0,
+      "peak_allocated_bytes_median": 759080.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s4096-m2048-sc",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 2048,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 9428976.0,
+      "p95_ns_per_unit": 9818638.6,
+      "p99_ns_per_unit": 9918923.16,
+      "mad_ns_per_unit": 43610.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9353516.0,
+        "upper": 9508795.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9465798.8,
+        "upper": 9936539.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9546285.88,
+        "upper": 9936539.0
+      },
+      "relative_median_ci_half_width": 0.008234139104819018,
+      "precision_met": true,
+      "allocation_count_median": 37418.0,
+      "allocated_bytes_median": 2256209.0,
+      "peak_allocated_bytes_median": 831041.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s4096-m2048-sc",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 2048,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 12962608.0,
+      "p95_ns_per_unit": 13237398.4,
+      "p99_ns_per_unit": 13291396.6,
+      "mad_ns_per_unit": 95345.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 12925898.0,
+        "upper": 13155880.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 13031462.0,
+        "upper": 13322718.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 13088932.0,
+        "upper": 13322718.0
+      },
+      "relative_median_ci_half_width": 0.008870977198415628,
+      "precision_met": true,
+      "allocation_count_median": 86980.0,
+      "allocated_bytes_median": 7981624.0,
+      "peak_allocated_bytes_median": 1409184.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s4096-m2048-sc",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 2048,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 19310025.0,
+      "p95_ns_per_unit": 19516252.0,
+      "p99_ns_per_unit": 32220932.640000008,
+      "mad_ns_per_unit": 93798.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 19119513.0,
+        "upper": 19345347.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 19391258.255,
+        "upper": 33517654.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 19443850.8,
+        "upper": 33517654.0
+      },
+      "relative_median_ci_half_width": 0.005847584350615807,
+      "precision_met": true,
+      "allocation_count_median": 103364.0,
+      "allocated_bytes_median": 9161272.0,
+      "peak_allocated_bytes_median": 1409184.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s4096-m256-cl",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 9348443.0,
+      "p95_ns_per_unit": 11034328.399999999,
+      "p99_ns_per_unit": 11450776.92,
+      "mad_ns_per_unit": 26574.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9278269.0,
+        "upper": 10580928.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9351105.225,
+        "upper": 11521103.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9369886.02,
+        "upper": 11521103.0
+      },
+      "relative_median_ci_half_width": 0.06967251124064189,
+      "precision_met": true,
+      "allocation_count_median": 33834.0,
+      "allocated_bytes_median": 2127185.0,
+      "peak_allocated_bytes_median": 831041.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s4096-m256-cl",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1578524.0,
+      "p95_ns_per_unit": 1599198.6,
+      "p99_ns_per_unit": 1679267.7200000002,
+      "mad_ns_per_unit": 11774.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1576805.0,
+        "upper": 1591678.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1593422.8,
+        "upper": 1729983.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1595786.72,
+        "upper": 1729983.0
+      },
+      "relative_median_ci_half_width": 0.004711046521940749,
+      "precision_met": true,
+      "allocation_count_median": 10956.0,
+      "allocated_bytes_median": 994344.0,
+      "peak_allocated_bytes_median": 176288.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s4096-m256-cl",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 256,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1953726.0,
+      "p95_ns_per_unit": 1974754.4,
+      "p99_ns_per_unit": 1984602.56,
+      "mad_ns_per_unit": 9103.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1945637.0,
+        "upper": 1965293.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1964796.4,
+        "upper": 1990059.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1967862.0,
+        "upper": 1990059.0
+      },
+      "relative_median_ci_half_width": 0.00503038808922029,
+      "precision_met": true,
+      "allocation_count_median": 11960.0,
+      "allocated_bytes_median": 1066632.0,
+      "peak_allocated_bytes_median": 176288.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s65536-m4096-sc",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 165780983.0,
+      "p95_ns_per_unit": 168349336.8,
+      "p99_ns_per_unit": 177514311.64,
+      "mad_ns_per_unit": 643602.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 165552830.0,
+        "upper": 166595864.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 167787526.8,
+        "upper": 177565162.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 167821228.0,
+        "upper": 177565162.0
+      },
+      "relative_median_ci_half_width": 0.0031458192041242754,
+      "precision_met": true,
+      "allocation_count_median": 541275.0,
+      "allocated_bytes_median": 33989345.0,
+      "peak_allocated_bytes_median": 13247361.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s65536-m4096-sc",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 35592608.0,
+      "p95_ns_per_unit": 37499082.8,
+      "p99_ns_per_unit": 38123204.64,
+      "mad_ns_per_unit": 665689.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 34800264.0,
+        "upper": 37399977.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 35744728.8,
+        "upper": 38348306.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 36088548.498,
+        "upper": 38348306.0
+      },
+      "relative_median_ci_half_width": 0.03652040614725394,
+      "precision_met": true,
+      "allocation_count_median": 296216.0,
+      "allocated_bytes_median": 25711768.0,
+      "peak_allocated_bytes_median": 12027320.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s65536-m4096-sc",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 35067926.0,
+      "p95_ns_per_unit": 37382207.0,
+      "p99_ns_per_unit": 38661277.52,
+      "mad_ns_per_unit": 225266.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 34599214.0,
+        "upper": 37220383.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 35175422.0,
+        "upper": 39353537.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 35358930.52,
+        "upper": 39353537.0
+      },
+      "relative_median_ci_half_width": 0.037372740549298525,
+      "precision_met": true,
+      "allocation_count_median": 296216.0,
+      "allocated_bytes_median": 25711768.0,
+      "peak_allocated_bytes_median": 12027320.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s65536-m32768-sc",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 32768,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 166976594.0,
+      "p95_ns_per_unit": 180126919.2,
+      "p99_ns_per_unit": 186340613.96,
+      "mad_ns_per_unit": 687788.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 165383506.0,
+        "upper": 167170966.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 168413468.0,
+        "upper": 186728734.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 171182007.04000002,
+        "upper": 186728734.0
+      },
+      "relative_median_ci_half_width": 0.005352426819773315,
+      "precision_met": true,
+      "allocation_count_median": 598619.0,
+      "allocated_bytes_median": 36053729.0,
+      "peak_allocated_bytes_median": 13247361.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s65536-m32768-sc",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 32768,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 218216181.0,
+      "p95_ns_per_unit": 222486019.2,
+      "p99_ns_per_unit": 225615058.04,
+      "mad_ns_per_unit": 2593152.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 211431392.0,
+        "upper": 219152431.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 220863773.0,
+        "upper": 226757148.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 221406341.175,
+        "upper": 226757148.0
+      },
+      "relative_median_ci_half_width": 0.017691261401004906,
+      "precision_met": true,
+      "allocation_count_median": 1389635.0,
+      "allocated_bytes_median": 127467256.0,
+      "peak_allocated_bytes_median": 22544544.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s65536-m32768-sc",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 32768,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 322926887.0,
+      "p95_ns_per_unit": 332572902.0,
+      "p99_ns_per_unit": 363206517.76000005,
+      "mad_ns_per_unit": 3111393.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 318679232.0,
+        "upper": 328520673.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 327667688.2,
+        "upper": 371329807.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 327898289.051,
+        "upper": 371329807.0
+      },
+      "relative_median_ci_half_width": 0.015237877978243415,
+      "precision_met": true,
+      "allocation_count_median": 1651779.0,
+      "allocated_bytes_median": 146341624.0,
+      "peak_allocated_bytes_median": 22544544.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s65536-m4096-cl",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 167424114.0,
+      "p95_ns_per_unit": 173932163.2,
+      "p99_ns_per_unit": 175926150.6,
+      "mad_ns_per_unit": 1484591.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 164639040.0,
+        "upper": 169076320.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 168621056.85,
+        "upper": 176421859.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 169382933.83,
+        "upper": 176421859.0
+      },
+      "relative_median_ci_half_width": 0.01325161559463292,
+      "precision_met": true,
+      "allocation_count_median": 541275.0,
+      "allocated_bytes_median": 33989345.0,
+      "peak_allocated_bytes_median": 13247361.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s65536-m4096-cl",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 25496747.0,
+      "p95_ns_per_unit": 26513282.6,
+      "p99_ns_per_unit": 27263696.720000003,
+      "mad_ns_per_unit": 306775.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 25198606.0,
+        "upper": 26209064.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 25631156.0,
+        "upper": 27802097.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 25658856.2,
+        "upper": 27802097.0
+      },
+      "relative_median_ci_half_width": 0.019815429787964717,
+      "precision_met": true,
+      "allocation_count_median": 165136.0,
+      "allocated_bytes_median": 15114512.0,
+      "peak_allocated_bytes_median": 2818208.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s65536-m4096-cl",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 32761869.0,
+      "p95_ns_per_unit": 33387652.0,
+      "p99_ns_per_unit": 33496532.44,
+      "mad_ns_per_unit": 392976.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 31769026.0,
+        "upper": 33154845.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 33018461.615,
+        "upper": 33548969.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 33163582.0,
+        "upper": 33548969.0
+      },
+      "relative_median_ci_half_width": 0.021149877010984936,
+      "precision_met": true,
+      "allocation_count_median": 181772.0,
+      "allocated_bytes_median": 16312304.0,
+      "peak_allocated_bytes_median": 2818208.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [
+    {
+      "cell": "st-q-s256k-e4-sc",
+      "baseline_cell": "st-r-s256k-e4-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.06912907407255882,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.06900834884661547,
+        "upper": 0.0691618685061199
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s256k-e4-sc",
+      "baseline_cell": "st-r-s256k-e4-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.06750394536484627,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.0673755061931665,
+        "upper": 0.07940428996596958
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s256k-e4-sc",
+      "baseline_cell": "st-r-s256k-e4-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.06735012565627017,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.06730327116163193,
+        "upper": 0.06844003302232385
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s256k-e32-sc",
+      "baseline_cell": "st-r-s256k-e32-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.5134038673635088,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.5087082779912303,
+        "upper": 0.5144535491577978
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s256k-e32-sc",
+      "baseline_cell": "st-r-s256k-e32-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.0048491921579235,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.0021152819421428,
+        "upper": 3.8747464790701933
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s256k-e32-cl",
+      "baseline_cell": "st-r-s256k-e32-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.502107761167129,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.5001631040930059,
+        "upper": 0.5024806875832614
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s256k-e32-cl",
+      "baseline_cell": "st-r-s256k-e32-cl",
+      "paired_processes": 5,
+      "median_ratio": 1.0025897083073563,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.0019176813431774,
+        "upper": 1.0581407605408484
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-q-s4m-e64-sc",
+      "baseline_cell": "st-r-s4m-e64-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.07424113155405004,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.074069036985907,
+        "upper": 0.0744356873152271
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s4m-e64-sc",
+      "baseline_cell": "st-r-s4m-e64-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.06756030531347393,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.06744227627246861,
+        "upper": 0.06760408224315578
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s4m-e64-sc",
+      "baseline_cell": "st-r-s4m-e64-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.06751722329470417,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.06726715938802931,
+        "upper": 0.06880065401273529
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s4m-e512-sc",
+      "baseline_cell": "st-r-s4m-e512-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.5156421445826295,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.5039086163464991,
+        "upper": 0.5164620320515584
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s4m-e512-sc",
+      "baseline_cell": "st-r-s4m-e512-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.008301945226661,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.9863416407112561,
+        "upper": 1.0113897090058406
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s4m-e512-cl",
+      "baseline_cell": "st-r-s4m-e512-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.5035417505664689,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.5000356542354627,
+        "upper": 0.514993403322916
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s4m-e512-cl",
+      "baseline_cell": "st-r-s4m-e512-cl",
+      "paired_processes": 5,
+      "median_ratio": 1.0088949928635194,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.006162563396436,
+        "upper": 1.0137612704363477
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-q-s64m-e1024-sc",
+      "baseline_cell": "st-r-s64m-e1024-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.08034576064918915,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.08014649412413871,
+        "upper": 0.08038529800694774
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s64m-e1024-sc",
+      "baseline_cell": "st-r-s64m-e1024-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.0693018958592696,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.06916346994666578,
+        "upper": 0.07014693437352952
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s64m-e1024-sc",
+      "baseline_cell": "st-r-s64m-e1024-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.06928299282044993,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.06908360866053335,
+        "upper": 0.06934482719492295
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s64m-e8192-sc",
+      "baseline_cell": "st-r-s64m-e8192-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.5192861560573407,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.5162959535724256,
+        "upper": 0.519727304298704
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s64m-e8192-sc",
+      "baseline_cell": "st-r-s64m-e8192-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.0095801615898712,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.0021704864975336,
+        "upper": 1.0102845779335943
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s64m-e8192-cl",
+      "baseline_cell": "st-r-s64m-e8192-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.5066228204589243,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.5054217209605565,
+        "upper": 0.5067101571883965
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s64m-e8192-cl",
+      "baseline_cell": "st-r-s64m-e8192-cl",
+      "paired_processes": 5,
+      "median_ratio": 1.008847101261629,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.0073286618235653,
+        "upper": 1.0092841701520414
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s512-m32-sc",
+      "baseline_cell": "db-r-s512-m32-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.6277382462229936,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.6197297798179524,
+        "upper": 1.0620336032796203
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s512-m32-sc",
+      "baseline_cell": "db-r-s512-m32-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.6262857784243107,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.5888779439419719,
+        "upper": 0.8782556863136436
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s512-m256-sc",
+      "baseline_cell": "db-r-s512-m256-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.779126526162406,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.7607107487081952,
+        "upper": 1.7806827484967394
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s512-m256-sc",
+      "baseline_cell": "db-r-s512-m256-sc",
+      "paired_processes": 5,
+      "median_ratio": 2.0829177420293794,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.0724435139189166,
+        "upper": 2.094579179772935
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s512-m32-cl",
+      "baseline_cell": "db-r-s512-m32-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.19570103405657183,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.1918724193252618,
+        "upper": 0.33420774493212513
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s512-m32-cl",
+      "baseline_cell": "db-r-s512-m32-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.21296784349716474,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.2107190046487635,
+        "upper": 0.5689384507118497
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s4096-m256-sc",
+      "baseline_cell": "db-r-s4096-m256-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.2672278574842605,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.266899661933406,
+        "upper": 0.2757051711673862
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s4096-m256-sc",
+      "baseline_cell": "db-r-s4096-m256-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.26925502641121807,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.26452554821330865,
+        "upper": 0.27107978440407704
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s4096-m2048-sc",
+      "baseline_cell": "db-r-s4096-m2048-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.3831535649268147,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.363222995132401,
+        "upper": 1.3964760842266608
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s4096-m2048-sc",
+      "baseline_cell": "db-r-s4096-m2048-sc",
+      "paired_processes": 5,
+      "median_ratio": 2.0503592913313806,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.0107188134774177,
+        "upper": 2.0608531593894743
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s4096-m256-cl",
+      "baseline_cell": "db-r-s4096-m256-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.1690032756140253,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.1504289604843734,
+        "upper": 0.1699460319591941
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s4096-m256-cl",
+      "baseline_cell": "db-r-s4096-m256-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.20969827453806308,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.18463134802542838,
+        "upper": 0.2104663704760739
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s65536-m4096-sc",
+      "baseline_cell": "db-r-s65536-m4096-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.2136464084126362,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.20961382036558338,
+        "upper": 0.22559871659103384
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s65536-m4096-sc",
+      "baseline_cell": "db-r-s65536-m4096-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.21102373786059714,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.20897742726755927,
+        "upper": 0.22419101981813164
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s65536-m32768-sc",
+      "baseline_cell": "db-r-s65536-m32768-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.306866883390854,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.2647614418881805,
+        "upper": 1.3120226837747444
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s65536-m32768-sc",
+      "baseline_cell": "db-r-s65536-m32768-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.9495586035042696,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.9118069360700372,
+        "upper": 1.9674654101520361
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s65536-m4096-cl",
+      "baseline_cell": "db-r-s65536-m4096-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.15415567915145126,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.15174245626975824,
+        "upper": 0.1550132153337617
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s65536-m4096-cl",
+      "baseline_cell": "db-r-s65536-m4096-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.1948960709447147,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.19296168150640333,
+        "upper": 0.19980077320096912
+      },
+      "status": "Paired"
+    }
+  ],
+  "curves": [
+    {
+      "curve": "db-s4096-clustered",
+      "strategy": "adaptive-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s4096-clustered",
+      "strategy": "bulk-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s4096-clustered",
+      "strategy": "rebuild-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s4096-scattered",
+      "strategy": "adaptive-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s4096-scattered",
+      "strategy": "bulk-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s4096-scattered",
+      "strategy": "rebuild-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s512-clustered",
+      "strategy": "adaptive-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s512-clustered",
+      "strategy": "bulk-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s512-clustered",
+      "strategy": "rebuild-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s512-scattered",
+      "strategy": "adaptive-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s512-scattered",
+      "strategy": "bulk-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s512-scattered",
+      "strategy": "rebuild-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-clustered",
+      "strategy": "adaptive-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-clustered",
+      "strategy": "bulk-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-clustered",
+      "strategy": "rebuild-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-scattered",
+      "strategy": "adaptive-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-scattered",
+      "strategy": "bulk-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-scattered",
+      "strategy": "rebuild-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s256k-clustered",
+      "strategy": "adaptive-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s256k-clustered",
+      "strategy": "bulk-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s256k-clustered",
+      "strategy": "rebuild-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s256k-scattered",
+      "strategy": "adaptive-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s256k-scattered",
+      "strategy": "bulk-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s256k-scattered",
+      "strategy": "rebuild-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s256k-scattered",
+      "strategy": "sequential-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s4m-clustered",
+      "strategy": "adaptive-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s4m-clustered",
+      "strategy": "bulk-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s4m-clustered",
+      "strategy": "rebuild-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s4m-scattered",
+      "strategy": "adaptive-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s4m-scattered",
+      "strategy": "bulk-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s4m-scattered",
+      "strategy": "rebuild-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s4m-scattered",
+      "strategy": "sequential-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-clustered",
+      "strategy": "adaptive-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-clustered",
+      "strategy": "bulk-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-clustered",
+      "strategy": "rebuild-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-scattered",
+      "strategy": "adaptive-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-scattered",
+      "strategy": "bulk-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-scattered",
+      "strategy": "rebuild-scattered",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-scattered",
+      "strategy": "sequential-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": false,
+  "claims_allowed": false
+}
