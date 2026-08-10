@@ -1,6 +1,6 @@
 # Estado actual y siguiente plan
 
-Fecha de revisión integral: 9 de agosto de 2026.
+Fecha de revisión integral: 10 de agosto de 2026.
 
 Este documento es la fotografía autoritativa del proyecto. Los planes e
 informes de fases conservan decisiones y evidencia histórica, pero no deben
@@ -13,9 +13,13 @@ inventario ejecutable
 El commit `fe528c4` obtuvo un dictamen técnico de **consumo interno
 condicionado**. B.1–B.3 ya están implementadas y ejecutadas: el harness cubre
 todas las familias en smoke y la matriz profunda obtuvo 44/44 celdas precisas,
-22 comparaciones pareadas y ocho curvas. La promoción e integración de la RC
-siguen aplazadas hasta replicar la campaña en un host dedicado `Controlled`;
-la ejecución actual es `Informative` y bloquea por diseño los claims externos.
+22 comparaciones pareadas y ocho curvas. Sobre esa base, los checkpoints hasta
+`b9d7ef1` ampliaron específicamente el escalado bulk del summary tree y de la
+DB y conservaron cuatro campañas adicionales: 690 procesos, 6.210
+observaciones y 131/138 celdas precisas. La promoción e integración de la RC
+siguen aplazadas hasta replicar la evidencia en un host dedicado `Controlled`;
+las ejecuciones actuales son `Informative` y bloquean por diseño los claims
+externos.
 
 La implementación funcional hasta RC.6 está integrada en `main`: campos
 finitos, generación estática y contextos runtime, firmas homomórficas,
@@ -41,11 +45,17 @@ adversarial ni pruebas de pertenencia que el sistema no ofrece.
 El vertical de base de datos no está pendiente de implementación inicial.
 RC.5 ya entregó schema y filas canónicas, `PartitionedDatabase`, transacciones
 versionadas `MFTX`, log/replay `MFTL`, firmas por partición y reconciliación
-acotada `MFRS`. Lo que quedó a medio cerrar es la maduración conjunta de estas
-firmas y protocolos:
+acotada `MFRS`. La ampliación bulk ya elimina el falso límite absoluto de 256:
+coalesce hojas y ancestros en el árbol, agrupa deltas por partición, evita
+clones completos en particiones dispersas, ofrece selección híbrida por
+densidad y deriva en streaming la identidad transaccional. En el piloto
+informativo, 4.096 updates sobre 65.536 filas son unas ocho veces más rápidos
+que el rebuild de referencia. Lo que queda para madurar estas rutas es:
 
-- replicar en entorno controlado la campaña estadística ya implementada y
-  ejecutada como `Informative`;
+- replicar en entorno controlado tanto la campaña general como las nuevas
+  matrices de densidad bulk;
+- localizar el crossover DB posterior al streaming con puntos intermedios y
+  validar 1 millón de filas y árboles de al menos 1 GiB;
 - reevaluar después la integración y fijar un checkpoint recuperable;
 - validar el consumidor sobre una base de datos real con I/O y concurrencia;
 - aplicar en un motor real el mapeo LSN/revisión fijado por el runbook;
@@ -70,10 +80,11 @@ consumidor importante, no como sustituto de esa línea de producto.
 | Harness publicable B.2 | `42874c7`, 21 celdas smoke y regeneración desde raw |
 | Piloto B.3 | evidencia en `49828e3`, 6.600 observaciones, 42/44 celdas precisas |
 | Campaña profunda B.3 | evidencia en `36ec77d`, 66.500 observaciones, 44/44 precisas, `Informative` |
+| Bulk tree/DB | código hasta `73a14cc`; cuatro campañas hasta `b9d7ef1`, 6.210 observaciones, 131/138 precisas |
 | Workspace | cuatro paquetes Cargo; dos productos, un laboratorio privado y un fixture generado |
-| Tamaño tras B.3 | 583 ficheros versionables, aproximadamente 120 MiB; 104 MiB son `data/` y 12 MiB evidencia B.3 |
-| Implementación Rust | 290 ficheros y aproximadamente 92.000 líneas |
-| Documentación Markdown | 112 ficheros y aproximadamente 19.300 líneas |
+| Tamaño actual | 624 ficheros versionables y aproximadamente 122 MiB; 104 MiB son `data/` |
+| Implementación Rust | aproximadamente 93.000 líneas |
+| Documentación Markdown | aproximadamente 19.800 líneas |
 
 Para iniciar trabajo nuevo debe usarse una rama creada desde `main`, no
 continuar sobre `agent/h2-5-verified-profiles-pmull`, aunque hoy ambos árboles
@@ -91,8 +102,8 @@ sean idénticos.
 | Tracking exacto | Soportado | conserva la fuente y paga memoria O(n) |
 | Residuales | Restringido | ecuación algebraica; nunca prueba de pertenencia ni autorización de borrado |
 | Deltas y journals | Soportado | revisión, preflight y commit atómico en memoria; no prometen durabilidad frente a caída |
-| Archivo y summary tree | Soportado | edición local con fronteras fijas; cambio de fronteras activa rebuild explícito |
-| DB y reconciliación | Soportado con límites | filas/versiones exactas y reconciliación de conjuntos; v1 rechaza multiplicidad |
+| Archivo y summary tree | Soportado | bulk atómico coalesce hojas/ancestros; cambio de fronteras activa rebuild explícito |
+| DB y reconciliación | Soportado con límites | deltas agrupados e híbridos por partición; filas/versiones exactas; reconciliación v1 rechaza multiplicidad |
 | Filtros de grafos | Soportado como evidencia negativa | pueden rechazar o devolver `Indistinguishable`; nunca crean identidad |
 | `Microcanon` | Condicionado | exacto solo al completar presupuesto; de otro modo `Inconclusive` |
 | DAG canónico y adapters | Condicionado | reutilización únicamente tras igualdad de bytes canónicos exactos |
@@ -134,6 +145,12 @@ Resultados:
 - todos los benchmarks registrados compilaron y completaron su ejecución en
   modo test; estas ejecuciones no sustituyen una campaña estadística release.
 
+La ampliación posterior de lotes añadió pruebas diferenciales de 200 commits
+bulk del árbol, rechazo atómico de solapamientos, política DB híbrida y una
+transacción de 2.048 updates sobre 4.096 filas. Las campañas multidimensionales
+de tamaño, densidad y distribución están interpretadas en
+[`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md).
+
 La integración remota posterior al merge, run
 [`30910486012`](https://github.com/alfredoVallejoM/homomorphic-hash-rs/actions/runs/30910486012),
 terminó con sus 13 jobs verdes. Incluyó MSRV 1.89, matriz de features y
@@ -160,8 +177,8 @@ deterministas, RC de firmas y grafos y F6.V reproducible en x86-64 y AArch64.
 ### Bloquean la integración del checkpoint
 
 1. Falta repetir la campaña profunda como `Controlled` en un host dedicado;
-   la evidencia `Informative` no autoriza los claims que motivaron aplazar la
-   RC.
+   la evidencia `Informative`, incluidas las matrices bulk nuevas, no autoriza
+   los claims que motivaron aplazar la RC.
 2. La rama validada aún no se ha integrado en `main`.
 3. Falta el run post-merge y un tag anotado sobre el merge verde.
 
@@ -231,15 +248,21 @@ CI repite el gate en x86-64/AArch64; sus cifras son `Smoke`, no publicables.
 - publicar incertidumbre, puntos de equilibrio y resultados inconclusos.
 
 Salida obtenida: 6.600 observaciones de piloto y 66.500 profundas; 44/44 celdas
-profundas precisas, 22 ratios pareados y ocho curvas regenerables. El árbol
-cruza entre 64 y 256 KiB editados; la DB en memoria de 512 filas cruza entre 8
-y 32 mutaciones. Véase
-[`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md).
+profundas precisas, 22 ratios pareados y ocho curvas regenerables. Aquella
+campaña caracterizó la API de edición individual: sus cruces no deben
+extrapolarse a un lote coalescido. La extensión bulk añadió 6.210 observaciones
+en 138 celdas: el árbol de 64 MiB conserva ventaja hasta 75 % de hojas tocadas
+y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
+4.096 updates, pero a densidad total el rebuild domina. Véanse
+[`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md) y
+[`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md).
 
 ### 4. Replicar como `Controlled` y reevaluar RC — siguiente
 
 - ejecutar `publication-controlled-v1.json` en x86-64 dedicado, con afinidad
   fijada y atestiguaciones completas;
+- repetir sin alterar workloads las matrices `pilot-bulk-scaling-v2`,
+  `pilot-bulk-density-frontier-v1` y `pilot-db-streaming-v1`;
 - replicar después en AArch64 sin cambiar workload ni análisis;
 - decidir go/no-go comparando efectos e intervalos con la campaña informativa;
 - solo entonces abrir PR, integrar, ejecutar CI post-merge y etiquetar.

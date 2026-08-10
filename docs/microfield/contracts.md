@@ -374,3 +374,21 @@ ensamblado de los tipos estáticos.
 almacena un producto no nulo y contador de ceros por punto. Ambas conservan
 composición exacta por particiones, pero siguen siendo fingerprints finitos:
 no autentican, no prueban pertenencia y no deciden igualdad estructural.
+
+Los adapters bulk del árbol y la DB conservan esa misma frontera semántica:
+
+- `replace_ranges_with_policy` acepta únicamente reemplazos disjuntos y de
+  longitud estable. Valida el lote completo, publica una sola revisión y
+  coalesce hojas/ancestros; un error no modifica bytes, raíz ni revisión.
+- `apply_transaction` agrupa las before/after images por partición y prepara
+  todos los deltas antes del commit. `DatabaseApplyPolicy::adaptive` puede
+  reconstruir solo particiones densas; si solicita rebuild autoritativo global,
+  las filas aportadas deben coincidir exactamente con el resultado esperado.
+- `TransactionId` identifica el contenido canónico `MFTX` mediante SHA-256 y
+  puede derivarse en streaming sin cambiar el wire. Es una identidad del
+  envelope transaccional, separada de las firmas homomórficas no
+  criptográficas y no autentica su origen.
+
+Los umbrales de densidad son política de capacidad del consumidor, no parte de
+la corrección ni constantes universales. Todas las rutas aceptadas preservan
+las mismas filas/chunks exactos y el mismo resumen que un rebuild.

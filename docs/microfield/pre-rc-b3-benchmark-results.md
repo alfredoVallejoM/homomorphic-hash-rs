@@ -4,6 +4,13 @@ Fecha: 9 de agosto de 2026.
 
 Estado: **cerrada con evidencia informativa; pendiente réplica controlada**.
 
+Nota de ciclo de vida (10 de agosto de 2026): los cruces de árbol y DB de este
+informe corresponden a la ruta de edición/transacción anterior al bulk
+coalescido. Conservan validez histórica para ese código, pero no son límites
+absolutos ni deben gobernar la API actual. La implementación posterior, sus
+matrices por densidad y la interpretación vigente están en
+[`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md).
+
 Las firmas medidas son resúmenes algebraicos homomórficos **no
 criptográficos**. Ningún resultado de este informe implica autenticación,
 resistencia adversarial a colisiones o seguridad criptográfica.
@@ -84,10 +91,11 @@ Son descripciones del rango y host medidos, no pruebas asintóticas.
 ## Qué demuestra y qué no
 
 La evidencia permite tomar decisiones internas defendibles: mantener el batch
-detectado, conservar el merge algebraico, activar rebuild del árbol cuando la
-edición se aproxima al tamaño total y usar un fallback DB antes de 32
-mutaciones para esta tabla/carga. Los puntos de cruce deben modelarse por
-tamaño relativo en la política final, no copiarse como constantes universales.
+detectado, conservar el merge algebraico y motivó sustituir las rutas
+repetitivas del árbol/DB por operaciones bulk. El umbral anterior a 32
+mutaciones solo describe aquella tabla de 512 filas y aquel código; los puntos
+de cruce deben modelarse por tamaño relativo, distribución y particionado, no
+copiarse como constantes universales.
 
 Todavía no permite:
 

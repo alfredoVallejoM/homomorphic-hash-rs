@@ -134,7 +134,27 @@ Gates locales:
 - no se soportan multiplicidades en reconciliación;
 - las firmas de filas siguen siendo fingerprints no criptográficos.
 
-## Decisión
+## Actualización bulk pre-RC (10 de agosto de 2026)
+
+La ruta transaccional posterior agrupa mutaciones por partición, aplica un
+delta agregado de filas retiradas/añadidas y evita clonar la partición completa
+cuando el lote es disperso. `DatabaseApplyPolicy::adaptive` puede combinar
+particiones bulk y reconstruidas en el mismo commit; el informe expone la ruta
+y el número de particiones reconstruidas. Claves, longitud canónica e identidad
+`MFTX` se preparan sin materializar repetidamente el wire completo.
+
+Los tests añaden una transacción de 2.048 updates sobre 4.096 filas, selección
+híbrida por partición e invariancia de wire/ID. En el piloto informativo, 4.096
+updates sobre 65.536 filas tardan 20,45–20,71 ms frente a 163,86 ms del rebuild
+de referencia; al modificar toda la tabla, el rebuild vuelve a dominar. El
+resultado actual y sus límites se detallan en
+[`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md).
+
+Esta actualización no añade SQL, WAL, `fsync` ni concurrencia, y no cambia la
+clasificación de las firmas: siguen siendo fingerprints algebraicos no
+criptográficos.
+
+## Decisión histórica RC.5
 
 RC.5 queda cerrado. RC.6 puede concentrarse en el schema canónico persistente
 de grafos, DAG exacto y adapters de cliques/subredes sin dejar pendientes en el

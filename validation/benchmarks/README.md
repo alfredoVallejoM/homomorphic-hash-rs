@@ -35,6 +35,26 @@ Both runs are `Informative` and therefore have `claims_allowed=false`. Their
 timings guide internal decisions but are not public performance claims. See
 `docs/microfield/pre-rc-b3-benchmark-results.md` for interpretation and limits.
 
+The bulk-scaling extension isolates coalesced summary-tree replacements and
+partitioned database transactions across size, edit density and scattered or
+clustered distributions:
+
+- `pilot-bulk-scaling-v1.json` and
+  `runs/pre-rc-bulk-scaling-pilot-v1`: baseline, 57 cells;
+- `pilot-bulk-scaling-v2.json` and
+  `runs/pre-rc-bulk-scaling-pilot-v2`: post-clone optimization, 57 cells;
+- `pilot-bulk-density-frontier-v1.json` and
+  `runs/pre-rc-bulk-density-frontier-pilot-v1`: 75/100% frontier, 18 cells;
+- `pilot-db-streaming-v1.json` and
+  `runs/pre-rc-database-streaming-pilot-v1`: post-streaming confirmation, six
+  cells.
+
+Together they retain 6,210 observations from 690 independent worker processes;
+131/138 cells met the configured precision target. These runs are also
+`Informative` with `claims_allowed=false`. Their interpretation, including why
+256 edits are not an absolute limit, lives in
+`docs/microfield/pre-rc-bulk-scaling-results.md`.
+
 A run can only be classified `Controlled` when it uses a release binary from a
 clean tree, the manifest declares a dedicated host, frequency metadata is
 visible and the operator explicitly attests dedicated execution and fixed

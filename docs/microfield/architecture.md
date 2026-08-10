@@ -264,3 +264,30 @@ en [`ADR 0016`](adr/0016-persistent-packed-batches.md) y VPCLMUL en
 [`ADR 0017`](adr/0017-x86-vpclmul-lane-pairs.md).
 El cierre conservador y la tabla versionada se fijan en
 [`ADR 0018`](adr/0018-versioned-calibration-and-phase-2-closure.md).
+
+## Lotes estructurales sobre el núcleo
+
+El paquete raíz consume campos estáticos/generados sin introducir estas rutas
+en `microfield`:
+
+```text
+SummaryRangeEdit[] → validar/ordenar → hojas únicas → ancestros únicos
+                                      └────────────→ commit de una revisión
+
+TransactionDelta → preflight → agrupar por partición → preparar deltas/candidatos
+                                                    → commit de una revisión
+```
+
+En el árbol, los reemplazos de longitud fija comparten una pasada de
+recomputación. La política adaptativa puede seleccionar rebuild por fracción
+de hojas sin cambiar el resultado exacto. En DB, las particiones dispersas
+preparan firmas agregadas sin clonarse enteras y solo las particiones densas
+materializan candidatos de rebuild. Toda validación ocurre antes de publicar
+filas, firmas, historial o revisión.
+
+`TransactionDelta` cachea claves y longitud canónica; el SHA-256 del
+`TransactionId` se alimenta en streaming con el framing byte-idéntico de
+`MFTX`. Esta identidad transaccional es independiente de los resúmenes
+algebraicos no criptográficos. La evidencia de capacidad y los límites de esta
+arquitectura están en
+[`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md).

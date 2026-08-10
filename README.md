@@ -29,6 +29,16 @@ terminó con todos sus jobs verdes en x86-64 y AArch64. El gate RC.10 confirmó
 campaña profunda es `Informative`, no `Controlled`, y por diseño mantiene
 `claims_allowed=false` hasta repetirla en hardware dedicado.
 
+El escalado específico de lotes del árbol y la DB ya se ha ampliado y medido
+en otras cuatro campañas informativas: 690 procesos, 6.210 observaciones y
+131/138 celdas precisas. El árbol coalesce hojas y ancestros; la DB agrupa
+deltas por partición, evita clones dispersos y puede combinar bulk con rebuild
+por partición. No hay un límite absoluto en 256 operaciones: en el piloto,
+4.096 updates sobre 65.536 filas tardan 20,45–20,71 ms frente a 163,86 ms del
+rebuild de referencia. Densidades cercanas al total siguen favoreciendo el
+rebuild. El análisis completo y sus límites están en
+[`pre-rc-bulk-scaling-results.md`](docs/microfield/pre-rc-bulk-scaling-results.md).
+
 La línea prioritaria de cierre son los hashes homomórficos —expuestos por la
 API como firmas algebraicas para dejar claro que **no son criptográficos**— y
 su aplicación a bases de datos. El sistema DB base ya existe: filas/schema,
@@ -163,6 +173,7 @@ cargo run -p microfield --features generator --bin microfield-gen -- \
 - [Plan maestro RC](docs/microfield/release-candidate-readiness-plan.md)
 - [Protocolo pre-RC de benchmarks](docs/microfield/pre-rc-benchmark-protocol.md)
 - [Resultados B.3 de escalabilidad](docs/microfield/pre-rc-b3-benchmark-results.md)
+- [Escalado bulk del árbol y la DB](docs/microfield/pre-rc-bulk-scaling-results.md)
 - [Plan de maduración, integración y publicación](docs/microfield/post-rc-benchmark-and-publication-plan.md)
 - [Contratos técnicos](docs/microfield/contracts.md)
 - [Arquitectura](docs/microfield/architecture.md)

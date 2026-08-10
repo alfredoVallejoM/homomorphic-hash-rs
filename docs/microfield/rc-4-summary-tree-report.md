@@ -135,7 +135,21 @@ Gates locales:
 - la raíz no demuestra igualdad exacta de archivos por sí sola;
 - no se persisten caches ISA ni representaciones internas.
 
-## Decisión
+## Actualización bulk pre-RC (10 de agosto de 2026)
+
+La API posterior añade reemplazos disjuntos atómicos mediante
+`SummaryRangeEdit` y `replace_ranges_with_policy`. La ruta
+`BulkLocalTree` clona cada hoja tocada y recalcula cada ancestro único una sola
+vez; una política opcional decide por bytes y fracción de hojas. Los tests
+añaden coalescencia, solapamiento atómico y 200 revisiones bulk diferenciales.
+
+En la campaña informativa, un árbol de 64 MiB conserva ventaja respecto a
+rebuild a 6,25 %, 50 % y 75 % de hojas tocadas, y alcanza aproximadamente la
+paridad al 100 %. Sustituye cualquier interpretación del umbral histórico en
+bytes como constante universal. Detalle y límites en
+[`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md).
+
+## Decisión histórica RC.4
 
 RC.4 queda cerrado. RC.5 puede construir particiones y transacciones de filas
 sobre el núcleo de deltas, mientras el árbol queda disponible como índice

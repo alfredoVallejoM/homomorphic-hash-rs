@@ -120,7 +120,7 @@
       "id": "protocol.database-transactions",
       "status": "supported",
       "feature": "signatures",
-      "contract": "partitioned MFTX before/after transactions with atomic commit, revision and idempotent MFTL replay"
+      "contract": "partitioned MFTX before/after transactions with grouped and adaptive per-partition application, atomic commit, revision and idempotent MFTL replay"
     },
     {
       "id": "protocol.data-delta",
@@ -144,7 +144,7 @@
       "id": "protocol.summary-tree",
       "status": "supported",
       "feature": "signatures",
-      "contract": "ordered hierarchical summary with local fixed-boundary updates and explicit rebuild fallback"
+      "contract": "ordered hierarchical summary with atomic coalesced fixed-boundary bulk updates, adaptive density policy and explicit rebuild fallback"
     },
     {
       "id": "protocol.summary-checkpoint",

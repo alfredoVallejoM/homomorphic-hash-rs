@@ -1,6 +1,6 @@
 # Índice y ciclo de vida de la documentación
 
-Fecha de inventario: 9 de agosto de 2026.
+Fecha de inventario: 10 de agosto de 2026.
 
 Este directorio conserva tanto contratos vigentes como planes e informes
 históricos. La redacción en futuro de un plan ejecutado y la frase “siguiente
@@ -40,6 +40,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`pre-rc-benchmark-protocol.md`](pre-rc-benchmark-protocol.md) | metodología, matriz y gates B.1–B.3 previos a RC |
 | [`pre-rc-b2-benchmark-harness-report.md`](pre-rc-b2-benchmark-harness-report.md) | workers, raw data, estadística y smoke B.2 |
 | [`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md) | piloto, campaña profunda, curvas, cruces y límites B.3 |
+| [`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md) | lotes coalescidos del árbol, DB por particiones y frontier de densidad |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |
 | [`phase-6-g15-internal-readiness-plan.md`](phase-6-g15-internal-readiness-plan.md) | desglose histórico G15 y correspondencia con RC |
 | [`contracts.md`](contracts.md) | contratos algebraicos, batch, generación y firmas |
@@ -60,8 +61,8 @@ G6–G7 y ADR 0032–0034 fijan assurance, comparación pareada y pipeline/delta
   tienen gate remoto verde en la rama RC y están pendientes de integración en
   `main`.
 - `pre-rc-benchmark-protocol.md`: B.1–B.3 cerrados con evidencia informativa;
-  la réplica `Controlled` es ahora precondición para promover o integrar la
-  RC.
+  la extensión bulk del árbol/DB también está ejecutada como `Informative`; la
+  réplica `Controlled` de ambas es precondición para promover o integrar la RC.
 - `post-rc-benchmark-and-publication-plan.md`: integración aplazada, DB real y
   release externa después de reevaluar B.1–B.3.
 - `phase-6-g15-internal-readiness-plan.md`: G15.0–G15.4 materializados por
