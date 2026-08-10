@@ -4,7 +4,7 @@
 
 use homomorphic_hash_rs::{
     BinaryPolynomialEncoder, FileChunkProfile, HomomorphicSummaryTree, SummaryEditPath,
-    SummaryEditPolicy, SummaryTreeError, SummaryTreeLimits,
+    SummaryEditPolicy, SummaryRangeEdit, SummaryTreeError, SummaryTreeLimits,
 };
 use microfield::{BinaryPolynomialField, Gf2_128V1};
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -96,6 +96,123 @@ fn measured_policy_routes_large_equal_length_edits_to_exact_rebuild() {
     assert_eq!(tree.to_file_bytes().unwrap(), exact);
     assert_eq!(tree.root(), rebuild(profile, &exact).root());
     assert_eq!(policy.max_local_edited_bytes(), 128);
+}
+
+#[test]
+fn bulk_edits_coalesce_shared_paths_and_match_exact_rebuild() {
+    let profile = FileChunkProfile::fixed(64).unwrap();
+    let original = (0..8_192).map(|index| index as u8).collect::<Vec<_>>();
+    let edits = vec![
+        SummaryRangeEdit::new(1_930..1_938, vec![0x31; 8]),
+        SummaryRangeEdit::new(650..658, vec![0x11; 8]),
+        SummaryRangeEdit::new(670..678, vec![0x21; 8]),
+        SummaryRangeEdit::new(710..718, vec![0x29; 8]),
+    ];
+    let mut exact = original.clone();
+    for edit in &edits {
+        exact[edit.range().clone()].copy_from_slice(edit.replacement());
+    }
+
+    let mut sequential = rebuild(profile, &original);
+    let sequential_nodes = edits
+        .iter()
+        .map(|edit| {
+            sequential
+                .replace_range(edit.range().clone(), edit.replacement())
+                .unwrap()
+                .recomputed_nodes()
+        })
+        .sum::<usize>();
+    let mut bulk = rebuild(profile, &original);
+    let report = bulk
+        .replace_ranges_with_policy(&edits, SummaryEditPolicy::default())
+        .unwrap();
+
+    assert_eq!(report.path(), SummaryEditPath::BulkLocalTree);
+    assert_eq!(report.touched_leaves(), 3);
+    assert!(report.recomputed_nodes() < sequential_nodes);
+    assert_eq!(bulk.revision(), 1);
+    assert_eq!(bulk.to_file_bytes().unwrap(), exact);
+    assert_eq!(bulk.root(), rebuild(profile, &exact).root());
+}
+
+#[test]
+fn adaptive_bulk_density_routes_and_invalid_batches_are_atomic() {
+    let profile = FileChunkProfile::fixed(64).unwrap();
+    let original = (0..4_096).map(|index| index as u8).collect::<Vec<_>>();
+    let policy = SummaryEditPolicy::adaptive(usize::MAX, 1, 4).unwrap();
+    assert_eq!(policy.max_local_touched_leaves_fraction(), (1, 4));
+    assert_eq!(
+        SummaryEditPolicy::adaptive(1, 2, 1),
+        Err(SummaryTreeError::InvalidPolicy)
+    );
+
+    let sparse = (0..16)
+        .map(|leaf| SummaryRangeEdit::new(leaf * 64..leaf * 64 + 1, vec![0xa5]))
+        .collect::<Vec<_>>();
+    let mut tree = rebuild(profile, &original);
+    assert_eq!(
+        tree.replace_ranges_with_policy(&sparse, policy)
+            .unwrap()
+            .path(),
+        SummaryEditPath::BulkLocalTree
+    );
+
+    let dense = (16..33)
+        .map(|leaf| SummaryRangeEdit::new(leaf * 64..leaf * 64 + 1, vec![0x5a]))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        tree.replace_ranges_with_policy(&dense, policy)
+            .unwrap()
+            .path(),
+        SummaryEditPath::BoundaryRebuild
+    );
+
+    let before_bytes = tree.to_file_bytes().unwrap();
+    let before_root = tree.root();
+    let before_revision = tree.revision();
+    let overlapping = vec![
+        SummaryRangeEdit::new(10..20, vec![1; 10]),
+        SummaryRangeEdit::new(19..24, vec![2; 5]),
+    ];
+    assert_eq!(
+        tree.replace_ranges_with_policy(&overlapping, policy),
+        Err(SummaryTreeError::InvalidBulkEdit("overlapping ranges"))
+    );
+    assert_eq!(tree.to_file_bytes().unwrap(), before_bytes);
+    assert_eq!(tree.root(), before_root);
+    assert_eq!(tree.revision(), before_revision);
+}
+
+#[test]
+fn random_bulk_campaign_matches_exact_bytes_and_rebuild() {
+    let profile = FileChunkProfile::fixed(32).unwrap();
+    let mut rng = StdRng::seed_from_u64(0x5243_40b0);
+    let mut exact = (0..16_384).map(|_| rng.gen()).collect::<Vec<u8>>();
+    let mut tree = rebuild(profile, &exact);
+
+    for revision in 1..=200_u64 {
+        let mut leaves = (0..512_usize).collect::<Vec<_>>();
+        use rand::seq::SliceRandom as _;
+        leaves.shuffle(&mut rng);
+        let edit_count = rng.gen_range(1..=96);
+        let edits = leaves[..edit_count]
+            .iter()
+            .map(|leaf| {
+                let start = leaf * 32 + rng.gen_range(0..=24);
+                let replacement = (0..8).map(|_| rng.gen()).collect::<Vec<u8>>();
+                exact[start..start + 8].copy_from_slice(&replacement);
+                SummaryRangeEdit::new(start..start + 8, replacement)
+            })
+            .collect::<Vec<_>>();
+        let report = tree
+            .replace_ranges_with_policy(&edits, SummaryEditPolicy::default())
+            .unwrap();
+        assert_eq!(report.path(), SummaryEditPath::BulkLocalTree);
+        assert_eq!(report.revision(), revision);
+        assert_eq!(tree.to_file_bytes().unwrap(), exact);
+        assert_eq!(tree.root(), rebuild(profile, &exact).root());
+    }
 }
 
 #[test]

@@ -104,5 +104,6 @@ pub use sequence::{SequenceSignature, TrackedSequence};
 pub use snapshot::TrackedSnapshotLimits;
 pub use summary_tree::{
     FileChunkProfile, FileChunkProfileId, HomomorphicSummaryRoot, HomomorphicSummaryTree,
-    SummaryEditPath, SummaryEditPolicy, SummaryEditReport, SummaryTreeError, SummaryTreeLimits,
+    SummaryEditPath, SummaryEditPolicy, SummaryEditReport, SummaryRangeEdit, SummaryTreeError,
+    SummaryTreeLimits,
 };

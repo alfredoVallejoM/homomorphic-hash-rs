@@ -91,8 +91,8 @@ pub use structural::{
     SignatureAssurance, SignatureBuilder, SignatureContext, SignatureDelta, SignatureError,
     SignatureEvaluationProfile, SignatureFieldBinding, SignatureFieldProfile, SignatureId,
     SignatureLaw, SignatureProfile, StructuralEncoder, StructuralLaneEncoder, SummaryEditPath,
-    SummaryEditPolicy, SummaryEditReport, SummaryTreeError, SummaryTreeLimits, TrackedMultiset,
-    TrackedSequence, TrackedSnapshotLimits, TransactionDelta, TransactionId,
+    SummaryEditPolicy, SummaryEditReport, SummaryRangeEdit, SummaryTreeError, SummaryTreeLimits,
+    TrackedMultiset, TrackedSequence, TrackedSnapshotLimits, TransactionDelta, TransactionId,
 };
 #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 pub use structural::{

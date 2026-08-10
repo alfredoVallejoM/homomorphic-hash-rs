@@ -1,6 +1,7 @@
 //! Fixed-chunk file adapter and hierarchical ordered summaries.
 
 use core::{fmt, ops::Range};
+use std::collections::BTreeMap;
 
 use microfield::{CanonicalEncoding, Field, Invert, Pow, StaticField};
 use sha2::{Digest as _, Sha256};
@@ -113,6 +114,10 @@ pub enum SummaryTreeError {
     InvalidChunkProfile,
     /// An edit range is reversed or outside the current file.
     InvalidRange,
+    /// A bulk edit overlaps another range or changes fixed chunk boundaries.
+    InvalidBulkEdit(&'static str),
+    /// An adaptive edit policy contains an invalid fraction.
+    InvalidPolicy,
     /// An edit or checkpoint exceeds a defensive ceiling.
     LimitExceeded(&'static str),
     /// The tree revision cannot advance.
@@ -129,6 +134,8 @@ impl fmt::Display for SummaryTreeError {
             Self::Signature(error) => error.fmt(formatter),
             Self::InvalidChunkProfile => formatter.write_str("invalid fixed chunk profile"),
             Self::InvalidRange => formatter.write_str("invalid file edit range"),
+            Self::InvalidBulkEdit(reason) => write!(formatter, "invalid bulk file edit: {reason}"),
+            Self::InvalidPolicy => formatter.write_str("invalid summary tree edit policy"),
             Self::LimitExceeded(limit) => write!(formatter, "summary tree exceeds {limit} limit"),
             Self::RevisionOverflow => formatter.write_str("summary tree revision overflow"),
             Self::InvalidCheckpoint(reason) => {
@@ -228,8 +235,37 @@ pub enum SummaryEditPath {
     NoChange,
     /// Chunk boundaries stayed fixed and only affected ancestor paths changed.
     LocalTree,
-    /// File length changed, so fixed boundaries required a complete rebuild.
+    /// Several disjoint edits shared one leaf/ancestor recomputation pass.
+    BulkLocalTree,
+    /// Boundaries changed or policy selected a complete exact rebuild.
     BoundaryRebuild,
+}
+
+/// One owned, boundary-preserving replacement in a bulk tree edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SummaryRangeEdit {
+    range: Range<usize>,
+    replacement: Vec<u8>,
+}
+
+impl SummaryRangeEdit {
+    /// Creates one edit. Bounds, length and overlap are validated by the tree.
+    #[must_use]
+    pub const fn new(range: Range<usize>, replacement: Vec<u8>) -> Self {
+        Self { range, replacement }
+    }
+
+    /// Original-file byte range replaced by this edit.
+    #[must_use]
+    pub const fn range(&self) -> &Range<usize> {
+        &self.range
+    }
+
+    /// Exact replacement bytes.
+    #[must_use]
+    pub fn replacement(&self) -> &[u8] {
+        &self.replacement
+    }
 }
 
 /// Capacity policy for choosing local recomputation versus exact rebuild.
@@ -240,6 +276,8 @@ pub enum SummaryEditPath {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SummaryEditPolicy {
     max_local_edited_bytes: usize,
+    max_local_touched_leaves_numerator: usize,
+    max_local_touched_leaves_denominator: usize,
 }
 
 impl SummaryEditPolicy {
@@ -248,13 +286,48 @@ impl SummaryEditPolicy {
     pub const fn new(max_local_edited_bytes: usize) -> Self {
         Self {
             max_local_edited_bytes,
+            max_local_touched_leaves_numerator: 1,
+            max_local_touched_leaves_denominator: 1,
         }
+    }
+
+    /// Creates a policy with absolute and relative local-update ceilings.
+    ///
+    /// `numerator / denominator` must be in the inclusive range `[0, 1]`.
+    pub const fn adaptive(
+        max_local_edited_bytes: usize,
+        numerator: usize,
+        denominator: usize,
+    ) -> Result<Self, SummaryTreeError> {
+        if denominator == 0 || numerator > denominator {
+            return Err(SummaryTreeError::InvalidPolicy);
+        }
+        Ok(Self {
+            max_local_edited_bytes,
+            max_local_touched_leaves_numerator: numerator,
+            max_local_touched_leaves_denominator: denominator,
+        })
     }
 
     /// Largest equal-length replacement routed through local recomputation.
     #[must_use]
     pub const fn max_local_edited_bytes(self) -> usize {
         self.max_local_edited_bytes
+    }
+
+    /// Inclusive touched-leaf ceiling as `(numerator, denominator)`.
+    #[must_use]
+    pub const fn max_local_touched_leaves_fraction(self) -> (usize, usize) {
+        (
+            self.max_local_touched_leaves_numerator,
+            self.max_local_touched_leaves_denominator,
+        )
+    }
+
+    fn accepts(self, edited_bytes: usize, touched_leaves: usize, total_leaves: usize) -> bool {
+        edited_bytes <= self.max_local_edited_bytes
+            && (touched_leaves as u128) * (self.max_local_touched_leaves_denominator as u128)
+                <= (total_leaves as u128) * (self.max_local_touched_leaves_numerator as u128)
     }
 }
 
@@ -467,10 +540,64 @@ where
         if range.start == range.end && replacement.is_empty() {
             return Ok(self.no_change_report());
         }
-        if range.len() == replacement.len() && range.len() <= policy.max_local_edited_bytes {
+        let touched_leaves = touched_leaf_count(&range, self.profile.chunk_bytes);
+        if range.len() == replacement.len()
+            && policy.accepts(range.len(), touched_leaves, self.chunks.len())
+        {
             self.replace_fixed(range, replacement)
         } else {
             self.replace_with_rebuild(range, replacement)
+        }
+    }
+
+    /// Applies disjoint equal-length replacements in one atomic tree update.
+    ///
+    /// Input order is irrelevant. Overlap, invalid bounds or a length change
+    /// rejects the complete batch. The local route clones each affected leaf
+    /// once and recomputes every shared ancestor once; the adaptive policy may
+    /// instead select one exact full rebuild for a dense batch.
+    pub fn replace_ranges_with_policy(
+        &mut self,
+        edits: &[SummaryRangeEdit],
+        policy: SummaryEditPolicy,
+    ) -> Result<SummaryEditReport, SummaryTreeError> {
+        if edits.is_empty() {
+            return Ok(self.no_change_report());
+        }
+        let mut ordered = edits.iter().collect::<Vec<_>>();
+        ordered.sort_by_key(|edit| (edit.range.start, edit.range.end));
+        let mut edited_bytes = 0_usize;
+        let mut previous_end = 0_usize;
+        let mut touched = BTreeMap::<usize, ()>::new();
+        for (position, edit) in ordered.iter().enumerate() {
+            validate_range(&edit.range, self.byte_len)?;
+            if edit.range.len() != edit.replacement.len() {
+                return Err(SummaryTreeError::InvalidBulkEdit(
+                    "replacement changes byte length",
+                ));
+            }
+            if position > 0 && edit.range.start < previous_end {
+                return Err(SummaryTreeError::InvalidBulkEdit("overlapping ranges"));
+            }
+            previous_end = edit.range.end;
+            edited_bytes = edited_bytes
+                .checked_add(edit.range.len())
+                .ok_or(SummaryTreeError::LimitExceeded("edited bytes"))?;
+            if !edit.range.is_empty() {
+                let first = edit.range.start / self.profile.chunk_bytes;
+                let last = (edit.range.end - 1) / self.profile.chunk_bytes;
+                for index in first..=last {
+                    touched.insert(index, ());
+                }
+            }
+        }
+        if edited_bytes == 0 {
+            return Ok(self.no_change_report());
+        }
+        if policy.accepts(edited_bytes, touched.len(), self.chunks.len()) {
+            self.replace_fixed_many(&ordered)
+        } else {
+            self.replace_fixed_many_with_rebuild(&ordered)
         }
     }
 
@@ -544,6 +671,55 @@ where
             return Ok(self.no_change_report());
         }
 
+        self.commit_fixed_chunks(changed, SummaryEditPath::LocalTree, revision)
+    }
+
+    fn replace_fixed_many(
+        &mut self,
+        edits: &[&SummaryRangeEdit],
+    ) -> Result<SummaryEditReport, SummaryTreeError> {
+        let revision = self
+            .revision
+            .checked_add(1)
+            .ok_or(SummaryTreeError::RevisionOverflow)?;
+        let mut changed = BTreeMap::<usize, Vec<u8>>::new();
+        for edit in edits {
+            if edit.range.is_empty() {
+                continue;
+            }
+            let first = edit.range.start / self.profile.chunk_bytes;
+            let last = (edit.range.end - 1) / self.profile.chunk_bytes;
+            for index in first..=last {
+                let chunk_start = index * self.profile.chunk_bytes;
+                let overlap_start = edit.range.start.max(chunk_start);
+                let overlap_end = edit.range.end.min(chunk_start + self.chunks[index].len());
+                let chunk = changed
+                    .entry(index)
+                    .or_insert_with(|| self.chunks[index].clone());
+                let local_start = overlap_start - chunk_start;
+                let local_end = overlap_end - chunk_start;
+                let source_start = overlap_start - edit.range.start;
+                let source_end = overlap_end - edit.range.start;
+                chunk[local_start..local_end]
+                    .copy_from_slice(&edit.replacement[source_start..source_end]);
+            }
+        }
+        let changed = changed
+            .into_iter()
+            .filter(|(index, chunk)| chunk != &self.chunks[*index])
+            .collect::<Vec<_>>();
+        if changed.is_empty() {
+            return Ok(self.no_change_report());
+        }
+        self.commit_fixed_chunks(changed, SummaryEditPath::BulkLocalTree, revision)
+    }
+
+    fn commit_fixed_chunks(
+        &mut self,
+        changed: Vec<(usize, Vec<u8>)>,
+        path: SummaryEditPath,
+        revision: u64,
+    ) -> Result<SummaryEditReport, SummaryTreeError> {
         let mut candidates: Vec<Vec<(usize, SequenceSignature<F, E>)>> = Vec::new();
         candidates
             .try_reserve_exact(self.levels.len())
@@ -608,7 +784,41 @@ where
         }
         self.revision = revision;
         Ok(SummaryEditReport {
-            path: SummaryEditPath::LocalTree,
+            path,
+            touched_leaves,
+            recomputed_nodes,
+            revision,
+        })
+    }
+
+    fn replace_fixed_many_with_rebuild(
+        &mut self,
+        edits: &[&SummaryRangeEdit],
+    ) -> Result<SummaryEditReport, SummaryTreeError> {
+        let revision = self
+            .revision
+            .checked_add(1)
+            .ok_or(SummaryTreeError::RevisionOverflow)?;
+        let mut bytes = self.to_file_bytes()?;
+        for edit in edits {
+            bytes[edit.range.clone()].copy_from_slice(&edit.replacement);
+        }
+        let candidate = Self::build(
+            self.profile,
+            self.encoder.clone(),
+            self.base,
+            &bytes,
+            self.limits,
+            revision,
+        )?;
+        if candidate.chunks == self.chunks {
+            return Ok(self.no_change_report());
+        }
+        let touched_leaves = candidate.chunks.len();
+        let recomputed_nodes = candidate.levels.iter().map(Vec::len).sum();
+        *self = candidate;
+        Ok(SummaryEditReport {
+            path: SummaryEditPath::BoundaryRebuild,
             touched_leaves,
             recomputed_nodes,
             revision,
@@ -768,6 +978,14 @@ fn validate_range(range: &Range<usize>, file_len: usize) -> Result<(), SummaryTr
         Err(SummaryTreeError::InvalidRange)
     } else {
         Ok(())
+    }
+}
+
+fn touched_leaf_count(range: &Range<usize>, chunk_bytes: usize) -> usize {
+    if range.is_empty() {
+        0
+    } else {
+        (range.end - 1) / chunk_bytes - range.start / chunk_bytes + 1
     }
 }
 

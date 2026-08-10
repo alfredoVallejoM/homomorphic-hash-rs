@@ -2,7 +2,7 @@
 
 #![cfg(feature = "signatures")]
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use homomorphic_hash_rs::{
     ApplicationNamespace, BinaryPolynomialEncoder, BoundedSetReconciler, DatabaseApplyPath,
@@ -378,6 +378,122 @@ fn measured_policy_selects_verified_authoritative_rebuild_atomically() {
     );
     assert_eq!(rejected.revision(), 0);
     assert_eq!(rejected.summary().unwrap(), before);
+}
+
+#[test]
+fn adaptive_policy_rebuilds_only_dense_partitions() {
+    let schema = schema();
+    let initial = (0..512_u64)
+        .map(|id| row(id, 1, id + 10))
+        .collect::<Vec<_>>();
+    let mut by_partition = BTreeMap::<usize, Vec<u64>>::new();
+    for (id, image) in initial.iter().enumerate() {
+        let key = schema.row_key(image).unwrap();
+        let partition = (u64::from_le_bytes(key.as_bytes()[..8].try_into().unwrap()) % 8) as usize;
+        by_partition.entry(partition).or_default().push(id as u64);
+    }
+    let (&dense_partition, dense_ids) = by_partition.iter().next().unwrap();
+    let sparse_id = *by_partition
+        .iter()
+        .find(|(partition, _)| **partition != dense_partition)
+        .unwrap()
+        .1
+        .first()
+        .unwrap();
+    let mut changed = dense_ids.iter().copied().collect::<BTreeSet<_>>();
+    changed.insert(sparse_id);
+    let mutations = changed
+        .iter()
+        .map(|id| RowMutation::Update {
+            before: initial[*id as usize].clone(),
+            after: row(*id, 2, id + 10_000),
+        })
+        .collect::<Vec<_>>();
+    let transaction = TransactionDelta::new(namespace(), &schema, 0, mutations).unwrap();
+    let target = (0..512_u64)
+        .map(|id| {
+            if changed.contains(&id) {
+                row(id, 2, id + 10_000)
+            } else {
+                initial[id as usize].clone()
+            }
+        })
+        .collect::<Vec<_>>();
+    let mut table = Table::from_rows(
+        namespace(),
+        schema.clone(),
+        8,
+        encoder(),
+        Gf2_128V1::ONE,
+        initial,
+    )
+    .unwrap();
+    let policy = DatabaseApplyPolicy::adaptive(usize::MAX, 1, 2).unwrap();
+    assert_eq!(policy.max_incremental_partition_fraction(), (1, 2));
+    assert_eq!(
+        DatabaseApplyPolicy::adaptive(10, 2, 1),
+        Err(DatabaseError::InvalidPolicy)
+    );
+    let report = table
+        .apply_transaction_with_policy(
+            &transaction,
+            DatabaseTransactionLimits::default(),
+            policy,
+            || -> Vec<DatabaseRow> { panic!("partition policy must not request global rows") },
+        )
+        .unwrap();
+    assert_eq!(report.path(), DatabaseApplyPath::PartitionHybrid);
+    assert_eq!(report.rebuilt_partitions(), 1);
+    assert!(report.touched_partitions() >= 2);
+    assert_eq!(table.revision(), 1);
+
+    let rebuilt =
+        Table::from_rows(namespace(), schema, 8, encoder(), Gf2_128V1::ONE, target).unwrap();
+    assert_eq!(table.rows(), rebuilt.rows());
+    assert_eq!(table.summary().unwrap(), rebuilt.summary().unwrap());
+}
+
+#[test]
+fn large_bulk_transaction_matches_full_rebuild() {
+    let schema = schema();
+    let initial = (0..4_096_u64)
+        .map(|id| row(id, 1, id.wrapping_mul(17)))
+        .collect::<Vec<_>>();
+    let target = (0..4_096_u64)
+        .map(|id| {
+            if id < 2_048 {
+                row(id, 2, id.wrapping_mul(31))
+            } else {
+                initial[id as usize].clone()
+            }
+        })
+        .collect::<Vec<_>>();
+    let mutations = (0..2_048_u64)
+        .map(|id| RowMutation::Update {
+            before: initial[id as usize].clone(),
+            after: target[id as usize].clone(),
+        })
+        .collect::<Vec<_>>();
+    let transaction = TransactionDelta::new(namespace(), &schema, 0, mutations).unwrap();
+    let mut table = Table::from_rows(
+        namespace(),
+        schema.clone(),
+        32,
+        encoder(),
+        Gf2_128V1::ONE,
+        initial,
+    )
+    .unwrap();
+    let report = table
+        .apply_transaction(&transaction, DatabaseTransactionLimits::default())
+        .unwrap();
+    assert_eq!(report.status(), DatabaseApplyStatus::Applied);
+    assert_eq!(report.touched_partitions(), 32);
+
+    let rebuilt =
+        Table::from_rows(namespace(), schema, 32, encoder(), Gf2_128V1::ONE, target).unwrap();
+    assert_eq!(table.rows(), rebuilt.rows());
+    assert_eq!(table.summary().unwrap(), rebuilt.summary().unwrap());
 }
 
 #[test]
