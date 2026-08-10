@@ -1,0 +1,51 @@
+{
+  "schema": "algesum-c3-expansion-report-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1",
+  "source": "c3-t1-r1-d1-factor-plan-v1.json",
+  "total_cells": 374,
+  "total_preflight_cells": 16,
+  "shards": [
+    {
+      "id": "t1-file-tree-state",
+      "operations": 5,
+      "primary_combinations": 4,
+      "secondary_combinations": 4,
+      "publication_cells": 80,
+      "smoke_cells": 5,
+      "preflight_cells": 5,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.0625,
+      "publication_manifest": "c3-t1-file-tree-state-publication-v1.json",
+      "smoke_manifest": "c3-t1-file-tree-state-smoke-v1.json",
+      "preflight_manifest": "c3-t1-file-tree-state-preflight-v1.json"
+    },
+    {
+      "id": "r1-bounded-reconciliation",
+      "operations": 4,
+      "primary_combinations": 21,
+      "secondary_combinations": 1,
+      "publication_cells": 84,
+      "smoke_cells": 4,
+      "preflight_cells": 4,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.047619047619047616,
+      "publication_manifest": "c3-r1-bounded-reconciliation-publication-v1.json",
+      "smoke_manifest": "c3-r1-bounded-reconciliation-smoke-v1.json",
+      "preflight_manifest": "c3-r1-bounded-reconciliation-preflight-v1.json"
+    },
+    {
+      "id": "d1-database-state",
+      "operations": 7,
+      "primary_combinations": 10,
+      "secondary_combinations": 3,
+      "publication_cells": 210,
+      "smoke_cells": 7,
+      "preflight_cells": 7,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.03333333333333333,
+      "publication_manifest": "c3-d1-database-state-publication-v1.json",
+      "smoke_manifest": "c3-d1-database-state-smoke-v1.json",
+      "preflight_manifest": "c3-d1-database-state-preflight-v1.json"
+    }
+  ]
+}

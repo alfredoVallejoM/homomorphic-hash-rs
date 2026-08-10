@@ -1,0 +1,2 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+t1-restore-calibration-p512-n1048576,file-summary-tree,summary-tree.restore-total,1048576,bytes,3,60,25.653758049,25.703367329,25.736858177,0.016567707,25.635944843,25.686458111,0.000984520,true,Precise,,,,,,,

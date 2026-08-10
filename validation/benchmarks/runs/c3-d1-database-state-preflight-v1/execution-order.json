@@ -1,0 +1,118 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1-d1-database-state-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "d1-database-state-row-wire-d4096-p16-n1",
+      "process_index": 0,
+      "seed": 13655378214981220817,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "d1-database-state-mixed-d4096-p4096-n1",
+      "process_index": 0,
+      "seed": 6138803324589214653,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "d1-database-state-route-d65536-p4096-n64",
+      "process_index": 0,
+      "seed": 13934175667864307751,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "d1-database-state-checkpoint-replay-d4096-p4096-n8",
+      "process_index": 0,
+      "seed": 17738791114970277729,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "d1-database-state-schema-wide-d65536-p4096-n8",
+      "process_index": 0,
+      "seed": 16752833399959799645,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "d1-database-state-schema-narrow-d4096-p4096-n64",
+      "process_index": 0,
+      "seed": 15950015147896202427,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "d1-database-state-schema-medium-d65536-p4096-n1",
+      "process_index": 0,
+      "seed": 17787237473839177600,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "d1-database-state-mixed-d4096-p4096-n1",
+      "process_index": 1,
+      "seed": 3853949601097508403,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "d1-database-state-route-d65536-p4096-n64",
+      "process_index": 1,
+      "seed": 15918026207018049121,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "d1-database-state-schema-medium-d65536-p4096-n1",
+      "process_index": 1,
+      "seed": 11405000446534609679,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "d1-database-state-schema-wide-d65536-p4096-n8",
+      "process_index": 1,
+      "seed": 4199645303677187466,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "d1-database-state-row-wire-d4096-p16-n1",
+      "process_index": 1,
+      "seed": 15781347486288300074,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 1,
+      "cell": "d1-database-state-schema-narrow-d4096-p4096-n64",
+      "process_index": 1,
+      "seed": 14877502200588693799,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 1,
+      "cell": "d1-database-state-checkpoint-replay-d4096-p4096-n8",
+      "process_index": 1,
+      "seed": 15365351574753682378,
+      "status": "success"
+    }
+  ]
+}

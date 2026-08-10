@@ -1,0 +1,103 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1-d1-database-state-preflight",
+  "profile": "smoke",
+  "seed": 130320260812,
+  "host_mode": "interactive",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 250000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "d1-database-state-row-wire-d4096-p16-n1",
+      "family": "in-memory-partitioned-database",
+      "operation": "database.row-wire-total",
+      "scale": 1,
+      "scale_unit": "rows-or-mutations",
+      "payload_bytes": 16,
+      "dataset_size": 4096,
+      "baseline_cell": null,
+      "curve": "d1-database-state-row-wire",
+      "strategy": "mfrw-roundtrip"
+    },
+    {
+      "id": "d1-database-state-mixed-d4096-p4096-n1",
+      "family": "in-memory-partitioned-database",
+      "operation": "database.mixed-mutation-total",
+      "scale": 1,
+      "scale_unit": "rows-or-mutations",
+      "payload_bytes": 4096,
+      "dataset_size": 4096,
+      "baseline_cell": null,
+      "curve": "d1-database-state-mixed",
+      "strategy": "balanced-insert-update-delete"
+    },
+    {
+      "id": "d1-database-state-checkpoint-replay-d4096-p4096-n8",
+      "family": "in-memory-partitioned-database",
+      "operation": "database.checkpoint-replay-total",
+      "scale": 8,
+      "scale_unit": "rows-or-mutations",
+      "payload_bytes": 4096,
+      "dataset_size": 4096,
+      "baseline_cell": null,
+      "curve": "d1-database-state-checkpoint-replay",
+      "strategy": "mftl-restore-replay"
+    },
+    {
+      "id": "d1-database-state-schema-narrow-d4096-p4096-n64",
+      "family": "in-memory-partitioned-database",
+      "operation": "database.schema-payload-total",
+      "scale": 64,
+      "scale_unit": "rows-or-mutations",
+      "payload_bytes": 4096,
+      "dataset_size": 4096,
+      "baseline_cell": null,
+      "curve": "d1-database-state-schema-narrow",
+      "strategy": "narrow-schema"
+    },
+    {
+      "id": "d1-database-state-schema-medium-d65536-p4096-n1",
+      "family": "in-memory-partitioned-database",
+      "operation": "database.schema-payload-total",
+      "scale": 1,
+      "scale_unit": "rows-or-mutations",
+      "payload_bytes": 4096,
+      "dataset_size": 65536,
+      "baseline_cell": null,
+      "curve": "d1-database-state-schema-medium",
+      "strategy": "medium-schema"
+    },
+    {
+      "id": "d1-database-state-schema-wide-d65536-p4096-n8",
+      "family": "in-memory-partitioned-database",
+      "operation": "database.schema-payload-total",
+      "scale": 8,
+      "scale_unit": "rows-or-mutations",
+      "payload_bytes": 4096,
+      "dataset_size": 65536,
+      "baseline_cell": null,
+      "curve": "d1-database-state-schema-wide",
+      "strategy": "wide-schema"
+    },
+    {
+      "id": "d1-database-state-route-d65536-p4096-n64",
+      "family": "in-memory-partitioned-database",
+      "operation": "database.route-telemetry",
+      "scale": 64,
+      "scale_unit": "rows-or-mutations",
+      "payload_bytes": 4096,
+      "dataset_size": 65536,
+      "baseline_cell": null,
+      "curve": "d1-database-state-route",
+      "strategy": "adaptive-partition-route"
+    }
+  ]
+}

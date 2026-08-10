@@ -1,0 +1,30 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-t1-restore-calibration-v1",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "t1-restore-calibration-p512-n1048576",
+      "process_index": 0,
+      "seed": 620918707870069585,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 1,
+      "cell": "t1-restore-calibration-p512-n1048576",
+      "process_index": 1,
+      "seed": 7067046375360011552,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 2,
+      "cell": "t1-restore-calibration-p512-n1048576",
+      "process_index": 2,
+      "seed": 3448760926283829479,
+      "status": "success"
+    }
+  ]
+}

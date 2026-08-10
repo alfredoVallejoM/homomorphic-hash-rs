@@ -9,16 +9,17 @@ use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
     BinaryPolynomialEncoder, BoundedSetReconciler, CanonicalBudgetLimit, CanonicalGraphDag,
     CanonicalSearchBudget, CompactSignature, DatabaseApplyPolicy, DatabaseColumn,
-    DatabaseColumnType, DatabaseRow, DatabaseSchema, DatabaseTransactionLimits, DatabaseValue,
-    DeltaJournal, DeltaJournalLimits, DynamicAdditiveSignature,
-    DynamicMultiEvaluationMultisetSignature, DynamicMultiEvaluationSequenceSignature,
-    FastGraphLabeler, FileChunkProfile, GraphExecution, GraphSchemaId, GraphWorkspace,
-    HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder, IncrementalGraphWorkspace,
-    Microcanon, MicrocanonOutcome, MicrocanonPath, MultiEvaluationMultisetSignature,
-    MultiEvaluationSequenceSignature, MultisetDelta, MultisetSignature, PartitionedDatabase,
-    PrimeIntegerEncoder, ReconciliationLimits, RevisionedSignature, RowMutation, SequenceAppend,
-    SequenceSignature, SequenceTrim, SummaryEditPolicy, SummaryRangeEdit, TrackedMultiset,
-    TrackedSequence, TrackedSnapshotLimits, TransactionDelta,
+    DatabaseColumnType, DatabaseRow, DatabaseSchema, DatabaseTransactionLimits,
+    DatabaseTransactionLog, DatabaseValue, DeltaJournal, DeltaJournalLimits,
+    DynamicAdditiveSignature, DynamicMultiEvaluationMultisetSignature,
+    DynamicMultiEvaluationSequenceSignature, FastGraphLabeler, FileChunkProfile, GraphExecution,
+    GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder,
+    IncrementalGraphWorkspace, Microcanon, MicrocanonOutcome, MicrocanonPath,
+    MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature, MultisetDelta,
+    MultisetSignature, PartitionedDatabase, PrimeIntegerEncoder, ReconciliationLimits,
+    RevisionedSignature, RowMutation, SequenceAppend, SequenceSignature, SequenceTrim,
+    SummaryEditPolicy, SummaryRangeEdit, SummaryTreeLimits, TrackedMultiset, TrackedSequence,
+    TrackedSnapshotLimits, TransactionDelta,
 };
 use microfield::{
     fill_fixed_base_powers,
@@ -139,6 +140,11 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "summary-tree.bulk-batch-total",
     "summary-tree.adaptive-batch-total",
     "summary-tree.rebuild-batch-total",
+    "file.chunk-build-total",
+    "file.chunk-wire-total",
+    "summary-tree.checkpoint-total",
+    "summary-tree.restore-total",
+    "summary-tree.grow-shrink-total",
     "database.rebuild",
     "database.transaction-end-to-end",
     "database.table-rebuild-total",
@@ -146,6 +152,15 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "database.adaptive-transaction-total",
     "database.selected-rebuild-total",
     "reconciliation.decode",
+    "reconciliation.sketch-total",
+    "reconciliation.combine-total",
+    "reconciliation.wire-total",
+    "reconciliation.limit-path",
+    "database.row-wire-total",
+    "database.mixed-mutation-total",
+    "database.checkpoint-replay-total",
+    "database.schema-payload-total",
+    "database.route-telemetry",
     "graph.fast-prepared",
     "graph.exact",
     "graph.dag-reuse",
@@ -265,6 +280,11 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "summary-tree.rebuild-batch-total" => {
             summary_tree_batch(cell, seed, SummaryBatchMode::Rebuild)
         }
+        "file.chunk-build-total" => file_chunk_build_total(cell, seed),
+        "file.chunk-wire-total" => file_chunk_wire_total(cell, seed),
+        "summary-tree.checkpoint-total" => summary_tree_checkpoint_total(cell, seed),
+        "summary-tree.restore-total" => summary_tree_restore_total(cell, seed),
+        "summary-tree.grow-shrink-total" => summary_tree_grow_shrink_total(cell, seed),
         "database.rebuild" => database_rebuild(cell, seed),
         "database.transaction-end-to-end" => database_transaction_end_to_end(cell, seed),
         "database.table-rebuild-total" => database_table_rebuild_total(cell, seed),
@@ -276,6 +296,15 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         }
         "database.selected-rebuild-total" => database_selected_rebuild(cell),
         "reconciliation.decode" => reconciliation_decode(cell),
+        "reconciliation.sketch-total" => reconciliation_sketch_total(cell),
+        "reconciliation.combine-total" => reconciliation_combine_total(cell),
+        "reconciliation.wire-total" => reconciliation_wire_total(cell),
+        "reconciliation.limit-path" => reconciliation_limit_path(cell),
+        "database.row-wire-total" => database_row_wire_total(cell),
+        "database.mixed-mutation-total" => database_mixed_mutation_total(cell),
+        "database.checkpoint-replay-total" => database_checkpoint_replay_total(cell),
+        "database.schema-payload-total" => database_schema_payload_total(cell),
+        "database.route-telemetry" => database_route_telemetry(cell),
         "graph.fast-prepared" => graph_fast(cell),
         "graph.exact" => graph_exact(cell),
         "graph.dag-reuse" => graph_dag_reuse(cell),
@@ -2000,6 +2029,95 @@ fn summary_tree_batch(
     }
 }
 
+fn file_chunk_build_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let chunk_bytes = cell.payload_bytes.clamp(1, 8 * 1024 * 1024);
+    let profile = FileChunkProfile::fixed(chunk_bytes).map_err(debug_error)?;
+    let bytes = deterministic_bytes(cell.scale, seed);
+    Ok(scaled(bytes.len(), move || {
+        let tree = build_tree(profile, &bytes).unwrap();
+        checksum_field(tree.root().evaluation()) ^ tree.chunk_count() as u64
+    }))
+}
+
+fn file_chunk_wire_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let bytes = deterministic_bytes(cell.scale, seed);
+    let chunk_bytes = cell.payload_bytes.max(1);
+    Ok(scaled(bytes.len(), move || {
+        bytes.chunks(chunk_bytes).fold(0_u64, |checksum, chunk| {
+            checksum.rotate_left(7) ^ checksum_bytes(&frame_file_chunk(chunk).unwrap())
+        })
+    }))
+}
+
+fn summary_tree_checkpoint_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let profile =
+        FileChunkProfile::fixed(cell.payload_bytes.clamp(1, 1024 * 1024)).map_err(debug_error)?;
+    let tree = build_tree(profile, &deterministic_bytes(cell.scale, seed))?;
+    Ok(scaled(tree.byte_len(), move || {
+        let bytes = tree.to_checkpoint_bytes().unwrap();
+        checksum_bytes(&bytes)
+    }))
+}
+
+fn summary_tree_restore_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let profile =
+        FileChunkProfile::fixed(cell.payload_bytes.clamp(1, 1024 * 1024)).map_err(debug_error)?;
+    let tree = build_tree(profile, &deterministic_bytes(cell.scale, seed))?;
+    let checkpoint = tree.to_checkpoint_bytes().map_err(debug_error)?;
+    let expected = tree.root();
+    Ok(scaled(tree.byte_len(), move || {
+        let restored = SummaryTree::from_checkpoint_bytes(
+            profile,
+            binary_encoder(),
+            Gf2_128V1::from_polynomial_bytes_mod(&[2]),
+            &checkpoint,
+            SummaryTreeLimits::default(),
+        )
+        .unwrap();
+        assert_eq!(restored.root(), expected);
+        checksum_field(restored.root().evaluation())
+    }))
+}
+
+fn summary_tree_grow_shrink_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let profile =
+        FileChunkProfile::fixed(cell.payload_bytes.clamp(1, 1024 * 1024)).map_err(debug_error)?;
+    let initial_len = cell.dataset_size.unwrap_or(cell.scale).max(1);
+    let mut tree = build_tree(profile, &deterministic_bytes(initial_len, seed))?;
+    let addition = deterministic_bytes(cell.scale.max(1), seed ^ 0xa5a5_5a5a);
+    let mut grown = false;
+    Ok(single_unit(move || {
+        if grown {
+            tree.truncate(initial_len).unwrap();
+        } else {
+            tree.append(&addition).unwrap();
+        }
+        grown = !grown;
+        checksum_field(tree.root().evaluation()) ^ tree.byte_len() as u64
+    }))
+}
+
+fn frame_file_chunk(chunk: &[u8]) -> Result<Vec<u8>, String> {
+    let capacity = 14_usize
+        .checked_add(chunk.len())
+        .ok_or("chunk frame length overflow")?;
+    let mut framed = Vec::with_capacity(capacity);
+    framed.extend_from_slice(b"MFFC");
+    framed.extend_from_slice(&1_u16.to_le_bytes());
+    framed.extend_from_slice(&(chunk.len() as u64).to_le_bytes());
+    framed.extend_from_slice(chunk);
+    Ok(framed)
+}
+
 fn database_rebuild(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
     let schema = database_schema()?;
     let namespace = database_namespace();
@@ -2233,6 +2351,187 @@ fn database_selected_rebuild(cell: &BenchmarkCell) -> Result<PreparedOperation, 
     }))
 }
 
+fn database_row_wire_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let schema = database_schema()?;
+    let rows = (0..cell.scale.max(1))
+        .map(|id| database_row(id as u64, 1))
+        .collect::<Vec<_>>();
+    Ok(scaled(rows.len(), move || {
+        rows.iter().fold(0_u64, |checksum, row| {
+            let wire = schema.encode_row(row).unwrap();
+            let restored = schema.decode_row(&wire).unwrap();
+            assert_eq!(&restored, row);
+            checksum.rotate_left(5) ^ checksum_bytes(&wire)
+        })
+    }))
+}
+
+fn database_mixed_mutation_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let row_count = cell.dataset_size.unwrap_or(cell.scale.max(3)).max(3);
+    let mutation_count = cell.scale.min(row_count).max(1);
+    let schema = database_schema()?;
+    let namespace = database_namespace();
+    let rows = (0..row_count)
+        .map(|id| database_row(id as u64, 1))
+        .collect::<Vec<_>>();
+    let baseline = Database::from_rows(
+        namespace,
+        schema.clone(),
+        16,
+        binary_encoder(),
+        Gf2_128V1::ONE,
+        rows,
+    )
+    .map_err(debug_error)?;
+    let deletes = mutation_count / 3;
+    let updates = mutation_count / 3;
+    let inserts = mutation_count - deletes - updates;
+    let mut mutations = Vec::with_capacity(mutation_count);
+    mutations.extend((0..deletes).map(|id| RowMutation::Delete(database_row(id as u64, 1))));
+    mutations.extend((deletes..deletes + updates).map(|id| RowMutation::Update {
+        before: database_row(id as u64, 1),
+        after: database_row(id as u64, 2),
+    }));
+    mutations.extend(
+        (0..inserts).map(|index| RowMutation::Insert(database_row((row_count + index) as u64, 1))),
+    );
+    let transaction =
+        TransactionDelta::new(namespace, &schema, 0, mutations).map_err(debug_error)?;
+    Ok(single_unit(move || {
+        let mut candidate = baseline.clone();
+        candidate
+            .apply_transaction(&transaction, DatabaseTransactionLimits::default())
+            .unwrap();
+        checksum_field(candidate.summary().unwrap().evaluation()) ^ candidate.row_count() as u64
+    }))
+}
+
+fn database_checkpoint_replay_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let count = cell.scale.max(1);
+    let schema = database_schema()?;
+    let namespace = database_namespace();
+    let mut log = DatabaseTransactionLog::new();
+    for revision in 0..count {
+        log.append(
+            TransactionDelta::new(
+                namespace,
+                &schema,
+                revision as u64,
+                vec![RowMutation::Insert(database_row(revision as u64, 1))],
+            )
+            .map_err(debug_error)?,
+        )
+        .map_err(debug_error)?;
+    }
+    let wire = log.to_canonical_bytes().map_err(debug_error)?;
+    let empty = Database::new(
+        namespace,
+        schema.clone(),
+        16,
+        binary_encoder(),
+        Gf2_128V1::ONE,
+    )
+    .map_err(debug_error)?;
+    Ok(scaled(count, move || {
+        let restored = DatabaseTransactionLog::from_canonical_bytes(
+            namespace,
+            &schema,
+            &wire,
+            DatabaseTransactionLimits::default(),
+        )
+        .unwrap();
+        let mut candidate = empty.clone();
+        let report = restored
+            .replay(&mut candidate, DatabaseTransactionLimits::default())
+            .unwrap();
+        assert_eq!(report.applied(), count as u64);
+        checksum_field(candidate.summary().unwrap().evaluation())
+    }))
+}
+
+fn database_schema_payload_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let wide = cell
+        .strategy
+        .as_deref()
+        .is_some_and(|strategy| strategy.contains("wide"));
+    let medium = cell
+        .strategy
+        .as_deref()
+        .is_some_and(|strategy| strategy.contains("medium"));
+    let extra_columns = if wide {
+        16
+    } else if medium {
+        4
+    } else {
+        1
+    };
+    let mut columns = vec![DatabaseColumn::new("id", DatabaseColumnType::U64, false)];
+    columns.extend((0..extra_columns).map(|index| {
+        DatabaseColumn::new(format!("payload_{index}"), DatabaseColumnType::Bytes, true)
+    }));
+    let schema = DatabaseSchema::new(1, columns, vec![0]).map_err(debug_error)?;
+    let payload = deterministic_bytes(cell.payload_bytes.max(1), cell.scale as u64);
+    let mut values = vec![DatabaseValue::U64(cell.scale as u64)];
+    values.extend((0..extra_columns).map(|index| {
+        if index % 3 == 0 {
+            DatabaseValue::Null
+        } else {
+            DatabaseValue::Bytes(payload.clone())
+        }
+    }));
+    let row = DatabaseRow::new(1, values);
+    Ok(single_unit(move || {
+        let wire = schema.encode_row(&row).unwrap();
+        assert_eq!(schema.decode_row(&wire).unwrap(), row);
+        checksum_bytes(&wire)
+    }))
+}
+
+fn database_route_telemetry(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let row_count = cell
+        .dataset_size
+        .unwrap_or(cell.scale)
+        .max(cell.scale)
+        .max(16);
+    let schema = database_schema()?;
+    let namespace = database_namespace();
+    let rows = (0..row_count)
+        .map(|id| database_row(id as u64, 1))
+        .collect::<Vec<_>>();
+    let baseline = Database::from_rows(
+        namespace,
+        schema.clone(),
+        16,
+        binary_encoder(),
+        Gf2_128V1::ONE,
+        rows,
+    )
+    .map_err(debug_error)?;
+    let mutations = (0..cell.scale)
+        .map(|id| RowMutation::Update {
+            before: database_row(id as u64, 1),
+            after: database_row(id as u64, 2),
+        })
+        .collect::<Vec<_>>();
+    let transaction =
+        TransactionDelta::new(namespace, &schema, 0, mutations).map_err(debug_error)?;
+    let policy = DatabaseApplyPolicy::adaptive(usize::MAX, 1, 4).map_err(debug_error)?;
+    Ok(single_unit(move || {
+        let mut candidate = baseline.clone();
+        let report = candidate
+            .apply_transaction_with_policy(
+                &transaction,
+                DatabaseTransactionLimits::default(),
+                policy,
+                Vec::<DatabaseRow>::new,
+            )
+            .unwrap();
+        checksum_field(candidate.summary().unwrap().evaluation())
+            ^ report.touched_partitions() as u64
+            ^ (report.rebuilt_partitions() as u64).rotate_left(13)
+    }))
+}
+
 fn reconciliation_decode(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
     let difference = cell.scale.clamp(2, 32);
     let reconciler = BoundedSetReconciler::new(ReconciliationLimits::new(160, 64, 64, 65_536))
@@ -2250,6 +2549,77 @@ fn reconciliation_decode(cell: &BenchmarkCell) -> Result<PreparedOperation, Stri
             .reconcile(&left_sketch, &right_sketch, &right)
             .unwrap();
         (recovered.only_left().len() ^ recovered.only_right().len()) as u64
+    }))
+}
+
+fn reconciliation_sets(universe: u16, difference: usize) -> (Vec<u16>, Vec<u16>) {
+    let difference = difference.clamp(1, 64);
+    let only_left = difference.div_ceil(2);
+    let only_right = difference / 2;
+    let base_size = usize::from(universe) / 2;
+    let left = (0..base_size as u16).collect::<Vec<_>>();
+    let mut right = left[only_left..].to_vec();
+    right.extend((0..only_right).map(|index| base_size as u16 + index as u16));
+    right.sort_unstable();
+    (left, right)
+}
+
+fn reconciliation_sketch_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let universe = cell.dataset_size.unwrap_or(160).clamp(64, 160) as u16;
+    let reconciler = BoundedSetReconciler::new(ReconciliationLimits::new(universe, 64, 64, 65_536))
+        .map_err(debug_error)?;
+    let set = (0..cell.scale.min(usize::from(universe)) as u16).collect::<Vec<_>>();
+    Ok(scaled(set.len(), move || {
+        checksum_bytes(&reconciler.sketch(&set).unwrap().to_canonical_bytes())
+    }))
+}
+
+fn reconciliation_combine_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let difference = cell.scale.clamp(1, 64);
+    let universe = cell.dataset_size.unwrap_or(160).clamp(64, 160) as u16;
+    let reconciler = BoundedSetReconciler::new(ReconciliationLimits::new(universe, 64, 64, 65_536))
+        .map_err(debug_error)?;
+    let (left, right) = reconciliation_sets(universe, difference);
+    Ok(scaled(difference, move || {
+        let left_sketch = reconciler.sketch(&left).unwrap();
+        let right_sketch = reconciler.sketch(&right).unwrap();
+        let recovered = reconciler
+            .reconcile(&left_sketch, &right_sketch, &right)
+            .unwrap();
+        assert_eq!(recovered.distance(), difference);
+        checksum_bytes(&left_sketch.to_canonical_bytes())
+            ^ checksum_bytes(&right_sketch.to_canonical_bytes())
+    }))
+}
+
+fn reconciliation_wire_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let universe = cell.dataset_size.unwrap_or(160).clamp(64, 160) as u16;
+    let reconciler = BoundedSetReconciler::new(ReconciliationLimits::new(universe, 64, 64, 65_536))
+        .map_err(debug_error)?;
+    let set = (0..cell.scale.min(usize::from(universe)) as u16).collect::<Vec<_>>();
+    let sketch = reconciler.sketch(&set).map_err(debug_error)?;
+    let wire = sketch.to_canonical_bytes();
+    Ok(single_unit(move || {
+        let restored = reconciler.sketch_from_canonical_bytes(&wire).unwrap();
+        assert_eq!(restored, sketch);
+        checksum_bytes(&restored.to_canonical_bytes())
+    }))
+}
+
+fn reconciliation_limit_path(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let bound = cell.scale.clamp(1, 32);
+    let universe = cell.dataset_size.unwrap_or(160).clamp(64, 160) as u16;
+    let reconciler =
+        BoundedSetReconciler::new(ReconciliationLimits::new(universe, bound, bound, 65_536))
+            .map_err(debug_error)?;
+    let (left, right) = reconciliation_sets(universe, (bound + 2).min(64));
+    let left_sketch = reconciler.sketch(&left).map_err(debug_error)?;
+    let right_sketch = reconciler.sketch(&right).map_err(debug_error)?;
+    Ok(single_unit(move || {
+        let error = reconciler
+            .reconcile(&left_sketch, &right_sketch, &right)
+            .expect_err("over-bound difference must fail closed");
+        checksum_bytes(format!("{error:?}").as_bytes())
     }))
 }
 
@@ -2983,6 +3353,32 @@ mod tests {
             checksums.push((prepared.run)());
         }
         assert!(checksums.windows(2).all(|pair| pair[0] == pair[1]));
+    }
+
+    #[test]
+    fn c3_t1_r1_d1_preflight_actions_are_reproducible_from_the_same_seed() {
+        let root = Path::new("../../validation/benchmarks/manifests/c3-t1-r1-d1");
+        for manifest in [
+            "c3-t1-file-tree-state-preflight-v1.json",
+            "c3-r1-bounded-reconciliation-preflight-v1.json",
+            "c3-d1-database-state-preflight-v1.json",
+        ] {
+            let manifest = crate::publication::load_manifest(&root.join(manifest)).unwrap();
+            for benchmark_cell in manifest.cells {
+                let mut first = prepare(&benchmark_cell, 0x1234_5678).unwrap_or_else(|error| {
+                    panic!("prepare first cell {}: {error}", benchmark_cell.id)
+                });
+                let mut second = prepare(&benchmark_cell, 0x1234_5678).unwrap_or_else(|error| {
+                    panic!("prepare second cell {}: {error}", benchmark_cell.id)
+                });
+                assert_eq!(
+                    (first.run)(),
+                    (second.run)(),
+                    "non-reproducible C3 workload: {}",
+                    benchmark_cell.id
+                );
+            }
+        }
     }
 
     #[test]

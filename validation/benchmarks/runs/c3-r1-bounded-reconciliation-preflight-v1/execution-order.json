@@ -1,0 +1,70 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1-r1-bounded-reconciliation-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "r1-bounded-reconciliation-limit-d160-n64",
+      "process_index": 0,
+      "seed": 11733790078108401882,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "r1-bounded-reconciliation-combine-d64-n64",
+      "process_index": 0,
+      "seed": 15102566265675204802,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "r1-bounded-reconciliation-wire-d128-n64",
+      "process_index": 0,
+      "seed": 9705632047111031653,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "r1-bounded-reconciliation-sketch-d64-n1",
+      "process_index": 0,
+      "seed": 9770656481623734728,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 1,
+      "cell": "r1-bounded-reconciliation-limit-d160-n64",
+      "process_index": 1,
+      "seed": 14371771749540401435,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 1,
+      "cell": "r1-bounded-reconciliation-wire-d128-n64",
+      "process_index": 1,
+      "seed": 12126665640775092598,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 1,
+      "cell": "r1-bounded-reconciliation-sketch-d64-n1",
+      "process_index": 1,
+      "seed": 15812536196296820335,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "r1-bounded-reconciliation-combine-d64-n64",
+      "process_index": 1,
+      "seed": 17273280892696536319,
+      "status": "success"
+    }
+  ]
+}

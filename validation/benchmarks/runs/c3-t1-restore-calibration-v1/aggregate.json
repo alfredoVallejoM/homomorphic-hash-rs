@@ -1,0 +1,54 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-t1-restore-calibration-v1",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "t1-restore-calibration-p512-n1048576",
+      "family": "file-summary-tree",
+      "operation": "summary-tree.restore-total",
+      "scale": 1048576,
+      "scale_unit": "bytes",
+      "process_count": 3,
+      "observation_count": 60,
+      "median_ns_per_unit": 25.65375804901123,
+      "p95_ns_per_unit": 25.7033673286438,
+      "p99_ns_per_unit": 25.73685817718506,
+      "mad_ns_per_unit": 0.016567707061767578,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 25.635944843292236,
+        "upper": 25.686458110809326
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 25.661203547716138,
+        "upper": 25.73729705810547
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 25.66125965118408,
+        "upper": 25.73729705810547
+      },
+      "relative_median_ci_half_width": 0.0009845198395608313,
+      "precision_met": true,
+      "allocation_count_median": 6161.0,
+      "allocated_bytes_median": 3992072.0,
+      "peak_allocated_bytes_median": 1818832.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "t1-restore-calibration",
+      "strategy": "mfst-restore-verify",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

@@ -54,21 +54,21 @@
     },
     {
       "id": "T1",
-      "status": "partial",
-      "implemented_operations": ["summary-tree.rebuild", "summary-tree.local-edit-total", "summary-tree.rebuild-edit-total", "summary-tree.sequential-batch-total", "summary-tree.bulk-batch-total", "summary-tree.adaptive-batch-total", "summary-tree.rebuild-batch-total"],
-      "missing_operations": ["file.chunk-build-total", "file.chunk-wire-total", "summary-tree.checkpoint-total", "summary-tree.restore-total", "summary-tree-grow-shrink-total"]
+      "status": "implemented",
+      "implemented_operations": ["summary-tree.rebuild", "summary-tree.local-edit-total", "summary-tree.rebuild-edit-total", "summary-tree.sequential-batch-total", "summary-tree.bulk-batch-total", "summary-tree.adaptive-batch-total", "summary-tree.rebuild-batch-total", "file.chunk-build-total", "file.chunk-wire-total", "summary-tree.checkpoint-total", "summary-tree.restore-total", "summary-tree.grow-shrink-total"],
+      "missing_operations": []
     },
     {
       "id": "R1",
-      "status": "partial",
-      "implemented_operations": ["reconciliation.decode"],
-      "missing_operations": ["reconciliation.sketch-total", "reconciliation.combine-total", "reconciliation.wire-total", "reconciliation.limit-path"]
+      "status": "implemented",
+      "implemented_operations": ["reconciliation.decode", "reconciliation.sketch-total", "reconciliation.combine-total", "reconciliation.wire-total", "reconciliation.limit-path"],
+      "missing_operations": []
     },
     {
       "id": "D1",
-      "status": "partial",
-      "implemented_operations": ["database.rebuild", "database.transaction-end-to-end", "database.table-rebuild-total", "database.bulk-transaction-total", "database.adaptive-transaction-total", "database.selected-rebuild-total"],
-      "missing_operations": ["database.row-wire-total", "database.mixed-mutation-total", "database.checkpoint-replay-total", "database.schema-payload-total", "database.route-telemetry"]
+      "status": "implemented",
+      "implemented_operations": ["database.rebuild", "database.transaction-end-to-end", "database.table-rebuild-total", "database.bulk-transaction-total", "database.adaptive-transaction-total", "database.selected-rebuild-total", "database.row-wire-total", "database.mixed-mutation-total", "database.checkpoint-replay-total", "database.schema-payload-total", "database.route-telemetry"],
+      "missing_operations": []
     },
     {
       "id": "D2",

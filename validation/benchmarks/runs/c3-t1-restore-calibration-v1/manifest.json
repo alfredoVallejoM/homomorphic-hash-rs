@@ -1,0 +1,31 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-t1-restore-calibration-v1",
+  "profile": "smoke",
+  "seed": 130320260812,
+  "host_mode": "interactive",
+  "minimum_processes": 3,
+  "maximum_processes": 3,
+  "precision_check_every": 1,
+  "warmup_observations": 3,
+  "measured_observations": 20,
+  "target_observation_ns": 1000000,
+  "maximum_batch_iterations": 8,
+  "bootstrap_resamples": 1000,
+  "maximum_relative_ci_half_width": 0.1,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "t1-restore-calibration-p512-n1048576",
+      "family": "file-summary-tree",
+      "operation": "summary-tree.restore-total",
+      "scale": 1048576,
+      "scale_unit": "bytes",
+      "payload_bytes": 512,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "t1-restore-calibration",
+      "strategy": "mfst-restore-verify"
+    }
+  ]
+}

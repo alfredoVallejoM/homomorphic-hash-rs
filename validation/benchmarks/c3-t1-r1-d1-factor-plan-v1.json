@@ -1,0 +1,64 @@
+{
+  "schema": "algesum-c3-factor-plan-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1",
+  "seed": 130320260812,
+  "shards": [
+    {
+      "id": "t1-file-tree-state",
+      "family": "file-summary-tree",
+      "scale_unit": "bytes",
+      "preflight_max_scale": 1048576,
+      "operations": [
+        { "id": "chunk-build", "operation": "file.chunk-build-total", "strategy": "fixed-chunk-build" },
+        { "id": "chunk-wire", "operation": "file.chunk-wire-total", "strategy": "mffc-frame-and-leaf" },
+        { "id": "checkpoint", "operation": "summary-tree.checkpoint-total", "strategy": "mfst-serialize" },
+        { "id": "restore", "operation": "summary-tree.restore-total", "strategy": "mfst-restore-verify" },
+        { "id": "grow-shrink", "operation": "summary-tree.grow-shrink-total", "strategy": "append-truncate" }
+      ],
+      "primary_factors": {
+        "scale": [1, 4096, 1048576, 67108864]
+      },
+      "secondary_factors": {
+        "payload_bytes": [512, 4096, 65536, 1048576]
+      }
+    },
+    {
+      "id": "r1-bounded-reconciliation",
+      "family": "bounded-set-reconciliation",
+      "scale_unit": "set-elements-or-difference",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "sketch", "operation": "reconciliation.sketch-total", "strategy": "fp251-sketch" },
+        { "id": "combine", "operation": "reconciliation.combine-total", "strategy": "paired-sketch-reconcile" },
+        { "id": "wire", "operation": "reconciliation.wire-total", "strategy": "mfrs-roundtrip" },
+        { "id": "limit", "operation": "reconciliation.limit-path", "strategy": "difference-over-bound" }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 4, 8, 16, 32, 64],
+        "dataset_size": [64, 128, 160]
+      }
+    },
+    {
+      "id": "d1-database-state",
+      "family": "in-memory-partitioned-database",
+      "scale_unit": "rows-or-mutations",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "row-wire", "operation": "database.row-wire-total", "strategy": "mfrw-roundtrip" },
+        { "id": "mixed", "operation": "database.mixed-mutation-total", "strategy": "balanced-insert-update-delete" },
+        { "id": "checkpoint-replay", "operation": "database.checkpoint-replay-total", "strategy": "mftl-restore-replay" },
+        { "id": "schema-narrow", "operation": "database.schema-payload-total", "strategy": "narrow-schema" },
+        { "id": "schema-medium", "operation": "database.schema-payload-total", "strategy": "medium-schema" },
+        { "id": "schema-wide", "operation": "database.schema-payload-total", "strategy": "wide-schema" },
+        { "id": "route", "operation": "database.route-telemetry", "strategy": "adaptive-partition-route" }
+      ],
+      "primary_factors": {
+        "scale": [1, 8, 64, 256, 4096],
+        "dataset_size": [4096, 65536]
+      },
+      "secondary_factors": {
+        "payload_bytes": [16, 256, 4096]
+      }
+    }
+  ]
+}

@@ -58,6 +58,19 @@ Smoke cells completed precisely under the exploratory threshold with stable
 checksums; this is harness evidence, not a publication claim. See
 `docs/microfield/c3-f3-s3-implementation-and-preflight-report.md`.
 
+T1/R1/D1 add 374 cells for file trees, bounded reconciliation and the
+in-memory database:
+
+```text
+cargo run -p microfield-validation-lab --locked -- c3-expand \
+  --manifest validation/benchmarks/c3-t1-r1-d1-factor-plan-v1.json \
+  --out-dir validation/benchmarks/manifests/c3-t1-r1-d1
+```
+
+The 16 unique preflight variants completed with stable checksums and were all
+precise after the focused T1 restore calibration. See
+`docs/microfield/c3-t1-r1-d1-implementation-and-preflight-report.md`.
+
 C2 is also versioned and remains informative:
 
 ```text

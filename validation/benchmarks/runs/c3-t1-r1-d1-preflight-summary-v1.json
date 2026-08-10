@@ -1,0 +1,51 @@
+{
+  "schema": "algesum-c3-t1-r1-d1-preflight-summary-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1",
+  "classification": "Smoke",
+  "claims_allowed": false,
+  "source_commit": "f6732e34a99f0d67b990e1357e97bb4807ed6827",
+  "tree_clean": false,
+  "security_classification": "non-cryptographic-algebraic-summaries",
+  "expansion": {
+    "publication_cells": 374,
+    "preflight_cells": 16,
+    "c3_total_publication_cells": 2984,
+    "registered_operations_added": 14,
+    "operation_variants": 16
+  },
+  "observed": {
+    "primary_cells": 16,
+    "calibration_cells": 1,
+    "workers": 35,
+    "observations": 220,
+    "primary_precise_cells": 15,
+    "primary_imprecise_cells": 1,
+    "unique_variants_precise_after_calibration": 16,
+    "workers_with_unstable_observation_checksum": 0,
+    "allocating_primary_cells": 16,
+    "allocation_free_primary_cells": 0,
+    "maximum_peak_allocated_bytes_in_one_action": 11161281,
+    "primary_median_relative_ci_half_width": 0.036173002399349834
+  },
+  "calibration": {
+    "operation": "summary-tree.restore-total",
+    "scale_bytes": 1048576,
+    "processes": 3,
+    "observations": 60,
+    "median_ns_per_byte": 25.65375804901123,
+    "relative_median_ci_half_width": 0.0009845198395608313,
+    "precision_met": true
+  },
+  "limitations": [
+    "Smoke timings from a dirty interactive host are not publication claims",
+    "all operations are end-to-end and are expected to allocate retained or wire state",
+    "the maintained reconciliation profile admits universes up to 200 and the generated matrix uses 64, 128 and 160",
+    "database and tree routes require Controlled density curves before selecting production thresholds"
+  ],
+  "runs": [
+    "validation/benchmarks/runs/c3-t1-file-tree-state-preflight-v1",
+    "validation/benchmarks/runs/c3-r1-bounded-reconciliation-preflight-v1",
+    "validation/benchmarks/runs/c3-d1-database-state-preflight-v1",
+    "validation/benchmarks/runs/c3-t1-restore-calibration-v1"
+  ]
+}

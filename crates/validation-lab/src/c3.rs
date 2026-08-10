@@ -695,6 +695,15 @@ mod tests {
         );
     }
 
+    #[test]
+    fn checked_in_t1_r1_d1_manifests_are_byte_reproducible() {
+        assert_checked_in_manifests(
+            Path::new("../../validation/benchmarks/c3-t1-r1-d1-factor-plan-v1.json"),
+            Path::new("../../validation/benchmarks/manifests/c3-t1-r1-d1"),
+            "t1-r1-d1",
+        );
+    }
+
     fn assert_checked_in_manifests(plan: &Path, checked_in: &Path, label: &str) {
         let generated = std::env::temp_dir().join(format!(
             "algesum-c3-expand-{label}-{}-{}",

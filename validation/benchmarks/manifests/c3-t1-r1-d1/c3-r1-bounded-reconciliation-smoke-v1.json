@@ -1,0 +1,67 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1-r1-bounded-reconciliation-smoke",
+  "profile": "smoke",
+  "seed": 130320260812,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "r1-bounded-reconciliation-sketch-d64-n1",
+      "family": "bounded-set-reconciliation",
+      "operation": "reconciliation.sketch-total",
+      "scale": 1,
+      "scale_unit": "set-elements-or-difference",
+      "payload_bytes": 16,
+      "dataset_size": 64,
+      "baseline_cell": null,
+      "curve": "r1-bounded-reconciliation-sketch",
+      "strategy": "fp251-sketch"
+    },
+    {
+      "id": "r1-bounded-reconciliation-combine-d64-n1",
+      "family": "bounded-set-reconciliation",
+      "operation": "reconciliation.combine-total",
+      "scale": 1,
+      "scale_unit": "set-elements-or-difference",
+      "payload_bytes": 16,
+      "dataset_size": 64,
+      "baseline_cell": null,
+      "curve": "r1-bounded-reconciliation-combine",
+      "strategy": "paired-sketch-reconcile"
+    },
+    {
+      "id": "r1-bounded-reconciliation-wire-d64-n1",
+      "family": "bounded-set-reconciliation",
+      "operation": "reconciliation.wire-total",
+      "scale": 1,
+      "scale_unit": "set-elements-or-difference",
+      "payload_bytes": 16,
+      "dataset_size": 64,
+      "baseline_cell": null,
+      "curve": "r1-bounded-reconciliation-wire",
+      "strategy": "mfrs-roundtrip"
+    },
+    {
+      "id": "r1-bounded-reconciliation-limit-d64-n1",
+      "family": "bounded-set-reconciliation",
+      "operation": "reconciliation.limit-path",
+      "scale": 1,
+      "scale_unit": "set-elements-or-difference",
+      "payload_bytes": 16,
+      "dataset_size": 64,
+      "baseline_cell": null,
+      "curve": "r1-bounded-reconciliation-limit",
+      "strategy": "difference-over-bound"
+    }
+  ]
+}

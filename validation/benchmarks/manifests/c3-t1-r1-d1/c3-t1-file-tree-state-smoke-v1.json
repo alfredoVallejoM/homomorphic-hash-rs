@@ -1,0 +1,79 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1-t1-file-tree-state-smoke",
+  "profile": "smoke",
+  "seed": 130320260812,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "t1-file-tree-state-chunk-build-p512-n1",
+      "family": "file-summary-tree",
+      "operation": "file.chunk-build-total",
+      "scale": 1,
+      "scale_unit": "bytes",
+      "payload_bytes": 512,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "t1-file-tree-state-chunk-build",
+      "strategy": "fixed-chunk-build"
+    },
+    {
+      "id": "t1-file-tree-state-chunk-wire-p512-n1",
+      "family": "file-summary-tree",
+      "operation": "file.chunk-wire-total",
+      "scale": 1,
+      "scale_unit": "bytes",
+      "payload_bytes": 512,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "t1-file-tree-state-chunk-wire",
+      "strategy": "mffc-frame-and-leaf"
+    },
+    {
+      "id": "t1-file-tree-state-checkpoint-p512-n1",
+      "family": "file-summary-tree",
+      "operation": "summary-tree.checkpoint-total",
+      "scale": 1,
+      "scale_unit": "bytes",
+      "payload_bytes": 512,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "t1-file-tree-state-checkpoint",
+      "strategy": "mfst-serialize"
+    },
+    {
+      "id": "t1-file-tree-state-restore-p512-n1",
+      "family": "file-summary-tree",
+      "operation": "summary-tree.restore-total",
+      "scale": 1,
+      "scale_unit": "bytes",
+      "payload_bytes": 512,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "t1-file-tree-state-restore",
+      "strategy": "mfst-restore-verify"
+    },
+    {
+      "id": "t1-file-tree-state-grow-shrink-p512-n1",
+      "family": "file-summary-tree",
+      "operation": "summary-tree.grow-shrink-total",
+      "scale": 1,
+      "scale_unit": "bytes",
+      "payload_bytes": 512,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "t1-file-tree-state-grow-shrink",
+      "strategy": "append-truncate"
+    }
+  ]
+}

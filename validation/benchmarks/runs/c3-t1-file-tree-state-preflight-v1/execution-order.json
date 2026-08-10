@@ -1,0 +1,86 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-t1-r1-d1-v1-t1-file-tree-state-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "t1-file-tree-state-grow-shrink-p1048576-n1048576",
+      "process_index": 0,
+      "seed": 14100690778351764200,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "t1-file-tree-state-checkpoint-p4096-n4096",
+      "process_index": 0,
+      "seed": 4754650153581215149,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "t1-file-tree-state-chunk-wire-p65536-n1",
+      "process_index": 0,
+      "seed": 5492239663622171751,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "t1-file-tree-state-chunk-build-p512-n1",
+      "process_index": 0,
+      "seed": 6032910898389640130,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "t1-file-tree-state-restore-p512-n1048576",
+      "process_index": 0,
+      "seed": 15405514726223529186,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 1,
+      "cell": "t1-file-tree-state-chunk-wire-p65536-n1",
+      "process_index": 1,
+      "seed": 6127320299313804660,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 1,
+      "cell": "t1-file-tree-state-checkpoint-p4096-n4096",
+      "process_index": 1,
+      "seed": 7724560213956065310,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "t1-file-tree-state-chunk-build-p512-n1",
+      "process_index": 1,
+      "seed": 7597924830905344284,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "t1-file-tree-state-restore-p512-n1048576",
+      "process_index": 1,
+      "seed": 13131694568982456385,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "t1-file-tree-state-grow-shrink-p1048576-n1048576",
+      "process_index": 1,
+      "seed": 13996611540145019390,
+      "status": "success"
+    }
+  ]
+}
