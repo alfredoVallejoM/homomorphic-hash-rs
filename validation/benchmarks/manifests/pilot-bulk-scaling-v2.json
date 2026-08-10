@@ -1,0 +1,17 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "pre-rc-bulk-scaling-pilot-v2",
+  "profile": "pilot",
+  "seed": 13503953896175478912,
+  "host_mode": "interactive",
+  "minimum_processes": 5,
+  "maximum_processes": 5,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 9,
+  "target_observation_ns": 500000,
+  "maximum_batch_iterations": 1,
+  "bootstrap_resamples": 1000,
+  "maximum_relative_ci_half_width": 0.20,
+  "cells_from": "pilot-bulk-scaling-v1.json"
+}

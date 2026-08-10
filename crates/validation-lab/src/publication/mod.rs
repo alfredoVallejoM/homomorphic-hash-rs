@@ -68,5 +68,16 @@ mod tests {
             .cells
             .iter()
             .any(|cell| cell.operation == "database.adaptive-transaction-total"));
+
+        let confirmation = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/pilot-bulk-scaling-v2.json",
+        ))
+        .expect("bulk scaling confirmation manifest");
+        assert_eq!(confirmation.cells.len(), manifest.cells.len());
+        let frontier = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/pilot-bulk-density-frontier-v1.json",
+        ))
+        .expect("bulk density frontier manifest");
+        assert_eq!(frontier.cells.len(), 18);
     }
 }

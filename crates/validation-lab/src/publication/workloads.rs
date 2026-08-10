@@ -477,7 +477,7 @@ fn summary_tree_batch(
                     SummaryBatchMode::Adaptive => {
                         tree.replace_ranges_with_policy(
                             edits,
-                            SummaryEditPolicy::adaptive(usize::MAX, 1, 4).unwrap(),
+                            SummaryEditPolicy::adaptive(usize::MAX, 3, 4).unwrap(),
                         )
                         .unwrap();
                     }
@@ -682,7 +682,7 @@ fn database_selected_transaction(
                         .apply_transaction_with_policy(
                             &transaction,
                             DatabaseTransactionLimits::default(),
-                            DatabaseApplyPolicy::adaptive(usize::MAX, 1, 4).unwrap(),
+                            DatabaseApplyPolicy::adaptive(usize::MAX, 3, 4).unwrap(),
                             || -> Vec<DatabaseRow> {
                                 panic!("partition-adaptive benchmark requested global rows")
                             },
