@@ -20,6 +20,25 @@ cargo run --release -p microfield-validation-lab --locked -- \
 Its design and C2/C3 expansion are specified in
 `docs/microfield/pre-rc-comprehensive-campaign-plan.md`.
 
+C2 is also versioned and remains informative:
+
+```text
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-campaign \
+  --manifest validation/benchmarks/manifests/comprehensive-pilot-v1.json \
+  --run-dir validation/benchmarks/runs/pre-rc-comprehensive-pilot-v1
+
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-campaign \
+  --manifest validation/benchmarks/manifests/comprehensive-fragmentation-pilot-v1.json \
+  --run-dir validation/benchmarks/runs/pre-rc-comprehensive-fragmentation-pilot-v1
+```
+
+Together these runs contain 47 cells, 470 independent processes and 7,050
+observations; 44/47 cells met the 10% pilot precision target. PostgreSQL adds
+33 exactly verified samples over one million rows. Interpretation and the C3
+blockers are in `docs/microfield/pre-rc-comprehensive-pilot-results.md`.
+
 ```text
 cargo run --release -p microfield-validation-lab --locked -- \
   publication-campaign \

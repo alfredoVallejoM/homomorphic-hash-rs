@@ -58,6 +58,51 @@ mod tests {
     }
 
     #[test]
+    fn comprehensive_pilot_covers_signature_k_payload_and_graph_axes() {
+        let manifest = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/comprehensive-pilot-v1.json",
+        ))
+        .expect("comprehensive pilot manifest");
+        assert_eq!(manifest.profile, CampaignProfile::Pilot);
+        assert_eq!(manifest.cells.len(), 39);
+        for operation in [
+            "signature.multi-multiset-k3.build-total",
+            "signature.multi-multiset-k4.merge-total",
+            "signature.multi-sequence-k3.build-total",
+            "signature.multi-sequence-k4.concatenate-total",
+            "graph.full-label-reanalysis-total",
+            "graph.incremental-label-update-total",
+        ] {
+            assert!(manifest
+                .cells
+                .iter()
+                .any(|cell| cell.operation == operation));
+        }
+        assert!(manifest
+            .cells
+            .iter()
+            .any(|cell| cell.strategy.as_deref() == Some("symmetric-cycle") && cell.scale == 16));
+        assert!(manifest
+            .cells
+            .iter()
+            .any(|cell| cell.payload_bytes == 1_024));
+    }
+
+    #[test]
+    fn fragmentation_pilot_uses_alternating_k4_signatures() {
+        let manifest = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/comprehensive-fragmentation-pilot-v1.json",
+        ))
+        .expect("fragmentation pilot manifest");
+        assert_eq!(manifest.profile, CampaignProfile::Pilot);
+        assert_eq!(manifest.cells.len(), 8);
+        assert!(manifest.cells.iter().all(|cell| {
+            cell.dataset_size == Some(65_536) && cell.strategy.as_deref() == Some("alternating")
+        }));
+        assert!(manifest.cells.iter().any(|cell| cell.scale == 1_024));
+    }
+
+    #[test]
     fn scaling_manifests_share_the_same_complete_cell_inventory() {
         let pilot = load_manifest(std::path::Path::new(
             "../../validation/benchmarks/manifests/pilot-scaling-v1.json",

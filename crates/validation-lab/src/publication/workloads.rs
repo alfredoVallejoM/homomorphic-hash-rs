@@ -6,7 +6,7 @@ use algesum::{
     DatabaseApplyPolicy, DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema,
     DatabaseTransactionLimits, DatabaseValue, FastGraphLabeler, FileChunkProfile, GraphExecution,
     GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder,
-    Microcanon, MicrocanonOutcome, MultiEvaluationMultisetSignature,
+    IncrementalGraphWorkspace, Microcanon, MicrocanonOutcome, MultiEvaluationMultisetSignature,
     MultiEvaluationSequenceSignature, MultisetSignature, PartitionedDatabase, PrimeIntegerEncoder,
     ReconciliationLimits, RevisionedSignature, RowMutation, SequenceSignature, SummaryEditPolicy,
     SummaryRangeEdit, TransactionDelta,
@@ -49,6 +49,16 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "signature.multiset.merge-total",
     "signature.multi-multiset-k2.merge-total",
     "signature.multi-sequence-k2.concatenate-total",
+    "signature.multi-multiset-k3.build-total",
+    "signature.multi-multiset-k4.build-total",
+    "signature.multi-sequence-k3.build-total",
+    "signature.multi-sequence-k4.build-total",
+    "signature.multi-multiset-k3.merge-total",
+    "signature.multi-multiset-k4.merge-total",
+    "signature.multi-sequence-k3.concatenate-total",
+    "signature.multi-sequence-k4.concatenate-total",
+    "signature.multi-multiset-k4.fragmented-merge-total",
+    "signature.multi-sequence-k4.fragmented-concatenate-total",
     "delta.additive.end-to-end",
     "summary-tree.rebuild",
     "summary-tree.local-edit-total",
@@ -67,6 +77,8 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "graph.fast-prepared",
     "graph.exact",
     "graph.dag-reuse",
+    "graph.full-label-reanalysis-total",
+    "graph.incremental-label-update-total",
     "tool.binary-manifest.parse",
     "tool.binary-manifest.generate",
 ];
@@ -117,6 +129,24 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "signature.multi-sequence-k2.concatenate-total" => {
             signature_multi_sequence_concatenate_total(cell, seed)
         }
+        "signature.multi-multiset-k3.build-total" => signature_multi_multiset_k3(cell, seed),
+        "signature.multi-multiset-k4.build-total" => signature_multi_multiset_k4(cell, seed),
+        "signature.multi-sequence-k3.build-total" => signature_multi_sequence_k3(cell, seed),
+        "signature.multi-sequence-k4.build-total" => signature_multi_sequence_k4(cell, seed),
+        "signature.multi-multiset-k3.merge-total" => signature_multi_multiset_merge_k3(cell, seed),
+        "signature.multi-multiset-k4.merge-total" => signature_multi_multiset_merge_k4(cell, seed),
+        "signature.multi-sequence-k3.concatenate-total" => {
+            signature_multi_sequence_concatenate_k3(cell, seed)
+        }
+        "signature.multi-sequence-k4.concatenate-total" => {
+            signature_multi_sequence_concatenate_k4(cell, seed)
+        }
+        "signature.multi-multiset-k4.fragmented-merge-total" => {
+            signature_multi_multiset_fragmented_k4(cell, seed)
+        }
+        "signature.multi-sequence-k4.fragmented-concatenate-total" => {
+            signature_multi_sequence_fragmented_k4(cell, seed)
+        }
         "delta.additive.end-to-end" => delta_additive(cell, seed),
         "summary-tree.rebuild" => summary_tree_rebuild(cell, seed),
         "summary-tree.local-edit-total" => summary_tree_local_edit_total(cell, seed),
@@ -145,6 +175,8 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "graph.fast-prepared" => graph_fast(cell),
         "graph.exact" => graph_exact(cell),
         "graph.dag-reuse" => graph_dag_reuse(cell),
+        "graph.full-label-reanalysis-total" => graph_full_label_reanalysis(cell),
+        "graph.incremental-label-update-total" => graph_incremental_label_update(cell),
         "tool.binary-manifest.parse" => tool_binary_manifest(false),
         "tool.binary-manifest.generate" => tool_binary_manifest(true),
         other => Err(format!(
@@ -355,7 +387,12 @@ fn signature_additive_merge_total(
         .absorb_many(items[midpoint..].iter().map(Vec::as_slice))
         .map_err(debug_error)?;
     Ok(single_unit(move || {
-        checksum_field(left.combine(&right).unwrap().state())
+        checksum_field(
+            std::hint::black_box(&left)
+                .combine(std::hint::black_box(&right))
+                .unwrap()
+                .state(),
+        )
     }))
 }
 
@@ -375,7 +412,12 @@ fn signature_sequence_concatenate_total(
         .push_many(items[midpoint..].iter().map(Vec::as_slice))
         .map_err(debug_error)?;
     Ok(single_unit(move || {
-        checksum_field(left.concatenate(&right).unwrap().state())
+        checksum_field(
+            std::hint::black_box(&left)
+                .concatenate(std::hint::black_box(&right))
+                .unwrap()
+                .state(),
+        )
     }))
 }
 
@@ -401,7 +443,9 @@ fn signature_bidirectional_concatenate_total(
         .push_many(items[midpoint..].iter().map(Vec::as_slice))
         .map_err(debug_error)?;
     Ok(single_unit(move || {
-        let combined = left.concatenate(&right).unwrap();
+        let combined = std::hint::black_box(&left)
+            .concatenate(std::hint::black_box(&right))
+            .unwrap();
         checksum_field(combined.forward_state()) ^ checksum_field(combined.reverse_state())
     }))
 }
@@ -420,7 +464,12 @@ fn signature_multiset_merge_total(
         .insert_many(items[midpoint..].iter().map(Vec::as_slice))
         .map_err(debug_error)?;
     Ok(single_unit(move || {
-        checksum_field(left.combine(&right).unwrap().evaluated_product())
+        checksum_field(
+            std::hint::black_box(&left)
+                .combine(std::hint::black_box(&right))
+                .unwrap()
+                .evaluated_product(),
+        )
     }))
 }
 
@@ -441,7 +490,8 @@ fn signature_multi_multiset_merge_total(
         .insert_many(items[midpoint..].iter().map(Vec::as_slice))
         .map_err(debug_error)?;
     Ok(single_unit(move || {
-        left.combine(&right)
+        std::hint::black_box(&left)
+            .combine(std::hint::black_box(&right))
             .unwrap()
             .evaluated_products()
             .into_iter()
@@ -466,8 +516,334 @@ fn signature_multi_sequence_concatenate_total(
         .push_many(items[midpoint..].iter().map(Vec::as_slice))
         .map_err(debug_error)?;
     Ok(single_unit(move || {
-        left.concatenate(&right)
+        std::hint::black_box(&left)
+            .concatenate(std::hint::black_box(&right))
             .unwrap()
+            .states()
+            .iter()
+            .fold(0, |sum, value| sum ^ checksum_field(*value))
+    }))
+}
+
+fn signature_multi_multiset_k3(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    signature_multi_multiset_build_k(
+        cell,
+        seed,
+        [
+            Fp251V1::ONE,
+            Fp251V1::from_u64_mod(2),
+            Fp251V1::from_u64_mod(3),
+        ],
+    )
+}
+
+fn signature_multi_multiset_k4(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    signature_multi_multiset_build_k(
+        cell,
+        seed,
+        [
+            Fp251V1::ONE,
+            Fp251V1::from_u64_mod(2),
+            Fp251V1::from_u64_mod(3),
+            Fp251V1::from_u64_mod(4),
+        ],
+    )
+}
+
+fn signature_multi_sequence_k3(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    signature_multi_sequence_build_k(
+        cell,
+        seed,
+        [
+            Fp251V1::from_u64_mod(7),
+            Fp251V1::from_u64_mod(11),
+            Fp251V1::from_u64_mod(13),
+        ],
+    )
+}
+
+fn signature_multi_sequence_k4(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    signature_multi_sequence_build_k(
+        cell,
+        seed,
+        [
+            Fp251V1::from_u64_mod(7),
+            Fp251V1::from_u64_mod(11),
+            Fp251V1::from_u64_mod(13),
+            Fp251V1::from_u64_mod(17),
+        ],
+    )
+}
+
+fn signature_multi_multiset_build_k<const K: usize>(
+    cell: &BenchmarkCell,
+    seed: u64,
+    points: [Fp251V1; K],
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    Ok(single_unit(move || {
+        let mut signature =
+            MultiEvaluationMultisetSignature::<Fp251V1, _, K>::new(prime_encoder(), points)
+                .unwrap();
+        signature
+            .insert_many(items.iter().map(Vec::as_slice))
+            .unwrap();
+        signature
+            .evaluated_products()
+            .into_iter()
+            .fold(0, |sum, value| sum ^ checksum_field(value))
+    }))
+}
+
+fn signature_multi_sequence_build_k<const K: usize>(
+    cell: &BenchmarkCell,
+    seed: u64,
+    bases: [Fp251V1; K],
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    Ok(single_unit(move || {
+        let mut signature =
+            MultiEvaluationSequenceSignature::<Fp251V1, _, K>::new(prime_encoder(), bases).unwrap();
+        signature
+            .push_many(items.iter().map(Vec::as_slice))
+            .unwrap();
+        signature
+            .states()
+            .iter()
+            .fold(0, |sum, value| sum ^ checksum_field(*value))
+    }))
+}
+
+fn signature_multi_multiset_merge_k3(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    signature_multi_multiset_merge_k(
+        cell,
+        seed,
+        [
+            Fp251V1::ONE,
+            Fp251V1::from_u64_mod(2),
+            Fp251V1::from_u64_mod(3),
+        ],
+    )
+}
+
+fn signature_multi_multiset_merge_k4(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    signature_multi_multiset_merge_k(
+        cell,
+        seed,
+        [
+            Fp251V1::ONE,
+            Fp251V1::from_u64_mod(2),
+            Fp251V1::from_u64_mod(3),
+            Fp251V1::from_u64_mod(4),
+        ],
+    )
+}
+
+fn signature_multi_multiset_merge_k<const K: usize>(
+    cell: &BenchmarkCell,
+    seed: u64,
+    points: [Fp251V1; K],
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let midpoint = items.len() / 2;
+    let mut left = MultiEvaluationMultisetSignature::<Fp251V1, _, K>::new(prime_encoder(), points)
+        .map_err(debug_error)?;
+    left.insert_many(items[..midpoint].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    let mut right = MultiEvaluationMultisetSignature::<Fp251V1, _, K>::new(prime_encoder(), points)
+        .map_err(debug_error)?;
+    right
+        .insert_many(items[midpoint..].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    Ok(single_unit(move || {
+        std::hint::black_box(&left)
+            .combine(std::hint::black_box(&right))
+            .unwrap()
+            .evaluated_products()
+            .into_iter()
+            .fold(0, |sum, value| sum ^ checksum_field(value))
+    }))
+}
+
+fn signature_multi_sequence_concatenate_k3(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    signature_multi_sequence_concatenate_k(
+        cell,
+        seed,
+        [
+            Fp251V1::from_u64_mod(7),
+            Fp251V1::from_u64_mod(11),
+            Fp251V1::from_u64_mod(13),
+        ],
+    )
+}
+
+fn signature_multi_sequence_concatenate_k4(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    signature_multi_sequence_concatenate_k(
+        cell,
+        seed,
+        [
+            Fp251V1::from_u64_mod(7),
+            Fp251V1::from_u64_mod(11),
+            Fp251V1::from_u64_mod(13),
+            Fp251V1::from_u64_mod(17),
+        ],
+    )
+}
+
+fn signature_multi_sequence_concatenate_k<const K: usize>(
+    cell: &BenchmarkCell,
+    seed: u64,
+    bases: [Fp251V1; K],
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let midpoint = items.len() / 2;
+    let mut left = MultiEvaluationSequenceSignature::<Fp251V1, _, K>::new(prime_encoder(), bases)
+        .map_err(debug_error)?;
+    left.push_many(items[..midpoint].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    let mut right = MultiEvaluationSequenceSignature::<Fp251V1, _, K>::new(prime_encoder(), bases)
+        .map_err(debug_error)?;
+    right
+        .push_many(items[midpoint..].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    Ok(single_unit(move || {
+        std::hint::black_box(&left)
+            .concatenate(std::hint::black_box(&right))
+            .unwrap()
+            .states()
+            .iter()
+            .fold(0, |sum, value| sum ^ checksum_field(*value))
+    }))
+}
+
+fn signature_multi_multiset_fragmented_k4(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let total = cell
+        .dataset_size
+        .ok_or("fragmented signature requires dataset_size")?;
+    let fragments = cell.scale;
+    if fragments < 2 || total == 0 || !total.is_multiple_of(fragments) {
+        return Err("fragment count must divide a non-empty dataset_size".into());
+    }
+    let points = [
+        Fp251V1::ONE,
+        Fp251V1::from_u64_mod(2),
+        Fp251V1::from_u64_mod(3),
+        Fp251V1::from_u64_mod(4),
+    ];
+    let items_a = payloads(total, cell.payload_bytes, seed)?;
+    let items_b = payloads(total, cell.payload_bytes, seed ^ 0xa5a5_5a5a_1357_2468)?;
+    let chunk_size = total / fragments;
+    let build = |items: &[Vec<u8>]| {
+        items
+            .chunks(chunk_size)
+            .map(|chunk| {
+                let mut signature =
+                    MultiEvaluationMultisetSignature::<Fp251V1, _, 4>::new(prime_encoder(), points)
+                        .map_err(debug_error)?;
+                signature
+                    .insert_many(chunk.iter().map(Vec::as_slice))
+                    .map_err(debug_error)?;
+                Ok(signature)
+            })
+            .collect::<Result<Vec<_>, String>>()
+    };
+    let signatures_a = build(&items_a)?;
+    let signatures_b = build(&items_b)?;
+    let mut alternate = false;
+    Ok(single_unit(move || {
+        alternate = !alternate;
+        let signatures = std::hint::black_box(if alternate {
+            &signatures_a
+        } else {
+            &signatures_b
+        });
+        let mut combined = signatures[0].clone();
+        for signature in &signatures[1..] {
+            combined = combined.combine(signature).unwrap();
+        }
+        combined
+            .evaluated_products()
+            .into_iter()
+            .fold(0, |sum, value| sum ^ checksum_field(value))
+    }))
+}
+
+fn signature_multi_sequence_fragmented_k4(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let total = cell
+        .dataset_size
+        .ok_or("fragmented signature requires dataset_size")?;
+    let fragments = cell.scale;
+    if fragments < 2 || total == 0 || !total.is_multiple_of(fragments) {
+        return Err("fragment count must divide a non-empty dataset_size".into());
+    }
+    let bases = [
+        Fp251V1::from_u64_mod(7),
+        Fp251V1::from_u64_mod(11),
+        Fp251V1::from_u64_mod(13),
+        Fp251V1::from_u64_mod(17),
+    ];
+    let items_a = payloads(total, cell.payload_bytes, seed)?;
+    let items_b = payloads(total, cell.payload_bytes, seed ^ 0xa5a5_5a5a_1357_2468)?;
+    let chunk_size = total / fragments;
+    let build = |items: &[Vec<u8>]| {
+        items
+            .chunks(chunk_size)
+            .map(|chunk| {
+                let mut signature =
+                    MultiEvaluationSequenceSignature::<Fp251V1, _, 4>::new(prime_encoder(), bases)
+                        .map_err(debug_error)?;
+                signature
+                    .push_many(chunk.iter().map(Vec::as_slice))
+                    .map_err(debug_error)?;
+                Ok(signature)
+            })
+            .collect::<Result<Vec<_>, String>>()
+    };
+    let signatures_a = build(&items_a)?;
+    let signatures_b = build(&items_b)?;
+    let mut alternate = false;
+    Ok(single_unit(move || {
+        alternate = !alternate;
+        let signatures = std::hint::black_box(if alternate {
+            &signatures_a
+        } else {
+            &signatures_b
+        });
+        let mut combined = signatures[0].clone();
+        for signature in &signatures[1..] {
+            combined = combined.concatenate(signature).unwrap();
+        }
+        combined
             .states()
             .iter()
             .fold(0, |sum, value| sum ^ checksum_field(*value))
@@ -896,7 +1272,11 @@ fn graph_fast(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
     // `PreparedGraph` borrows the immutable graph. The worker is a short-lived
     // process, so retaining this input until process exit keeps setup outside
     // the measured operation without a self-referential owner.
-    let graph: &'static IncidenceGraph = Box::leak(Box::new(sparse_cycle(cell.scale.max(4))?));
+    let graph: &'static IncidenceGraph = Box::leak(Box::new(match cell.strategy.as_deref() {
+        Some("regular-8") => regular_graph(cell.scale.max(8), 8, false)?,
+        Some("star") => star_graph(cell.scale.max(4))?,
+        _ => sparse_cycle(cell.scale.max(4))?,
+    }));
     let labeler =
         FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
             .map_err(debug_error)?;
@@ -912,15 +1292,68 @@ fn graph_fast(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
 }
 
 fn graph_exact(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
-    let graph = distinct_path(cell.scale.clamp(2, 14))?;
+    let graph = match cell.strategy.as_deref() {
+        Some("symmetric-cycle") => sparse_cycle(cell.scale.clamp(3, 16))?,
+        _ => distinct_path(cell.scale.clamp(2, 16))?,
+    };
     let schema = GraphSchemaId::derive(b"publication-exact-v1");
     let canonizer = Microcanon::new(schema);
     let budget = CanonicalSearchBudget::new(1_000_000);
     Ok(scaled(graph.vertex_count(), move || {
         match canonizer.canonicalize(&graph, budget).unwrap() {
             MicrocanonOutcome::Exact { form, .. } => checksum_bytes(form.bytes()),
-            MicrocanonOutcome::Inconclusive { report } => panic!("inconclusive: {report:?}"),
+            MicrocanonOutcome::Inconclusive { report } => {
+                0x494e_434f_4e43_4c55 ^ report.explored_nodes()
+            }
         }
+    }))
+}
+
+fn graph_full_label_reanalysis(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let vertices = cell.scale.max(8);
+    let base = regular_graph(vertices, 8, false)?;
+    let changed = regular_graph(vertices, 8, true)?;
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    let mut toggle = false;
+    Ok(single_unit(move || {
+        toggle = !toggle;
+        let graph = if toggle {
+            changed.clone()
+        } else {
+            base.clone()
+        };
+        checksum_field(labeler.analyze(&graph).unwrap().signature().lanes()[0])
+    }))
+}
+
+fn graph_incremental_label_update(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let vertices = cell.scale.max(8);
+    let base = regular_graph(vertices, 8, false)?;
+    let changed = regular_graph(vertices, 8, true)?;
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    let mut state = labeler
+        .incremental_state(base.clone())
+        .map_err(debug_error)?;
+    let mut workspace = IncrementalGraphWorkspace::new();
+    workspace
+        .reserve_for(vertices, base.incidence_count(), 4)
+        .map_err(debug_error)?;
+    let mut toggle = false;
+    Ok(single_unit(move || {
+        toggle = !toggle;
+        let graph = if toggle {
+            changed.clone()
+        } else {
+            base.clone()
+        };
+        labeler
+            .update_incremental(&mut state, graph, &mut workspace)
+            .unwrap()
+            .recomputed_vertex_rounds() as u64
     }))
 }
 
@@ -1085,6 +1518,51 @@ fn distinct_path(vertices: usize) -> Result<IncidenceGraph, String> {
     builder.build().map_err(debug_error)
 }
 
+fn regular_graph(
+    vertices: usize,
+    degree: usize,
+    changed_label: bool,
+) -> Result<IncidenceGraph, String> {
+    let mut builder = IncidenceGraphBuilder::new();
+    let ids = (0..vertices)
+        .map(|index| {
+            let label = if changed_label && index == vertices / 2 {
+                b"changed".to_vec()
+            } else {
+                (index % 17).to_le_bytes().to_vec()
+            };
+            builder.add_vertex(label)
+        })
+        .collect::<Vec<_>>();
+    for source in 0..vertices {
+        for step in 1..=degree / 2 {
+            builder
+                .add_undirected_relation(
+                    ids[source],
+                    ids[(source + step) % vertices],
+                    b"edge",
+                    b"regular",
+                    1,
+                )
+                .map_err(debug_error)?;
+        }
+    }
+    builder.build().map_err(debug_error)
+}
+
+fn star_graph(vertices: usize) -> Result<IncidenceGraph, String> {
+    let mut builder = IncidenceGraphBuilder::new();
+    let ids = (0..vertices)
+        .map(|_| builder.add_vertex(Vec::new()))
+        .collect::<Vec<_>>();
+    for leaf in 1..vertices {
+        builder
+            .add_undirected_relation(ids[0], ids[leaf], b"edge", b"star", 1)
+            .map_err(debug_error)?;
+    }
+    builder.build().map_err(debug_error)
+}
+
 fn checksum_field<F: CanonicalEncoding>(value: F) -> u64 {
     checksum_bytes(value.to_canonical().as_ref())
 }
@@ -1136,6 +1614,9 @@ mod tests {
             let mut benchmark_cell = cell(operation, scale);
             if operation.contains("summary-tree.") {
                 benchmark_cell.dataset_size = Some(4_096);
+            }
+            if operation.contains("fragmented-") {
+                benchmark_cell.dataset_size = Some(benchmark_cell.scale);
             }
             let mut prepared = prepare(&benchmark_cell, 7)
                 .unwrap_or_else(|error| panic!("prepare {operation}: {error}"));

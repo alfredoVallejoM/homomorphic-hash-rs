@@ -1,6 +1,6 @@
 # Campaña integral pre-RC de Algesum
 
-Fecha: 2026-08-10. Estado: **en ejecución**. Clasificación inicial:
+Fecha: 2026-08-10. Estado: **C2 ejecutado; C3 pendiente**. Clasificación inicial:
 **Informative**; ninguna medición habilita por sí sola afirmaciones públicas.
 
 Algesum mide resúmenes y firmas algebraicas homomórficas **no criptográficas**.
@@ -159,8 +159,16 @@ acotados, y memoria pico documentada.
 - nuevas operaciones de composición constante para las seis firmas mantenidas;
 - laboratorio PostgreSQL `algesum-postgresql-scaling-v2`, con distribuciones y
   tiempos de preparación/verificación separados.
+- `comprehensive-pilot-v1.json`: K=1..4, payloads, familias rápidas, edición
+  incremental y canon exacto presupuestado;
+- `comprehensive-fragmentation-pilot-v1.json`: 2–1.024 fragmentos K=4 con dos
+  juegos de operandos alternantes;
+- tres campañas PostgreSQL C2 de un millón de filas y tres repeticiones por
+  celda para `clustered`, `strided` y `hotspot`.
 
-Tras validar C1, se congela `comprehensive-pilot-v1`; después se seleccionan
-solo las celdas discriminantes para C3. Esto evita convertir el producto
+C1 y C2 están ejecutados. Sus resultados y fronteras están en
+`pre-rc-comprehensive-pilot-results.md`; después de corregir el selector denso
+de DB y la telemetría exacta se seleccionarán sólo las celdas discriminantes
+para C3. Esto evita convertir el producto
 cartesiano completo en una campaña inmanejable sin perder fronteras, baselines
 ni casos adversariales.

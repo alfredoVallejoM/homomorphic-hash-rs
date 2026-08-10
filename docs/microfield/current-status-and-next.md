@@ -77,16 +77,26 @@ GiB de RSS. Véanse
 y el
 [`plan integral`](pre-rc-comprehensive-campaign-plan.md).
 
+C2 ya está ejecutado: 47 celdas de firmas/grafos, 470 procesos y 7.050
+observaciones, con 44/47 celdas precisas. Confirma composición K=1..4,
+fragmentación K=4 hasta 1.024 operandos alternantes, estabilidad por vértice en
+tres familias de grafos y una ventaja incremental de 2,79–2,96x para editar
+una etiqueta. PostgreSQL añadió 33/33 muestras exactas a un millón de filas.
+El límite detectado está en alta densidad: la ruta por particiones a 75–100 %
+es más lenta que el rebuild completo y debe incorporarse éste al selector antes
+de C3. Véase
+[`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md).
+
 - replicar en entorno controlado tanto la campaña general como las nuevas
   matrices de densidad bulk;
-- repetir estadísticamente el piloto PostgreSQL de 1 millón y ejecutar 10
-  millones solo en un host dedicado con memoria suficiente;
+- corregir y repetir la selección DB densa; ejecutar 10 millones sólo en un
+  host dedicado con memoria suficiente;
 - reevaluar después la integración y fijar un checkpoint recuperable;
 - extender el consumidor PostgreSQL desde commits controlados a logical
   decoding/WAL y probar 16–256 clientes concurrentes, crashes y lag;
 - importar NYC TLC para canonicalización y carga masiva de datos heterogéneos;
-- ejecutar C2/C3 de firmas y grafos, ampliando K, payload, fragmentación,
-  familias, densidad, deltas y casos adversariales exactos;
+- ejecutar C3 controlado de firmas y grafos; ampliar topología incremental,
+  densidad, deltas, outcome estructurado y corpus adversarial exacto;
 - decisión de congelar la reconciliación v1 como conjuntos o diseñar una v2
   para multiplicidad;
 - completar licencia, seguridad, semver, advisories/SBOM y packaging externo.

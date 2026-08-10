@@ -44,6 +44,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`algesum-postgresql-results.md`](algesum-postgresql-results.md) | integración PostgreSQL, change stream y política adaptativa |
 | [`pre-rc-comprehensive-campaign-plan.md`](pre-rc-comprehensive-campaign-plan.md) | matriz C0–C3 de todas las estructuras, priorizando firmas y grafos |
 | [`pre-rc-comprehensive-smoke-results.md`](pre-rc-comprehensive-smoke-results.md) | C1 de 65 celdas y piloto PostgreSQL hasta un millón de filas |
+| [`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md) | C2 de firmas K/fragmentación, grafos y PostgreSQL repetido a un millón |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |
 | [`phase-6-g15-internal-readiness-plan.md`](phase-6-g15-internal-readiness-plan.md) | desglose histórico G15 y correspondencia con RC |
 | [`contracts.md`](contracts.md) | contratos algebraicos, batch, generación y firmas |
@@ -66,9 +67,10 @@ G6–G7 y ADR 0032–0034 fijan assurance, comparación pareada y pipeline/delta
 - `pre-rc-benchmark-protocol.md`: B.1–B.3 cerrados con evidencia informativa;
   la extensión bulk del árbol/DB también está ejecutada como `Informative`; la
   réplica `Controlled` de ambas es precondición para promover o integrar la RC.
-- `pre-rc-comprehensive-campaign-plan.md`: C1 ejecutado; C2 debe ampliar K,
-  payloads, fragmentación, familias de grafos y repeticiones PostgreSQL; C3
-  queda reservado para un host dedicado.
+- `pre-rc-comprehensive-campaign-plan.md`: C1 y C2 ejecutados; C2 conserva 47
+  celdas de firmas/grafos y 33 muestras PostgreSQL verificadas. C3 queda
+  reservado para un host dedicado tras corregir la selección DB densa y
+  ampliar la telemetría exacta de grafos.
 - `post-rc-benchmark-and-publication-plan.md`: primera integración PostgreSQL
   ejecutada; logical decoding, concurrencia, corpus real y release externa
   continúan después de reevaluar B.1–B.3.

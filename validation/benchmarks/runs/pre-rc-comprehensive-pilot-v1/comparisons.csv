@@ -1,0 +1,12 @@
+cell,baseline_cell,paired_processes,median_ratio,ratio_ci95_lower,ratio_ci95_upper,status
+set-k1-compose-64,set-k1-build-64,10,0.000530795,0.000519535,0.000962407,Paired
+set-k2-compose-64,set-k2-build-64,10,0.000594812,0.000566152,0.000603363,Paired
+set-k3-compose-64,set-k3-build-64,10,0.000688959,0.000687241,0.001008616,Paired
+set-k4-compose-64,set-k4-build-64,10,0.000751863,0.000750211,0.000754649,Paired
+seq-k1-compose-4096,seq-k1-build-4096,10,0.000447075,0.000427534,0.000453924,Paired
+seq-k2-compose-4096,seq-k2-build-4096,10,0.000878306,0.000872757,0.000940495,Paired
+seq-k3-compose-4096,seq-k3-build-4096,10,0.001324694,0.001305801,0.001448325,Paired
+seq-k4-compose-4096,seq-k4-build-4096,10,0.001648377,0.001631933,0.001758754,Paired
+graph-incremental-edit-1024,graph-full-edit-1024,10,0.349588372,0.340288213,0.354338028,Paired
+graph-incremental-edit-16384,graph-full-edit-16384,10,0.338095387,0.337255982,0.346283850,Paired
+graph-incremental-edit-131072,graph-full-edit-131072,10,0.358773687,0.349779655,0.370245671,Paired
