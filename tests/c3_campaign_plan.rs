@@ -173,6 +173,51 @@ fn c3_generated_scaling_inventory_reaches_the_declared_volume_floor() {
 }
 
 #[test]
+fn c3_consolidated_status_matches_generated_inventory_and_remaining_gap() {
+    let ledger: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/c3-coverage-ledger-v1.json"
+    ))
+    .unwrap();
+    let inventory: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/c3-operation-inventory-v1.json"
+    ))
+    .unwrap();
+    let status: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/runs/c3-preflight-consolidated-status-v1.json"
+    ))
+    .unwrap();
+
+    assert_eq!(status["generated_publication_cells"], 3_609);
+    assert_eq!(status["local_timed_cells_and_calibrations_executed"], 229);
+    assert_eq!(status["independent_worker_processes"], 485);
+    assert_eq!(status["observations"], 2_770);
+    assert_eq!(status["semantic_failures"], 0);
+    assert_eq!(status["unstable_checksums"], 0);
+
+    let minimum_processes = status["generated_publication_cells"].as_u64().unwrap()
+        * ledger["targets"]["minimum_processes_per_timed_cell"]
+            .as_u64()
+            .unwrap();
+    assert_eq!(
+        status["remaining_gates"][1]["minimum_processes_per_host"],
+        minimum_processes
+    );
+
+    let missing = inventory["suites"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .flat_map(|suite| suite["missing_operations"].as_array().unwrap())
+        .map(|operation| operation.as_str().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(missing, ["postgres.backpressure-soak"]);
+    assert_eq!(
+        status["operation_inventory"]["only_missing_operation"],
+        missing[0]
+    );
+}
+
+#[test]
 fn c3_plan_names_the_required_campaign_lanes_and_rejects_weak_selection() {
     let plan = include_str!("../docs/microfield/c3-extensive-campaign-plan.md");
     for required in [

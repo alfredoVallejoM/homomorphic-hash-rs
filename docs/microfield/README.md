@@ -51,6 +51,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`c3-x1-x2-implementation-and-preflight-report.md`](c3-x1-x2-implementation-and-preflight-report.md) | corpora públicos, familias wire, fallos, packaging y compatibilidad legacy |
 | [`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md) | logical decoding, concurrencia, backlog, migración y restart PostgreSQL |
 | [`c3-f1-f2-closure-preflight-report.md`](c3-f1-f2-closure-preflight-report.md) | referencias independientes, backends forzados, patrones y reducción de campos |
+| [`c3-preflight-consolidated-results-and-controlled-next.md`](c3-preflight-consolidated-results-and-controlled-next.md) | consolidación cuantitativa, gate actual y secuencia Controlled pendiente |
 | [`pre-rc-comprehensive-smoke-results.md`](pre-rc-comprehensive-smoke-results.md) | C1 de 65 celdas y piloto PostgreSQL hasta un millón de filas |
 | [`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md) | C2 de firmas K/fragmentación, grafos y PostgreSQL repetido a un millón |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |
@@ -79,9 +80,9 @@ G6–G7 y ADR 0032–0034 fijan assurance, comparación pareada y pipeline/delta
   celdas de firmas/grafos y 33 muestras PostgreSQL verificadas. La selección
   DB densa y la telemetría exacta ya se corrigieron. C3 se ha replanificado
   como campaña extensiva de 12.000+ casos semánticos, 2.500–4.000 celdas de
-  timing y 150–300 escenarios. P0 y F1–S3 ya aportan 2.610 celdas generadas y
-  sus preflights; quedan estructuras, DB, grafos, semántica/sistemas y réplica
-  multihost `Controlled`.
+  timing y 150–300 escenarios. Los preflights locales de las 15 suites ya
+  definen 3.609 celdas; quedan C3-C0, ejecución multihost `Controlled` y soak
+  D2, no implementación general de estructuras.
 - `post-rc-benchmark-and-publication-plan.md`: primera integración PostgreSQL
   ejecutada; logical decoding, concurrencia, corpus real y release externa
   continúan después de reevaluar B.1–B.3.

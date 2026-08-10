@@ -25,6 +25,10 @@ rules, multi-host replication and systems scenarios, is
 The machine-readable capability ownership and volume targets are frozen in
 `c3-coverage-ledger-v1.json`; `tests/c3_campaign_plan.rs` fails if the admitted
 RC surface and the C3 ledger drift apart.
+The aggregate local-preflight status, exact remaining gates and minimum
+Controlled process counts are recorded in
+`runs/c3-preflight-consolidated-status-v1.json` and interpreted in
+`docs/microfield/c3-preflight-consolidated-results-and-controlled-next.md`.
 
 C3-P0 adds the deterministic factor expander and the first generated F1/F2
 shards:

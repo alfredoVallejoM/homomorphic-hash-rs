@@ -321,6 +321,10 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
 - cierre F1/F2 ejecutado: 366 celdas nuevas definidas, 85 preflights más cinco
   calibraciones, 206 procesos y 1.330 observaciones; todas las variantes tienen
   una ejecución precisa y el inventario acumulado alcanza 3.609 celdas;
+- consolidación ejecutada: 229 celdas/calibraciones locales, 485 procesos y
+  2.770 observaciones en total, sin divergencias semánticas ni checksums
+  inestables; sólo `postgres.backpressure-soak` permanece ausente del
+  inventario de operaciones;
 - completar C3-Semantic, C3-Scaling y C3-Systems;
 - replicar los claims en Intel x86-64, AMD x86-64 y AArch64 dedicados;
 - decidir go/no-go con cobertura, efectos, intervalos, límites e inconclusos;
@@ -341,6 +345,8 @@ Evidencia D2:
 [`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md).
 Evidencia de cierre F1/F2:
 [`c3-f1-f2-closure-preflight-report.md`](c3-f1-f2-closure-preflight-report.md).
+Consolidación y secuencia restante:
+[`c3-preflight-consolidated-results-and-controlled-next.md`](c3-preflight-consolidated-results-and-controlled-next.md).
 
 ### 5. Base de datos real
 

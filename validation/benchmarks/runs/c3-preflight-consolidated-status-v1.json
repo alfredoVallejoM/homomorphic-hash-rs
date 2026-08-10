@@ -1,0 +1,55 @@
+{
+  "schema": "algesum-c3-preflight-consolidated-status-v1",
+  "campaign_id": "algesum-c3-extensive-v1",
+  "date": "2026-08-11",
+  "security_classification": "non-cryptographic-algebraic-summaries",
+  "classification": "preflight-consolidation",
+  "claims_allowed": false,
+  "generated_publication_cells": 3609,
+  "local_timed_cells_and_calibrations_executed": 229,
+  "independent_worker_processes": 485,
+  "observations": 2770,
+  "semantic_failures": 0,
+  "unstable_checksums": 0,
+  "external_preflights": {
+    "x1_sources": 5,
+    "x1_vertical_tests": 4,
+    "d2_observed_commits": 1888,
+    "d2_client_levels": [1, 2, 8, 16, 32],
+    "d2_backpressure_factors": [2, 5],
+    "d2_restart_exact": true
+  },
+  "operation_inventory": {
+    "implemented_or_external_suites": 15,
+    "only_missing_operation": "postgres.backpressure-soak"
+  },
+  "remaining_gates": [
+    {
+      "id": "C3-C0",
+      "requirement": "at least 12000 versioned semantic cases",
+      "status": "not-executed"
+    },
+    {
+      "id": "C3-Scaling-Controlled",
+      "requirement": "3609 cells and at least 30 independent processes per cell on a dedicated host",
+      "minimum_processes_per_host": 108270,
+      "status": "not-executed"
+    },
+    {
+      "id": "C3-R",
+      "requirement": "replication on Intel x86-64, AMD x86-64 and AArch64",
+      "minimum_complete_processes_across_three_hosts": 324810,
+      "status": "infrastructure-required"
+    },
+    {
+      "id": "C3-Systems",
+      "requirement": "150-300 scenarios including 15 minute, 1 hour and 8 hour soak profiles",
+      "status": "infrastructure-required"
+    },
+    {
+      "id": "C3-P",
+      "requirement": "regenerated publication package, adversarial review and go/no-go",
+      "status": "blocked-by-evidence-gates"
+    }
+  ]
+}
