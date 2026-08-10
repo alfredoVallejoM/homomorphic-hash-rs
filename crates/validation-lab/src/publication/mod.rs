@@ -27,6 +27,37 @@ mod tests {
     }
 
     #[test]
+    fn comprehensive_smoke_covers_every_signature_law_and_graph_scale() {
+        let manifest = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/comprehensive-smoke-v1.json",
+        ))
+        .expect("comprehensive smoke manifest");
+        assert_eq!(manifest.profile, CampaignProfile::Smoke);
+        assert_eq!(manifest.cells.len(), 65);
+        for operation in [
+            "signature.additive.merge-total",
+            "signature.sequence.concatenate-total",
+            "signature.bidirectional.concatenate-total",
+            "signature.multiset.merge-total",
+            "signature.multi-multiset-k2.merge-total",
+            "signature.multi-sequence-k2.concatenate-total",
+        ] {
+            assert!(manifest
+                .cells
+                .iter()
+                .any(|cell| cell.operation == operation));
+        }
+        assert!(manifest
+            .cells
+            .iter()
+            .any(|cell| cell.operation == "graph.fast-prepared" && cell.scale == 131_072));
+        assert!(manifest
+            .cells
+            .iter()
+            .any(|cell| cell.operation == "graph.exact" && cell.scale == 14));
+    }
+
+    #[test]
     fn scaling_manifests_share_the_same_complete_cell_inventory() {
         let pilot = load_manifest(std::path::Path::new(
             "../../validation/benchmarks/manifests/pilot-scaling-v1.json",

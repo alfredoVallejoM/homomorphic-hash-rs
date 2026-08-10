@@ -1,0 +1,93 @@
+{
+  "schema": "algesum-postgresql-scaling-v2",
+  "rows": 1000000,
+  "partitions": 1024,
+  "repetitions": 1,
+  "incremental_ceiling": 1000000,
+  "partition_density_numerator": 2,
+  "partition_density_denominator": 3,
+  "max_mutations": 1000000,
+  "max_transaction_bytes": 536870912,
+  "distribution": "clustered",
+  "hotspot_rows": null,
+  "initialize_microseconds": 2295428,
+  "initial_load_microseconds": 554599,
+  "initial_build_microseconds": 2995074,
+  "cells": [
+    {
+      "batch_size": 256,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 7116,
+          "algesum_apply_microseconds": 8120,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 3081927,
+          "verification_microseconds": 546601,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 10000,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 102136,
+          "algesum_apply_microseconds": 92036,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 2799639,
+          "verification_microseconds": 566890,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 250000,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 1953959,
+          "algesum_apply_microseconds": 1553031,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 2829701,
+          "verification_microseconds": 728642,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 750000,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 6312555,
+          "algesum_apply_microseconds": 4444373,
+          "algesum_apply_path": "PartitionRebuild",
+          "algesum_rebuild_microseconds": 2863132,
+          "verification_microseconds": 1138720,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 1000000,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 8780037,
+          "algesum_apply_microseconds": 4568905,
+          "algesum_apply_path": "PartitionRebuild",
+          "algesum_rebuild_microseconds": 2806019,
+          "verification_microseconds": 1219676,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    }
+  ]
+}

@@ -65,13 +65,28 @@ falla de forma cerrada ante redelivery conflictiva. La evidencia está en
 [`algesum-postgresql-results.md`](algesum-postgresql-results.md). Lo que queda
 para madurar estas rutas es:
 
+La campaña integral C1 posterior amplió el smoke a 65 celdas: seis leyes de
+firma con build/composición, payloads, campos, deltas, árboles, DB,
+reconciliación, grafos fast/exact/DAG y tooling. Las 65 terminaron precisas bajo
+el umbral relajado de smoke. PostgreSQL también llegó a un millón de filas en
+clustered, strided y hotspot con igualdad exacta en todos los commits. Tras
+eliminar una copia autoritativa innecesaria del laboratorio, 256 cambios sobre
+un millón costaron 8,1–11,9 ms y el proceso denso alcanzó aproximadamente 1,44
+GiB de RSS. Véanse
+[`pre-rc-comprehensive-smoke-results.md`](pre-rc-comprehensive-smoke-results.md)
+y el
+[`plan integral`](pre-rc-comprehensive-campaign-plan.md).
+
 - replicar en entorno controlado tanto la campaña general como las nuevas
   matrices de densidad bulk;
-- replicar la campaña PostgreSQL sobre 1 millón y 10 millones de filas;
+- repetir estadísticamente el piloto PostgreSQL de 1 millón y ejecutar 10
+  millones solo en un host dedicado con memoria suficiente;
 - reevaluar después la integración y fijar un checkpoint recuperable;
 - extender el consumidor PostgreSQL desde commits controlados a logical
   decoding/WAL y probar 16–256 clientes concurrentes, crashes y lag;
 - importar NYC TLC para canonicalización y carga masiva de datos heterogéneos;
+- ejecutar C2/C3 de firmas y grafos, ampliando K, payload, fragmentación,
+  familias, densidad, deltas y casos adversariales exactos;
 - decisión de congelar la reconciliación v1 como conjuntos o diseñar una v2
   para multiplicidad;
 - completar licencia, seguridad, semver, advisories/SBOM y packaging externo.

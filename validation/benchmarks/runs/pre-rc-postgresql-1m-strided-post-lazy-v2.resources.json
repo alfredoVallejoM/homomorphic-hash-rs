@@ -1,0 +1,13 @@
+{
+  "schema": "algesum-process-resources-v1",
+  "report": "pre-rc-postgresql-1m-strided-post-lazy-v2.json",
+  "collector": "/usr/bin/time -v",
+  "elapsed_seconds": 54.07,
+  "user_seconds": 34.90,
+  "system_seconds": 1.52,
+  "maximum_resident_set_kibibytes": 1504616,
+  "major_page_faults": 0,
+  "minor_page_faults": 543029,
+  "swaps": 0,
+  "exit_status": 0
+}

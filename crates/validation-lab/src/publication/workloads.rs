@@ -38,7 +38,17 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "signature.multi-multiset-k2.build",
     "signature.multi-sequence-k2.build",
     "signature.additive.build-total",
+    "signature.sequence.build-total",
+    "signature.bidirectional.build-total",
+    "signature.multiset.build-total",
+    "signature.multi-multiset-k2.build-total",
+    "signature.multi-sequence-k2.build-total",
     "signature.additive.merge-total",
+    "signature.sequence.concatenate-total",
+    "signature.bidirectional.concatenate-total",
+    "signature.multiset.merge-total",
+    "signature.multi-multiset-k2.merge-total",
+    "signature.multi-sequence-k2.concatenate-total",
     "delta.additive.end-to-end",
     "summary-tree.rebuild",
     "summary-tree.local-edit-total",
@@ -84,7 +94,29 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "signature.multi-multiset-k2.build" => signature_multi_multiset(cell, seed),
         "signature.multi-sequence-k2.build" => signature_multi_sequence(cell, seed),
         "signature.additive.build-total" => signature_additive_total(cell, seed),
+        "signature.sequence.build-total" => signature_total(signature_sequence(cell, seed)?),
+        "signature.bidirectional.build-total" => {
+            signature_total(signature_bidirectional(cell, seed)?)
+        }
+        "signature.multiset.build-total" => signature_total(signature_multiset(cell, seed)?),
+        "signature.multi-multiset-k2.build-total" => {
+            signature_total(signature_multi_multiset(cell, seed)?)
+        }
+        "signature.multi-sequence-k2.build-total" => {
+            signature_total(signature_multi_sequence(cell, seed)?)
+        }
         "signature.additive.merge-total" => signature_additive_merge_total(cell, seed),
+        "signature.sequence.concatenate-total" => signature_sequence_concatenate_total(cell, seed),
+        "signature.bidirectional.concatenate-total" => {
+            signature_bidirectional_concatenate_total(cell, seed)
+        }
+        "signature.multiset.merge-total" => signature_multiset_merge_total(cell, seed),
+        "signature.multi-multiset-k2.merge-total" => {
+            signature_multi_multiset_merge_total(cell, seed)
+        }
+        "signature.multi-sequence-k2.concatenate-total" => {
+            signature_multi_sequence_concatenate_total(cell, seed)
+        }
         "delta.additive.end-to-end" => delta_additive(cell, seed),
         "summary-tree.rebuild" => summary_tree_rebuild(cell, seed),
         "summary-tree.local-edit-total" => summary_tree_local_edit_total(cell, seed),
@@ -304,6 +336,11 @@ fn signature_additive_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedO
     Ok(operation)
 }
 
+fn signature_total(mut operation: PreparedOperation) -> Result<PreparedOperation, String> {
+    operation.logical_units_per_action = 1;
+    Ok(operation)
+}
+
 fn signature_additive_merge_total(
     cell: &BenchmarkCell,
     seed: u64,
@@ -319,6 +356,121 @@ fn signature_additive_merge_total(
         .map_err(debug_error)?;
     Ok(single_unit(move || {
         checksum_field(left.combine(&right).unwrap().state())
+    }))
+}
+
+fn signature_sequence_concatenate_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let midpoint = items.len() / 2;
+    let mut left = SequenceSignature::<Fp251V1, _>::new(prime_encoder(), Fp251V1::from_u64_mod(7))
+        .map_err(debug_error)?;
+    left.push_many(items[..midpoint].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    let mut right = SequenceSignature::<Fp251V1, _>::new(prime_encoder(), Fp251V1::from_u64_mod(7))
+        .map_err(debug_error)?;
+    right
+        .push_many(items[midpoint..].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    Ok(single_unit(move || {
+        checksum_field(left.concatenate(&right).unwrap().state())
+    }))
+}
+
+fn signature_bidirectional_concatenate_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let midpoint = items.len() / 2;
+    let mut left = BidirectionalSequenceSignature::<Fp251V1, _>::new(
+        prime_encoder(),
+        Fp251V1::from_u64_mod(7),
+    )
+    .map_err(debug_error)?;
+    left.push_many(items[..midpoint].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    let mut right = BidirectionalSequenceSignature::<Fp251V1, _>::new(
+        prime_encoder(),
+        Fp251V1::from_u64_mod(7),
+    )
+    .map_err(debug_error)?;
+    right
+        .push_many(items[midpoint..].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    Ok(single_unit(move || {
+        let combined = left.concatenate(&right).unwrap();
+        checksum_field(combined.forward_state()) ^ checksum_field(combined.reverse_state())
+    }))
+}
+
+fn signature_multiset_merge_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let midpoint = items.len() / 2;
+    let mut left = MultisetSignature::<Fp251V1, _>::new(prime_encoder(), Fp251V1::ONE);
+    left.insert_many(items[..midpoint].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    let mut right = MultisetSignature::<Fp251V1, _>::new(prime_encoder(), Fp251V1::ONE);
+    right
+        .insert_many(items[midpoint..].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    Ok(single_unit(move || {
+        checksum_field(left.combine(&right).unwrap().evaluated_product())
+    }))
+}
+
+fn signature_multi_multiset_merge_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let midpoint = items.len() / 2;
+    let points = [Fp251V1::ONE, Fp251V1::from_u64_mod(2)];
+    let mut left = MultiEvaluationMultisetSignature::<Fp251V1, _, 2>::new(prime_encoder(), points)
+        .map_err(debug_error)?;
+    left.insert_many(items[..midpoint].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    let mut right = MultiEvaluationMultisetSignature::<Fp251V1, _, 2>::new(prime_encoder(), points)
+        .map_err(debug_error)?;
+    right
+        .insert_many(items[midpoint..].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    Ok(single_unit(move || {
+        left.combine(&right)
+            .unwrap()
+            .evaluated_products()
+            .into_iter()
+            .fold(0, |sum, value| sum ^ checksum_field(value))
+    }))
+}
+
+fn signature_multi_sequence_concatenate_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let midpoint = items.len() / 2;
+    let bases = [Fp251V1::from_u64_mod(7), Fp251V1::from_u64_mod(11)];
+    let mut left = MultiEvaluationSequenceSignature::<Fp251V1, _, 2>::new(prime_encoder(), bases)
+        .map_err(debug_error)?;
+    left.push_many(items[..midpoint].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    let mut right = MultiEvaluationSequenceSignature::<Fp251V1, _, 2>::new(prime_encoder(), bases)
+        .map_err(debug_error)?;
+    right
+        .push_many(items[midpoint..].iter().map(Vec::as_slice))
+        .map_err(debug_error)?;
+    Ok(single_unit(move || {
+        left.concatenate(&right)
+            .unwrap()
+            .states()
+            .iter()
+            .fold(0, |sum, value| sum ^ checksum_field(*value))
     }))
 }
 

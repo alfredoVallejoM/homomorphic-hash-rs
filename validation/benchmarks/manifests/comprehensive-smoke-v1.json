@@ -1,0 +1,96 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "pre-rc-comprehensive-smoke-v1",
+  "profile": "smoke",
+  "seed": 11936128518282651045,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 3,
+  "measured_observations": 5,
+  "target_observation_ns": 250000,
+  "maximum_batch_iterations": 65536,
+  "bootstrap_resamples": 500,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells": [
+    { "id": "field-gf2-128-mul", "family": "finite-field", "operation": "field.gf2-128.mul", "scale": 1, "scale_unit": "field-operation" },
+    { "id": "field-gf2-256-hh-mul", "family": "finite-field", "operation": "field.gf2-256-hh.mul", "scale": 1, "scale_unit": "field-operation" },
+    { "id": "field-gf2-256-alt-mul", "family": "finite-field", "operation": "field.gf2-256-alt.mul", "scale": 1, "scale_unit": "field-operation" },
+    { "id": "field-fp251-mul", "family": "finite-field", "operation": "field.fp251.mul", "scale": 1, "scale_unit": "field-operation" },
+    { "id": "field-goldilocks-mul", "family": "finite-field", "operation": "field.goldilocks.mul", "scale": 1, "scale_unit": "field-operation" },
+
+    { "id": "field-scalar-64", "family": "finite-field", "operation": "field.gf2-128.scalar-total", "scale": 64, "scale_unit": "field-elements", "curve": "field-batch-scaling", "strategy": "scalar" },
+    { "id": "field-detected-64", "family": "finite-field", "operation": "field.gf2-128.batch-detected-total", "scale": 64, "scale_unit": "field-elements", "baseline_cell": "field-scalar-64", "curve": "field-batch-scaling", "strategy": "detected" },
+    { "id": "field-scalar-4096", "family": "finite-field", "operation": "field.gf2-128.scalar-total", "scale": 4096, "scale_unit": "field-elements", "curve": "field-batch-scaling", "strategy": "scalar" },
+    { "id": "field-detected-4096", "family": "finite-field", "operation": "field.gf2-128.batch-detected-total", "scale": 4096, "scale_unit": "field-elements", "baseline_cell": "field-scalar-4096", "curve": "field-batch-scaling", "strategy": "detected" },
+    { "id": "field-scalar-65536", "family": "finite-field", "operation": "field.gf2-128.scalar-total", "scale": 65536, "scale_unit": "field-elements", "curve": "field-batch-scaling", "strategy": "scalar" },
+    { "id": "field-detected-65536", "family": "finite-field", "operation": "field.gf2-128.batch-detected-total", "scale": 65536, "scale_unit": "field-elements", "baseline_cell": "field-scalar-65536", "curve": "field-batch-scaling", "strategy": "detected" },
+
+    { "id": "sig-add-build-64", "family": "homomorphic-signature", "operation": "signature.additive.build-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-add-scaling", "strategy": "rebuild" },
+    { "id": "sig-add-compose-64", "family": "homomorphic-signature", "operation": "signature.additive.merge-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-add-build-64", "curve": "sig-add-scaling", "strategy": "compose" },
+    { "id": "sig-add-build-4096", "family": "homomorphic-signature", "operation": "signature.additive.build-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-add-scaling", "strategy": "rebuild" },
+    { "id": "sig-add-compose-4096", "family": "homomorphic-signature", "operation": "signature.additive.merge-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-add-build-4096", "curve": "sig-add-scaling", "strategy": "compose" },
+
+    { "id": "sig-seq-build-64", "family": "homomorphic-signature", "operation": "signature.sequence.build-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-seq-scaling", "strategy": "rebuild" },
+    { "id": "sig-seq-compose-64", "family": "homomorphic-signature", "operation": "signature.sequence.concatenate-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-seq-build-64", "curve": "sig-seq-scaling", "strategy": "compose" },
+    { "id": "sig-seq-build-4096", "family": "homomorphic-signature", "operation": "signature.sequence.build-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-seq-scaling", "strategy": "rebuild" },
+    { "id": "sig-seq-compose-4096", "family": "homomorphic-signature", "operation": "signature.sequence.concatenate-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-seq-build-4096", "curve": "sig-seq-scaling", "strategy": "compose" },
+
+    { "id": "sig-bidir-build-64", "family": "homomorphic-signature", "operation": "signature.bidirectional.build-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-bidir-scaling", "strategy": "rebuild" },
+    { "id": "sig-bidir-compose-64", "family": "homomorphic-signature", "operation": "signature.bidirectional.concatenate-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-bidir-build-64", "curve": "sig-bidir-scaling", "strategy": "compose" },
+    { "id": "sig-bidir-build-4096", "family": "homomorphic-signature", "operation": "signature.bidirectional.build-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-bidir-scaling", "strategy": "rebuild" },
+    { "id": "sig-bidir-compose-4096", "family": "homomorphic-signature", "operation": "signature.bidirectional.concatenate-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-bidir-build-4096", "curve": "sig-bidir-scaling", "strategy": "compose" },
+
+    { "id": "sig-set-build-64", "family": "homomorphic-signature", "operation": "signature.multiset.build-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-set-scaling", "strategy": "rebuild" },
+    { "id": "sig-set-compose-64", "family": "homomorphic-signature", "operation": "signature.multiset.merge-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-set-build-64", "curve": "sig-set-scaling", "strategy": "compose" },
+    { "id": "sig-set-build-4096", "family": "homomorphic-signature", "operation": "signature.multiset.build-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-set-scaling", "strategy": "rebuild" },
+    { "id": "sig-set-compose-4096", "family": "homomorphic-signature", "operation": "signature.multiset.merge-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-set-build-4096", "curve": "sig-set-scaling", "strategy": "compose" },
+
+    { "id": "sig-multi-set-build-64", "family": "homomorphic-signature", "operation": "signature.multi-multiset-k2.build-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-multi-set-scaling", "strategy": "rebuild" },
+    { "id": "sig-multi-set-compose-64", "family": "homomorphic-signature", "operation": "signature.multi-multiset-k2.merge-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-multi-set-build-64", "curve": "sig-multi-set-scaling", "strategy": "compose" },
+    { "id": "sig-multi-set-build-4096", "family": "homomorphic-signature", "operation": "signature.multi-multiset-k2.build-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-multi-set-scaling", "strategy": "rebuild" },
+    { "id": "sig-multi-set-compose-4096", "family": "homomorphic-signature", "operation": "signature.multi-multiset-k2.merge-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-multi-set-build-4096", "curve": "sig-multi-set-scaling", "strategy": "compose" },
+
+    { "id": "sig-multi-seq-build-64", "family": "homomorphic-signature", "operation": "signature.multi-sequence-k2.build-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-multi-seq-scaling", "strategy": "rebuild" },
+    { "id": "sig-multi-seq-compose-64", "family": "homomorphic-signature", "operation": "signature.multi-sequence-k2.concatenate-total", "scale": 64, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-multi-seq-build-64", "curve": "sig-multi-seq-scaling", "strategy": "compose" },
+    { "id": "sig-multi-seq-build-4096", "family": "homomorphic-signature", "operation": "signature.multi-sequence-k2.build-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "curve": "sig-multi-seq-scaling", "strategy": "rebuild" },
+    { "id": "sig-multi-seq-compose-4096", "family": "homomorphic-signature", "operation": "signature.multi-sequence-k2.concatenate-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "baseline_cell": "sig-multi-seq-build-4096", "curve": "sig-multi-seq-scaling", "strategy": "compose" },
+    { "id": "sig-add-build-payload-1024", "family": "homomorphic-signature", "operation": "signature.additive.build-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 1024, "curve": "sig-payload-scaling", "strategy": "additive" },
+    { "id": "sig-multi-seq-build-payload-1024", "family": "homomorphic-signature", "operation": "signature.multi-sequence-k2.build-total", "scale": 4096, "scale_unit": "items", "payload_bytes": 1024, "baseline_cell": "sig-add-build-payload-1024", "curve": "sig-payload-scaling", "strategy": "multi-sequence-k2" },
+
+    { "id": "delta-additive-32", "family": "delta", "operation": "delta.additive.end-to-end", "scale": 32, "scale_unit": "items", "payload_bytes": 16, "curve": "delta-scaling", "strategy": "apply" },
+    { "id": "delta-additive-4096", "family": "delta", "operation": "delta.additive.end-to-end", "scale": 4096, "scale_unit": "items", "payload_bytes": 16, "curve": "delta-scaling", "strategy": "apply" },
+
+    { "id": "tree-rebuild-16-leaves", "family": "summary-tree", "operation": "summary-tree.rebuild-batch-total", "scale": 16, "scale_unit": "disjoint-edits", "payload_bytes": 4096, "dataset_size": 262144, "curve": "tree-density", "strategy": "rebuild" },
+    { "id": "tree-adaptive-16-leaves", "family": "summary-tree", "operation": "summary-tree.adaptive-batch-total", "scale": 16, "scale_unit": "disjoint-edits", "payload_bytes": 4096, "dataset_size": 262144, "baseline_cell": "tree-rebuild-16-leaves", "curve": "tree-density", "strategy": "adaptive" },
+    { "id": "tree-rebuild-48-leaves", "family": "summary-tree", "operation": "summary-tree.rebuild-batch-total", "scale": 48, "scale_unit": "disjoint-edits", "payload_bytes": 4096, "dataset_size": 262144, "curve": "tree-density", "strategy": "rebuild" },
+    { "id": "tree-adaptive-48-leaves", "family": "summary-tree", "operation": "summary-tree.adaptive-batch-total", "scale": 48, "scale_unit": "disjoint-edits", "payload_bytes": 4096, "dataset_size": 262144, "baseline_cell": "tree-rebuild-48-leaves", "curve": "tree-density", "strategy": "adaptive" },
+
+    { "id": "db-rebuild-scattered-4096", "family": "database", "operation": "database.selected-rebuild-total", "scale": 4096, "scale_unit": "row-mutations", "dataset_size": 65536, "curve": "db-scattered-density", "strategy": "rebuild-scattered" },
+    { "id": "db-adaptive-scattered-4096", "family": "database", "operation": "database.adaptive-transaction-total", "scale": 4096, "scale_unit": "row-mutations", "dataset_size": 65536, "baseline_cell": "db-rebuild-scattered-4096", "curve": "db-scattered-density", "strategy": "adaptive-scattered" },
+    { "id": "db-rebuild-scattered-49152", "family": "database", "operation": "database.selected-rebuild-total", "scale": 49152, "scale_unit": "row-mutations", "dataset_size": 65536, "curve": "db-scattered-density", "strategy": "rebuild-scattered" },
+    { "id": "db-adaptive-scattered-49152", "family": "database", "operation": "database.adaptive-transaction-total", "scale": 49152, "scale_unit": "row-mutations", "dataset_size": 65536, "baseline_cell": "db-rebuild-scattered-49152", "curve": "db-scattered-density", "strategy": "adaptive-scattered" },
+    { "id": "db-rebuild-clustered-4096", "family": "database", "operation": "database.selected-rebuild-total", "scale": 4096, "scale_unit": "row-mutations", "dataset_size": 65536, "curve": "db-clustered-density", "strategy": "rebuild-clustered" },
+    { "id": "db-adaptive-clustered-4096", "family": "database", "operation": "database.adaptive-transaction-total", "scale": 4096, "scale_unit": "row-mutations", "dataset_size": 65536, "baseline_cell": "db-rebuild-clustered-4096", "curve": "db-clustered-density", "strategy": "adaptive-clustered" },
+    { "id": "db-rebuild-clustered-49152", "family": "database", "operation": "database.selected-rebuild-total", "scale": 49152, "scale_unit": "row-mutations", "dataset_size": 65536, "curve": "db-clustered-density", "strategy": "rebuild-clustered" },
+    { "id": "db-adaptive-clustered-49152", "family": "database", "operation": "database.adaptive-transaction-total", "scale": 49152, "scale_unit": "row-mutations", "dataset_size": 65536, "baseline_cell": "db-rebuild-clustered-49152", "curve": "db-clustered-density", "strategy": "adaptive-clustered" },
+
+    { "id": "reconcile-4", "family": "reconciliation", "operation": "reconciliation.decode", "scale": 4, "scale_unit": "symmetric-difference", "curve": "reconciliation-scaling", "strategy": "decode" },
+    { "id": "reconcile-16", "family": "reconciliation", "operation": "reconciliation.decode", "scale": 16, "scale_unit": "symmetric-difference", "curve": "reconciliation-scaling", "strategy": "decode" },
+    { "id": "reconcile-32", "family": "reconciliation", "operation": "reconciliation.decode", "scale": 32, "scale_unit": "symmetric-difference", "curve": "reconciliation-scaling", "strategy": "decode" },
+
+    { "id": "graph-fast-256", "family": "graph", "operation": "graph.fast-prepared", "scale": 256, "scale_unit": "vertices", "curve": "graph-fast-scaling", "strategy": "prepared" },
+    { "id": "graph-fast-16384", "family": "graph", "operation": "graph.fast-prepared", "scale": 16384, "scale_unit": "vertices", "curve": "graph-fast-scaling", "strategy": "prepared" },
+    { "id": "graph-fast-131072", "family": "graph", "operation": "graph.fast-prepared", "scale": 131072, "scale_unit": "vertices", "curve": "graph-fast-scaling", "strategy": "prepared" },
+    { "id": "graph-exact-6", "family": "graph", "operation": "graph.exact", "scale": 6, "scale_unit": "vertices", "curve": "graph-exact-scaling", "strategy": "exact" },
+    { "id": "graph-dag-reuse-6", "family": "graph", "operation": "graph.dag-reuse", "scale": 6, "scale_unit": "vertices", "baseline_cell": "graph-exact-6", "curve": "graph-exact-scaling", "strategy": "dag-reuse" },
+    { "id": "graph-exact-10", "family": "graph", "operation": "graph.exact", "scale": 10, "scale_unit": "vertices", "curve": "graph-exact-scaling", "strategy": "exact" },
+    { "id": "graph-dag-reuse-10", "family": "graph", "operation": "graph.dag-reuse", "scale": 10, "scale_unit": "vertices", "baseline_cell": "graph-exact-10", "curve": "graph-exact-scaling", "strategy": "dag-reuse" },
+    { "id": "graph-exact-14", "family": "graph", "operation": "graph.exact", "scale": 14, "scale_unit": "vertices", "curve": "graph-exact-scaling", "strategy": "exact" },
+    { "id": "graph-dag-reuse-14", "family": "graph", "operation": "graph.dag-reuse", "scale": 14, "scale_unit": "vertices", "baseline_cell": "graph-exact-14", "curve": "graph-exact-scaling", "strategy": "dag-reuse" },
+
+    { "id": "tool-manifest-parse", "family": "tooling", "operation": "tool.binary-manifest.parse", "scale": 1, "scale_unit": "manifest" },
+    { "id": "tool-manifest-generate", "family": "tooling", "operation": "tool.binary-manifest.generate", "scale": 1, "scale_unit": "generated-package" }
+  ]
+}

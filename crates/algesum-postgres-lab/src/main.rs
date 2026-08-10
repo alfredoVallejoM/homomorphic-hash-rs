@@ -24,7 +24,19 @@ struct Config {
     incremental_ceiling: usize,
     partition_density_numerator: usize,
     partition_density_denominator: usize,
+    max_mutations: usize,
+    max_transaction_bytes: usize,
+    distribution: IdDistribution,
+    hotspot_rows: Option<usize>,
     output: PathBuf,
+}
+
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(rename_all = "kebab-case")]
+enum IdDistribution {
+    Clustered,
+    Strided,
+    Hotspot,
 }
 
 #[derive(Debug, Serialize)]
@@ -36,6 +48,13 @@ struct Report {
     incremental_ceiling: usize,
     partition_density_numerator: usize,
     partition_density_denominator: usize,
+    max_mutations: usize,
+    max_transaction_bytes: usize,
+    distribution: IdDistribution,
+    hotspot_rows: Option<usize>,
+    initialize_microseconds: u128,
+    initial_load_microseconds: u128,
+    initial_build_microseconds: u128,
     cells: Vec<Cell>,
 }
 
@@ -52,6 +71,7 @@ struct Sample {
     algesum_apply_microseconds: u128,
     algesum_apply_path: String,
     algesum_rebuild_microseconds: u128,
+    verification_microseconds: u128,
     exact_match: bool,
     summary_match: bool,
 }
@@ -68,8 +88,13 @@ fn main() -> ExitCode {
 
 fn run() -> Result<(), String> {
     let config = parse_config()?;
-    if config.rows == 0 || config.partitions == 0 || config.repetitions == 0 {
-        return Err("rows, partitions and repetitions must be nonzero".into());
+    if config.rows == 0
+        || config.partitions == 0
+        || config.repetitions == 0
+        || config.max_mutations == 0
+        || config.max_transaction_bytes == 0
+    {
+        return Err("rows, partitions, repetitions and transaction limits must be nonzero".into());
     }
     if config.batches.is_empty()
         || config
@@ -82,20 +107,37 @@ fn run() -> Result<(), String> {
 
     let mut client = Client::connect(&config.database_url, NoTls)
         .map_err(|error| format!("cannot connect to PostgreSQL: {error}"))?;
+    let initialize_started = Instant::now();
     initialize(&mut client, config.rows)?;
+    let initialize_microseconds = initialize_started.elapsed().as_micros();
 
     let schema = account_schema()?;
     let namespace = ApplicationNamespace::derive(b"algesum-postgresql-account-lab-v1");
     let source = DatabaseSourceId::new([0x50; 32]);
+    let initial_load_started = Instant::now();
     let mut exact_rows = load_rows(&mut client)?;
+    let initial_load_microseconds = initial_load_started.elapsed().as_micros();
+    let initial_build_started = Instant::now();
     let mut table = build_table(namespace, &schema, config.partitions, exact_rows.clone())?;
+    let initial_build_microseconds = initial_build_started.elapsed().as_micros();
     let mut adapter = DatabaseChangeStreamAdapter::new(namespace, schema.clone(), source);
+    let transaction_limits = DatabaseTransactionLimits {
+        max_mutations: config.max_mutations,
+        max_transaction_bytes: config.max_transaction_bytes,
+        ..DatabaseTransactionLimits::default()
+    };
     let mut cells = Vec::with_capacity(config.batches.len());
 
     for &batch_size in &config.batches {
         let mut samples = Vec::with_capacity(config.repetitions);
         for repetition in 0..config.repetitions {
-            let ids = deterministic_ids(config.rows, batch_size, repetition);
+            let ids = deterministic_ids(
+                config.rows,
+                batch_size,
+                repetition,
+                config.distribution,
+                config.hotspot_rows,
+            )?;
             let postgres_started = Instant::now();
             let (position, mutations) = update_postgres(&mut client, &ids)?;
             let postgres_microseconds = postgres_started.elapsed().as_micros();
@@ -110,19 +152,18 @@ fn run() -> Result<(), String> {
             let batch = CommittedDatabaseTransaction::new(source, position, mutations)
                 .map_err(|error| error.to_string())?;
             let apply_started = Instant::now();
-            let authoritative_rows = exact_rows.clone();
             let apply_report = adapter
                 .apply_committed_with_policy(
                     &mut table,
                     &batch,
-                    DatabaseTransactionLimits::default(),
+                    transaction_limits,
                     DatabaseApplyPolicy::adaptive(
                         config.incremental_ceiling,
                         config.partition_density_numerator,
                         config.partition_density_denominator,
                     )
                     .map_err(|error| error.to_string())?,
-                    || authoritative_rows,
+                    || exact_rows.clone(),
                 )
                 .map_err(|error| error.to_string())?;
             let algesum_apply_microseconds = apply_started.elapsed().as_micros();
@@ -130,10 +171,12 @@ fn run() -> Result<(), String> {
             let rebuild_started = Instant::now();
             let rebuilt = build_table(namespace, &schema, config.partitions, exact_rows.clone())?;
             let algesum_rebuild_microseconds = rebuild_started.elapsed().as_micros();
+            let verification_started = Instant::now();
             let persisted = load_rows(&mut client)?;
             let exact_match = persisted == exact_rows;
             let summary_match = table.summary().map_err(|error| error.to_string())?
                 == rebuilt.summary().map_err(|error| error.to_string())?;
+            let verification_microseconds = verification_started.elapsed().as_micros();
             if !exact_match || !summary_match {
                 return Err(format!(
                     "verification failed for batch {batch_size}, repetition {repetition}"
@@ -145,6 +188,7 @@ fn run() -> Result<(), String> {
                 algesum_apply_microseconds,
                 algesum_apply_path: format!("{:?}", apply_report.path()),
                 algesum_rebuild_microseconds,
+                verification_microseconds,
                 exact_match,
                 summary_match,
             });
@@ -156,13 +200,20 @@ fn run() -> Result<(), String> {
     }
 
     let report = Report {
-        schema: "algesum-postgresql-bulk-v1",
+        schema: "algesum-postgresql-scaling-v2",
         rows: config.rows,
         partitions: config.partitions,
         repetitions: config.repetitions,
         incremental_ceiling: config.incremental_ceiling,
         partition_density_numerator: config.partition_density_numerator,
         partition_density_denominator: config.partition_density_denominator,
+        max_mutations: config.max_mutations,
+        max_transaction_bytes: config.max_transaction_bytes,
+        distribution: config.distribution,
+        hotspot_rows: config.hotspot_rows,
+        initialize_microseconds,
+        initial_load_microseconds,
+        initial_build_microseconds,
         cells,
     };
     let output = File::create(&config.output)
@@ -185,6 +236,10 @@ fn parse_config() -> Result<Config, String> {
     let mut incremental_ceiling = 65_536;
     let mut partition_density_numerator = 2;
     let mut partition_density_denominator = 3;
+    let mut max_mutations = DatabaseTransactionLimits::default().max_mutations;
+    let mut max_transaction_bytes = DatabaseTransactionLimits::default().max_transaction_bytes;
+    let mut distribution = IdDistribution::Clustered;
+    let mut hotspot_rows = None;
     let mut output = PathBuf::from("/tmp/algesum-postgresql-bulk-v1.json");
     let mut args = env::args().skip(1);
     while let Some(argument) = args.next() {
@@ -218,6 +273,24 @@ fn parse_config() -> Result<Config, String> {
                     .parse::<usize>()
                     .map_err(|error| format!("invalid partition-density denominator: {error}"))?;
             }
+            "--max-mutations" => {
+                max_mutations = parse_usize(args.next(), "--max-mutations")?;
+            }
+            "--max-transaction-bytes" => {
+                max_transaction_bytes = parse_usize(args.next(), "--max-transaction-bytes")?;
+            }
+            "--distribution" => {
+                distribution = match args.next().as_deref() {
+                    Some("clustered") => IdDistribution::Clustered,
+                    Some("strided") => IdDistribution::Strided,
+                    Some("hotspot") => IdDistribution::Hotspot,
+                    Some(value) => return Err(format!("unknown distribution {value:?}")),
+                    None => {
+                        return Err("--distribution requires clustered, strided or hotspot".into());
+                    }
+                }
+            }
+            "--hotspot-rows" => hotspot_rows = Some(parse_usize(args.next(), "--hotspot-rows")?),
             "--output" => output = PathBuf::from(args.next().ok_or("--output requires a path")?),
             _ => return Err(format!("unknown argument {argument:?}\n{}", usage())),
         }
@@ -231,6 +304,10 @@ fn parse_config() -> Result<Config, String> {
         incremental_ceiling,
         partition_density_numerator,
         partition_density_denominator,
+        max_mutations,
+        max_transaction_bytes,
+        distribution,
+        hotspot_rows,
         output,
     })
 }
@@ -243,7 +320,7 @@ fn parse_usize(value: Option<String>, flag: &str) -> Result<usize, String> {
 }
 
 fn usage() -> &'static str {
-    "usage: algesum-postgres-lab [--database-url URL] [--rows N] [--partitions N] [--repetitions N] [--batches N,N,...] [--incremental-ceiling N] [--partition-density N/D] [--output PATH]"
+    "usage: algesum-postgres-lab [--database-url URL] [--rows N] [--partitions N] [--repetitions N] [--batches N,N,...] [--incremental-ceiling N] [--partition-density N/D] [--max-mutations N] [--max-transaction-bytes N] [--distribution clustered|strided|hotspot] [--hotspot-rows N] [--output PATH]"
 }
 
 fn initialize(client: &mut Client, rows: usize) -> Result<(), String> {
@@ -372,11 +449,61 @@ fn update_postgres(client: &mut Client, ids: &[i64]) -> Result<(u64, Vec<RowMuta
         .map_err(|_| "negative PostgreSQL revision".into())
 }
 
-fn deterministic_ids(rows: usize, batch: usize, repetition: usize) -> Vec<i64> {
-    let start = repetition.wrapping_mul(1_000_003) % rows;
+fn deterministic_ids(
+    rows: usize,
+    batch: usize,
+    repetition: usize,
+    distribution: IdDistribution,
+    hotspot_rows: Option<usize>,
+) -> Result<Vec<i64>, String> {
+    let universe = match distribution {
+        IdDistribution::Hotspot => hotspot_rows.unwrap_or_else(|| (rows / 16).max(batch)),
+        IdDistribution::Clustered | IdDistribution::Strided => rows,
+    };
+    if universe == 0 || universe > rows || batch > universe {
+        return Err(format!(
+            "distribution universe must satisfy batch <= universe <= rows; batch={batch}, universe={universe}, rows={rows}"
+        ));
+    }
+    let window_start = match distribution {
+        IdDistribution::Hotspot => repetition.wrapping_mul(1_000_003) % (rows - universe + 1),
+        IdDistribution::Clustered | IdDistribution::Strided => 0,
+    };
+    let start = repetition.wrapping_mul(1_000_003) % universe;
+    let stride = match distribution {
+        IdDistribution::Clustered => 1,
+        IdDistribution::Strided | IdDistribution::Hotspot => coprime_stride(universe),
+    };
     (0..batch)
-        .map(|offset| ((start + offset) % rows) as i64)
+        .map(|offset| {
+            let local = (start as u128 + offset as u128 * stride as u128) % universe as u128;
+            i64::try_from(window_start as u128 + local)
+                .map_err(|_| "selected PostgreSQL id does not fit bigint".to_string())
+        })
         .collect()
+}
+
+fn coprime_stride(modulus: usize) -> usize {
+    if modulus <= 2 {
+        return 1;
+    }
+    let mut candidate = (modulus / 2) | 1;
+    while gcd(candidate, modulus) != 1 {
+        candidate += 2;
+        if candidate >= modulus {
+            candidate = 1;
+        }
+    }
+    candidate
+}
+
+fn gcd(mut left: usize, mut right: usize) -> usize {
+    while right != 0 {
+        let remainder = left % right;
+        left = right;
+        right = remainder;
+    }
+    left
 }
 
 fn row_id(row: &DatabaseRow) -> Result<usize, String> {
@@ -401,4 +528,34 @@ fn build_table(
         rows,
     )
     .map_err(|error| error.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeSet;
+
+    use super::{IdDistribution, deterministic_ids};
+
+    #[test]
+    fn distributions_are_deterministic_unique_and_bounded() {
+        for distribution in [
+            IdDistribution::Clustered,
+            IdDistribution::Strided,
+            IdDistribution::Hotspot,
+        ] {
+            let hotspot = matches!(distribution, IdDistribution::Hotspot).then_some(128);
+            let first = deterministic_ids(1_024, 64, 7, distribution, hotspot).unwrap();
+            let second = deterministic_ids(1_024, 64, 7, distribution, hotspot).unwrap();
+            assert_eq!(first, second);
+            assert_eq!(first.iter().copied().collect::<BTreeSet<_>>().len(), 64);
+            assert!(first.iter().all(|id| (0..1_024).contains(id)));
+        }
+    }
+
+    #[test]
+    fn hotspot_rejects_batches_larger_than_the_window() {
+        let error =
+            deterministic_ids(1_024, 129, 0, IdDistribution::Hotspot, Some(128)).unwrap_err();
+        assert!(error.contains("batch <= universe <= rows"));
+    }
 }

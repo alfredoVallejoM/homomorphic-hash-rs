@@ -7,6 +7,19 @@ capacity/regression gate.
 The measured homomorphic signatures are non-cryptographic algebraic
 fingerprints. Performance results do not add security properties.
 
+The integral C1 campaign covers every maintained family and gives extra weight
+to composition laws and graph scaling:
+
+```text
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-campaign \
+  --manifest validation/benchmarks/manifests/comprehensive-smoke-v1.json \
+  --run-dir validation/benchmarks/runs/pre-rc-comprehensive-smoke-v1
+```
+
+Its design and C2/C3 expansion are specified in
+`docs/microfield/pre-rc-comprehensive-campaign-plan.md`.
+
 ```text
 cargo run --release -p microfield-validation-lab --locked -- \
   publication-campaign \

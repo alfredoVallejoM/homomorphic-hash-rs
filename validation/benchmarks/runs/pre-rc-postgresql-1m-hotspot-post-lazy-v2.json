@@ -1,0 +1,63 @@
+{
+  "schema": "algesum-postgresql-scaling-v2",
+  "rows": 1000000,
+  "partitions": 1024,
+  "repetitions": 1,
+  "incremental_ceiling": 1000000,
+  "partition_density_numerator": 2,
+  "partition_density_denominator": 3,
+  "max_mutations": 100000,
+  "max_transaction_bytes": 67108864,
+  "distribution": "hotspot",
+  "hotspot_rows": 62500,
+  "initialize_microseconds": 2329752,
+  "initial_load_microseconds": 582217,
+  "initial_build_microseconds": 2906764,
+  "cells": [
+    {
+      "batch_size": 256,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 8409,
+          "algesum_apply_microseconds": 11907,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 3095528,
+          "verification_microseconds": 547908,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 4096,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 51295,
+          "algesum_apply_microseconds": 56115,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 2787529,
+          "verification_microseconds": 553797,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 62500,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 510895,
+          "algesum_apply_microseconds": 402006,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 2843823,
+          "verification_microseconds": 616133,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    }
+  ]
+}
