@@ -1,0 +1,726 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "pre-rc-bulk-density-frontier-pilot-v1",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "db-b-s65536-m49152-sc",
+      "process_index": 0,
+      "seed": 5105630582073416535,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 0,
+      "seed": 4933277203479409133,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "st-a-s64m-e12288-cl",
+      "process_index": 0,
+      "seed": 13296326195286312517,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "st-a-s64m-e16384",
+      "process_index": 0,
+      "seed": 6341631945506421948,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "st-b-s64m-e16384",
+      "process_index": 0,
+      "seed": 6341631945506421948,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "db-b-s65536-m49152-cl",
+      "process_index": 0,
+      "seed": 5044227280677572367,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "db-a-s65536-m49152-cl",
+      "process_index": 0,
+      "seed": 5044227280677572367,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "st-r-s64m-e12288-cl",
+      "process_index": 0,
+      "seed": 13296326195286312517,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 0,
+      "seed": 4933277203479409133,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "st-b-s64m-e12288-sc",
+      "process_index": 0,
+      "seed": 16086047700400724790,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 0,
+      "cell": "db-r-s65536-m49152-sc",
+      "process_index": 0,
+      "seed": 5105630582073416535,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 0,
+      "cell": "db-r-s65536-m49152-cl",
+      "process_index": 0,
+      "seed": 5044227280677572367,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 0,
+      "cell": "st-r-s64m-e12288-sc",
+      "process_index": 0,
+      "seed": 16086047700400724790,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 0,
+      "cell": "st-a-s64m-e12288-sc",
+      "process_index": 0,
+      "seed": 16086047700400724790,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 0,
+      "cell": "st-r-s64m-e16384",
+      "process_index": 0,
+      "seed": 6341631945506421948,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 0,
+      "cell": "st-b-s64m-e12288-cl",
+      "process_index": 0,
+      "seed": 13296326195286312517,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 0,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 0,
+      "seed": 4933277203479409133,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 0,
+      "cell": "db-a-s65536-m49152-sc",
+      "process_index": 0,
+      "seed": 5105630582073416535,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "st-b-s64m-e16384",
+      "process_index": 1,
+      "seed": 8686801346340786744,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 1,
+      "seed": 15386914797502396228,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 1,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 1,
+      "seed": 15386914797502396228,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 1,
+      "cell": "st-a-s64m-e12288-sc",
+      "process_index": 1,
+      "seed": 12084014165350221764,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 1,
+      "cell": "db-a-s65536-m49152-cl",
+      "process_index": 1,
+      "seed": 15027045945150704648,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 1,
+      "cell": "st-a-s64m-e16384",
+      "process_index": 1,
+      "seed": 8686801346340786744,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 1,
+      "cell": "st-r-s64m-e16384",
+      "process_index": 1,
+      "seed": 8686801346340786744,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 1,
+      "cell": "st-r-s64m-e12288-cl",
+      "process_index": 1,
+      "seed": 13994359192961870287,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 1,
+      "cell": "st-r-s64m-e12288-sc",
+      "process_index": 1,
+      "seed": 12084014165350221764,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 1,
+      "cell": "st-b-s64m-e12288-sc",
+      "process_index": 1,
+      "seed": 12084014165350221764,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 1,
+      "cell": "db-a-s65536-m49152-sc",
+      "process_index": 1,
+      "seed": 8059790926956465833,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 1,
+      "cell": "db-b-s65536-m49152-sc",
+      "process_index": 1,
+      "seed": 8059790926956465833,
+      "status": "success"
+    },
+    {
+      "sequence": 30,
+      "round": 1,
+      "cell": "db-r-s65536-m49152-sc",
+      "process_index": 1,
+      "seed": 8059790926956465833,
+      "status": "success"
+    },
+    {
+      "sequence": 31,
+      "round": 1,
+      "cell": "st-a-s64m-e12288-cl",
+      "process_index": 1,
+      "seed": 13994359192961870287,
+      "status": "success"
+    },
+    {
+      "sequence": 32,
+      "round": 1,
+      "cell": "db-b-s65536-m49152-cl",
+      "process_index": 1,
+      "seed": 15027045945150704648,
+      "status": "success"
+    },
+    {
+      "sequence": 33,
+      "round": 1,
+      "cell": "st-b-s64m-e12288-cl",
+      "process_index": 1,
+      "seed": 13994359192961870287,
+      "status": "success"
+    },
+    {
+      "sequence": 34,
+      "round": 1,
+      "cell": "db-r-s65536-m49152-cl",
+      "process_index": 1,
+      "seed": 15027045945150704648,
+      "status": "success"
+    },
+    {
+      "sequence": 35,
+      "round": 1,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 1,
+      "seed": 15386914797502396228,
+      "status": "success"
+    },
+    {
+      "sequence": 36,
+      "round": 2,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 2,
+      "seed": 2085940091013515362,
+      "status": "success"
+    },
+    {
+      "sequence": 37,
+      "round": 2,
+      "cell": "db-r-s65536-m49152-cl",
+      "process_index": 2,
+      "seed": 16929760885703283424,
+      "status": "success"
+    },
+    {
+      "sequence": 38,
+      "round": 2,
+      "cell": "st-a-s64m-e12288-sc",
+      "process_index": 2,
+      "seed": 1351233001344401979,
+      "status": "success"
+    },
+    {
+      "sequence": 39,
+      "round": 2,
+      "cell": "st-b-s64m-e12288-sc",
+      "process_index": 2,
+      "seed": 1351233001344401979,
+      "status": "success"
+    },
+    {
+      "sequence": 40,
+      "round": 2,
+      "cell": "db-b-s65536-m49152-cl",
+      "process_index": 2,
+      "seed": 16929760885703283424,
+      "status": "success"
+    },
+    {
+      "sequence": 41,
+      "round": 2,
+      "cell": "st-r-s64m-e12288-cl",
+      "process_index": 2,
+      "seed": 14011040232386374722,
+      "status": "success"
+    },
+    {
+      "sequence": 42,
+      "round": 2,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 2,
+      "seed": 2085940091013515362,
+      "status": "success"
+    },
+    {
+      "sequence": 43,
+      "round": 2,
+      "cell": "st-b-s64m-e16384",
+      "process_index": 2,
+      "seed": 607646247170071229,
+      "status": "success"
+    },
+    {
+      "sequence": 44,
+      "round": 2,
+      "cell": "db-a-s65536-m49152-sc",
+      "process_index": 2,
+      "seed": 15461696625672671048,
+      "status": "success"
+    },
+    {
+      "sequence": 45,
+      "round": 2,
+      "cell": "db-a-s65536-m49152-cl",
+      "process_index": 2,
+      "seed": 16929760885703283424,
+      "status": "success"
+    },
+    {
+      "sequence": 46,
+      "round": 2,
+      "cell": "db-r-s65536-m49152-sc",
+      "process_index": 2,
+      "seed": 15461696625672671048,
+      "status": "success"
+    },
+    {
+      "sequence": 47,
+      "round": 2,
+      "cell": "st-a-s64m-e12288-cl",
+      "process_index": 2,
+      "seed": 14011040232386374722,
+      "status": "success"
+    },
+    {
+      "sequence": 48,
+      "round": 2,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 2,
+      "seed": 2085940091013515362,
+      "status": "success"
+    },
+    {
+      "sequence": 49,
+      "round": 2,
+      "cell": "st-r-s64m-e12288-sc",
+      "process_index": 2,
+      "seed": 1351233001344401979,
+      "status": "success"
+    },
+    {
+      "sequence": 50,
+      "round": 2,
+      "cell": "st-b-s64m-e12288-cl",
+      "process_index": 2,
+      "seed": 14011040232386374722,
+      "status": "success"
+    },
+    {
+      "sequence": 51,
+      "round": 2,
+      "cell": "st-a-s64m-e16384",
+      "process_index": 2,
+      "seed": 607646247170071229,
+      "status": "success"
+    },
+    {
+      "sequence": 52,
+      "round": 2,
+      "cell": "db-b-s65536-m49152-sc",
+      "process_index": 2,
+      "seed": 15461696625672671048,
+      "status": "success"
+    },
+    {
+      "sequence": 53,
+      "round": 2,
+      "cell": "st-r-s64m-e16384",
+      "process_index": 2,
+      "seed": 607646247170071229,
+      "status": "success"
+    },
+    {
+      "sequence": 54,
+      "round": 3,
+      "cell": "st-r-s64m-e16384",
+      "process_index": 3,
+      "seed": 4700322332499057324,
+      "status": "success"
+    },
+    {
+      "sequence": 55,
+      "round": 3,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 3,
+      "seed": 11403458791123151483,
+      "status": "success"
+    },
+    {
+      "sequence": 56,
+      "round": 3,
+      "cell": "st-r-s64m-e12288-sc",
+      "process_index": 3,
+      "seed": 17057974155303567742,
+      "status": "success"
+    },
+    {
+      "sequence": 57,
+      "round": 3,
+      "cell": "db-r-s65536-m49152-sc",
+      "process_index": 3,
+      "seed": 8477952313569585082,
+      "status": "success"
+    },
+    {
+      "sequence": 58,
+      "round": 3,
+      "cell": "st-b-s64m-e16384",
+      "process_index": 3,
+      "seed": 4700322332499057324,
+      "status": "success"
+    },
+    {
+      "sequence": 59,
+      "round": 3,
+      "cell": "st-b-s64m-e12288-sc",
+      "process_index": 3,
+      "seed": 17057974155303567742,
+      "status": "success"
+    },
+    {
+      "sequence": 60,
+      "round": 3,
+      "cell": "st-a-s64m-e12288-sc",
+      "process_index": 3,
+      "seed": 17057974155303567742,
+      "status": "success"
+    },
+    {
+      "sequence": 61,
+      "round": 3,
+      "cell": "db-b-s65536-m49152-cl",
+      "process_index": 3,
+      "seed": 10224619659516522711,
+      "status": "success"
+    },
+    {
+      "sequence": 62,
+      "round": 3,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 3,
+      "seed": 11403458791123151483,
+      "status": "success"
+    },
+    {
+      "sequence": 63,
+      "round": 3,
+      "cell": "st-b-s64m-e12288-cl",
+      "process_index": 3,
+      "seed": 6338489136366788490,
+      "status": "success"
+    },
+    {
+      "sequence": 64,
+      "round": 3,
+      "cell": "db-a-s65536-m49152-cl",
+      "process_index": 3,
+      "seed": 10224619659516522711,
+      "status": "success"
+    },
+    {
+      "sequence": 65,
+      "round": 3,
+      "cell": "st-r-s64m-e12288-cl",
+      "process_index": 3,
+      "seed": 6338489136366788490,
+      "status": "success"
+    },
+    {
+      "sequence": 66,
+      "round": 3,
+      "cell": "db-r-s65536-m49152-cl",
+      "process_index": 3,
+      "seed": 10224619659516522711,
+      "status": "success"
+    },
+    {
+      "sequence": 67,
+      "round": 3,
+      "cell": "db-a-s65536-m49152-sc",
+      "process_index": 3,
+      "seed": 8477952313569585082,
+      "status": "success"
+    },
+    {
+      "sequence": 68,
+      "round": 3,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 3,
+      "seed": 11403458791123151483,
+      "status": "success"
+    },
+    {
+      "sequence": 69,
+      "round": 3,
+      "cell": "db-b-s65536-m49152-sc",
+      "process_index": 3,
+      "seed": 8477952313569585082,
+      "status": "success"
+    },
+    {
+      "sequence": 70,
+      "round": 3,
+      "cell": "st-a-s64m-e12288-cl",
+      "process_index": 3,
+      "seed": 6338489136366788490,
+      "status": "success"
+    },
+    {
+      "sequence": 71,
+      "round": 3,
+      "cell": "st-a-s64m-e16384",
+      "process_index": 3,
+      "seed": 4700322332499057324,
+      "status": "success"
+    },
+    {
+      "sequence": 72,
+      "round": 4,
+      "cell": "st-r-s64m-e16384",
+      "process_index": 4,
+      "seed": 11471378921776678359,
+      "status": "success"
+    },
+    {
+      "sequence": 73,
+      "round": 4,
+      "cell": "st-b-s64m-e16384",
+      "process_index": 4,
+      "seed": 11471378921776678359,
+      "status": "success"
+    },
+    {
+      "sequence": 74,
+      "round": 4,
+      "cell": "db-a-s65536-m49152-sc",
+      "process_index": 4,
+      "seed": 11227091101884441421,
+      "status": "success"
+    },
+    {
+      "sequence": 75,
+      "round": 4,
+      "cell": "st-r-s64m-e12288-sc",
+      "process_index": 4,
+      "seed": 16082266126842672302,
+      "status": "success"
+    },
+    {
+      "sequence": 76,
+      "round": 4,
+      "cell": "st-a-s64m-e12288-cl",
+      "process_index": 4,
+      "seed": 5895669959220648492,
+      "status": "success"
+    },
+    {
+      "sequence": 77,
+      "round": 4,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 4,
+      "seed": 7162335622084990664,
+      "status": "success"
+    },
+    {
+      "sequence": 78,
+      "round": 4,
+      "cell": "db-b-s65536-m49152-cl",
+      "process_index": 4,
+      "seed": 727924735103655950,
+      "status": "success"
+    },
+    {
+      "sequence": 79,
+      "round": 4,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 4,
+      "seed": 7162335622084990664,
+      "status": "success"
+    },
+    {
+      "sequence": 80,
+      "round": 4,
+      "cell": "db-r-s65536-m49152-cl",
+      "process_index": 4,
+      "seed": 727924735103655950,
+      "status": "success"
+    },
+    {
+      "sequence": 81,
+      "round": 4,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 4,
+      "seed": 7162335622084990664,
+      "status": "success"
+    },
+    {
+      "sequence": 82,
+      "round": 4,
+      "cell": "db-r-s65536-m49152-sc",
+      "process_index": 4,
+      "seed": 11227091101884441421,
+      "status": "success"
+    },
+    {
+      "sequence": 83,
+      "round": 4,
+      "cell": "st-r-s64m-e12288-cl",
+      "process_index": 4,
+      "seed": 5895669959220648492,
+      "status": "success"
+    },
+    {
+      "sequence": 84,
+      "round": 4,
+      "cell": "st-b-s64m-e12288-cl",
+      "process_index": 4,
+      "seed": 5895669959220648492,
+      "status": "success"
+    },
+    {
+      "sequence": 85,
+      "round": 4,
+      "cell": "st-b-s64m-e12288-sc",
+      "process_index": 4,
+      "seed": 16082266126842672302,
+      "status": "success"
+    },
+    {
+      "sequence": 86,
+      "round": 4,
+      "cell": "st-a-s64m-e12288-sc",
+      "process_index": 4,
+      "seed": 16082266126842672302,
+      "status": "success"
+    },
+    {
+      "sequence": 87,
+      "round": 4,
+      "cell": "st-a-s64m-e16384",
+      "process_index": 4,
+      "seed": 11471378921776678359,
+      "status": "success"
+    },
+    {
+      "sequence": 88,
+      "round": 4,
+      "cell": "db-b-s65536-m49152-sc",
+      "process_index": 4,
+      "seed": 11227091101884441421,
+      "status": "success"
+    },
+    {
+      "sequence": 89,
+      "round": 4,
+      "cell": "db-a-s65536-m49152-cl",
+      "process_index": 4,
+      "seed": 727924735103655950,
+      "status": "success"
+    }
+  ]
+}

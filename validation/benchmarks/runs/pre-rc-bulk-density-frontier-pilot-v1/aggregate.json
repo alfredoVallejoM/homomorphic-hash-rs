@@ -1,0 +1,896 @@
+{
+  "schema": "microfield-publication-aggregate-v1",
+  "campaign_id": "pre-rc-bulk-density-frontier-pilot-v1",
+  "profile": "pilot",
+  "environment_classification": "informative",
+  "cells": [
+    {
+      "id": "st-r-s64m-e12288-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 12288,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1008503745.0,
+      "p95_ns_per_unit": 1043874038.8,
+      "p99_ns_per_unit": 1068274574.4000001,
+      "mad_ns_per_unit": 697558.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1007953101.0,
+        "upper": 1021500853.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1009089261.0,
+        "upper": 1076708281.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1009607769.0,
+        "upper": 1076708281.0
+      },
+      "relative_median_ci_half_width": 0.006716758399345359,
+      "precision_met": true,
+      "allocation_count_median": 49172.0,
+      "allocated_bytes_median": 208093704.0,
+      "peak_allocated_bytes_median": 73269456.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s64m-e12288-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 12288,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 752205630.0,
+      "p95_ns_per_unit": 753693723.4,
+      "p99_ns_per_unit": 753802502.72,
+      "mad_ns_per_unit": 499016.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 751857215.0,
+        "upper": 752851342.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 752712473.0,
+        "upper": 753829953.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 753045690.0,
+        "upper": 753829953.0
+      },
+      "relative_median_ci_half_width": 0.0006608080027265948,
+      "precision_met": true,
+      "allocation_count_median": 41001.0,
+      "allocated_bytes_median": 159221424.0,
+      "peak_allocated_bytes_median": 56470800.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s64m-e12288-sc",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 12288,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 752622890.0,
+      "p95_ns_per_unit": 754280187.4,
+      "p99_ns_per_unit": 771448672.84,
+      "mad_ns_per_unit": 352789.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 751942534.0,
+        "upper": 753792206.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 752712833.0,
+        "upper": 784659569.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 752872459.32,
+        "upper": 784659569.0
+      },
+      "relative_median_ci_half_width": 0.0012288172633176224,
+      "precision_met": true,
+      "allocation_count_median": 41001.0,
+      "allocated_bytes_median": 159221424.0,
+      "peak_allocated_bytes_median": 56470800.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s64m-e12288-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 12288,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1007741194.0,
+      "p95_ns_per_unit": 1009647605.4,
+      "p99_ns_per_unit": 1010948189.32,
+      "mad_ns_per_unit": 572141.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1007291141.0,
+        "upper": 1008474706.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1008603239.4,
+        "upper": 1010960552.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1008966668.0,
+        "upper": 1010960552.0
+      },
+      "relative_median_ci_half_width": 0.0005872365876510949,
+      "precision_met": true,
+      "allocation_count_median": 49172.0,
+      "allocated_bytes_median": 208093704.0,
+      "peak_allocated_bytes_median": 73269456.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s64m-e12288-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 12288,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 746469459.0,
+      "p95_ns_per_unit": 747731177.2,
+      "p99_ns_per_unit": 748751504.52,
+      "mad_ns_per_unit": 453154.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 745578967.0,
+        "upper": 746857261.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 746686670.43,
+        "upper": 749150878.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 746871519.47,
+        "upper": 749150878.0
+      },
+      "relative_median_ci_half_width": 0.0008562265907787126,
+      "precision_met": true,
+      "allocation_count_median": 41001.0,
+      "allocated_bytes_median": 158435184.0,
+      "peak_allocated_bytes_median": 55717320.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s64m-e12288-cl",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 12288,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 746258753.0,
+      "p95_ns_per_unit": 751121110.0,
+      "p99_ns_per_unit": 917944918.5600007,
+      "mad_ns_per_unit": 434337.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 745957271.0,
+        "upper": 746499850.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 747591767.8,
+        "upper": 1044598721.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 749132425.4,
+        "upper": 1044598721.0
+      },
+      "relative_median_ci_half_width": 0.00036353275443591344,
+      "precision_met": true,
+      "allocation_count_median": 41001.0,
+      "allocated_bytes_median": 158435184.0,
+      "peak_allocated_bytes_median": 55717320.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-r-s64m-e16384",
+      "family": "summary-tree",
+      "operation": "summary-tree.rebuild-batch-total",
+      "scale": 16384,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 1008494595.0,
+      "p95_ns_per_unit": 1011024373.2,
+      "p99_ns_per_unit": 1013791879.92,
+      "mad_ns_per_unit": 367294.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1008006694.0,
+        "upper": 1008642905.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1008978473.8,
+        "upper": 1015091225.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1009180912.842,
+        "upper": 1015091225.0
+      },
+      "relative_median_ci_half_width": 0.00031542608317102584,
+      "precision_met": true,
+      "allocation_count_median": 49172.0,
+      "allocated_bytes_median": 208093704.0,
+      "peak_allocated_bytes_median": 73269456.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-b-s64m-e16384",
+      "family": "summary-tree",
+      "operation": "summary-tree.bulk-batch-total",
+      "scale": 16384,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 994835683.0,
+      "p95_ns_per_unit": 996789935.0,
+      "p99_ns_per_unit": 999525452.32,
+      "mad_ns_per_unit": 568992.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 994804315.0,
+        "upper": 995499304.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 995664854.4,
+        "upper": 1000371835.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 996009534.833,
+        "upper": 1000371835.0
+      },
+      "relative_median_ci_half_width": 0.0003492983876011613,
+      "precision_met": true,
+      "allocation_count_median": 54653.0,
+      "allocated_bytes_median": 210897120.0,
+      "peak_allocated_bytes_median": 74114688.0,
+      "status": "Precise"
+    },
+    {
+      "id": "st-a-s64m-e16384",
+      "family": "summary-tree",
+      "operation": "summary-tree.adaptive-batch-total",
+      "scale": 16384,
+      "scale_unit": "disjoint-edits",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 991735251.0,
+      "p95_ns_per_unit": 992689733.6,
+      "p99_ns_per_unit": 993847178.24,
+      "mad_ns_per_unit": 468697.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 990677277.0,
+        "upper": 992112916.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 992106018.0,
+        "upper": 994439475.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 992268323.8,
+        "upper": 994439475.0
+      },
+      "relative_median_ci_half_width": 0.0007238015380376955,
+      "precision_met": true,
+      "allocation_count_median": 51903.0,
+      "allocated_bytes_median": 275785672.0,
+      "peak_allocated_bytes_median": 140830352.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s65536-m49152-sc",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 49152,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 168131025.0,
+      "p95_ns_per_unit": 174565296.6,
+      "p99_ns_per_unit": 184109567.40000004,
+      "mad_ns_per_unit": 1489574.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 166751267.0,
+        "upper": 173707095.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 168558130.0,
+        "upper": 190887741.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 168672709.0,
+        "upper": 190887741.0
+      },
+      "relative_median_ci_half_width": 0.0206857360204638,
+      "precision_met": true,
+      "allocation_count_median": 631387.0,
+      "allocated_bytes_median": 37233377.0,
+      "peak_allocated_bytes_median": 13247361.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s65536-m49152-sc",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 49152,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 267070682.0,
+      "p95_ns_per_unit": 276730237.4,
+      "p99_ns_per_unit": 278194482.44,
+      "mad_ns_per_unit": 1770667.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 266785083.0,
+        "upper": 268906232.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 274630410.0,
+        "upper": 278543545.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 275439253.0,
+        "upper": 278543545.0
+      },
+      "relative_median_ci_half_width": 0.003971137872782307,
+      "precision_met": true,
+      "allocation_count_median": 1284698.0,
+      "allocated_bytes_median": 103017872.0,
+      "peak_allocated_bytes_median": 27525280.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s65536-m49152-sc",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 49152,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 260543950.0,
+      "p95_ns_per_unit": 267836706.6,
+      "p99_ns_per_unit": 273344149.2,
+      "mad_ns_per_unit": 1886332.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 259231587.0,
+        "upper": 265090554.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 264807232.2,
+        "upper": 274188254.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 266040411.0,
+        "upper": 274188254.0
+      },
+      "relative_median_ci_half_width": 0.011243721068940575,
+      "precision_met": true,
+      "allocation_count_median": 1461211.0,
+      "allocated_bytes_median": 116205384.0,
+      "peak_allocated_bytes_median": 27525280.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s65536-m49152-cl",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 49152,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 170774396.0,
+      "p95_ns_per_unit": 174262906.0,
+      "p99_ns_per_unit": 175820563.68,
+      "mad_ns_per_unit": 1053694.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 169125119.0,
+        "upper": 173113065.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 172328672.0,
+        "upper": 175999865.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 173684460.48,
+        "upper": 175999865.0
+      },
+      "relative_median_ci_half_width": 0.011676065304309435,
+      "precision_met": true,
+      "allocation_count_median": 631387.0,
+      "allocated_bytes_median": 37233377.0,
+      "peak_allocated_bytes_median": 13247361.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s65536-m49152-cl",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 49152,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 259151788.0,
+      "p95_ns_per_unit": 269311655.59999996,
+      "p99_ns_per_unit": 300044182.56000006,
+      "mad_ns_per_unit": 741175.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 258205093.0,
+        "upper": 260015852.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 259516649.0,
+        "upper": 316837102.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 261824388.0,
+        "upper": 316837102.0
+      },
+      "relative_median_ci_half_width": 0.003493626291322366,
+      "precision_met": true,
+      "allocation_count_median": 1284740.0,
+      "allocated_bytes_median": 103708208.0,
+      "peak_allocated_bytes_median": 27525280.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s65536-m49152-cl",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 49152,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 201626870.0,
+      "p95_ns_per_unit": 211174622.79999998,
+      "p99_ns_per_unit": 216186733.88,
+      "mad_ns_per_unit": 1973877.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 200297015.0,
+        "upper": 206898187.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 207541810.39999998,
+        "upper": 216623972.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 209382979.0,
+        "upper": 216623972.0
+      },
+      "relative_median_ci_half_width": 0.016369772540733286,
+      "precision_met": true,
+      "allocation_count_median": 1586432.0,
+      "allocated_bytes_median": 126241976.0,
+      "peak_allocated_bytes_median": 27525280.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-r-s65536-m65536",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 65536,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 167807841.0,
+      "p95_ns_per_unit": 171372725.0,
+      "p99_ns_per_unit": 173615740.96,
+      "mad_ns_per_unit": 1146944.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 167495968.0,
+        "upper": 170703855.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 169566854.4,
+        "upper": 174744689.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 169652901.0,
+        "upper": 174744689.0
+      },
+      "relative_median_ci_half_width": 0.00955821545907381,
+      "precision_met": true,
+      "allocation_count_median": 664155.0,
+      "allocated_bytes_median": 38413025.0,
+      "peak_allocated_bytes_median": 13247361.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-b-s65536-m65536",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 65536,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 358084321.0,
+      "p95_ns_per_unit": 366281512.8,
+      "p99_ns_per_unit": 370471998.88,
+      "mad_ns_per_unit": 1558015.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 356703706.0,
+        "upper": 360246924.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 361277460.91499996,
+        "upper": 371526502.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 361790079.0,
+        "upper": 371526502.0
+      },
+      "relative_median_ci_half_width": 0.00494746319820018,
+      "precision_met": true,
+      "allocation_count_median": 1712878.0,
+      "allocated_bytes_median": 151886384.0,
+      "peak_allocated_bytes_median": 47186080.0,
+      "status": "Precise"
+    },
+    {
+      "id": "db-a-s65536-m65536",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 65536,
+      "scale_unit": "row-mutations",
+      "process_count": 5,
+      "observation_count": 45,
+      "median_ns_per_unit": 272236988.0,
+      "p95_ns_per_unit": 287131398.6,
+      "p99_ns_per_unit": 288789631.0,
+      "mad_ns_per_unit": 1807309.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 271546648.0,
+        "upper": 273721215.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 276064656.12,
+        "upper": 289021478.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 286653019.0,
+        "upper": 289021478.0
+      },
+      "relative_median_ci_half_width": 0.003993886018162969,
+      "precision_met": true,
+      "allocation_count_median": 2114883.0,
+      "allocated_bytes_median": 181908440.0,
+      "peak_allocated_bytes_median": 47186080.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [
+    {
+      "cell": "st-b-s64m-e12288-sc",
+      "baseline_cell": "st-r-s64m-e12288-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.7458630012325834,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.7360773148566329,
+        "upper": 0.7468685728067421
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s64m-e12288-sc",
+      "baseline_cell": "st-r-s64m-e12288-sc",
+      "paired_processes": 5,
+      "median_ratio": 0.7465114871153973,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.7361154244674919,
+        "upper": 0.7474361991585862
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s64m-e12288-cl",
+      "baseline_cell": "st-r-s64m-e12288-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.7402925086477339,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.7401543924810574,
+        "upper": 0.7411606204129219
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s64m-e12288-cl",
+      "baseline_cell": "st-r-s64m-e12288-cl",
+      "paired_processes": 5,
+      "median_ratio": 0.7405027584890015,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.7400908591970383,
+        "upper": 0.7408292325933954
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-b-s64m-e16384",
+      "baseline_cell": "st-r-s64m-e16384",
+      "paired_processes": 5,
+      "median_ratio": 0.9866028776140645,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.9862973963020143,
+        "upper": 0.9875919574002353
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "st-a-s64m-e16384",
+      "baseline_cell": "st-r-s64m-e16384",
+      "paired_processes": 5,
+      "median_ratio": 0.9833321367478425,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.9828082322239022,
+        "upper": 0.9839026429892148
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s65536-m49152-sc",
+      "baseline_cell": "db-r-s65536-m49152-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.5978492656540344,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.5365940061342918,
+        "upper": 1.6016111109968358
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s65536-m49152-sc",
+      "baseline_cell": "db-r-s65536-m49152-sc",
+      "paired_processes": 5,
+      "median_ratio": 1.5496482579583393,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.4968360503639762,
+        "upper": 1.589736370638791
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s65536-m49152-cl",
+      "baseline_cell": "db-r-s65536-m49152-cl",
+      "paired_processes": 5,
+      "median_ratio": 1.5122077620971863,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.4948522400663404,
+        "upper": 1.5323080896102725
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s65536-m49152-cl",
+      "baseline_cell": "db-r-s65536-m49152-cl",
+      "paired_processes": 5,
+      "median_ratio": 1.1843126330630993,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.1647120337220072,
+        "upper": 1.205642981883421
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-b-s65536-m65536",
+      "baseline_cell": "db-r-s65536-m65536",
+      "paired_processes": 5,
+      "median_ratio": 2.1278437602659044,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.097693230185106,
+        "upper": 2.1467824259773414
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "db-a-s65536-m65536",
+      "baseline_cell": "db-r-s65536-m65536",
+      "paired_processes": 5,
+      "median_ratio": 1.6232538743858,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.5907470162287782,
+        "upper": 1.632828506105154
+      },
+      "status": "Paired"
+    }
+  ],
+  "curves": [
+    {
+      "curve": "db-s65536-frontier-clustered",
+      "strategy": "adaptive-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-frontier-clustered",
+      "strategy": "bulk-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-frontier-clustered",
+      "strategy": "rebuild-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-frontier-full",
+      "strategy": "adaptive-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-frontier-full",
+      "strategy": "bulk-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-frontier-full",
+      "strategy": "rebuild-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-frontier-scattered",
+      "strategy": "adaptive-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-frontier-scattered",
+      "strategy": "bulk-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "db-s65536-frontier-scattered",
+      "strategy": "rebuild-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-clustered",
+      "strategy": "adaptive-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-clustered",
+      "strategy": "bulk-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-clustered",
+      "strategy": "rebuild-clustered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-full",
+      "strategy": "adaptive-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-full",
+      "strategy": "bulk-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-full",
+      "strategy": "rebuild-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-scattered",
+      "strategy": "adaptive-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-scattered",
+      "strategy": "bulk-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "st-s64m-frontier-scattered",
+      "strategy": "rebuild-scattered",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}
