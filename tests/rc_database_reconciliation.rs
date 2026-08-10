@@ -507,6 +507,16 @@ fn transaction_and_log_wires_reject_every_truncated_prefix() {
     )
     .unwrap();
     let wire = transaction.to_canonical_bytes();
+    assert_eq!(transaction.canonical_len(), wire.len());
+    let decoded = TransactionDelta::from_canonical_bytes(
+        namespace(),
+        &schema,
+        &wire,
+        DatabaseTransactionLimits::default(),
+    )
+    .unwrap();
+    assert_eq!(decoded, transaction);
+    assert_eq!(decoded.canonical_len(), wire.len());
     assert_eq!(&wire[..4], b"MFTX");
     for length in 0..wire.len() {
         assert!(TransactionDelta::from_canonical_bytes(

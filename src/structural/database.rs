@@ -458,7 +458,9 @@ pub struct TransactionDelta {
     source_revision: u64,
     target_revision: u64,
     mutations: Vec<RowMutation>,
+    mutation_keys: Vec<DatabaseRowKey>,
     transaction_id: TransactionId,
+    canonical_len: usize,
 }
 
 impl TransactionDelta {
@@ -475,16 +477,20 @@ impl TransactionDelta {
         let target_revision = source_revision
             .checked_add(1)
             .ok_or(DatabaseError::RevisionOverflow)?;
-        validate_mutations(schema, &mutations)?;
+        let mutation_keys = validate_mutations(schema, &mutations)?;
         let mut transaction = Self {
             namespace,
             schema_id: schema.schema_id,
             source_revision,
             target_revision,
             mutations,
+            mutation_keys,
             transaction_id: TransactionId([0; 32]),
+            canonical_len: 0,
         };
-        transaction.transaction_id = derive_transaction_id(&transaction.to_canonical_bytes());
+        let canonical = transaction.to_canonical_bytes();
+        transaction.canonical_len = canonical.len();
+        transaction.transaction_id = derive_transaction_id(&canonical);
         Ok(transaction)
     }
 
@@ -522,6 +528,12 @@ impl TransactionDelta {
     #[must_use]
     pub const fn transaction_id(&self) -> TransactionId {
         self.transaction_id
+    }
+
+    /// Exact byte length of the canonical transaction envelope.
+    #[must_use]
+    pub const fn canonical_len(&self) -> usize {
+        self.canonical_len
     }
 
     /// Deterministic `MFTX` schema 1 representation.
@@ -952,7 +964,7 @@ where
         if transaction.mutations.len() > limits.max_mutations {
             return Err(DatabaseError::LimitExceeded("mutations"));
         }
-        if transaction.to_canonical_bytes().len() > limits.max_transaction_bytes {
+        if transaction.canonical_len > limits.max_transaction_bytes {
             return Err(DatabaseError::LimitExceeded("transaction bytes"));
         }
         Ok(())
@@ -1019,78 +1031,129 @@ where
         self.preflight_transaction(transaction, limits)?;
 
         let mut grouped = BTreeMap::<usize, Vec<(DatabaseRowKey, &RowMutation)>>::new();
-        for mutation in &transaction.mutations {
-            let reference = match mutation {
-                RowMutation::Insert(after) => after,
-                RowMutation::Delete(before) | RowMutation::Update { before, .. } => before,
-            };
-            let key = self.schema.row_key(reference)?;
+        for (&key, mutation) in transaction.mutation_keys.iter().zip(&transaction.mutations) {
             let index = partition_index(key, self.partitions.len());
             grouped.entry(index).or_default().push((key, mutation));
         }
 
-        let mut candidates = BTreeMap::<usize, DatabasePartition<F, E>>::new();
+        let touched_partitions = grouped.len();
+        let mut bulk_signatures = BTreeMap::<usize, MultisetSignature<F, E>>::new();
+        let mut rebuild_candidates = BTreeMap::<usize, DatabasePartition<F, E>>::new();
         let mut rebuilt_partitions = 0_usize;
-        for (index, mutations) in grouped {
+        for (&index, mutations) in &grouped {
             let original = &self.partitions[index];
-            let mut candidate = original.clone();
+            let insertions = mutations
+                .iter()
+                .filter(|(_, mutation)| matches!(mutation, RowMutation::Insert(_)))
+                .count();
+            let deletions = mutations
+                .iter()
+                .filter(|(_, mutation)| matches!(mutation, RowMutation::Delete(_)))
+                .count();
+            let population = original
+                .rows
+                .len()
+                .checked_add(insertions)
+                .and_then(|count| count.checked_sub(deletions))
+                .ok_or(DatabaseError::InvalidTransaction(
+                    "partition cardinality overflow",
+                ))?;
+            let rebuild = policy.is_some_and(|selected| {
+                selected.rebuilds_partition(mutations.len(), original.rows.len().max(population))
+            });
+
+            if rebuild {
+                let mut candidate = original.clone();
+                for (key, mutation) in mutations {
+                    match mutation {
+                        RowMutation::Insert(after) => {
+                            if candidate.rows.contains_key(key) {
+                                return Err(DatabaseError::Conflict("inserted key already exists"));
+                            }
+                            checked_row_bytes(&self.schema, after, limits)?;
+                            candidate.rows.insert(*key, after.clone());
+                        }
+                        RowMutation::Delete(before) => {
+                            if candidate.rows.get(key) != Some(before) {
+                                return Err(DatabaseError::Conflict(
+                                    "delete before image mismatch",
+                                ));
+                            }
+                            checked_row_bytes(&self.schema, before, limits)?;
+                            candidate.rows.remove(key);
+                        }
+                        RowMutation::Update { before, after } => {
+                            if candidate.rows.get(key) != Some(before) {
+                                return Err(DatabaseError::Conflict(
+                                    "update before image mismatch",
+                                ));
+                            }
+                            checked_row_bytes(&self.schema, before, limits)?;
+                            checked_row_bytes(&self.schema, after, limits)?;
+                            candidate.rows.insert(*key, after.clone());
+                        }
+                    }
+                }
+                candidate.signature = self.rebuild_partition_signature(&candidate.rows, limits)?;
+                rebuild_candidates.insert(index, candidate);
+                rebuilt_partitions += 1;
+                continue;
+            }
+
             let mut removed = MultisetSignature::new(self.encoder.clone(), self.offset);
             let mut added = MultisetSignature::new(self.encoder.clone(), self.offset);
-
-            for (key, mutation) in &mutations {
+            for (key, mutation) in mutations {
                 match mutation {
                     RowMutation::Insert(after) => {
-                        if candidate.rows.contains_key(key) {
+                        if original.rows.contains_key(key) {
                             return Err(DatabaseError::Conflict("inserted key already exists"));
                         }
                         let bytes = checked_row_bytes(&self.schema, after, limits)?;
                         added.insert(&bytes)?;
-                        candidate.rows.insert(*key, after.clone());
                     }
                     RowMutation::Delete(before) => {
-                        if candidate.rows.get(key) != Some(before) {
+                        if original.rows.get(key) != Some(before) {
                             return Err(DatabaseError::Conflict("delete before image mismatch"));
                         }
                         let bytes = checked_row_bytes(&self.schema, before, limits)?;
                         removed.insert(&bytes)?;
-                        candidate.rows.remove(key);
                     }
                     RowMutation::Update { before, after } => {
-                        if self.schema.row_key(after)? != *key {
-                            return Err(DatabaseError::InvalidTransaction("primary-key update"));
-                        }
-                        if after.version <= before.version {
-                            return Err(DatabaseError::InvalidTransaction(
-                                "non-increasing row version",
-                            ));
-                        }
-                        if candidate.rows.get(key) != Some(before) {
+                        if original.rows.get(key) != Some(before) {
                             return Err(DatabaseError::Conflict("update before image mismatch"));
                         }
                         let before_bytes = checked_row_bytes(&self.schema, before, limits)?;
                         let after_bytes = checked_row_bytes(&self.schema, after, limits)?;
                         removed.insert(&before_bytes)?;
                         added.insert(&after_bytes)?;
-                        candidate.rows.insert(*key, after.clone());
                     }
                 }
             }
-
-            let population = original.rows.len().max(candidate.rows.len());
-            let rebuild = policy
-                .is_some_and(|selected| selected.rebuilds_partition(mutations.len(), population));
-            if rebuild {
-                candidate.signature = self.rebuild_partition_signature(&candidate.rows, limits)?;
-                rebuilt_partitions += 1;
-            } else {
-                candidate.signature = original.signature.apply_delta_parts(&removed, &added)?;
-            }
-            candidates.insert(index, candidate);
+            bulk_signatures.insert(
+                index,
+                original.signature.apply_delta_parts(&removed, &added)?,
+            );
         }
 
-        let touched_partitions = candidates.len();
-        for (index, partition) in candidates {
-            self.partitions[index] = partition;
+        for (&index, mutations) in &grouped {
+            if let Some(candidate) = rebuild_candidates.remove(&index) {
+                self.partitions[index] = candidate;
+                continue;
+            }
+            let partition = &mut self.partitions[index];
+            partition.signature = bulk_signatures
+                .remove(&index)
+                .expect("every bulk partition has a prepared signature");
+            for (key, mutation) in mutations {
+                match mutation {
+                    RowMutation::Insert(after) | RowMutation::Update { after, .. } => {
+                        partition.rows.insert(*key, after.clone());
+                    }
+                    RowMutation::Delete(_) => {
+                        partition.rows.remove(key);
+                    }
+                }
+            }
         }
         self.applied.insert(transaction.transaction_id);
         self.revision = transaction.target_revision;
@@ -1465,8 +1528,12 @@ impl DatabaseReplayReport {
 fn validate_mutations(
     schema: &DatabaseSchema,
     mutations: &[RowMutation],
-) -> Result<(), DatabaseError> {
+) -> Result<Vec<DatabaseRowKey>, DatabaseError> {
     let mut keys = BTreeSet::new();
+    let mut ordered_keys = Vec::new();
+    ordered_keys
+        .try_reserve_exact(mutations.len())
+        .map_err(|_| DatabaseError::AllocationFailed)?;
     for mutation in mutations {
         let (before, after) = match mutation {
             RowMutation::Insert(after) => (None, Some(after)),
@@ -1479,6 +1546,7 @@ fn validate_mutations(
                 "duplicate primary key mutation",
             ));
         }
+        ordered_keys.push(key);
         if let Some(after) = after {
             if schema.row_key(after)? != key {
                 return Err(DatabaseError::InvalidTransaction("primary-key update"));
@@ -1492,7 +1560,7 @@ fn validate_mutations(
             }
         }
     }
-    Ok(())
+    Ok(ordered_keys)
 }
 
 fn checked_row_bytes(
