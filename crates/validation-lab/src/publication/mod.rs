@@ -79,5 +79,10 @@ mod tests {
         ))
         .expect("bulk density frontier manifest");
         assert_eq!(frontier.cells.len(), 18);
+        let streaming = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/pilot-db-streaming-v1.json",
+        ))
+        .expect("database streaming manifest");
+        assert_eq!(streaming.cells.len(), 6);
     }
 }
