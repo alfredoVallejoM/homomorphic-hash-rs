@@ -1,0 +1,31 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-g1-g2-v1-g1-incremental-batch-smoke",
+  "profile": "smoke",
+  "seed": 130320260813,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "g1-incremental-batch-batch-d1024-n1",
+      "family": "graph-incremental-batch",
+      "operation": "graph.incremental-batch-total",
+      "scale": 1,
+      "scale_unit": "edited-vertices",
+      "payload_bytes": 16,
+      "dataset_size": 1024,
+      "baseline_cell": null,
+      "curve": "g1-incremental-batch-batch",
+      "strategy": "label-delta-batch"
+    }
+  ]
+}

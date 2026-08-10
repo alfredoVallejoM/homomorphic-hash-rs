@@ -47,6 +47,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`c3-p0-implementation-and-preflight-report.md`](c3-p0-implementation-and-preflight-report.md) | expansor factorial, inventario de gaps y primer preflight F1/F2 |
 | [`c3-f3-s3-implementation-and-preflight-report.md`](c3-f3-s3-implementation-and-preflight-report.md) | batería F3–S3: batch, runtime, herramientas, firmas, estado, deltas y journals |
 | [`c3-t1-r1-d1-implementation-and-preflight-report.md`](c3-t1-r1-d1-implementation-and-preflight-report.md) | archivos/árboles, reconciliación y base de datos en memoria |
+| [`c3-g1-g2-implementation-and-preflight-report.md`](c3-g1-g2-implementation-and-preflight-report.md) | pipeline de grafos, exactitud acotada, familias de simetría y DAG persistente |
 | [`pre-rc-comprehensive-smoke-results.md`](pre-rc-comprehensive-smoke-results.md) | C1 de 65 celdas y piloto PostgreSQL hasta un millón de filas |
 | [`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md) | C2 de firmas K/fragmentación, grafos y PostgreSQL repetido a un millón |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |

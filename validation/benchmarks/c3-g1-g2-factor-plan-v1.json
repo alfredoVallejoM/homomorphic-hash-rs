@@ -1,0 +1,83 @@
+{
+  "schema": "algesum-c3-factor-plan-v1",
+  "campaign_id": "algesum-c3-g1-g2-v1",
+  "seed": 130320260813,
+  "shards": [
+    {
+      "id": "g1-linear-graph-pipeline",
+      "family": "graph-linear-pipeline",
+      "scale_unit": "vertices",
+      "preflight_max_scale": 1024,
+      "operations": [
+        { "id": "build-prepare", "operation": "graph.build-prepare-total", "strategy": "sparse-cycle" },
+        { "id": "field", "operation": "graph.fast-prepared", "strategy": "sparse-cycle" },
+        { "id": "hybrid", "operation": "graph.channel-total", "strategy": "sparse-cycle" },
+        { "id": "parallel", "operation": "graph.parallel-total", "strategy": "parallel-regular" },
+        { "id": "memory", "operation": "graph.memory-telemetry", "strategy": "memory-regular" }
+      ],
+      "primary_factors": {
+        "scale": [64, 1024, 16384, 65536]
+      }
+    },
+    {
+      "id": "g1-incremental-batch",
+      "family": "graph-incremental-batch",
+      "scale_unit": "edited-vertices",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "batch", "operation": "graph.incremental-batch-total", "strategy": "label-delta-batch" }
+      ],
+      "primary_factors": {
+        "scale": [1, 8, 64, 256],
+        "dataset_size": [1024, 16384, 65536]
+      }
+    },
+    {
+      "id": "g2-exact-budgets",
+      "family": "graph-exact-budget",
+      "scale_unit": "vertices",
+      "preflight_max_scale": 10,
+      "operations": [
+        { "id": "nodes", "operation": "graph.exact-budget-matrix", "strategy": "budget-nodes" },
+        { "id": "cells", "operation": "graph.exact-budget-matrix", "strategy": "budget-cells" },
+        { "id": "bytes", "operation": "graph.exact-budget-matrix", "strategy": "budget-bytes" },
+        { "id": "depth", "operation": "graph.exact-budget-matrix", "strategy": "budget-depth" }
+      ],
+      "primary_factors": {
+        "scale": [6, 10, 14, 16]
+      },
+      "secondary_factors": {
+        "payload_bytes": [1, 8, 64, 1024]
+      }
+    },
+    {
+      "id": "g2-exact-families",
+      "family": "graph-exact-family",
+      "scale_unit": "vertices",
+      "preflight_max_scale": 10,
+      "operations": [
+        { "id": "path", "operation": "graph.exact-family-matrix", "strategy": "distinct-path" },
+        { "id": "cycle", "operation": "graph.exact-family-matrix", "strategy": "symmetric-cycle" },
+        { "id": "components", "operation": "graph.exact-family-matrix", "strategy": "disconnected-cycles" },
+        { "id": "regular", "operation": "graph.exact-family-matrix", "strategy": "regular-8" },
+        { "id": "star", "operation": "graph.exact-family-matrix", "strategy": "star" }
+      ],
+      "primary_factors": {
+        "scale": [6, 10, 14, 16]
+      }
+    },
+    {
+      "id": "g2-dag-state",
+      "family": "graph-exact-dag",
+      "scale_unit": "vertices-or-nodes",
+      "preflight_max_scale": 8,
+      "operations": [
+        { "id": "persist-restore", "operation": "graph.dag-persist-restore-total", "strategy": "mfgd-roundtrip" },
+        { "id": "incremental", "operation": "graph.dag-incremental-total", "strategy": "delta-recanonicalize" }
+      ],
+      "primary_factors": {
+        "scale": [2, 4, 8, 12, 14]
+      }
+    }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-g1-g2-v1-g2-exact-families-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "g2-exact-families-path-n6",
+      "family": "graph-exact-family",
+      "operation": "graph.exact-family-matrix",
+      "scale": 6,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 2070.5364583333335,
+      "p95_ns_per_unit": 2345.3510416666663,
+      "p99_ns_per_unit": 2379.8285416666668,
+      "mad_ns_per_unit": 170.09114583333326,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1895.3385416666667,
+        "upper": 2245.734375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1922.9479166666667,
+        "upper": 2388.4479166666665
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1924.6494270833332,
+        "upper": 2388.4479166666665
+      },
+      "relative_median_ci_half_width": 0.08461474607778276,
+      "precision_met": true,
+      "allocation_count_median": 4384.0,
+      "allocated_bytes_median": 440576.0,
+      "peak_allocated_bytes_median": 5244.0,
+      "graph_exact": {
+        "outcome": "exact",
+        "node_budget": 1000000,
+        "explored_nodes": 0,
+        "leaf_count": 1,
+        "maximum_depth": 0,
+        "path": "exact-refinement-discrete",
+        "exhausted_limit": null
+      },
+      "status": "Precise"
+    },
+    {
+      "id": "g2-exact-families-cycle-n6",
+      "family": "graph-exact-family",
+      "operation": "graph.exact-family-matrix",
+      "scale": 6,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 5859.395833333333,
+      "p95_ns_per_unit": 6018.027083333333,
+      "p99_ns_per_unit": 6076.872083333333,
+      "mad_ns_per_unit": 79.24999999999909,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5794.520833333333,
+        "upper": 5924.270833333333
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5854.677760416666,
+        "upper": 6091.583333333333
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5898.918302083333,
+        "upper": 6091.583333333333
+      },
+      "relative_median_ci_half_width": 0.01107196063302886,
+      "precision_met": true,
+      "allocation_count_median": 2072.0,
+      "allocated_bytes_median": 231728.0,
+      "peak_allocated_bytes_median": 6582.0,
+      "graph_exact": {
+        "outcome": "exact",
+        "node_budget": 1000000,
+        "explored_nodes": 7,
+        "leaf_count": 4,
+        "maximum_depth": 2,
+        "path": "individualization-refinement",
+        "exhausted_limit": null
+      },
+      "status": "Precise"
+    },
+    {
+      "id": "g2-exact-families-components-n6",
+      "family": "graph-exact-family",
+      "operation": "graph.exact-family-matrix",
+      "scale": 6,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 7661.75,
+      "p95_ns_per_unit": 8321.798958333333,
+      "p99_ns_per_unit": 8384.476458333334,
+      "mad_ns_per_unit": 330.7916666666665,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7179.375,
+        "upper": 8144.125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7564.458333333333,
+        "upper": 8400.145833333334
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7740.24,
+        "upper": 8400.145833333334
+      },
+      "relative_median_ci_half_width": 0.0629588540477045,
+      "precision_met": true,
+      "allocation_count_median": 2970.0,
+      "allocated_bytes_median": 249552.0,
+      "peak_allocated_bytes_median": 6927.0,
+      "graph_exact": {
+        "outcome": "exact",
+        "node_budget": 1000000,
+        "explored_nodes": 14,
+        "leaf_count": 8,
+        "maximum_depth": 2,
+        "path": "weak-component-decomposition",
+        "exhausted_limit": null
+      },
+      "status": "Precise"
+    },
+    {
+      "id": "g2-exact-families-regular-n6",
+      "family": "graph-exact-family",
+      "operation": "graph.exact-family-matrix",
+      "scale": 6,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 6846.8828125,
+      "p95_ns_per_unit": 9236.610156249999,
+      "p99_ns_per_unit": 9370.88453125,
+      "mad_ns_per_unit": 141.0390625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6774.984375,
+        "upper": 6918.78125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6925.71875,
+        "upper": 9404.453125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6925.71875,
+        "upper": 9404.453125
+      },
+      "relative_median_ci_half_width": 0.010500900843335414,
+      "precision_met": true,
+      "allocation_count_median": 3416.0,
+      "allocated_bytes_median": 481088.0,
+      "peak_allocated_bytes_median": 21654.0,
+      "graph_exact": {
+        "outcome": "exact",
+        "node_budget": 1000000,
+        "explored_nodes": 0,
+        "leaf_count": 1,
+        "maximum_depth": 0,
+        "path": "exact-refinement-discrete",
+        "exhausted_limit": null
+      },
+      "status": "Precise"
+    },
+    {
+      "id": "g2-exact-families-star-n10",
+      "family": "graph-exact-family",
+      "operation": "graph.exact-family-matrix",
+      "scale": 10,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 41593.55,
+      "p95_ns_per_unit": 43235.91,
+      "p99_ns_per_unit": 43268.382,
+      "mad_ns_per_unit": 419.1500000000051,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 41468.1,
+        "upper": 41719.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 42338.2,
+        "upper": 43276.5
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 42678.1591,
+        "upper": 43276.5
+      },
+      "relative_median_ci_half_width": 0.0030160926393635722,
+      "precision_met": true,
+      "allocation_count_median": 2098.0,
+      "allocated_bytes_median": 254066.0,
+      "peak_allocated_bytes_median": 14170.0,
+      "graph_exact": {
+        "outcome": "exact",
+        "node_budget": 1000000,
+        "explored_nodes": 129,
+        "leaf_count": 37,
+        "maximum_depth": 8,
+        "path": "individualization-refinement",
+        "exhausted_limit": null
+      },
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "g2-exact-families-components",
+      "strategy": "disconnected-cycles",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g2-exact-families-cycle",
+      "strategy": "symmetric-cycle",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g2-exact-families-path",
+      "strategy": "distinct-path",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g2-exact-families-regular",
+      "strategy": "regular-8",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g2-exact-families-star",
+      "strategy": "star",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

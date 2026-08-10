@@ -79,15 +79,15 @@
     },
     {
       "id": "G1",
-      "status": "partial",
-      "implemented_operations": ["graph.fast-prepared", "graph.full-label-reanalysis-total", "graph.incremental-label-update-total", "graph.full-topology-reanalysis-total", "graph.incremental-topology-update-total"],
-      "missing_operations": ["graph.build-prepare-total", "graph.channel-total", "graph.parallel-total", "graph.incremental-batch-total", "graph.memory-telemetry"]
+      "status": "implemented",
+      "implemented_operations": ["graph.fast-prepared", "graph.full-label-reanalysis-total", "graph.incremental-label-update-total", "graph.full-topology-reanalysis-total", "graph.incremental-topology-update-total", "graph.build-prepare-total", "graph.channel-total", "graph.parallel-total", "graph.incremental-batch-total", "graph.memory-telemetry"],
+      "missing_operations": []
     },
     {
       "id": "G2",
-      "status": "partial",
-      "implemented_operations": ["graph.exact", "graph.dag-reuse"],
-      "missing_operations": ["graph.exact-budget-matrix", "graph.exact-family-matrix", "graph.dag-persist-restore-total", "graph.dag-incremental-total"]
+      "status": "implemented",
+      "implemented_operations": ["graph.exact", "graph.dag-reuse", "graph.exact-budget-matrix", "graph.exact-family-matrix", "graph.dag-persist-restore-total", "graph.dag-incremental-total"],
+      "missing_operations": []
     },
     {
       "id": "X1",

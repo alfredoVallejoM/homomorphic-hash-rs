@@ -1,0 +1,70 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-g1-g2-v1-g2-exact-budgets-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "g2-exact-budgets-cells-p64-n6",
+      "process_index": 0,
+      "seed": 5693694078913046274,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "g2-exact-budgets-nodes-p1-n6",
+      "process_index": 0,
+      "seed": 17702945769603442635,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "g2-exact-budgets-depth-p1024-n10",
+      "process_index": 0,
+      "seed": 18280468515479915665,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "g2-exact-budgets-bytes-p1-n10",
+      "process_index": 0,
+      "seed": 17268206260223294957,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 1,
+      "cell": "g2-exact-budgets-cells-p64-n6",
+      "process_index": 1,
+      "seed": 1956624617979123287,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 1,
+      "cell": "g2-exact-budgets-bytes-p1-n10",
+      "process_index": 1,
+      "seed": 166285053523837040,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 1,
+      "cell": "g2-exact-budgets-nodes-p1-n6",
+      "process_index": 1,
+      "seed": 16492912224305333585,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "g2-exact-budgets-depth-p1024-n10",
+      "process_index": 1,
+      "seed": 3456453292666094341,
+      "status": "success"
+    }
+  ]
+}

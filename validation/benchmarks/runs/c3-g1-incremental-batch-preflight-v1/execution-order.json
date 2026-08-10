@@ -1,0 +1,22 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-g1-g2-v1-g1-incremental-batch-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "g1-incremental-batch-batch-d1024-n1",
+      "process_index": 0,
+      "seed": 1329835404609217843,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 1,
+      "cell": "g1-incremental-batch-batch-d1024-n1",
+      "process_index": 1,
+      "seed": 14653971521855894565,
+      "status": "success"
+    }
+  ]
+}

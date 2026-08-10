@@ -1,0 +1,31 @@
+{
+  "schema": "algesum-c3-preflight-summary-v1",
+  "campaign_id": "algesum-c3-g1-g2-v1",
+  "classification": "smoke",
+  "claims_allowed": false,
+  "publication_cells": 126,
+  "preflight_cells": 17,
+  "workers": 34,
+  "observations": 170,
+  "precise_cells": 17,
+  "median_relative_ci_half_width": 0.010500900843335414,
+  "maximum_relative_ci_half_width": 0.10869906139159624,
+  "maximum_peak_allocated_bytes": 454011,
+  "allocation_free_cells": [
+    "g1-linear-graph-pipeline-field-n64",
+    "g1-linear-graph-pipeline-parallel-n64"
+  ],
+  "exact_outcomes": {
+    "exact": 7,
+    "inconclusive": 2,
+    "inconclusive_limits": ["search-nodes", "retained-bytes"]
+  },
+  "findings": [
+    "prepared sequential field analysis remained allocation-free",
+    "forcing parallel execution at 64 vertices was slower than sequential execution",
+    "the hybrid field-plus-SHA channel was materially more expensive than the field-only channel",
+    "single-label transactional updates on a 1024-vertex graph retained a high fixed replacement cost",
+    "exact difficulty depended on symmetry and decomposition family, not only vertex count",
+    "DAG persistence and incremental recanonicalization completed deterministically"
+  ]
+}

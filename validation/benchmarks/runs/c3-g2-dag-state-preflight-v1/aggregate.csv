@@ -1,0 +1,3 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+g2-dag-state-persist-restore-n2,graph-exact-dag,graph.dag-persist-restore-total,2,vertices-or-nodes,2,10,36.900841346,48.743544671,54.664974960,1.030598958,34.308794071,39.492888622,0.070243582,true,Precise,,,,,,,
+g2-dag-state-incremental-n8,graph-exact-dag,graph.dag-incremental-total,8,vertices-or-nodes,2,10,5857.343750000,6495.535156250,6679.782031250,95.570312500,5844.937500000,5869.750000000,0.002118068,true,Precise,,,,,,,

@@ -540,7 +540,7 @@ fn sample_cells(
     };
     let mut selected = BTreeSet::new();
     for (operation_index, operation) in operations.iter().enumerate() {
-        let eligible = cells
+        let mut eligible = cells
             .iter()
             .enumerate()
             .filter(|(_, cell)| {
@@ -553,6 +553,20 @@ fn sample_cells(
             })
             .map(|(index, _)| index)
             .collect::<Vec<_>>();
+        if eligible.is_empty() {
+            eligible = cells
+                .iter()
+                .enumerate()
+                .filter(|(_, cell)| {
+                    cell.operation == operation.operation
+                        && operation
+                            .strategy
+                            .as_deref()
+                            .is_none_or(|strategy| cell.strategy.as_deref() == Some(strategy))
+                })
+                .map(|(index, _)| index)
+                .collect();
+        }
         if !eligible.is_empty() {
             let position = if fraction == 0.0 || operations.len() == 1 {
                 0
@@ -563,12 +577,18 @@ fn sample_cells(
         }
     }
     if target > selected.len() {
-        let eligible = cells
+        let mut eligible = cells
             .iter()
             .enumerate()
             .filter(|(_, cell)| maximum_scale.is_none_or(|maximum| cell.scale <= maximum))
             .map(|(index, _)| index)
             .collect::<Vec<_>>();
+        if eligible.is_empty() {
+            eligible.extend(0..cells.len());
+        }
+        if eligible.is_empty() {
+            return Vec::new();
+        }
         let stride = eligible.len() as f64 / target as f64;
         for sample in 0..target {
             selected.insert(
@@ -701,6 +721,15 @@ mod tests {
             Path::new("../../validation/benchmarks/c3-t1-r1-d1-factor-plan-v1.json"),
             Path::new("../../validation/benchmarks/manifests/c3-t1-r1-d1"),
             "t1-r1-d1",
+        );
+    }
+
+    #[test]
+    fn checked_in_g1_g2_manifests_are_byte_reproducible() {
+        assert_checked_in_manifests(
+            Path::new("../../validation/benchmarks/c3-g1-g2-factor-plan-v1.json"),
+            Path::new("../../validation/benchmarks/manifests/c3-g1-g2"),
+            "g1-g2",
         );
     }
 

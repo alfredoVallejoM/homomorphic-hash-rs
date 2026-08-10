@@ -1,0 +1,79 @@
+{
+  "schema": "algesum-c3-expansion-report-v1",
+  "campaign_id": "algesum-c3-g1-g2-v1",
+  "source": "c3-g1-g2-factor-plan-v1.json",
+  "total_cells": 126,
+  "total_preflight_cells": 17,
+  "shards": [
+    {
+      "id": "g1-linear-graph-pipeline",
+      "operations": 5,
+      "primary_combinations": 4,
+      "secondary_combinations": 1,
+      "publication_cells": 20,
+      "smoke_cells": 5,
+      "preflight_cells": 5,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.25,
+      "publication_manifest": "c3-g1-linear-graph-pipeline-publication-v1.json",
+      "smoke_manifest": "c3-g1-linear-graph-pipeline-smoke-v1.json",
+      "preflight_manifest": "c3-g1-linear-graph-pipeline-preflight-v1.json"
+    },
+    {
+      "id": "g1-incremental-batch",
+      "operations": 1,
+      "primary_combinations": 12,
+      "secondary_combinations": 1,
+      "publication_cells": 12,
+      "smoke_cells": 1,
+      "preflight_cells": 1,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.08333333333333333,
+      "publication_manifest": "c3-g1-incremental-batch-publication-v1.json",
+      "smoke_manifest": "c3-g1-incremental-batch-smoke-v1.json",
+      "preflight_manifest": "c3-g1-incremental-batch-preflight-v1.json"
+    },
+    {
+      "id": "g2-exact-budgets",
+      "operations": 4,
+      "primary_combinations": 4,
+      "secondary_combinations": 4,
+      "publication_cells": 64,
+      "smoke_cells": 4,
+      "preflight_cells": 4,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.0625,
+      "publication_manifest": "c3-g2-exact-budgets-publication-v1.json",
+      "smoke_manifest": "c3-g2-exact-budgets-smoke-v1.json",
+      "preflight_manifest": "c3-g2-exact-budgets-preflight-v1.json"
+    },
+    {
+      "id": "g2-exact-families",
+      "operations": 5,
+      "primary_combinations": 4,
+      "secondary_combinations": 1,
+      "publication_cells": 20,
+      "smoke_cells": 5,
+      "preflight_cells": 5,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.25,
+      "publication_manifest": "c3-g2-exact-families-publication-v1.json",
+      "smoke_manifest": "c3-g2-exact-families-smoke-v1.json",
+      "preflight_manifest": "c3-g2-exact-families-preflight-v1.json"
+    },
+    {
+      "id": "g2-dag-state",
+      "operations": 2,
+      "primary_combinations": 5,
+      "secondary_combinations": 1,
+      "publication_cells": 10,
+      "smoke_cells": 2,
+      "preflight_cells": 2,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.2,
+      "publication_manifest": "c3-g2-dag-state-publication-v1.json",
+      "smoke_manifest": "c3-g2-dag-state-smoke-v1.json",
+      "preflight_manifest": "c3-g2-dag-state-preflight-v1.json"
+    }
+  ]
+}

@@ -71,6 +71,19 @@ The 16 unique preflight variants completed with stable checksums and were all
 precise after the focused T1 restore calibration. See
 `docs/microfield/c3-t1-r1-d1-implementation-and-preflight-report.md`.
 
+G1/G2 add 126 cells for the graph pipeline, incremental batches, exact budget
+and structural-family matrices, plus persistent/incremental DAG state:
+
+```text
+cargo run -p microfield-validation-lab --locked -- c3-expand \
+  --manifest validation/benchmarks/c3-g1-g2-factor-plan-v1.json \
+  --out-dir validation/benchmarks/manifests/c3-g1-g2
+```
+
+All 17 preflight cells were precise with stable checksums. The generated C3
+inventory now contains 3,110 publication cells. See
+`docs/microfield/c3-g1-g2-implementation-and-preflight-report.md`.
+
 C2 is also versioned and remains informative:
 
 ```text

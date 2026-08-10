@@ -1,0 +1,2 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+g1-incremental-batch-batch-d1024-n1,graph-incremental-batch,graph.incremental-batch-total,1,edited-vertices,2,10,587271.000000000,602994.850000000,603688.570000000,10522.500000000,586259.000000000,588283.000000000,0.001723225,true,Precise,,,,,,,

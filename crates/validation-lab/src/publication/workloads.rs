@@ -8,18 +8,18 @@ use std::{
 use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
     BinaryPolynomialEncoder, BoundedSetReconciler, CanonicalBudgetLimit, CanonicalGraphDag,
-    CanonicalSearchBudget, CompactSignature, DatabaseApplyPolicy, DatabaseColumn,
-    DatabaseColumnType, DatabaseRow, DatabaseSchema, DatabaseTransactionLimits,
+    CanonicalGraphDagLimits, CanonicalSearchBudget, CompactSignature, DatabaseApplyPolicy,
+    DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema, DatabaseTransactionLimits,
     DatabaseTransactionLog, DatabaseValue, DeltaJournal, DeltaJournalLimits,
     DynamicAdditiveSignature, DynamicMultiEvaluationMultisetSignature,
-    DynamicMultiEvaluationSequenceSignature, FastGraphLabeler, FileChunkProfile, GraphExecution,
-    GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder,
-    IncrementalGraphWorkspace, Microcanon, MicrocanonOutcome, MicrocanonPath,
-    MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature, MultisetDelta,
-    MultisetSignature, PartitionedDatabase, PrimeIntegerEncoder, ReconciliationLimits,
-    RevisionedSignature, RowMutation, SequenceAppend, SequenceSignature, SequenceTrim,
-    SummaryEditPolicy, SummaryRangeEdit, SummaryTreeLimits, TrackedMultiset, TrackedSequence,
-    TrackedSnapshotLimits, TransactionDelta,
+    DynamicMultiEvaluationSequenceSignature, FastGraphLabeler, FileChunkProfile, GraphDelta,
+    GraphDeltaPolicy, GraphExecution, GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree,
+    IncidenceGraph, IncidenceGraphBuilder, IncrementalGraphWorkspace, Microcanon,
+    MicrocanonOutcome, MicrocanonPath, MultiEvaluationMultisetSignature,
+    MultiEvaluationSequenceSignature, MultisetDelta, MultisetSignature, PartitionedDatabase,
+    PrimeIntegerEncoder, ReconciliationLimits, RevisionedSignature, RowMutation, SequenceAppend,
+    SequenceSignature, SequenceTrim, SummaryEditPolicy, SummaryRangeEdit, SummaryTreeLimits,
+    TrackedMultiset, TrackedSequence, TrackedSnapshotLimits, TransactionDelta, VertexId,
 };
 use microfield::{
     fill_fixed_base_powers,
@@ -168,6 +168,15 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "graph.incremental-label-update-total",
     "graph.full-topology-reanalysis-total",
     "graph.incremental-topology-update-total",
+    "graph.build-prepare-total",
+    "graph.channel-total",
+    "graph.parallel-total",
+    "graph.incremental-batch-total",
+    "graph.memory-telemetry",
+    "graph.exact-budget-matrix",
+    "graph.exact-family-matrix",
+    "graph.dag-persist-restore-total",
+    "graph.dag-incremental-total",
     "tool.binary-manifest.parse",
     "tool.binary-manifest.generate",
     "field.runtime-lifecycle-total",
@@ -312,6 +321,15 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "graph.incremental-label-update-total" => graph_incremental_label_update(cell),
         "graph.full-topology-reanalysis-total" => graph_full_topology_reanalysis(cell),
         "graph.incremental-topology-update-total" => graph_incremental_topology_update(cell),
+        "graph.build-prepare-total" => graph_build_prepare_total(cell),
+        "graph.channel-total" => graph_channel_total(cell),
+        "graph.parallel-total" => graph_parallel_total(cell),
+        "graph.incremental-batch-total" => graph_incremental_batch_total(cell),
+        "graph.memory-telemetry" => graph_memory_telemetry(cell),
+        "graph.exact-budget-matrix" => graph_exact(cell),
+        "graph.exact-family-matrix" => graph_exact(cell),
+        "graph.dag-persist-restore-total" => graph_dag_persist_restore_total(cell),
+        "graph.dag-incremental-total" => graph_dag_incremental_total(cell),
         "tool.binary-manifest.parse" => tool_binary_manifest(false),
         "tool.binary-manifest.generate" => tool_binary_manifest(true),
         "field.runtime-lifecycle-total" => field_runtime_lifecycle_total(cell, seed),
@@ -2648,21 +2666,156 @@ fn graph_fast(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
     }))
 }
 
-fn graph_exact(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
-    let graph = match cell.strategy.as_deref() {
-        Some("symmetric-cycle" | "symmetric-cycle-budget-1") => {
-            sparse_cycle(cell.scale.clamp(3, 16))?
+fn graph_for_linear_campaign(cell: &BenchmarkCell) -> Result<IncidenceGraph, String> {
+    match cell.strategy.as_deref() {
+        Some("regular-8" | "parallel-regular" | "memory-regular") => {
+            regular_graph(cell.scale.max(8), 8, false)
         }
+        Some("regular-32") => regular_graph(cell.scale.max(32), 32, false),
+        Some("mesh") => mesh_graph(cell.scale.max(16)),
+        Some("star") => star_graph(cell.scale.max(4)),
+        _ => sparse_cycle(cell.scale.max(4)),
+    }
+}
+
+fn graph_build_prepare_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let graph = graph_for_linear_campaign(cell)?;
+    let vertices = graph.vertex_count();
+    Ok(scaled(vertices, move || {
+        let labeler = FastGraphLabeler::<Fp251V1, _, 2>::new(
+            prime_encoder(),
+            algesum::RefinementProfile::fast(),
+        )
+        .unwrap();
+        let prepared = labeler.prepare(&graph).unwrap();
+        checksum_bytes(prepared.signature_id().as_bytes())
+    }))
+}
+
+fn graph_channel_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let graph: &'static IncidenceGraph = Box::leak(Box::new(graph_for_linear_campaign(cell)?));
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    let prepared = labeler.prepare(graph).map_err(debug_error)?;
+    let mut workspace = GraphWorkspace::new();
+    workspace.reserve_for(graph.vertex_count(), 4);
+    Ok(scaled(graph.vertex_count(), move || {
+        let analysis = labeler
+            .analyze_prepared_hybrid_with_workspace(
+                &prepared,
+                &mut workspace,
+                GraphExecution::Sequential,
+            )
+            .unwrap();
+        checksum_field(analysis.structural().signature().lanes()[0])
+            ^ checksum_bytes(analysis.invariant_digest().as_bytes())
+    }))
+}
+
+fn graph_parallel_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let graph: &'static IncidenceGraph = Box::leak(Box::new(graph_for_linear_campaign(cell)?));
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    let prepared = labeler.prepare(graph).map_err(debug_error)?;
+    let mut workspace = GraphWorkspace::new();
+    workspace.reserve_for(graph.vertex_count(), 4);
+    Ok(scaled(graph.vertex_count(), move || {
+        let analysis = labeler
+            .analyze_prepared_with_workspace(
+                &prepared,
+                &mut workspace,
+                GraphExecution::Parallel {
+                    minimum_vertices: 1,
+                },
+            )
+            .unwrap();
+        checksum_field(analysis.signature().lanes()[0])
+    }))
+}
+
+fn graph_incremental_batch_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let vertices = cell.dataset_size.unwrap_or(cell.scale.max(64)).max(8);
+    let edits = cell.scale.clamp(1, vertices);
+    let graph = regular_graph(vertices, 8, false)?;
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    let mut state = labeler.incremental_state(graph).map_err(debug_error)?;
+    let mut workspace = IncrementalGraphWorkspace::new();
+    workspace
+        .reserve_for(vertices, state.graph().incidence_count(), 4)
+        .map_err(debug_error)?;
+    let mut generation = 0_u64;
+    Ok(scaled(edits, move || {
+        generation = generation.wrapping_add(1);
+        let mut delta = GraphDelta::new().with_expected_revision(state.revision());
+        for index in 0..edits {
+            delta
+                .set_vertex_label(
+                    VertexId::new(index),
+                    generation.wrapping_add(index as u64).to_le_bytes(),
+                )
+                .unwrap();
+        }
+        let report = labeler
+            .apply_delta(
+                &mut state,
+                &delta,
+                GraphDeltaPolicy::default(),
+                &mut workspace,
+            )
+            .unwrap();
+        report.estimated_vertex_rounds() as u64 ^ state.revision()
+    }))
+}
+
+fn graph_memory_telemetry(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let graph = graph_for_linear_campaign(cell)?;
+    let vertices = graph.vertex_count();
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    Ok(scaled(vertices, move || {
+        let analysis = labeler.analyze(&graph).unwrap();
+        checksum_field(analysis.signature().lanes()[0])
+    }))
+}
+
+fn graph_exact(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let strategy = cell.strategy.as_deref();
+    let graph = match strategy {
+        Some(
+            "symmetric-cycle"
+            | "symmetric-cycle-budget-1"
+            | "budget-nodes"
+            | "budget-cells"
+            | "budget-bytes"
+            | "budget-depth",
+        ) => sparse_cycle(cell.scale.clamp(3, 16))?,
+        Some("regular-8") => regular_graph(cell.scale.clamp(8, 16), 8, false)?,
+        Some("disconnected-cycles") => disconnected_cycles(cell.scale.clamp(6, 16))?,
+        Some("star") => star_graph(cell.scale.clamp(4, 16))?,
         _ => distinct_path(cell.scale.clamp(2, 16))?,
     };
     let schema = GraphSchemaId::derive(b"publication-exact-v1");
     let canonizer = Microcanon::new(schema);
-    let node_budget = if cell.strategy.as_deref() == Some("symmetric-cycle-budget-1") {
-        1
-    } else {
-        1_000_000
+    let node_budget = match strategy {
+        Some("symmetric-cycle-budget-1") => 1,
+        Some("budget-nodes") => cell.payload_bytes.max(1) as u64,
+        _ => 1_000_000,
     };
-    let budget = CanonicalSearchBudget::new(node_budget);
+    let budget = match strategy {
+        Some("budget-cells") => CanonicalSearchBudget::new(node_budget)
+            .with_max_retained_state_cells(cell.payload_bytes.max(1)),
+        Some("budget-bytes") => CanonicalSearchBudget::new(node_budget)
+            .with_max_retained_bytes(cell.payload_bytes.max(1)),
+        Some("budget-depth") => {
+            CanonicalSearchBudget::new(node_budget).with_max_depth(cell.payload_bytes)
+        }
+        _ => CanonicalSearchBudget::new(node_budget),
+    };
     let probe = canonizer
         .canonicalize(&graph, budget)
         .map_err(debug_error)?;
@@ -2817,6 +2970,98 @@ fn graph_dag_reuse(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
         match outcome {
             algesum::GraphDagResolveOutcome::Reused { node, .. } => node.as_u64(),
             other => panic!("expected DAG reuse, got {other:?}"),
+        }
+    }))
+}
+
+fn graph_dag_persist_restore_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let node_count = cell.scale.clamp(1, 12);
+    let schema = GraphSchemaId::derive(b"publication-dag-persistence-v1");
+    let canonizer = Microcanon::new(schema);
+    let budget = CanonicalSearchBudget::new(1_000_000);
+    let mut dag = CanonicalGraphDag::new(schema);
+    let mut dependency = None;
+    for size in 1..=node_count {
+        let graph = distinct_path(size + 1)?;
+        let dependencies = dependency.into_iter().collect::<Vec<_>>();
+        let outcome = dag
+            .resolve(&graph, &canonizer, budget, &dependencies, None)
+            .map_err(debug_error)?;
+        dependency = match outcome {
+            algesum::GraphDagResolveOutcome::Inserted { node, .. }
+            | algesum::GraphDagResolveOutcome::Reused { node, .. } => Some(node),
+            algesum::GraphDagResolveOutcome::Inconclusive => {
+                return Err("DAG fixture was inconclusive".into())
+            }
+        };
+    }
+    let wire = dag.to_canonical_bytes();
+    Ok(scaled(wire.len(), move || {
+        let restored = CanonicalGraphDag::from_canonical_bytes(
+            &wire,
+            &canonizer,
+            budget,
+            CanonicalGraphDagLimits::default(),
+        )
+        .unwrap();
+        assert_eq!(restored, dag);
+        checksum_bytes(&restored.to_canonical_bytes())
+    }))
+}
+
+fn graph_dag_incremental_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let vertices = cell.scale.clamp(3, 14);
+    let schema = GraphSchemaId::derive(b"publication-dag-incremental-v1");
+    let canonizer = Microcanon::new(schema);
+    let budget = CanonicalSearchBudget::new(1_000_000);
+    let original = distinct_path(vertices)?;
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    let mut state = labeler
+        .incremental_state(original.clone())
+        .map_err(debug_error)?;
+    let mut workspace = IncrementalGraphWorkspace::new();
+    workspace
+        .reserve_for(vertices, original.incidence_count(), 4)
+        .map_err(debug_error)?;
+    let mut dag = CanonicalGraphDag::new(schema);
+    dag.resolve(&original, &canonizer, budget, &[], None)
+        .map_err(debug_error)?;
+    let mut generation = 0_u64;
+    Ok(scaled(vertices, move || {
+        generation = generation.wrapping_add(1);
+        let mut delta = GraphDelta::new().with_expected_revision(state.revision());
+        delta
+            .set_vertex_label(
+                VertexId::new((generation as usize) % vertices),
+                generation.to_le_bytes(),
+            )
+            .unwrap();
+        let report = labeler
+            .apply_delta(
+                &mut state,
+                &delta,
+                GraphDeltaPolicy::default(),
+                &mut workspace,
+            )
+            .unwrap();
+        let outcome = dag
+            .resolve_after_delta(
+                state.graph(),
+                report,
+                &canonizer,
+                budget,
+                &[],
+                Some(dag.revision()),
+            )
+            .unwrap();
+        match outcome {
+            algesum::GraphDagResolveOutcome::Inserted { node, .. }
+            | algesum::GraphDagResolveOutcome::Reused { node, .. } => node.as_u64(),
+            algesum::GraphDagResolveOutcome::Inconclusive => {
+                panic!("incremental DAG fixture was inconclusive")
+            }
         }
     }))
 }
@@ -3107,6 +3352,30 @@ fn sparse_cycle(vertices: usize) -> Result<IncidenceGraph, String> {
     builder.build().map_err(debug_error)
 }
 
+fn disconnected_cycles(vertices: usize) -> Result<IncidenceGraph, String> {
+    let vertices = vertices.max(6);
+    let left_count = vertices / 2;
+    let right_count = vertices - left_count;
+    let mut builder = IncidenceGraphBuilder::new();
+    let ids = (0..vertices)
+        .map(|_| builder.add_vertex(b"cycle"))
+        .collect::<Vec<_>>();
+    for (offset, count) in [(0, left_count), (left_count, right_count)] {
+        for index in 0..count {
+            builder
+                .add_undirected_relation(
+                    ids[offset + index],
+                    ids[offset + (index + 1) % count],
+                    b"edge",
+                    b"disconnected-cycle",
+                    1,
+                )
+                .map_err(debug_error)?;
+        }
+    }
+    builder.build().map_err(debug_error)
+}
+
 fn distinct_path(vertices: usize) -> Result<IncidenceGraph, String> {
     let mut builder = IncidenceGraphBuilder::new();
     let ids = (0..vertices)
@@ -3362,6 +3631,34 @@ mod tests {
             "c3-t1-file-tree-state-preflight-v1.json",
             "c3-r1-bounded-reconciliation-preflight-v1.json",
             "c3-d1-database-state-preflight-v1.json",
+        ] {
+            let manifest = crate::publication::load_manifest(&root.join(manifest)).unwrap();
+            for benchmark_cell in manifest.cells {
+                let mut first = prepare(&benchmark_cell, 0x1234_5678).unwrap_or_else(|error| {
+                    panic!("prepare first cell {}: {error}", benchmark_cell.id)
+                });
+                let mut second = prepare(&benchmark_cell, 0x1234_5678).unwrap_or_else(|error| {
+                    panic!("prepare second cell {}: {error}", benchmark_cell.id)
+                });
+                assert_eq!(
+                    (first.run)(),
+                    (second.run)(),
+                    "non-reproducible C3 workload: {}",
+                    benchmark_cell.id
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn c3_g1_g2_preflight_actions_are_reproducible_from_the_same_seed() {
+        let root = Path::new("../../validation/benchmarks/manifests/c3-g1-g2");
+        for manifest in [
+            "c3-g1-linear-graph-pipeline-preflight-v1.json",
+            "c3-g1-incremental-batch-preflight-v1.json",
+            "c3-g2-exact-budgets-preflight-v1.json",
+            "c3-g2-exact-families-preflight-v1.json",
+            "c3-g2-dag-state-preflight-v1.json",
         ] {
             let manifest = crate::publication::load_manifest(&root.join(manifest)).unwrap();
             for benchmark_cell in manifest.cells {

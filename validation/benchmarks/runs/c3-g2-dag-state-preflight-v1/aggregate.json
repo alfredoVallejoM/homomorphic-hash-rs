@@ -1,0 +1,95 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-g1-g2-v1-g2-dag-state-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "g2-dag-state-persist-restore-n2",
+      "family": "graph-exact-dag",
+      "operation": "graph.dag-persist-restore-total",
+      "scale": 2,
+      "scale_unit": "vertices-or-nodes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 36.90084134615384,
+      "p95_ns_per_unit": 48.74354467147434,
+      "p99_ns_per_unit": 54.664974959935904,
+      "mad_ns_per_unit": 1.0305989583333321,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 34.30879407051282,
+        "upper": 39.49288862179487
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 35.506790865384616,
+        "upper": 56.145332532051285
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 36.009290865384614,
+        "upper": 56.145332532051285
+      },
+      "relative_median_ci_half_width": 0.07024358201825102,
+      "precision_met": true,
+      "allocation_count_median": 5664.0,
+      "allocated_bytes_median": 333664.0,
+      "peak_allocated_bytes_median": 4419.0,
+      "status": "Precise"
+    },
+    {
+      "id": "g2-dag-state-incremental-n8",
+      "family": "graph-exact-dag",
+      "operation": "graph.dag-incremental-total",
+      "scale": 8,
+      "scale_unit": "vertices-or-nodes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 5857.34375,
+      "p95_ns_per_unit": 6495.535156249999,
+      "p99_ns_per_unit": 6679.78203125,
+      "mad_ns_per_unit": 95.5703125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5844.9375,
+        "upper": 5869.75
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5992.890625,
+        "upper": 6725.84375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5992.61355859375,
+        "upper": 6725.84375
+      },
+      "relative_median_ci_half_width": 0.0021180675967668794,
+      "precision_met": true,
+      "allocation_count_median": 3133.0,
+      "allocated_bytes_median": 264640.0,
+      "peak_allocated_bytes_median": 16584.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "g2-dag-state-incremental",
+      "strategy": "delta-recanonicalize",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g2-dag-state-persist-restore",
+      "strategy": "mfgd-roundtrip",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

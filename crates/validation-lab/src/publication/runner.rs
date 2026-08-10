@@ -581,7 +581,10 @@ fn validate_worker_reports(
     for report in reports {
         let exact_telemetry_valid = if report.schema == "microfield-publication-worker-v1" {
             report.graph_exact.is_none()
-        } else if report.cell.operation == "graph.exact" {
+        } else if matches!(
+            report.cell.operation.as_str(),
+            "graph.exact" | "graph.exact-budget-matrix" | "graph.exact-family-matrix"
+        ) {
             report.graph_exact.as_ref().is_some_and(|telemetry| {
                 telemetry.node_budget > 0
                     && telemetry.explored_nodes <= telemetry.node_budget

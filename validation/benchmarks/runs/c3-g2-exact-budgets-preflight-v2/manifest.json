@@ -1,0 +1,67 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-g1-g2-v1-g2-exact-budgets-preflight",
+  "profile": "smoke",
+  "seed": 130320260813,
+  "host_mode": "interactive",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 250000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "g2-exact-budgets-nodes-p1-n6",
+      "family": "graph-exact-budget",
+      "operation": "graph.exact-budget-matrix",
+      "scale": 6,
+      "scale_unit": "vertices",
+      "payload_bytes": 1,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "g2-exact-budgets-nodes",
+      "strategy": "budget-nodes"
+    },
+    {
+      "id": "g2-exact-budgets-cells-p64-n6",
+      "family": "graph-exact-budget",
+      "operation": "graph.exact-budget-matrix",
+      "scale": 6,
+      "scale_unit": "vertices",
+      "payload_bytes": 64,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "g2-exact-budgets-cells",
+      "strategy": "budget-cells"
+    },
+    {
+      "id": "g2-exact-budgets-bytes-p1-n10",
+      "family": "graph-exact-budget",
+      "operation": "graph.exact-budget-matrix",
+      "scale": 10,
+      "scale_unit": "vertices",
+      "payload_bytes": 1,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "g2-exact-budgets-bytes",
+      "strategy": "budget-bytes"
+    },
+    {
+      "id": "g2-exact-budgets-depth-p1024-n10",
+      "family": "graph-exact-budget",
+      "operation": "graph.exact-budget-matrix",
+      "scale": 10,
+      "scale_unit": "vertices",
+      "payload_bytes": 1024,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "g2-exact-budgets-depth",
+      "strategy": "budget-depth"
+    }
+  ]
+}

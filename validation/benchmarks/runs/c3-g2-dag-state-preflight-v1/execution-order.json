@@ -1,0 +1,38 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-g1-g2-v1-g2-dag-state-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "g2-dag-state-persist-restore-n2",
+      "process_index": 0,
+      "seed": 17217735169986943028,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "g2-dag-state-incremental-n8",
+      "process_index": 0,
+      "seed": 10607918922912649582,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 1,
+      "cell": "g2-dag-state-persist-restore-n2",
+      "process_index": 1,
+      "seed": 7178181376979028536,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 1,
+      "cell": "g2-dag-state-incremental-n8",
+      "process_index": 1,
+      "seed": 15904064119631037218,
+      "status": "success"
+    }
+  ]
+}

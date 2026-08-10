@@ -1,0 +1,218 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-g1-g2-v1-g1-linear-graph-pipeline-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "g1-linear-graph-pipeline-build-prepare-n64",
+      "family": "graph-linear-pipeline",
+      "operation": "graph.build-prepare-total",
+      "scale": 64,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 398.181640625,
+      "p95_ns_per_unit": 586.307763671875,
+      "p99_ns_per_unit": 589.504521484375,
+      "mad_ns_per_unit": 17.4091796875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 383.435546875,
+        "upper": 412.927734375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 394.2216796875,
+        "upper": 590.3037109375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 412.927734375,
+        "upper": 590.3037109375
+      },
+      "relative_median_ci_half_width": 0.037033585292516276,
+      "precision_met": true,
+      "allocation_count_median": 1200.0,
+      "allocated_bytes_median": 31424.0,
+      "peak_allocated_bytes_median": 218.0,
+      "status": "Precise"
+    },
+    {
+      "id": "g1-linear-graph-pipeline-field-n64",
+      "family": "graph-linear-pipeline",
+      "operation": "graph.fast-prepared",
+      "scale": 64,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 508.5810546875,
+      "p95_ns_per_unit": 637.7967773437499,
+      "p99_ns_per_unit": 688.83591796875,
+      "mad_ns_per_unit": 9.6484375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 497.857421875,
+        "upper": 519.3046875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 519.3046875,
+        "upper": 701.595703125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 519.2835893554687,
+        "upper": 701.595703125
+      },
+      "relative_median_ci_half_width": 0.021085395756806527,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "g1-linear-graph-pipeline-hybrid-n64",
+      "family": "graph-linear-pipeline",
+      "operation": "graph.channel-total",
+      "scale": 64,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 2175.765625,
+      "p95_ns_per_unit": 2246.505859375,
+      "p99_ns_per_unit": 2250.626171875,
+      "mad_ns_per_unit": 8.125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2172.828125,
+        "upper": 2178.703125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2174.53125,
+        "upper": 2251.65625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2178.598828125,
+        "upper": 2251.65625
+      },
+      "relative_median_ci_half_width": 0.0013500994621146291,
+      "precision_met": true,
+      "allocation_count_median": 26.0,
+      "allocated_bytes_median": 43024.0,
+      "peak_allocated_bytes_median": 7176.0,
+      "status": "Precise"
+    },
+    {
+      "id": "g1-linear-graph-pipeline-parallel-n64",
+      "family": "graph-linear-pipeline",
+      "operation": "graph.parallel-total",
+      "scale": 64,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 4682.796875,
+      "p95_ns_per_unit": 8312.328906249999,
+      "p99_ns_per_unit": 8632.22828125,
+      "mad_ns_per_unit": 509.015625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4173.78125,
+        "upper": 5191.8125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4747.890625,
+        "upper": 8712.203125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4747.890625,
+        "upper": 8712.203125
+      },
+      "relative_median_ci_half_width": 0.10869906139159624,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "g1-linear-graph-pipeline-memory-n1024",
+      "family": "graph-linear-pipeline",
+      "operation": "graph.memory-telemetry",
+      "scale": 1024,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1489.2099609375,
+      "p95_ns_per_unit": 1566.217578125,
+      "p99_ns_per_unit": 1569.830234375,
+      "mad_ns_per_unit": 6.6962890625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1480.3212890625,
+        "upper": 1498.0986328125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1486.766162109375,
+        "upper": 1570.7333984375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1487.954794921875,
+        "upper": 1570.7333984375
+      },
+      "relative_median_ci_half_width": 0.0059687163718703095,
+      "precision_met": true,
+      "allocation_count_median": 1050.0,
+      "allocated_bytes_median": 94590.0,
+      "peak_allocated_bytes_median": 57698.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "g1-linear-graph-pipeline-build-prepare",
+      "strategy": "sparse-cycle",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g1-linear-graph-pipeline-field",
+      "strategy": "sparse-cycle",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g1-linear-graph-pipeline-hybrid",
+      "strategy": "sparse-cycle",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g1-linear-graph-pipeline-memory",
+      "strategy": "memory-regular",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g1-linear-graph-pipeline-parallel",
+      "strategy": "parallel-regular",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

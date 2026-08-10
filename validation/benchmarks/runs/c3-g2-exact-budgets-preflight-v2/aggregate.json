@@ -1,0 +1,213 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-g1-g2-v1-g2-exact-budgets-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "g2-exact-budgets-nodes-p1-n6",
+      "family": "graph-exact-budget",
+      "operation": "graph.exact-budget-matrix",
+      "scale": 6,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 417.38671875,
+      "p95_ns_per_unit": 423.9619140625,
+      "p99_ns_per_unit": 425.1361328125,
+      "mad_ns_per_unit": 1.1953125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 416.2825520833333,
+        "upper": 418.4908854166667
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 418.3695133463542,
+        "upper": 425.4296875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 418.27507486979164,
+        "upper": 425.4296875
+      },
+      "relative_median_ci_half_width": 0.0026454283690996953,
+      "precision_met": true,
+      "allocation_count_median": 3968.0,
+      "allocated_bytes_median": 350976.0,
+      "peak_allocated_bytes_median": 2448.0,
+      "graph_exact": {
+        "outcome": "inconclusive",
+        "node_budget": 1,
+        "explored_nodes": 1,
+        "leaf_count": 0,
+        "maximum_depth": 0,
+        "path": "individualization-refinement",
+        "exhausted_limit": "search-nodes"
+      },
+      "status": "Precise"
+    },
+    {
+      "id": "g2-exact-budgets-cells-p64-n6",
+      "family": "graph-exact-budget",
+      "operation": "graph.exact-budget-matrix",
+      "scale": 6,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 5908.572916666666,
+      "p95_ns_per_unit": 6012.78125,
+      "p99_ns_per_unit": 6027.40625,
+      "mad_ns_per_unit": 43.1875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5878.25,
+        "upper": 5938.895833333333
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5945.45,
+        "upper": 6031.0625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5920.416666666667,
+        "upper": 6031.0625
+      },
+      "relative_median_ci_half_width": 0.005132020387043519,
+      "precision_met": true,
+      "allocation_count_median": 2072.0,
+      "allocated_bytes_median": 231728.0,
+      "peak_allocated_bytes_median": 6582.0,
+      "graph_exact": {
+        "outcome": "exact",
+        "node_budget": 1000000,
+        "explored_nodes": 7,
+        "leaf_count": 4,
+        "maximum_depth": 2,
+        "path": "individualization-refinement",
+        "exhausted_limit": null
+      },
+      "status": "Precise"
+    },
+    {
+      "id": "g2-exact-budgets-bytes-p1-n10",
+      "family": "graph-exact-budget",
+      "operation": "graph.exact-budget-matrix",
+      "scale": 10,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 180.64589843750002,
+      "p95_ns_per_unit": 206.43597656249995,
+      "p99_ns_per_unit": 222.05407031250002,
+      "mad_ns_per_unit": 1.5582031249999773,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 180.384375,
+        "upper": 180.907421875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 181.13176708984375,
+        "upper": 225.95859375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 181.32578125,
+        "upper": 225.95859375
+      },
+      "relative_median_ci_half_width": 0.001447713121427359,
+      "precision_met": true,
+      "allocation_count_median": 2816.0,
+      "allocated_bytes_median": 636928.0,
+      "peak_allocated_bytes_median": 2488.0,
+      "graph_exact": {
+        "outcome": "inconclusive",
+        "node_budget": 1000000,
+        "explored_nodes": 0,
+        "leaf_count": 0,
+        "maximum_depth": 0,
+        "path": "exact-refinement-discrete",
+        "exhausted_limit": "retained-bytes"
+      },
+      "status": "Precise"
+    },
+    {
+      "id": "g2-exact-budgets-depth-p1024-n10",
+      "family": "graph-exact-budget",
+      "operation": "graph.exact-budget-matrix",
+      "scale": 10,
+      "scale_unit": "vertices",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 6316.075,
+      "p95_ns_per_unit": 7798.376249999999,
+      "p99_ns_per_unit": 8103.21525,
+      "mad_ns_per_unit": 598.8625000000002,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5706.75,
+        "upper": 6925.4
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5715.25,
+        "upper": 8179.425
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5979.53675,
+        "upper": 8179.425
+      },
+      "relative_median_ci_half_width": 0.0964720969906152,
+      "precision_met": true,
+      "allocation_count_median": 1392.0,
+      "allocated_bytes_median": 167336.0,
+      "peak_allocated_bytes_median": 8474.0,
+      "graph_exact": {
+        "outcome": "exact",
+        "node_budget": 1000000,
+        "explored_nodes": 7,
+        "leaf_count": 4,
+        "maximum_depth": 2,
+        "path": "individualization-refinement",
+        "exhausted_limit": null
+      },
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "g2-exact-budgets-bytes",
+      "strategy": "budget-bytes",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g2-exact-budgets-cells",
+      "strategy": "budget-cells",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g2-exact-budgets-depth",
+      "strategy": "budget-depth",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "g2-exact-budgets-nodes",
+      "strategy": "budget-nodes",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}
