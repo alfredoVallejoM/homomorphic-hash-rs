@@ -17,8 +17,14 @@ cargo run --release -p microfield-validation-lab --locked -- \
   --run-dir validation/benchmarks/runs/pre-rc-comprehensive-smoke-v1
 ```
 
-Its design and C2/C3 expansion are specified in
-`docs/microfield/pre-rc-comprehensive-campaign-plan.md`.
+Its C1/C2 design is specified in
+`docs/microfield/pre-rc-comprehensive-campaign-plan.md`. The substantially
+broader normative C3 plan, including the full coverage ledger, factorial
+rules, multi-host replication and systems scenarios, is
+`docs/microfield/c3-extensive-campaign-plan.md`.
+The machine-readable capability ownership and volume targets are frozen in
+`c3-coverage-ledger-v1.json`; `tests/c3_campaign_plan.rs` fails if the admitted
+RC surface and the C3 ledger drift apart.
 
 C2 is also versioned and remains informative:
 
@@ -82,6 +88,10 @@ cargo run --release -p microfield-validation-lab --locked -- \
   --manifest validation/benchmarks/manifests/smoke-v1.json \
   --run-dir /tmp/microfield-publication-smoke
 ```
+
+`publication-controlled-v1.json` is now a historical seed/regression manifest,
+not the complete C3 campaign. The extensive C3 plan requires generated shards
+and additional workloads before controlled execution.
 
 `publication-campaign` refuses to overwrite a non-empty run. `smoke` only
 checks the harness and always has `claims_allowed=false`. Host-specific timing

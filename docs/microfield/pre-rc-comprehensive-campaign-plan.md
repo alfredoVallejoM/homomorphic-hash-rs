@@ -1,7 +1,9 @@
 # Campaña integral pre-RC de Algesum
 
-Fecha: 2026-08-10. Estado: **C2 y extensiones ejecutados; C3 controlado pendiente**. Clasificación inicial:
-**Informative**; ninguna medición habilita por sí sola afirmaciones públicas.
+Fecha: 2026-08-10. Estado: **C2 y extensiones ejecutados; C3 extensivo en
+planificación**. Clasificación inicial: **Informative**; ninguna medición
+habilita por sí sola afirmaciones públicas. La especificación normativa de C3
+es [`c3-extensive-campaign-plan.md`](c3-extensive-campaign-plan.md).
 
 Algesum mide resúmenes y firmas algebraicas homomórficas **no criptográficas**.
 La campaña no interpreta igualdad de firmas como prueba de igualdad ni añade
@@ -27,7 +29,7 @@ percentiles, bootstrap, asignaciones, clasificación del entorno y checksums.
 | C0 | leyes, modelos, wires, fallos y fuzzing | no aplica | puerta de corrección |
 | C1 | smoke de cobertura integral | 2 | detecta rutas rotas |
 | C2 | piloto informativo | 10 | calibra escalas y fronteras |
-| C3 | campaña controlada | 30–50 adaptativos | evidencia publicable |
+| C3 | campaña controlada extensiva | 30–100 adaptativos | evidencia publicable por suite |
 
 C3 solo puede ejecutarse en host dedicado, frecuencia y afinidad controladas,
 árbol limpio y binario de release identificado. C1 y C2 nunca permiten claims.
@@ -142,7 +144,8 @@ acotados, y memoria pico documentada.
 
 - Semillas y corpus quedan versionados.
 - Cada comparación usa procesos emparejados y el mismo host.
-- El piloto acepta CI relativa de mediana <= 10 %; C3 exige <= 5 %.
+- El piloto acepta CI relativa de mediana <= 10 %; C3 exige <= 3 % en celdas
+  de claims y <= 5 % en caracterización/tails.
 - C3 informa mediana, p95, p99, MAD, CI95 y asignaciones.
 - Toda ruta optimizada tiene baseline semánticamente equivalente.
 - Las referencias que omiten validación transaccional se etiquetan como suelo
@@ -172,8 +175,9 @@ acotados, y memoria pico documentada.
   celda para `clustered`, `strided` y `hotspot`.
 
 C1 y C2 están ejecutados. Sus resultados y fronteras están en
-`pre-rc-comprehensive-pilot-results.md`; después de corregir el selector denso
-de DB y la telemetría exacta se seleccionarán sólo las celdas discriminantes
-para C3. Esto evita convertir el producto
-cartesiano completo en una campaña inmanejable sin perder fronteras, baselines
-ni casos adversariales.
+`pre-rc-comprehensive-pilot-results.md`. C3 no se reducirá a unas pocas celdas
+discriminantes: cubrirá toda la superficie admitida mediante casos semánticos
+exhaustivos, cruces completos de ejes primarios, covering arrays versionados
+para ejes secundarios, escenarios reales y réplica multihost. El piloto solo
+calibra coste y repetición; no autoriza eliminar familias, operaciones o
+fronteras.

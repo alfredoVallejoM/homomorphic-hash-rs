@@ -82,9 +82,10 @@ observaciones, con 44/47 celdas precisas. Confirma composición K=1..4,
 fragmentación K=4 hasta 1.024 operandos alternantes, estabilidad por vértice en
 tres familias de grafos y una ventaja incremental de 2,79–2,96x para editar
 una etiqueta. PostgreSQL añadió 33/33 muestras exactas a un millón de filas.
-El límite detectado está en alta densidad: la ruta por particiones a 75–100 %
-es más lenta que el rebuild completo y debe incorporarse éste al selector antes
-de C3. Véase
+El límite detectado está en alta densidad. El A/B posterior mostró que el
+rebuild completo tampoco gana a la ruta por particiones ya optimizada, por lo
+que queda opt-in; esta decisión y la telemetría exacta de grafos ya están
+cerradas. Véase
 [`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md).
 
 - replicar en entorno controlado tanto la campaña general como las nuevas
@@ -95,8 +96,9 @@ de C3. Véase
 - extender el consumidor PostgreSQL desde commits controlados a logical
   decoding/WAL y probar 16–256 clientes concurrentes, crashes y lag;
 - importar NYC TLC para canonicalización y carga masiva de datos heterogéneos;
-- ejecutar C3 controlado de firmas y grafos; ampliar topología incremental,
-  densidad, deltas, outcome estructurado y corpus adversarial exacto;
+- implementar y ejecutar la C3 extensiva sobre campos, engines, firmas,
+  estructuras persistentes, reconciliación, DB y grafos, con 12.000+ casos
+  semánticos, 2.500–4.000 celdas de timing y 150–300 escenarios;
 - decisión de congelar la reconciliación v1 como conjuntos o diseñar una v2
   para multiplicidad;
 - completar licencia, seguridad, semver, advisories/SBOM y packaging externo.
@@ -214,9 +216,9 @@ deterministas, RC de firmas y grafos y F6.V reproducible en x86-64 y AArch64.
 
 ### Bloquean la integración del checkpoint
 
-1. Falta repetir la campaña profunda como `Controlled` en un host dedicado;
-   la evidencia `Informative`, incluidas las matrices bulk nuevas, no autoriza
-   los claims que motivaron aplazar la RC.
+1. Falta implementar y ejecutar la campaña C3 extensiva como `Controlled` en
+   hosts Intel x86-64, AMD x86-64 y AArch64; la evidencia `Informative`,
+   incluidas las matrices bulk nuevas, no autoriza claims públicos.
 2. La rama validada aún no se ha integrado en `main`.
 3. Falta el run post-merge y un tag anotado sobre el merge verde.
 
@@ -295,15 +297,17 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
 [`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md) y
 [`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md).
 
-### 4. Replicar como `Controlled` y reevaluar RC — siguiente
+### 4. Implementar y ejecutar C3 extensiva — siguiente
 
-- ejecutar `publication-controlled-v1.json` en x86-64 dedicado, con afinidad
-  fijada y atestiguaciones completas;
-- repetir sin alterar workloads las matrices `pilot-bulk-scaling-v2`,
-  `pilot-bulk-density-frontier-v1` y `pilot-db-streaming-v1`;
-- replicar después en AArch64 sin cambiar workload ni análisis;
-- decidir go/no-go comparando efectos e intervalos con la campaña informativa;
+- completar el ledger y los workloads ausentes del harness;
+- generar shards mediante cruces primarios y covering arrays versionados;
+- ejecutar el preflight del 1 % para estimar host-días y almacenamiento;
+- completar C3-Semantic, C3-Scaling y C3-Systems;
+- replicar los claims en Intel x86-64, AMD x86-64 y AArch64 dedicados;
+- decidir go/no-go con cobertura, efectos, intervalos, límites e inconclusos;
 - solo entonces abrir PR, integrar, ejecutar CI post-merge y etiquetar.
+
+Especificación: [`c3-extensive-campaign-plan.md`](c3-extensive-campaign-plan.md).
 
 ### 5. Base de datos real
 

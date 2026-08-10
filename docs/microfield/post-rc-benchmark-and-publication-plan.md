@@ -48,9 +48,12 @@ No se comparará con otra biblioteca hasta congelar una operación equivalente,
 el mismo nivel de seguridad —aquí ninguno criptográfico—, hardware, inputs y
 tratamiento estadístico. Un gráfico no sustituirá los datos crudos.
 
-Gate local satisfecho: una máquina limpia reproduce tablas desde raw. Gate de
-claims pendiente: ejecutar `publication-controlled-v1.json` en x86-64 y
-AArch64 dedicados; ninguna conclusión pública dependerá de un único host.
+Gate local satisfecho: una máquina limpia reproduce tablas desde raw. El
+manifest histórico `publication-controlled-v1.json` sirve como seed y control
+de regresión, pero ya no basta para cerrar claims. El gate vigente es la
+campaña extensiva descrita en
+[`c3-extensive-campaign-plan.md`](c3-extensive-campaign-plan.md), con cobertura
+de toda la superficie y réplica Intel x86-64, AMD x86-64 y AArch64.
 
 ## B.4 — vertical de base de datos real
 

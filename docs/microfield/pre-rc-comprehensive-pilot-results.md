@@ -140,10 +140,12 @@ C2 cierra como calibración informativa. Antes de congelar C3 deben completarse:
    quedan los tiempos externos en host C3;
 4. ~~añadir el quinto punto de fragmentación y conservar operandos
    alternantes~~: cerrado con 10/10 celdas precisas y pendientes estimadas;
-5. ejecutar WAL/logical decoding, reinicio y concurrencia como campaña de
-   integración separada;
-6. replicar las celdas discriminantes de todas las estructuras en host
-   dedicado `Controlled` antes de cualquier claim o integración RC.
+5. integrar WAL/logical decoding, reinicio y concurrencia en el carril
+   C3-Systems;
+6. ejecutar el plan extensivo
+   [`c3-extensive-campaign-plan.md`](c3-extensive-campaign-plan.md): ninguna
+   familia se reduce a celdas discriminantes y los claims principales se
+   replican en Intel x86-64, AMD x86-64 y AArch64 dedicados.
 
 Los datos crudos están en
 `validation/benchmarks/runs/pre-rc-comprehensive-pilot-v1`,
