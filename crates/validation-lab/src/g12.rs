@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use homomorphic_hash_rs::{
+use algesum::{
     CanonicalSearchBudget, GraphComparison, IncidenceGraph, IncidenceGraphBuilder, Microcanon,
     MicrocanonOutcome, VerifiedGraphMapping, VertexId,
 };

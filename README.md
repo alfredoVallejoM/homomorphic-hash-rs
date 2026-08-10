@@ -1,15 +1,18 @@
-# Homomorphic Hash RS / Microfield
+# Algesum / Microfield
 
-Workspace Rust para campos finitos portables, firmas algebraicas homomórficas
-no criptográficas y análisis/canonización exacta presupuestada de grafos.
+**Resúmenes algebraicos componibles sobre campos finitos.** Workspace Rust
+para campos finitos portables, firmas algebraicas homomórficas no
+criptográficas, bases de datos y análisis/canonización exacta presupuestada de
+grafos.
 
-El repositorio contiene cuatro paquetes Cargo con funciones distintas:
+El repositorio contiene cinco paquetes Cargo con funciones distintas:
 
 | Paquete | Función | Publicación actual |
 |---|---|---|
 | `microfield` | núcleo `no_std`, campos, generación, batch e ISA | `publish = false` |
-| `homomorphic-hash-rs` | firmas, deltas, reconciliación, grafos y compatibilidad legacy | candidato interno condicionado |
+| `algesum` | firmas, deltas, reconciliación, grafos y compatibilidad legacy | candidato interno condicionado |
 | `microfield-validation-lab` | campañas y artefactos F6.V | privado, no publicable |
+| `algesum-postgres-lab` | integración y escalado PostgreSQL | privado, no publicable |
 | `structural-field-fixture` | campo externo generado para tests | fixture, no publicable |
 
 ## Estado
@@ -43,9 +46,11 @@ La línea prioritaria de cierre son los hashes homomórficos —expuestos por la
 API como firmas algebraicas para dejar claro que **no son criptográficos**— y
 su aplicación a bases de datos. El sistema DB base ya existe: filas/schema,
 particiones, transacciones versionadas, log/replay y reconciliación acotada. Lo
-pendiente es replicar en entorno controlado la medición ya ejecutada,
-conectarla a una base de datos real con persistencia/concurrencia y preparar la
-ingeniería de release; no reimplementar RC.5.
+pendiente es replicar en entorno controlado la medición ya ejecutada, completar
+logical decoding y concurrencia sobre la integración PostgreSQL ya validada, y
+preparar la ingeniería de release; no reimplementar RC.5. La campaña
+PostgreSQL actual verificó lotes de hasta 65.536 filas y está descrita en
+[`algesum-postgresql-results.md`](docs/microfield/algesum-postgresql-results.md).
 
 La fotografía auditada, riesgos y orden siguiente están en
 [`current-status-and-next.md`](docs/microfield/current-status-and-next.md). El
@@ -88,7 +93,7 @@ activa de forma explícita. Un consumidor de firmas sin grafos debería elegir:
 
 ```toml
 [dependencies]
-homomorphic-hash-rs = { path = "...", default-features = false, features = ["signatures"] }
+algesum = { path = "...", default-features = false, features = ["signatures"] }
 ```
 
 ## Ejemplo mínimo de Microfield
@@ -123,10 +128,10 @@ Gates opt-in de release:
 
 ```text
 python3 tools/fetch_graph_corpus.py
-cargo test -p homomorphic-hash-rs --all-features --locked \
+cargo test -p algesum --all-features --locked \
   --test external_graph_corpus -- --ignored --nocapture
 
-cargo test -p homomorphic-hash-rs --all-features --release --locked \
+cargo test -p algesum --all-features --release --locked \
   --test graph_canonical \
   microcanon_matches_every_simple_graph_isomorphism_class_at_six_vertices \
   -- --ignored --exact
@@ -174,6 +179,7 @@ cargo run -p microfield --features generator --bin microfield-gen -- \
 - [Protocolo pre-RC de benchmarks](docs/microfield/pre-rc-benchmark-protocol.md)
 - [Resultados B.3 de escalabilidad](docs/microfield/pre-rc-b3-benchmark-results.md)
 - [Escalado bulk del árbol y la DB](docs/microfield/pre-rc-bulk-scaling-results.md)
+- [Integración y escalado PostgreSQL](docs/microfield/algesum-postgresql-results.md)
 - [Plan de maduración, integración y publicación](docs/microfield/post-rc-benchmark-and-publication-plan.md)
 - [Contratos técnicos](docs/microfield/contracts.md)
 - [Arquitectura](docs/microfield/architecture.md)

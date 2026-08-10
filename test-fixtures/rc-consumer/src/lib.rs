@@ -2,7 +2,7 @@
 
 use std::{fs, path::Path};
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BinaryPolynomialEncoder,
     BoundedSetReconciler, CanonicalGraphDag, CanonicalGraphDagLimits, CanonicalSearchBudget,
     DatabaseApplyPolicy, DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema,
@@ -469,7 +469,7 @@ fn debug_error(error: impl std::fmt::Debug) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use homomorphic_hash_rs::{DatabaseApplyPath, SummaryEditPath};
+    use algesum::{DatabaseApplyPath, SummaryEditPath};
 
     #[test]
     fn clean_consumer_persists_restarts_and_rebuilds_all_verticals() {

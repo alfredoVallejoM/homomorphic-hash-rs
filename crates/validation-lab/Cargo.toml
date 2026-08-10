@@ -3,11 +3,11 @@ name = "microfield-validation-lab"
 version = "0.1.0"
 edition = "2021"
 publish = false
-description = "Reproducible F6.V validation harness for homomorphic-hash-rs"
+description = "Reproducible F6.V validation harness for Algesum"
 
 [dependencies]
 allocation-counter = "0.8.1"
-homomorphic-hash-rs = { path = "../.." }
+algesum = { path = "../.." }
 microfield = { path = "../microfield", features = ["generator"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0"

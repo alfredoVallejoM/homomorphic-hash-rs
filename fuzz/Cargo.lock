@@ -9,6 +9,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
+name = "algesum"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "csv",
+ "flate2",
+ "microfield",
+ "purr",
+ "rand",
+ "rayon",
+ "serde",
+ "sha2",
+ "ureq",
+]
+
+[[package]]
+name = "algesum-fuzz"
+version = "0.0.0"
+dependencies = [
+ "algesum",
+ "libfuzzer-sys",
+ "microfield",
+]
+
+[[package]]
 name = "arbitrary"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -231,31 +256,6 @@ name = "hashbrown"
 version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
-
-[[package]]
-name = "homomorphic-hash-rs"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "csv",
- "flate2",
- "microfield",
- "purr",
- "rand",
- "rayon",
- "serde",
- "sha2",
- "ureq",
-]
-
-[[package]]
-name = "homomorphic-hash-rs-fuzz"
-version = "0.0.0"
-dependencies = [
- "homomorphic-hash-rs",
- "libfuzzer-sys",
- "microfield",
-]
 
 [[package]]
 name = "icu_collections"

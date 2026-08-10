@@ -1,11 +1,10 @@
 //! Corrected algebraic contracts for the pre-canonization Phase 6 layer.
 
-use allocation_counter::measure;
-use homomorphic_hash_rs::topology::{
+use algesum::topology::{
     multiset::MultisetAggregator as LegacyMultiset, sequence::SequenceAggregator as LegacySequence,
     traits::HomomorphicAggregator,
 };
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveSignature, BidirectionalSequenceSignature, BinaryPolynomialEncoder,
     CanonicalElementEncoder, DomainSeparatedHashToFieldEncoder, FiniteField as _,
     GaloisSignature256, LegacyAffineEncoderV1, LegacyLinearEncoderV1,
@@ -13,6 +12,7 @@ use homomorphic_hash_rs::{
     PrimeIntegerEncoder, SequenceSignature, SignatureAssurance, SignatureError, StructuralEncoder,
     StructuralLaneEncoder, SymmetricDifferenceAggregator, TrackedMultiset, TrackedSequence,
 };
+use allocation_counter::measure;
 use microfield::{
     BinaryPolynomialField, CanonicalEncoding, Field, Fp251V1, Fp256GenericV1, FpGoldilocks64V1,
     Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1, Invert, Pow, PrimeField, StaticField,
@@ -20,7 +20,7 @@ use microfield::{
 use structural_field_fixture::Gf2_9StructuralFixture;
 
 #[cfg(feature = "dynamic-fields")]
-use homomorphic_hash_rs::{
+use algesum::{
     DynamicAdditiveSignature, DynamicBidirectionalSequenceSignature,
     DynamicMultiEvaluationMultisetSignature, DynamicMultiEvaluationSequenceSignature,
     DynamicMultisetSignature, DynamicSequenceSignature,

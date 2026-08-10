@@ -2,7 +2,7 @@
 
 #![cfg(feature = "signatures")]
 
-use homomorphic_hash_rs::{
+use algesum::{
     BinaryPolynomialEncoder, CanonicalElementEncoder, CompactSignature, PrimeIntegerEncoder,
     SignatureBuilder, SignatureError, SignatureEvaluationProfile, SignatureFieldBinding,
     SignatureLaw, TrackedMultiset, TrackedSequence, TrackedSnapshotLimits,
@@ -224,7 +224,7 @@ fn long_random_tracked_histories_round_trip_after_every_checkpoint() {
 #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 #[test]
 fn dynamic_builder_matches_static_field_profile_and_compact_contract() {
-    use homomorphic_hash_rs::DynamicSignatureBuilder;
+    use algesum::DynamicSignatureBuilder;
     use microfield::StaticField;
     let field = microfield::DynField::builder("rc2_runtime_gf2_9")
         .binary(9, vec![9, 4, 0])

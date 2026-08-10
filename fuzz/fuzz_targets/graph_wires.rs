@@ -1,6 +1,6 @@
 #![no_main]
 
-use homomorphic_hash_rs::{
+use algesum::{
     CanonicalGraphDag, CanonicalGraphDagLimits, CanonicalGraphDocument, CanonicalSearchBudget,
     GraphSchemaId, Microcanon,
 };

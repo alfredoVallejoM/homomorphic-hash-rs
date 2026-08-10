@@ -2,8 +2,8 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
 
-use homomorphic_hash_rs::domains::chemistry::demo4_thermodynamic::Demo4ThermodynamicLimit;
-use homomorphic_hash_rs::harness::runner::BenchmarkRunner;
+use algesum::domains::chemistry::demo4_thermodynamic::Demo4ThermodynamicLimit;
+use algesum::harness::runner::BenchmarkRunner;
 
 // =========================================================================
 // INDUSTRIAL DATASET MANAGER

@@ -1,6 +1,6 @@
 //! G13 adaptive-filter and G14 transactional-delta acceptance gates.
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdaptiveFilterOutcome, AdaptiveFilterPolicy, AdaptiveFilterTier, AdaptiveGraphPipeline,
     CanonicalSearchBudget, FastGraphLabeler, GraphDelta, GraphDeltaPolicy, GraphDeltaUpdatePath,
     GraphError, IncidenceGraph, IncidenceGraphBuilder, IncrementalGraphWorkspace,

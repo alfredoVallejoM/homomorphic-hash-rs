@@ -62,9 +62,9 @@ jobs:
       - name: External generated-source Clippy
         run: cargo +stable clippy --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --all-targets -- -D warnings
       - name: Legacy library regression
-        run: cargo +stable test -p homomorphic-hash-rs --features legacy --lib
+        run: cargo +stable test -p algesum --features legacy --lib
       - name: Legacy field compatibility
-        run: cargo +stable test -p homomorphic-hash-rs --features legacy --test microfield_compat
+        run: cargo +stable test -p algesum --features legacy --test microfield_compat
       - name: F6.V validation harness unit gates
         run: cargo +stable test -p microfield-validation-lab --all-targets
 
@@ -95,7 +95,7 @@ jobs:
         run: rustup toolchain install stable --profile minimal
       - name: Homomorphic signatures, deltas, trees, DB and reconciliation
         run: >-
-          cargo +stable test -p homomorphic-hash-rs --all-features --locked
+          cargo +stable test -p algesum --all-features --locked
           --test structural_signatures
           --test rc_supported_surface
           --test rc_signature_api
@@ -113,7 +113,7 @@ jobs:
         run: rustup toolchain install stable --profile minimal
       - name: Fast filters, exact canonization, deltas and DAG
         run: >-
-          cargo +stable test -p homomorphic-hash-rs --all-features --locked
+          cargo +stable test -p algesum --all-features --locked
           --test fast_graph
           --test graph_canonical
           --test microcanon
@@ -136,7 +136,7 @@ jobs:
           --test property_fields
       - name: Executable correctness inventory and state-machine properties
         run: >-
-          cargo +stable test -p homomorphic-hash-rs --all-features --locked
+          cargo +stable test -p algesum --all-features --locked
           --test rc_correctness_inventory
           --test rc_property_contracts
           --test rc_graph_properties
@@ -472,14 +472,14 @@ jobs:
         run: cargo +stable check --manifest-path crates/microfield/test-fixtures/external-consumer/Cargo.toml --no-default-features --lib
       - name: Root package feature boundaries
         run: |
-          cargo +stable check -p homomorphic-hash-rs --no-default-features --locked
-          cargo +stable check -p homomorphic-hash-rs --no-default-features --features signatures --locked
-          cargo +stable check -p homomorphic-hash-rs --no-default-features --features dynamic-signatures --locked
-          cargo +stable check -p homomorphic-hash-rs --no-default-features --features graph --locked
-          cargo +stable check -p homomorphic-hash-rs --no-default-features --features legacy --locked
+          cargo +stable check -p algesum --no-default-features --locked
+          cargo +stable check -p algesum --no-default-features --features signatures --locked
+          cargo +stable check -p algesum --no-default-features --features dynamic-signatures --locked
+          cargo +stable check -p algesum --no-default-features --features graph --locked
+          cargo +stable check -p algesum --no-default-features --features legacy --locked
       - name: Signatures and protocols without graph or legacy
         run: >-
-          cargo +stable test -p homomorphic-hash-rs --no-default-features
+          cargo +stable test -p algesum --no-default-features
           --features signatures --locked
           --test rc_supported_surface
           --test rc_property_contracts
@@ -489,7 +489,7 @@ jobs:
           --test rc_database_reconciliation
       - name: Runtime signatures without graph or legacy
         run: >-
-          cargo +stable test -p homomorphic-hash-rs --no-default-features
+          cargo +stable test -p algesum --no-default-features
           --features dynamic-signatures --locked
           --test rc_supported_surface
           --test rc_signature_api

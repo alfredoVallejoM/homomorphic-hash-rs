@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, fs, path::Path};
 
-use homomorphic_hash_rs::{
+use algesum::{
     BinaryPolynomialEncoder, CanonicalSearchBudget, ExactCanonicalOutcome, FastGraphLabeler,
     GraphDiscriminationPolicy, HyperedgeIncidence, IncidenceGraph, IncidenceGraphBuilder,
     IncrementalGraphWorkspace, PrimeIntegerEncoder, RefinementProfile, VertexId,

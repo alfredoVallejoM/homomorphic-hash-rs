@@ -41,6 +41,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`pre-rc-b2-benchmark-harness-report.md`](pre-rc-b2-benchmark-harness-report.md) | workers, raw data, estadística y smoke B.2 |
 | [`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md) | piloto, campaña profunda, curvas, cruces y límites B.3 |
 | [`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md) | lotes coalescidos del árbol, DB por particiones y frontier de densidad |
+| [`algesum-postgresql-results.md`](algesum-postgresql-results.md) | integración PostgreSQL, change stream y política adaptativa |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |
 | [`phase-6-g15-internal-readiness-plan.md`](phase-6-g15-internal-readiness-plan.md) | desglose histórico G15 y correspondencia con RC |
 | [`contracts.md`](contracts.md) | contratos algebraicos, batch, generación y firmas |
@@ -63,8 +64,9 @@ G6–G7 y ADR 0032–0034 fijan assurance, comparación pareada y pipeline/delta
 - `pre-rc-benchmark-protocol.md`: B.1–B.3 cerrados con evidencia informativa;
   la extensión bulk del árbol/DB también está ejecutada como `Informative`; la
   réplica `Controlled` de ambas es precondición para promover o integrar la RC.
-- `post-rc-benchmark-and-publication-plan.md`: integración aplazada, DB real y
-  release externa después de reevaluar B.1–B.3.
+- `post-rc-benchmark-and-publication-plan.md`: primera integración PostgreSQL
+  ejecutada; logical decoding, concurrencia, corpus real y release externa
+  continúan después de reevaluar B.1–B.3.
 - `phase-6-g15-internal-readiness-plan.md`: G15.0–G15.4 materializados por
   RC.0–RC.6; G15.5 parcial y G15.6–G15.9 abiertos.
 - `phase-6-validation-plan.md`: harness V1–V6 ejecutado; continúan campañas de
@@ -102,6 +104,8 @@ pueda confundirse con el presente.
 - [`../../crates/validation-lab/README.md`](../../crates/validation-lab/README.md)
   y [`../../validation/f6/README.md`](../../validation/f6/README.md): ejecución
   y artefactos del laboratorio privado.
+- [`../../crates/algesum-postgres-lab/README.md`](../../crates/algesum-postgres-lab/README.md):
+  campaña PostgreSQL reproducible y sus límites.
 
 ## Regla de mantenimiento
 

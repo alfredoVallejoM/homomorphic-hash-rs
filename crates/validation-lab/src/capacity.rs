@@ -8,8 +8,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use allocation_counter::measure;
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BinaryPolynomialEncoder,
     BoundedSetReconciler, CanonicalGraphDag, CanonicalSearchBudget, DatabaseApplyPath,
     DatabaseApplyPolicy, DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema,
@@ -21,6 +20,7 @@ use homomorphic_hash_rs::{
     SequenceTrim, SignatureBuilder, SignatureDelta, SummaryEditPath, SummaryEditPolicy,
     TrackedMultiset, TrackedSequence, TransactionDelta,
 };
+use allocation_counter::measure;
 use microfield::{
     BinaryPolynomialField, CanonicalEncoding, Engine, Field, Fp251V1, Gf2_128V1, PackedBatch,
 };
@@ -1459,11 +1459,9 @@ fn graph_samples(
     samples: &mut Vec<CapacitySample>,
 ) -> Result<(), String> {
     let graph = sparse_cycle(manifest.graph_vertices)?;
-    let labeler = FastGraphLabeler::<Fp251V1, _, 2>::new(
-        prime_encoder(),
-        homomorphic_hash_rs::RefinementProfile::fast(),
-    )
-    .map_err(debug_error)?;
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
     let prepared = labeler.prepare(&graph).map_err(debug_error)?;
     let mut workspace = GraphWorkspace::new();
     workspace.reserve_for(graph.vertex_count(), 4);
@@ -1520,7 +1518,7 @@ fn graph_samples(
                 .resolve(&exact_graph, &canonizer, budget, &[], Some(dag.revision()))
                 .unwrap();
             match outcome {
-                homomorphic_hash_rs::GraphDagResolveOutcome::Reused { node, .. } => node.as_u64(),
+                algesum::GraphDagResolveOutcome::Reused { node, .. } => node.as_u64(),
                 other => panic!("expected DAG reuse, got {other:?}"),
             }
         },

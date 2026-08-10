@@ -1,12 +1,12 @@
 [package]
-name = "homomorphic-hash-rs"
+name = "algesum"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.89"
-description = "Firmas algebraicas homomorficas no criptograficas sobre campos finitos"
+description = "Composable non-cryptographic algebraic summaries over finite fields"
 repository = "https://github.com/alfredoVallejoM/homomorphic-hash-rs"
 homepage = "https://github.com/alfredoVallejoM/homomorphic-hash-rs"
-documentation = "https://docs.rs/homomorphic-hash-rs"
+documentation = "https://docs.rs/algesum"
 include = ["src/**/*.rs", "Cargo.toml", "README.md"]
 autobenches = false
 
@@ -15,6 +15,7 @@ members = [
     "crates/microfield",
     "crates/structural-field-fixture",
     "crates/validation-lab",
+    "crates/algesum-postgres-lab",
 ]
 exclude = [
     "crates/microfield/test-fixtures/external-consumer",

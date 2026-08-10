@@ -1,6 +1,6 @@
 //! G12 paired-comparison, decomposition and witness contracts.
 
-use homomorphic_hash_rs::{
+use algesum::{
     CanonicalSearchBudget, DifferenceWitness, FastGraphLabeler, GraphComparison, IncidenceGraph,
     IncidenceGraphBuilder, Microcanon, PairedComparisonPath, PrimeIntegerEncoder,
     RefinementProfile, VerifiedGraphMapping, VertexId,
@@ -224,11 +224,11 @@ fn paired_matcher_agrees_with_canonical_forms_on_small_graphs() {
         let left = graph_from_mask(5, mask);
         let right = graph_from_mask(5, reversed);
         let left_form = match canon.canonicalize(&left, budget).unwrap() {
-            homomorphic_hash_rs::MicrocanonOutcome::Exact { form, .. } => form,
+            algesum::MicrocanonOutcome::Exact { form, .. } => form,
             outcome => panic!("left oracle incomplete for {mask}: {outcome:?}"),
         };
         let right_form = match canon.canonicalize(&right, budget).unwrap() {
-            homomorphic_hash_rs::MicrocanonOutcome::Exact { form, .. } => form,
+            algesum::MicrocanonOutcome::Exact { form, .. } => form,
             outcome => panic!("right oracle incomplete for {mask}: {outcome:?}"),
         };
         let expected = left_form.bytes() == right_form.bytes();

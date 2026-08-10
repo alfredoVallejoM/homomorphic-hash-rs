@@ -2,7 +2,7 @@
 
 #![cfg(feature = "signatures")]
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, DeltaApplyStatus, DeltaError,
     DeltaJournal, DeltaJournalLimits, DeltaVerification, MultisetDelta, MultisetSignature,
     PrimeIntegerEncoder, RevisionedSignature, SequenceAppend, SequenceSignature, SequenceTrim,
@@ -341,7 +341,7 @@ fn journal_replay_is_atomic_when_a_later_candidate_fails() {
 
 #[test]
 fn delta_contract_is_monomorphized_for_external_generated_fields() {
-    let encoder = homomorphic_hash_rs::BinaryPolynomialEncoder::new(0x9003);
+    let encoder = algesum::BinaryPolynomialEncoder::new(0x9003);
     let empty = AdditiveSignature::<Gf2_9StructuralFixture, _>::new(encoder);
     let mut added = AdditiveSignature::<Gf2_9StructuralFixture, _>::new(encoder);
     added

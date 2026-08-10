@@ -133,6 +133,17 @@ impl_id!(DatabaseSchemaId, "DatabaseSchemaId");
 impl_id!(DatabaseRowKey, "DatabaseRowKey");
 impl_id!(TransactionId, "TransactionId");
 
+impl TransactionId {
+    /// Restores an identity from its canonical bytes.
+    ///
+    /// This does not authenticate the bytes. Consumers normally obtain them
+    /// from a validated `MFTX` envelope or a durable replication checkpoint.
+    #[must_use]
+    pub const fn from_canonical_bytes(bytes: [u8; 32]) -> Self {
+        Self(bytes)
+    }
+}
+
 /// Versioned schema with an explicit unique primary key.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DatabaseSchema {
@@ -903,23 +914,8 @@ where
         }
 
         self.preflight_transaction(transaction, limits)?;
-        let expected = self.expected_rows_after(transaction, limits)?;
-        let target_rows = authoritative_target_rows().into_iter().collect::<Vec<_>>();
-        let mut target = BTreeMap::new();
-        for row in &target_rows {
-            checked_row_bytes(&self.schema, row, limits)?;
-            let key = self.schema.row_key(row)?;
-            if target.insert(key, row.clone()).is_some() {
-                return Err(DatabaseError::Conflict(
-                    "duplicate primary key in authoritative rebuild",
-                ));
-            }
-        }
-        if target != expected {
-            return Err(DatabaseError::Conflict(
-                "authoritative rebuild target mismatch",
-            ));
-        }
+        let target =
+            self.verified_authoritative_target(transaction, limits, authoritative_target_rows())?;
 
         let mut candidate = Self::from_rows(
             self.namespace,
@@ -927,7 +923,7 @@ where
             self.partitions.len(),
             self.encoder.clone(),
             self.offset,
-            target_rows,
+            target.into_values(),
         )?;
         candidate.revision = transaction.target_revision;
         candidate.applied = self.applied.clone();
@@ -969,48 +965,83 @@ where
         Ok(())
     }
 
-    fn expected_rows_after(
+    fn verified_authoritative_target<I>(
         &self,
         transaction: &TransactionDelta,
         limits: DatabaseTransactionLimits,
-    ) -> Result<BTreeMap<DatabaseRowKey, DatabaseRow>, DatabaseError> {
-        let mut expected = BTreeMap::new();
-        for row in self.rows() {
+        target_rows: I,
+    ) -> Result<BTreeMap<DatabaseRowKey, DatabaseRow>, DatabaseError>
+    where
+        I: IntoIterator<Item = DatabaseRow>,
+    {
+        let mut target = BTreeMap::new();
+        for row in target_rows {
+            checked_row_bytes(&self.schema, &row, limits)?;
             let key = self.schema.row_key(&row)?;
-            expected.insert(key, row);
+            if target.insert(key, row).is_some() {
+                return Err(DatabaseError::Conflict(
+                    "duplicate primary key in authoritative rebuild",
+                ));
+            }
         }
-        for mutation in &transaction.mutations {
-            match mutation {
-                RowMutation::Insert(after) => {
-                    checked_row_bytes(&self.schema, after, limits)?;
-                    let key = self.schema.row_key(after)?;
-                    if expected.insert(key, after.clone()).is_some() {
-                        return Err(DatabaseError::Conflict("inserted key already exists"));
-                    }
-                }
+
+        let inserted = transaction
+            .mutations
+            .iter()
+            .filter(|mutation| matches!(mutation, RowMutation::Insert(_)))
+            .count();
+        let deleted = transaction
+            .mutations
+            .iter()
+            .filter(|mutation| matches!(mutation, RowMutation::Delete(_)))
+            .count();
+        let expected_len = self
+            .row_count()
+            .checked_add(inserted)
+            .and_then(|count| count.checked_sub(deleted))
+            .ok_or(DatabaseError::InvalidTransaction(
+                "table cardinality overflow",
+            ))?;
+        if target.len() != expected_len {
+            return Err(DatabaseError::Conflict(
+                "authoritative rebuild target mismatch",
+            ));
+        }
+
+        for (&key, mutation) in transaction.mutation_keys.iter().zip(&transaction.mutations) {
+            let partition = partition_index(key, self.partitions.len());
+            let current = self.partitions[partition].rows.get(&key);
+            let accepted = match mutation {
+                RowMutation::Insert(after) => current.is_none() && target.get(&key) == Some(after),
                 RowMutation::Delete(before) => {
-                    checked_row_bytes(&self.schema, before, limits)?;
-                    let key = self.schema.row_key(before)?;
-                    if expected.get(&key) != Some(before) {
-                        return Err(DatabaseError::Conflict("delete before image mismatch"));
-                    }
-                    expected.remove(&key);
+                    current == Some(before) && !target.contains_key(&key)
                 }
                 RowMutation::Update { before, after } => {
-                    checked_row_bytes(&self.schema, before, limits)?;
-                    checked_row_bytes(&self.schema, after, limits)?;
-                    let key = self.schema.row_key(before)?;
-                    if self.schema.row_key(after)? != key {
-                        return Err(DatabaseError::InvalidTransaction("primary-key update"));
-                    }
-                    if expected.get(&key) != Some(before) {
-                        return Err(DatabaseError::Conflict("update before image mismatch"));
-                    }
-                    expected.insert(key, after.clone());
+                    current == Some(before) && target.get(&key) == Some(after)
+                }
+            };
+            if !accepted {
+                return Err(DatabaseError::Conflict(
+                    "authoritative rebuild target mismatch",
+                ));
+            }
+        }
+
+        let mutated = transaction
+            .mutation_keys
+            .iter()
+            .copied()
+            .collect::<BTreeSet<_>>();
+        for partition in &self.partitions {
+            for (key, current) in &partition.rows {
+                if !mutated.contains(key) && target.get(key) != Some(current) {
+                    return Err(DatabaseError::Conflict(
+                        "authoritative rebuild target mismatch",
+                    ));
                 }
             }
         }
-        Ok(expected)
+        Ok(target)
     }
 
     fn apply_transaction_partitioned(

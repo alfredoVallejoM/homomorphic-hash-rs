@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdaptiveFilterOutcome, AdaptiveFilterPolicy, AdaptiveGraphPipeline, FastGraphLabeler,
     GraphDelta, GraphDeltaPolicy, GraphDeltaUpdatePath, IncidenceGraph, IncidenceGraphBuilder,
     IncrementalGraphWorkspace, Microcanon, PrimeIntegerEncoder, RefinementProfile,

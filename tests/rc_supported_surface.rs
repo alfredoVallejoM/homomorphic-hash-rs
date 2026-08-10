@@ -10,7 +10,7 @@ use serde_json::Value;
 use structural_field_fixture::Gf2_9StructuralFixture;
 
 #[cfg(feature = "signatures")]
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveSignature, BidirectionalSequenceSignature, CanonicalElementEncoder,
     MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature, MultisetSignature,
     SequenceSignature, SignatureLaw, TrackedMultiset, TrackedSequence,
@@ -78,6 +78,7 @@ fn rc_inventory_is_well_formed_and_unique() {
         "protocol.reconciliation",
         "protocol.database-rows",
         "protocol.database-transactions",
+        "protocol.database-change-stream",
         "graph.filter",
         "graph.microcanon",
         "graph.canonical-dag",
@@ -177,7 +178,7 @@ fn signatures_feature_exposes_all_maintained_static_families_without_graph_api()
 #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 #[test]
 fn dynamic_signatures_feature_exposes_runtime_families_without_graph_requirement() {
-    use homomorphic_hash_rs::{
+    use algesum::{
         DynamicAdditiveSignature, DynamicBidirectionalSequenceSignature,
         DynamicMultiEvaluationMultisetSignature, DynamicMultiEvaluationSequenceSignature,
         DynamicMultisetSignature, DynamicSequenceSignature,

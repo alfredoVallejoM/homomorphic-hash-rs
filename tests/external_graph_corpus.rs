@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use homomorphic_hash_rs::{
+use algesum::{
     DiscriminatingGraphComparison, FastGraphLabeler, GraphDiscriminationPolicy, HyperedgeIncidence,
     IncidenceGraph, IncidenceGraphBuilder, PrimeIntegerEncoder, RefinementProfile, VertexId,
 };

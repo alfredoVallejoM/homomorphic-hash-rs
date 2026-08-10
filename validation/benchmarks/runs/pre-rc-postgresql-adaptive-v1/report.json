@@ -1,0 +1,203 @@
+{
+  "schema": "algesum-postgresql-bulk-v1",
+  "rows": 65536,
+  "partitions": 256,
+  "repetitions": 3,
+  "incremental_ceiling": 65536,
+  "partition_density_numerator": 1,
+  "partition_density_denominator": 2,
+  "cells": [
+    {
+      "batch_size": 256,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 9625,
+          "algesum_apply_microseconds": 17845,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 192383,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 1,
+          "postgres_microseconds": 9007,
+          "algesum_apply_microseconds": 15872,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 163959,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 2,
+          "postgres_microseconds": 20344,
+          "algesum_apply_microseconds": 15089,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 169069,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 4096,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 36490,
+          "algesum_apply_microseconds": 41096,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 163307,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 1,
+          "postgres_microseconds": 38124,
+          "algesum_apply_microseconds": 40335,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 160874,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 2,
+          "postgres_microseconds": 34078,
+          "algesum_apply_microseconds": 38733,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 163862,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 16384,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 123172,
+          "algesum_apply_microseconds": 105554,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 164293,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 1,
+          "postgres_microseconds": 125144,
+          "algesum_apply_microseconds": 107950,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 163666,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 2,
+          "postgres_microseconds": 133888,
+          "algesum_apply_microseconds": 108265,
+          "algesum_apply_path": "Incremental",
+          "algesum_rebuild_microseconds": 164577,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 32768,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 265294,
+          "algesum_apply_microseconds": 214092,
+          "algesum_apply_path": "PartitionHybrid",
+          "algesum_rebuild_microseconds": 170543,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 1,
+          "postgres_microseconds": 273722,
+          "algesum_apply_microseconds": 218039,
+          "algesum_apply_path": "PartitionHybrid",
+          "algesum_rebuild_microseconds": 164526,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 2,
+          "postgres_microseconds": 268194,
+          "algesum_apply_microseconds": 214561,
+          "algesum_apply_path": "PartitionHybrid",
+          "algesum_rebuild_microseconds": 165374,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 49152,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 411120,
+          "algesum_apply_microseconds": 251055,
+          "algesum_apply_path": "PartitionRebuild",
+          "algesum_rebuild_microseconds": 159810,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 1,
+          "postgres_microseconds": 422073,
+          "algesum_apply_microseconds": 258212,
+          "algesum_apply_path": "PartitionRebuild",
+          "algesum_rebuild_microseconds": 159126,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 2,
+          "postgres_microseconds": 421648,
+          "algesum_apply_microseconds": 262827,
+          "algesum_apply_path": "PartitionRebuild",
+          "algesum_rebuild_microseconds": 160065,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    },
+    {
+      "batch_size": 65536,
+      "samples": [
+        {
+          "repetition": 0,
+          "postgres_microseconds": 556147,
+          "algesum_apply_microseconds": 294832,
+          "algesum_apply_path": "PartitionRebuild",
+          "algesum_rebuild_microseconds": 176560,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 1,
+          "postgres_microseconds": 578298,
+          "algesum_apply_microseconds": 297647,
+          "algesum_apply_path": "PartitionRebuild",
+          "algesum_rebuild_microseconds": 160995,
+          "exact_match": true,
+          "summary_match": true
+        },
+        {
+          "repetition": 2,
+          "postgres_microseconds": 599142,
+          "algesum_apply_microseconds": 295364,
+          "algesum_apply_path": "PartitionRebuild",
+          "algesum_rebuild_microseconds": 159251,
+          "exact_match": true,
+          "summary_match": true
+        }
+      ]
+    }
+  ]
+}

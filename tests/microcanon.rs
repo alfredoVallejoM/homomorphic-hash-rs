@@ -1,6 +1,6 @@
 //! Contract and adversarial tests for the profile-independent exact core.
 
-use homomorphic_hash_rs::{
+use algesum::{
     BinaryPolynomialEncoder, CanonicalGraphDocument, CanonicalSearchBudget, CanonicalizationPath,
     ExactCanonicalOutcome, FastGraphLabeler, GraphComparison, GraphError, GraphSchemaId,
     HyperedgeIncidence, IncidenceGraph, IncidenceGraphBuilder, Microcanon, MicrocanonOutcome,
@@ -11,7 +11,7 @@ use microfield::{Fp251V1, Gf2_256HhV1};
 
 const DOMAIN: u64 = 0x4d49_4352_4f43_414e;
 
-fn exact_form(outcome: MicrocanonOutcome) -> homomorphic_hash_rs::CanonicalGraphForm {
+fn exact_form(outcome: MicrocanonOutcome) -> algesum::CanonicalGraphForm {
     match outcome {
         MicrocanonOutcome::Exact { form, .. } => form,
         MicrocanonOutcome::Inconclusive { report } => {
@@ -419,15 +419,15 @@ fn g10_physical_depth_and_time_budgets_fail_closed() {
     for (budget, expected) in [
         (
             CanonicalSearchBudget::new(1_000_000).with_max_retained_bytes(1),
-            homomorphic_hash_rs::CanonicalBudgetLimit::RetainedBytes,
+            algesum::CanonicalBudgetLimit::RetainedBytes,
         ),
         (
             CanonicalSearchBudget::new(1_000_000).with_max_depth(0),
-            homomorphic_hash_rs::CanonicalBudgetLimit::SearchDepth,
+            algesum::CanonicalBudgetLimit::SearchDepth,
         ),
         (
             CanonicalSearchBudget::new(1_000_000).with_max_elapsed(Duration::ZERO),
-            homomorphic_hash_rs::CanonicalBudgetLimit::ElapsedTime,
+            algesum::CanonicalBudgetLimit::ElapsedTime,
         ),
     ] {
         match canon.canonicalize(&graph, budget).unwrap() {
@@ -467,7 +467,7 @@ fn component_artifacts_participate_in_the_retained_byte_budget() {
         }
         MicrocanonOutcome::Inconclusive { report } => assert_eq!(
             report.exhausted_limit(),
-            Some(homomorphic_hash_rs::CanonicalBudgetLimit::RetainedBytes)
+            Some(algesum::CanonicalBudgetLimit::RetainedBytes)
         ),
     }
 }
@@ -479,11 +479,11 @@ fn differential_reference_never_publishes_past_new_g10_limits() {
     for (budget, expected) in [
         (
             CanonicalSearchBudget::new(1_000_000).with_max_depth(0),
-            homomorphic_hash_rs::CanonicalBudgetLimit::SearchDepth,
+            algesum::CanonicalBudgetLimit::SearchDepth,
         ),
         (
             CanonicalSearchBudget::new(1_000_000).with_max_retained_bytes(1),
-            homomorphic_hash_rs::CanonicalBudgetLimit::RetainedBytes,
+            algesum::CanonicalBudgetLimit::RetainedBytes,
         ),
     ] {
         match reference.canonicalize(&graph, budget).unwrap() {

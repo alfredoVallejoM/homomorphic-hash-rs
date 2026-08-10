@@ -2,10 +2,10 @@ use std::{env, path::PathBuf, process::ExitCode};
 
 fn main() -> ExitCode {
     let Some(path) = env::args_os().nth(1).map(PathBuf::from) else {
-        eprintln!("usage: homomorphic-hash-rc-consumer ARTIFACT_DIRECTORY");
+        eprintln!("usage: algesum-rc-consumer ARTIFACT_DIRECTORY");
         return ExitCode::FAILURE;
     };
-    match homomorphic_hash_rc_consumer::run_scenario(&path) {
+    match algesum_rc_consumer::run_scenario(&path) {
         Ok(report) => {
             let report_path = path.join("rc9-report.json");
             let bytes = serde_json::to_vec_pretty(&report).expect("serializable RC.9 report");

@@ -1,7 +1,6 @@
 //! Throughput comparison for bounded graph refinement over compact and wide fields.
 
-use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput};
-use homomorphic_hash_rs::{
+use algesum::{
     AdaptiveFilterPolicy, AdaptiveGraphPipeline, BinaryPolynomialEncoder, CanonicalSearchBudget,
     CellMomentProfile, ClosedWalkQueryPlan, DomainSeparatedHashToFieldEncoder,
     ExactCanonicalOutcome, F251BatchGraphWorkspace, F251GraphLabeler, FastGraphLabeler,
@@ -11,6 +10,7 @@ use homomorphic_hash_rs::{
     PatternProductFingerprint, PrimeIntegerEncoder, RefinementProfile, RelationalClosedWalkProfile,
     RelationalMatrixProfile, RelationalThetaProfile, VertexId,
 };
+use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput};
 use microfield::{Fp251V1, FpGoldilocks64V1, Gf2_256HhV1};
 
 const GRAPH_DOMAIN: u64 = 0x4752_4150_485f_0001;

@@ -9,7 +9,7 @@ crudos y expandidos viven en `.cache/graph-corpus/`, que está ignorado.
 
 ```bash
 python3 tools/fetch_graph_corpus.py
-cargo test -p homomorphic-hash-rs --test external_graph_corpus -- --ignored
+cargo test -p algesum --test external_graph_corpus -- --ignored
 ```
 
 Tras una primera descarga, la integridad y la expansión pueden repetirse sin

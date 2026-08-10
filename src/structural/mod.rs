@@ -5,10 +5,10 @@
 //! configuration; it is never a collision-free equality proof.
 //!
 //! ```
-//! use homomorphic_hash_rs::{AdditiveSignature, BinaryPolynomialEncoder};
+//! use algesum::{AdditiveSignature, BinaryPolynomialEncoder};
 //! use microfield::Gf2_256HhV1;
 //!
-//! # fn main() -> Result<(), homomorphic_hash_rs::SignatureError> {
+//! # fn main() -> Result<(), algesum::SignatureError> {
 //! let encoder = BinaryPolynomialEncoder::new(0x4558_414d_504c_4501);
 //! let mut left = AdditiveSignature::<Gf2_256HhV1, _>::new(encoder);
 //! let mut right = AdditiveSignature::<Gf2_256HhV1, _>::new(encoder);
@@ -26,6 +26,7 @@ mod assurance;
 mod bidirectional_sequence;
 mod builder;
 mod database;
+mod database_stream;
 mod delta;
 #[cfg(any(feature = "dynamic-signatures", feature = "dynamic-fields"))]
 mod dynamic;
@@ -61,6 +62,10 @@ pub use database::{
     DatabaseReplayReport, DatabaseRow, DatabaseRowKey, DatabaseSchema, DatabaseSchemaId,
     DatabaseSummary, DatabaseTransactionLimits, DatabaseTransactionLog, DatabaseValue,
     PartitionedDatabase, RowMutation, TransactionDelta, TransactionId,
+};
+pub use database_stream::{
+    CommittedDatabaseTransaction, DatabaseChangeStreamAdapter, DatabaseReplicationCheckpoint,
+    DatabaseReplicationError, DatabaseSourceId,
 };
 pub use delta::{
     AdditiveDelta, ApplicationNamespace, DeltaApplyReport, DeltaApplyStatus, DeltaEnvelope,

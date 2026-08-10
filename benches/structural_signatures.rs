@@ -1,17 +1,17 @@
 //! Comparative throughput for corrected structural laws.
 
-use criterion::{
-    black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
-};
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveSignature, BidirectionalSequenceSignature, BinaryPolynomialEncoder,
     DegreeHistogramProfile, FileChunkProfile, HomomorphicSummaryTree, IncidenceGraphBuilder,
     MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature, MultisetSignature,
     PrimeIntegerEncoder, SequenceSignature,
 };
+use criterion::{
+    black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
+};
 use microfield::{BinaryPolynomialField, Field, Fp251V1, Gf2_256HhV1};
 
-fn cycle(order: usize) -> homomorphic_hash_rs::IncidenceGraph {
+fn cycle(order: usize) -> algesum::IncidenceGraph {
     let mut builder = IncidenceGraphBuilder::new();
     let vertices = (0..order)
         .map(|_| builder.add_vertex(Vec::new()))

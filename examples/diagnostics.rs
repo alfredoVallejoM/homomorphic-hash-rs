@@ -1,6 +1,6 @@
-use homomorphic_hash_rs::algebra::galois_256::GaloisSignature256;
-use homomorphic_hash_rs::domains::chemistry::smiles_parser::SmilesParser;
-use homomorphic_hash_rs::engine::canonizer::CellularGaloisCanonizer;
+use algesum::algebra::galois_256::GaloisSignature256;
+use algesum::domains::chemistry::smiles_parser::SmilesParser;
+use algesum::engine::canonizer::CellularGaloisCanonizer;
 use std::collections::HashSet;
 
 // =========================================================================

@@ -1,6 +1,6 @@
 //! Semantic migration contract between the legacy and Microfield fields.
 
-use homomorphic_hash_rs::{FiniteField as LegacyField, GaloisSignature256};
+use algesum::{FiniteField as LegacyField, GaloisSignature256};
 use microfield::{BinaryPolynomialField, CanonicalEncoding, Field, Gf2_256HhV1, Invert};
 
 #[test]

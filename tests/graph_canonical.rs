@@ -2,7 +2,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use homomorphic_hash_rs::{
+use algesum::{
     BinaryPolynomialEncoder, CanonicalBudgetLimit, CanonicalSearchBudget, CanonicalizationPath,
     DiscriminatingGraphComparison, DiscriminationRecommendation, ExactCanonicalOutcome,
     FastGraphLabeler, GraphDiscriminationPolicy, GraphError, GraphEscalationAdvice,
@@ -826,15 +826,15 @@ fn independent_simple_graph_orbits(vertex_count: usize) -> Vec<u64> {
 #[ignore = "full 32,768-graph certification gate; run explicitly before releases"]
 fn microcanon_matches_every_simple_graph_isomorphism_class_at_six_vertices() {
     let oracle = independent_simple_graph_orbits(6);
-    let canon = homomorphic_hash_rs::Microcanon::default();
+    let canon = algesum::Microcanon::default();
     let budget = CanonicalSearchBudget::new(1_000_000);
     let mut oracle_to_production = BTreeMap::new();
     let mut production_to_oracle = BTreeMap::new();
     for (mask, &oracle_class) in oracle.iter().enumerate() {
         let graph = simple_graph(6, mask as u64);
         let production = match canon.canonicalize(&graph, budget).unwrap() {
-            homomorphic_hash_rs::MicrocanonOutcome::Exact { form, .. } => form.bytes().to_vec(),
-            homomorphic_hash_rs::MicrocanonOutcome::Inconclusive { report } => {
+            algesum::MicrocanonOutcome::Exact { form, .. } => form.bytes().to_vec(),
+            algesum::MicrocanonOutcome::Inconclusive { report } => {
                 panic!("six-vertex gate exhausted at mask {mask:#x}: {report:?}")
             }
         };
@@ -905,7 +905,7 @@ fn multi_field_evidence_is_identified_but_never_claims_isomorphism() {
         f251: &FastGraphLabeler<Fp251V1, PrimeIntegerEncoder, 3>,
         binary: &FastGraphLabeler<Gf2_256HhV1, BinaryPolynomialEncoder, 2>,
         reverse: bool,
-    ) -> homomorphic_hash_rs::MultiFieldGraphEvidence {
+    ) -> algesum::MultiFieldGraphEvidence {
         let first = f251.analyze(graph).unwrap();
         let second = binary.analyze(graph).unwrap();
         let mut builder = MultiFieldGraphEvidenceBuilder::new();

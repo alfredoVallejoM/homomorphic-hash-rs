@@ -1,6 +1,6 @@
 //! Validation adapter for the maintained bounded reconciliation API.
 
-use homomorphic_hash_rs::{BoundedSetReconciler, ReconciliationError, ReconciliationLimits};
+use algesum::{BoundedSetReconciler, ReconciliationError, ReconciliationLimits};
 
 use crate::model::{ReconciliationReport, ValidationManifest};
 

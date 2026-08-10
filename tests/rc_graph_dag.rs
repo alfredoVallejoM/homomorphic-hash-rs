@@ -1,7 +1,7 @@
 //! RC.6 gates for exact canonical persistence, DAG reuse and loss-aware adapters.
 
-use homomorphic_hash_rs::FastGraphLabeler;
-use homomorphic_hash_rs::{
+use algesum::FastGraphLabeler;
+use algesum::{
     CanonicalGraphDag, CanonicalGraphDagLimits, CanonicalSearchBudget, GraphDagResolveOutcome,
     GraphDagUpdateKind, GraphDelta, GraphDeltaPolicy, GraphError, GraphSchemaId,
     GraphSubnetworkAdapter, IncidenceGraph, IncidenceGraphBuilder, IncrementalGraphWorkspace,
@@ -52,7 +52,7 @@ fn permute(graph: &IncidenceGraph, new_to_old: &[usize]) -> IncidenceGraph {
     builder.build().unwrap()
 }
 
-fn inserted(outcome: GraphDagResolveOutcome) -> homomorphic_hash_rs::GraphDagNodeId {
+fn inserted(outcome: GraphDagResolveOutcome) -> algesum::GraphDagNodeId {
     match outcome {
         GraphDagResolveOutcome::Inserted { node, .. } => node,
         other => panic!("expected insertion, got {other:?}"),

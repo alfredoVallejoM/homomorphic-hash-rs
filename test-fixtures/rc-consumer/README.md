@@ -1,7 +1,7 @@
 # RC.9 external consumer fixture
 
 Crate deliberadamente fuera del workspace. Depende de
-`homomorphic-hash-rs` con `default-features = false` y solo usa las features
+`algesum` con `default-features = false` y solo usa las features
 públicas `signatures` y `graph`; por tanto detecta dependencias accidentales en
 módulos privados o en `legacy`.
 

@@ -1,6 +1,6 @@
 use std::fs;
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
     BinaryPolynomialEncoder, BoundedSetReconciler, CanonicalGraphDag, CanonicalSearchBudget,
     DatabaseApplyPolicy, DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema,
@@ -544,19 +544,15 @@ fn database_transaction_end_to_end(
         maximum_batch_iterations: Some(1),
         run: Box::new(move || {
             let mutations = (0..mutation_count)
-                .map(|id| homomorphic_hash_rs::RowMutation::Update {
+                .map(|id| algesum::RowMutation::Update {
                     before: database_row(id as u64, revision + 1),
                     after: database_row(id as u64, revision + 2),
                 })
                 .collect();
             let transaction =
-                homomorphic_hash_rs::TransactionDelta::new(namespace, &schema, revision, mutations)
-                    .unwrap();
+                algesum::TransactionDelta::new(namespace, &schema, revision, mutations).unwrap();
             database
-                .apply_transaction(
-                    &transaction,
-                    homomorphic_hash_rs::DatabaseTransactionLimits::default(),
-                )
+                .apply_transaction(&transaction, algesum::DatabaseTransactionLimits::default())
                 .unwrap();
             revision += 1;
             checksum_field(database.summary().unwrap().evaluation())
@@ -749,11 +745,9 @@ fn graph_fast(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
     // process, so retaining this input until process exit keeps setup outside
     // the measured operation without a self-referential owner.
     let graph: &'static IncidenceGraph = Box::leak(Box::new(sparse_cycle(cell.scale.max(4))?));
-    let labeler = FastGraphLabeler::<Fp251V1, _, 2>::new(
-        prime_encoder(),
-        homomorphic_hash_rs::RefinementProfile::fast(),
-    )
-    .map_err(debug_error)?;
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
     let prepared = labeler.prepare(graph).map_err(debug_error)?;
     let mut workspace = GraphWorkspace::new();
     workspace.reserve_for(graph.vertex_count(), 4);
@@ -791,7 +785,7 @@ fn graph_dag_reuse(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
             .resolve(&graph, &canonizer, budget, &[], Some(dag.revision()))
             .unwrap();
         match outcome {
-            homomorphic_hash_rs::GraphDagResolveOutcome::Reused { node, .. } => node.as_u64(),
+            algesum::GraphDagResolveOutcome::Reused { node, .. } => node.as_u64(),
             other => panic!("expected DAG reuse, got {other:?}"),
         }
     }))

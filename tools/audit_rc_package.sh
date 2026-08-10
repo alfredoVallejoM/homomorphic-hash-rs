@@ -2,11 +2,11 @@
 set -euo pipefail
 
 repository_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-inventory=$(mktemp /tmp/hhrs-package-inventory.XXXXXX)
+inventory=$(mktemp /tmp/algesum-package-inventory.XXXXXX)
 trap 'rm -f "$inventory"' EXIT
 
 cd "$repository_root"
-cargo package -p homomorphic-hash-rs --list --allow-dirty > "$inventory"
+cargo package -p algesum --list --allow-dirty > "$inventory"
 
 grep -qx 'Cargo.toml' "$inventory"
 grep -qx 'README.md' "$inventory"

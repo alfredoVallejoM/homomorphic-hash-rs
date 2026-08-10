@@ -27,6 +27,11 @@ snapshots, deltas, árbol de resúmenes, base de datos, reconciliación acotada,
 pipeline de grafos, canonización exacta presupuestada y DAG canónico. La
 corrección local y remota es fuerte y reproducible.
 
+La marca y el crate raíz se llaman ahora **Algesum**. Los identificadores wire
+`MFRW`, `MFTX`, `MFTL` y sus separadores históricos se conservan por
+compatibilidad de datos; no son nombres de producto ni garantías
+criptográficas.
+
 RC.7–RC.10 están implementados y verdes local y remotamente: inventario de
 corrección, property tests, fuzzing continuo, 37 SLO, regresión máxima del 3
 %, break-even, fallback ejecutable, consumidor externo, restart/migración,
@@ -50,23 +55,31 @@ coalesce hojas y ancestros en el árbol, agrupa deltas por partición, evita
 clones completos en particiones dispersas, ofrece selección híbrida por
 densidad y deriva en streaming la identidad transaccional. En el piloto
 informativo, 4.096 updates sobre 65.536 filas son unas ocho veces más rápidos
-que el rebuild de referencia. Lo que queda para madurar estas rutas es:
+que el rebuild de referencia.
+
+La primera integración PostgreSQL real ya está ejecutada: 18/18 transacciones
+verificadas sobre 65.536 filas y lotes hasta 65.536, con igualdad exacta de
+filas y resúmenes frente a rebuild. También existe un adaptador que separa
+posiciones externas dispersas de revisiones contiguas, conserva checkpoint y
+falla de forma cerrada ante redelivery conflictiva. La evidencia está en
+[`algesum-postgresql-results.md`](algesum-postgresql-results.md). Lo que queda
+para madurar estas rutas es:
 
 - replicar en entorno controlado tanto la campaña general como las nuevas
   matrices de densidad bulk;
-- localizar el crossover DB posterior al streaming con puntos intermedios y
-  validar 1 millón de filas y árboles de al menos 1 GiB;
+- replicar la campaña PostgreSQL sobre 1 millón y 10 millones de filas;
 - reevaluar después la integración y fijar un checkpoint recuperable;
-- validar el consumidor sobre una base de datos real con I/O y concurrencia;
-- aplicar en un motor real el mapeo LSN/revisión fijado por el runbook;
+- extender el consumidor PostgreSQL desde commits controlados a logical
+  decoding/WAL y probar 16–256 clientes concurrentes, crashes y lag;
+- importar NYC TLC para canonicalización y carga masiva de datos heterogéneos;
 - decisión de congelar la reconciliación v1 como conjuntos o diseñar una v2
   para multiplicidad;
 - completar licencia, seguridad, semver, advisories/SBOM y packaging externo.
 
-Por tanto, el siguiente trabajo pre-RC es operacional: obtener la réplica
-controlada de la evidencia ya reproducible. Después se abordará una integración
-de base de datos real para las firmas homomórficas. Grafos permanece como otro
-consumidor importante, no como sustituto de esa línea de producto.
+Por tanto, el siguiente trabajo pre-RC combina la réplica controlada de la
+evidencia ya reproducible con WAL/concurrencia y corpus real sobre la
+integración PostgreSQL existente. Grafos permanece como otro consumidor
+importante, no como sustituto de esa línea de producto.
 
 ## Base auditada
 
@@ -81,7 +94,7 @@ consumidor importante, no como sustituto de esa línea de producto.
 | Piloto B.3 | evidencia en `49828e3`, 6.600 observaciones, 42/44 celdas precisas |
 | Campaña profunda B.3 | evidencia en `36ec77d`, 66.500 observaciones, 44/44 precisas, `Informative` |
 | Bulk tree/DB | código hasta `73a14cc`; cuatro campañas hasta `b9d7ef1`, 6.210 observaciones, 131/138 precisas |
-| Workspace | cuatro paquetes Cargo; dos productos, un laboratorio privado y un fixture generado |
+| Workspace | cinco paquetes Cargo; dos productos, dos laboratorios privados y un fixture generado |
 | Tamaño actual | 624 ficheros versionables y aproximadamente 122 MiB; 104 MiB son `data/` |
 | Implementación Rust | aproximadamente 93.000 líneas |
 | Documentación Markdown | aproximadamente 19.800 líneas |
@@ -103,7 +116,7 @@ sean idénticos.
 | Residuales | Restringido | ecuación algebraica; nunca prueba de pertenencia ni autorización de borrado |
 | Deltas y journals | Soportado | revisión, preflight y commit atómico en memoria; no prometen durabilidad frente a caída |
 | Archivo y summary tree | Soportado | bulk atómico coalesce hojas/ancestros; cambio de fronteras activa rebuild explícito |
-| DB y reconciliación | Soportado con límites | deltas agrupados e híbridos por partición; filas/versiones exactas; reconciliación v1 rechaza multiplicidad |
+| DB y reconciliación | Soportado con límites | deltas agrupados e híbridos por partición; filas/versiones exactas; adaptador change-stream condicionado; reconciliación v1 rechaza multiplicidad |
 | Filtros de grafos | Soportado como evidencia negativa | pueden rechazar o devolver `Indistinguishable`; nunca crean identidad |
 | `Microcanon` | Condicionado | exacto solo al completar presupuesto; de otro modo `Inconclusive` |
 | DAG canónico y adapters | Condicionado | reutilización únicamente tras igualdad de bytes canónicos exactos |
@@ -123,9 +136,9 @@ cargo test --workspace --all-features --all-targets --locked
 cargo clippy --workspace --all-features --all-targets --locked -- -D warnings
 RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --locked --no-deps
 python3 tools/fetch_graph_corpus.py --offline
-cargo test -p homomorphic-hash-rs --all-features --locked \
+cargo test -p algesum --all-features --locked \
   --test external_graph_corpus -- --ignored --nocapture
-cargo test -p homomorphic-hash-rs --all-features --release --locked \
+cargo test -p algesum --all-features --release --locked \
   --test graph_canonical \
   microcanon_matches_every_simple_graph_isomorphism_class_at_six_vertices \
   -- --ignored --exact

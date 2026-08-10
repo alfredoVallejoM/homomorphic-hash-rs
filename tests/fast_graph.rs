@@ -2,14 +2,14 @@
 
 use std::collections::BTreeMap;
 
-use allocation_counter::measure;
-use homomorphic_hash_rs::{
+use algesum::{
     from_legacy_topology, BinaryPolynomialEncoder, CellularGaloisCanonizer,
     F251BatchGraphWorkspace, F251GraphLabeler, FastGraphAnalysis, FastGraphLabeler,
     GaloisSignature256, GraphError, GraphExecution, GraphWorkspace, HyperedgeIncidence,
     IncidenceGraph, IncidenceGraphBuilder, IncrementalGraphWorkspace, PrimeIntegerEncoder,
     RefinementProfile, TopologyProvider, TryCanonicalOutcome, VertexId, VertexKind,
 };
+use allocation_counter::measure;
 use microfield::{BackendId, CpuCapabilities, Fp251V1, FpGoldilocks64V1, Gf2_256HhV1};
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use structural_field_fixture::Gf2_9StructuralFixture;
@@ -945,7 +945,7 @@ fn incremental_random_edit_sequence_is_differentially_exact_across_fields() {
             + microfield::Pow
             + microfield::Invert
             + core::fmt::Debug,
-        E: homomorphic_hash_rs::StructuralEncoder<F>,
+        E: algesum::StructuralEncoder<F>,
     {
         let mut rng = StdRng::seed_from_u64(0xe703_7ed1_a0b4_28db);
         let mut labels: Vec<_> = (0_u64..31).collect();
@@ -1076,7 +1076,7 @@ fn incremental_semantic_row_audit_covers_roles_direction_loops_and_multiplicity(
 
 #[test]
 fn incremental_aggregate_delta_handles_zero_factor_removal_and_insertion() {
-    use homomorphic_hash_rs::StructuralEncoder as _;
+    use algesum::StructuralEncoder as _;
     use microfield::Field as _;
 
     let encoder = PrimeIntegerEncoder::new(GRAPH_DOMAIN);

@@ -1,6 +1,6 @@
 #![no_main]
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
     BinaryPolynomialEncoder, BoundedSetReconciler, DatabaseColumn, DatabaseColumnType,
     DatabaseSchema, DatabaseTransactionLimits, DatabaseTransactionLog, DeltaJournal,

@@ -4,7 +4,7 @@
 
 use std::collections::BTreeMap;
 
-use homomorphic_hash_rs::{
+use algesum::{
     CanonicalGraphDag, CanonicalGraphDagLimits, CanonicalGraphDocument, CanonicalSearchBudget,
     GraphDagResolveOutcome, GraphSchemaId, IncidenceGraph, IncidenceGraphBuilder, Microcanon,
     MicrocanonOutcome, VertexId,

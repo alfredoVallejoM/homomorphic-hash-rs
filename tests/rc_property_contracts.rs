@@ -4,7 +4,7 @@
 
 use std::collections::BTreeMap;
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
     BinaryPolynomialEncoder, DatabaseApplyStatus, DatabaseColumn, DatabaseColumnType, DatabaseRow,
     DatabaseSchema, DatabaseTransactionLimits, DatabaseTransactionLog, DatabaseValue,

@@ -4,7 +4,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use homomorphic_hash_rs::{
+use algesum::{
     CanonicalElementEncoder, FastGraphLabeler, GraphExecution, GraphWorkspace,
     IncidenceGraphBuilder, PrimeIntegerEncoder, RefinementProfile, SequenceSignature,
 };
@@ -92,7 +92,7 @@ fn build_sequence(values: &[u8]) -> SequenceSignature<Fp251V1, CanonicalElementE
     signature
 }
 
-fn sparse_cycle(vertices: usize) -> Result<homomorphic_hash_rs::IncidenceGraph, String> {
+fn sparse_cycle(vertices: usize) -> Result<algesum::IncidenceGraph, String> {
     let mut builder = IncidenceGraphBuilder::new();
     let ids: Vec<_> = (0..vertices)
         .map(|_| builder.add_vertex(Vec::new()))

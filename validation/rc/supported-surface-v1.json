@@ -123,6 +123,12 @@
       "contract": "partitioned MFTX before/after transactions with grouped and adaptive per-partition application, atomic commit, revision and idempotent MFTL replay"
     },
     {
+      "id": "protocol.database-change-stream",
+      "status": "conditional",
+      "feature": "signatures",
+      "contract": "ordered committed-change adapter with separate sparse source position, contiguous Algesum revision, durable checkpoint and fail-closed redelivery rules; PostgreSQL logical decoding and concurrent consumers remain pre-RC work"
+    },
+    {
       "id": "protocol.data-delta",
       "status": "supported",
       "feature": "signatures",

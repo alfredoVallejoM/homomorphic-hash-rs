@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveSignature, BidirectionalSequenceSignature, CanonicalElementEncoder,
     MultiEvaluationMultisetSignature, MultisetSignature, SequenceSignature,
 };

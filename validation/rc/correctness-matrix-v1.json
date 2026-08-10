@@ -143,6 +143,13 @@
       "fuzz_targets": ["structural_wires"]
     },
     {
+      "capability": "protocol.database-change-stream",
+      "status": "covered",
+      "methods": ["sparse-position-mapping", "idempotent-redelivery", "checkpoint-restore", "postgresql-exact-rebuild"],
+      "evidence": ["tests/database_change_stream.rs", "docs/microfield/algesum-postgresql-results.md"],
+      "fuzz_targets": []
+    },
+    {
       "capability": "protocol.data-delta",
       "status": "covered",
       "methods": ["exact-state-machine", "atomic-rejection", "wire-roundtrip"],

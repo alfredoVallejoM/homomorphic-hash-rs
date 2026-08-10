@@ -3,7 +3,7 @@
   "generated_on": "2026-08-09",
   "authority": "Cargo.lock plus the independently locked fixture manifests",
   "lockfiles": [
-    { "path": "Cargo.lock", "packages": 179, "scope": "workspace and RC product" },
+    { "path": "Cargo.lock", "packages": 233, "scope": "workspace, RC product and PostgreSQL integration lab" },
     { "path": "fuzz/Cargo.lock", "packages": 121, "scope": "RC.7 fuzz tooling" },
     { "path": "test-fixtures/rc-consumer/Cargo.lock", "packages": 127, "scope": "RC.9 external consumer" },
     { "path": "crates/microfield/test-fixtures/external-consumer/Cargo.lock", "packages": 36, "scope": "generated-field consumer" }

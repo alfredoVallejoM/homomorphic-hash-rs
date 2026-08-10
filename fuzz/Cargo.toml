@@ -1,5 +1,5 @@
 [package]
-name = "homomorphic-hash-rs-fuzz"
+name = "algesum-fuzz"
 version = "0.0.0"
 publish = false
 edition = "2021"
@@ -10,7 +10,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 microfield = { path = "../crates/microfield", features = ["generator", "dynamic"] }
-homomorphic-hash-rs = { path = "..", features = ["dynamic-fields"] }
+algesum = { path = "..", features = ["dynamic-fields"] }
 
 [[bin]]
 name = "microfield_manifests"

@@ -23,5 +23,5 @@ jobs:
         run: python3 tools/fetch_graph_corpus.py --offline
       - name: Run external graph corpus campaigns
         run: >-
-          cargo +stable test -p homomorphic-hash-rs
+          cargo +stable test -p algesum
           --test external_graph_corpus -- --ignored --nocapture

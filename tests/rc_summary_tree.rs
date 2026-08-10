@@ -2,7 +2,7 @@
 
 #![cfg(feature = "signatures")]
 
-use homomorphic_hash_rs::{
+use algesum::{
     BinaryPolynomialEncoder, FileChunkProfile, HomomorphicSummaryTree, SummaryEditPath,
     SummaryEditPolicy, SummaryRangeEdit, SummaryTreeError, SummaryTreeLimits,
 };

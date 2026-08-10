@@ -6,11 +6,11 @@ use std::io::Write;
 use std::path::Path;
 
 // IMPORTACIONES DE LA LIBRERÍA
-use homomorphic_hash_rs::algebra::traits::FiniteField;
-use homomorphic_hash_rs::algebra::galois_256::GaloisSignature256;
-use homomorphic_hash_rs::topology::traits::HomomorphicAggregator;
-use homomorphic_hash_rs::topology::multiset::MultisetAggregator;
-use homomorphic_hash_rs::engine::proofs::{ProofGenerator, ProofVerifier};
+use algesum::algebra::traits::FiniteField;
+use algesum::algebra::galois_256::GaloisSignature256;
+use algesum::topology::traits::HomomorphicAggregator;
+use algesum::topology::multiset::MultisetAggregator;
+use algesum::engine::proofs::{ProofGenerator, ProofVerifier};
 
 // =============================================================================
 // MOTOR DE TELEMETRÍA RAW CON RIGOR ESTADÍSTICO (VERSIÓN Q1: MEDIANA + P99)

@@ -4,7 +4,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use homomorphic_hash_rs::{
+use algesum::{
     ApplicationNamespace, BinaryPolynomialEncoder, BoundedSetReconciler, DatabaseApplyPath,
     DatabaseApplyPolicy, DatabaseApplyStatus, DatabaseColumn, DatabaseColumnType, DatabaseError,
     DatabaseRow, DatabaseSchema, DatabaseTransactionLimits, DatabaseTransactionLog, DatabaseValue,

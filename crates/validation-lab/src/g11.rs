@@ -2,7 +2,7 @@
 
 use std::{collections::BTreeMap, fs, path::Path};
 
-use homomorphic_hash_rs::{
+use algesum::{
     CellMomentProfile, ClosedWalkQueryPlan, DegreeHistogramProfile,
     DomainSeparatedHashToFieldEncoder, FastGraphLabeler, IncidenceGraph, LoopPatternCatalog,
     PatternFieldFingerprint, PatternProductFingerprint, PrimeIntegerEncoder, RefinementProfile,
@@ -297,7 +297,7 @@ fn evaluate_channels(
 
 fn field_channels<F>(
     graph: &IncidenceGraph,
-    patterns: &homomorphic_hash_rs::ConnectedPatternProfile,
+    patterns: &algesum::ConnectedPatternProfile,
 ) -> Result<FieldChannels, String>
 where
     F: Field + CanonicalEncoding + Invert + Pow + StaticField,
@@ -340,7 +340,7 @@ fn collision_profile(name: &str, buckets: &BTreeMap<Vec<u8>, u64>) -> GraphColli
 }
 
 fn reverse_relabel(graph: &IncidenceGraph) -> Result<IncidenceGraph, String> {
-    use homomorphic_hash_rs::{IncidenceGraphBuilder, VertexId};
+    use algesum::{IncidenceGraphBuilder, VertexId};
 
     let count = graph.vertex_count();
     let mut builder = IncidenceGraphBuilder::new();
@@ -381,7 +381,7 @@ fn debug_error(error: impl std::fmt::Debug) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use homomorphic_hash_rs::IncidenceGraphBuilder;
+    use algesum::IncidenceGraphBuilder;
 
     #[test]
     fn channel_order_is_stable_and_relabeling_invariant() {

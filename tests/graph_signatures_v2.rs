@@ -1,6 +1,6 @@
 //! G11 contracts for non-authoritative graph invariant channels.
 
-use homomorphic_hash_rs::{
+use algesum::{
     CellMomentProfile, ClosedWalkAnalysisStatus, ClosedWalkOperator, ClosedWalkQueryPlan,
     DegreeHistogramProfile, DomainSeparatedHashToFieldEncoder, GraphError, GraphFieldChannel,
     GraphFieldSuitability, IncidenceGraph, IncidenceGraphBuilder, LoopPatternCatalog,
@@ -700,7 +700,7 @@ fn runtime_field_policy_matches_the_generated_external_profile() {
         .binary(9, vec![9, 4, 0])
         .build()
         .unwrap();
-    let dynamic = homomorphic_hash_rs::DynamicGraphFieldProfile::for_field(&runtime);
+    let dynamic = algesum::DynamicGraphFieldProfile::for_field(&runtime);
     let generated = StaticGraphFieldProfile::for_field::<Gf2_9StructuralFixture>();
     assert_eq!(dynamic.field_id(), generated.field_id());
     assert_eq!(dynamic.extension_degree(), generated.extension_degree());

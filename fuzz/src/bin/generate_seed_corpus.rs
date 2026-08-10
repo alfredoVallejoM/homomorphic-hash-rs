@@ -2,7 +2,7 @@
 
 use std::{fs, io, path::Path};
 
-use homomorphic_hash_rs::{
+use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
     BinaryPolynomialEncoder, BoundedSetReconciler, CanonicalGraphDag, CanonicalSearchBudget,
     DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema, DatabaseTransactionLog,
@@ -222,8 +222,8 @@ fn graph_seeds(directory: &Path) -> io::Result<()> {
     let canonizer = Microcanon::new(schema);
     let budget = CanonicalSearchBudget::new(20_000);
     let form = match canonizer.canonicalize(&graph, budget).unwrap() {
-        homomorphic_hash_rs::MicrocanonOutcome::Exact { form, .. } => form,
-        homomorphic_hash_rs::MicrocanonOutcome::Inconclusive { report } => {
+        algesum::MicrocanonOutcome::Exact { form, .. } => form,
+        algesum::MicrocanonOutcome::Inconclusive { report } => {
             panic!("constant graph exceeded corpus budget: {report:?}")
         }
     };
