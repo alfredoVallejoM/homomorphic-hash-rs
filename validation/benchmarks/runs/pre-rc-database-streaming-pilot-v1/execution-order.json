@@ -1,0 +1,246 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "pre-rc-database-streaming-pilot-v1",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 0,
+      "seed": 11403458791123151483,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 0,
+      "seed": 11403458791123151483,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "db-b-s65536-m4096-sc",
+      "process_index": 0,
+      "seed": 6566374094032150464,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "db-a-s65536-m4096-sc",
+      "process_index": 0,
+      "seed": 6566374094032150464,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "db-r-s65536-m4096-sc",
+      "process_index": 0,
+      "seed": 6566374094032150464,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 0,
+      "seed": 11403458791123151483,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 1,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 1,
+      "seed": 2085940091013515362,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "db-b-s65536-m4096-sc",
+      "process_index": 1,
+      "seed": 10057061620938230147,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "db-a-s65536-m4096-sc",
+      "process_index": 1,
+      "seed": 10057061620938230147,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "db-r-s65536-m4096-sc",
+      "process_index": 1,
+      "seed": 10057061620938230147,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 1,
+      "seed": 2085940091013515362,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 1,
+      "seed": 2085940091013515362,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 2,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 2,
+      "seed": 15386914797502396228,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 2,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 2,
+      "seed": 15386914797502396228,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 2,
+      "cell": "db-r-s65536-m4096-sc",
+      "process_index": 2,
+      "seed": 4843727272690328397,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 2,
+      "cell": "db-a-s65536-m4096-sc",
+      "process_index": 2,
+      "seed": 4843727272690328397,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 2,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 2,
+      "seed": 15386914797502396228,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 2,
+      "cell": "db-b-s65536-m4096-sc",
+      "process_index": 2,
+      "seed": 4843727272690328397,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 3,
+      "cell": "db-b-s65536-m4096-sc",
+      "process_index": 3,
+      "seed": 16225116484632015867,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 3,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 3,
+      "seed": 4933277203479409133,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 3,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 3,
+      "seed": 4933277203479409133,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 3,
+      "cell": "db-a-s65536-m4096-sc",
+      "process_index": 3,
+      "seed": 16225116484632015867,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 3,
+      "cell": "db-r-s65536-m4096-sc",
+      "process_index": 3,
+      "seed": 16225116484632015867,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 3,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 3,
+      "seed": 4933277203479409133,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 4,
+      "cell": "db-r-s65536-m65536",
+      "process_index": 4,
+      "seed": 17948845534006354305,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 4,
+      "cell": "db-a-s65536-m65536",
+      "process_index": 4,
+      "seed": 17948845534006354305,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 4,
+      "cell": "db-b-s65536-m65536",
+      "process_index": 4,
+      "seed": 17948845534006354305,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 4,
+      "cell": "db-b-s65536-m4096-sc",
+      "process_index": 4,
+      "seed": 11177562234540430219,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 4,
+      "cell": "db-r-s65536-m4096-sc",
+      "process_index": 4,
+      "seed": 11177562234540430219,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 4,
+      "cell": "db-a-s65536-m4096-sc",
+      "process_index": 4,
+      "seed": 11177562234540430219,
+      "status": "success"
+    }
+  ]
+}

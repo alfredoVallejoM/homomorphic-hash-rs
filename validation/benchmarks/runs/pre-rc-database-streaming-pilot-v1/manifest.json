@@ -1,0 +1,91 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "pre-rc-database-streaming-pilot-v1",
+  "profile": "pilot",
+  "seed": 13503953896175478914,
+  "host_mode": "interactive",
+  "minimum_processes": 5,
+  "maximum_processes": 5,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 9,
+  "target_observation_ns": 500000,
+  "maximum_batch_iterations": 1,
+  "bootstrap_resamples": 1000,
+  "maximum_relative_ci_half_width": 0.2,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "db-r-s65536-m4096-sc",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "payload_bytes": 16,
+      "dataset_size": 65536,
+      "baseline_cell": null,
+      "curve": "db-streaming-sparse",
+      "strategy": "rebuild-scattered"
+    },
+    {
+      "id": "db-b-s65536-m4096-sc",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "payload_bytes": 16,
+      "dataset_size": 65536,
+      "baseline_cell": "db-r-s65536-m4096-sc",
+      "curve": "db-streaming-sparse",
+      "strategy": "bulk-scattered"
+    },
+    {
+      "id": "db-a-s65536-m4096-sc",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 4096,
+      "scale_unit": "row-mutations",
+      "payload_bytes": 16,
+      "dataset_size": 65536,
+      "baseline_cell": "db-r-s65536-m4096-sc",
+      "curve": "db-streaming-sparse",
+      "strategy": "adaptive-scattered"
+    },
+    {
+      "id": "db-r-s65536-m65536",
+      "family": "database",
+      "operation": "database.selected-rebuild-total",
+      "scale": 65536,
+      "scale_unit": "row-mutations",
+      "payload_bytes": 16,
+      "dataset_size": 65536,
+      "baseline_cell": null,
+      "curve": "db-streaming-full",
+      "strategy": "rebuild-scattered"
+    },
+    {
+      "id": "db-b-s65536-m65536",
+      "family": "database",
+      "operation": "database.bulk-transaction-total",
+      "scale": 65536,
+      "scale_unit": "row-mutations",
+      "payload_bytes": 16,
+      "dataset_size": 65536,
+      "baseline_cell": "db-r-s65536-m65536",
+      "curve": "db-streaming-full",
+      "strategy": "bulk-scattered"
+    },
+    {
+      "id": "db-a-s65536-m65536",
+      "family": "database",
+      "operation": "database.adaptive-transaction-total",
+      "scale": 65536,
+      "scale_unit": "row-mutations",
+      "payload_bytes": 16,
+      "dataset_size": 65536,
+      "baseline_cell": "db-r-s65536-m65536",
+      "curve": "db-streaming-full",
+      "strategy": "adaptive-scattered"
+    }
+  ]
+}
