@@ -1,0 +1,259 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-x2-v1-x2-wire-failure-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "x2-wire-failure-additive-p1-n1",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 9.503577848451327,
+      "p95_ns_per_unit": 11.548259471792033,
+      "p99_ns_per_unit": 12.606692823561946,
+      "mad_ns_per_unit": 0.3651306692477876,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9.153000553097344,
+        "upper": 9.85415514380531
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9.78991249827157,
+        "upper": 12.871301161504425
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9.20094717920354,
+        "upper": 12.871301161504425
+      },
+      "relative_median_ci_half_width": 0.036888980228757896,
+      "precision_met": true,
+      "allocation_count_median": 256.0,
+      "allocated_bytes_median": 28928.0,
+      "peak_allocated_bytes_median": 113.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-failure-multi-multiset-p1-n1",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 8.85471653293919,
+      "p95_ns_per_unit": 9.020428631756758,
+      "p99_ns_per_unit": 9.04418285472973,
+      "mad_ns_per_unit": 0.03318992820945965,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 8.838075380067568,
+        "upper": 8.87135768581081
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 8.92058422191723,
+        "upper": 9.050121410472974
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 8.931561444256756,
+        "upper": 9.050121410472974
+      },
+      "relative_median_ci_half_width": 0.0018793546704422017,
+      "precision_met": true,
+      "allocation_count_median": 1280.0,
+      "allocated_bytes_median": 50176.0,
+      "peak_allocated_bytes_median": 172.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-failure-summary-tree-p64-n1",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 2.118285500323834,
+      "p95_ns_per_unit": 2.1606377003724093,
+      "p99_ns_per_unit": 2.171044314685881,
+      "mad_ns_per_unit": 0.00610478060233155,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.115173656088083,
+        "upper": 2.1213973445595853
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.1229182521049226,
+        "upper": 2.173645968264249
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.1229355569948187,
+        "upper": 2.173645968264249
+      },
+      "relative_median_ci_half_width": 0.001469039105104315,
+      "precision_met": true,
+      "allocation_count_median": 768.0,
+      "allocated_bytes_median": 148224.0,
+      "peak_allocated_bytes_median": 193.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-failure-database-row-p64-n1",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 2.663294350228658,
+      "p95_ns_per_unit": 3.1698027820121943,
+      "p99_ns_per_unit": 3.4175257240853663,
+      "mad_ns_per_unit": 0.07320050495426811,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.5695503048780486,
+        "upper": 2.757038395579268
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.6231778772865852,
+        "upper": 3.4794564596036586
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.6231778772865852,
+        "upper": 3.4794564596036586
+      },
+      "relative_median_ci_half_width": 0.03519852972412205,
+      "precision_met": true,
+      "allocation_count_median": 2048.0,
+      "allocated_bytes_median": 149504.0,
+      "peak_allocated_bytes_median": 82.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-failure-reconciliation-p1-n64",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 3.2750167846679688,
+      "p95_ns_per_unit": 3.48807144165039,
+      "p99_ns_per_unit": 3.565827178955078,
+      "mad_ns_per_unit": 0.0056304931640625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3.2694091796875,
+        "upper": 3.2806243896484375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3.2769622802734375,
+        "upper": 3.58526611328125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3.2801552505493166,
+        "upper": 3.58526611328125
+      },
+      "relative_median_ci_half_width": 0.0017122370201950786,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 65536.0,
+      "peak_allocated_bytes_median": 64.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-failure-dag-p64-n64",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 2.724506176614481,
+      "p95_ns_per_unit": 3.273261298312133,
+      "p99_ns_per_unit": 3.274331809564579,
+      "mad_ns_per_unit": 0.09462909735812164,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.200892857142857,
+        "upper": 3.2481194960861055
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.728895930161447,
+        "upper": 3.2745994373776908
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2.2637444960861055,
+        "upper": 3.2745994373776908
+      },
+      "relative_median_ci_half_width": 0.19218650483012492,
+      "precision_met": true,
+      "allocation_count_median": 768.0,
+      "allocated_bytes_median": 133376.0,
+      "peak_allocated_bytes_median": 511.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "x2-wire-failure-additive",
+      "strategy": "additive",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-failure-dag",
+      "strategy": "dag",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-failure-database-row",
+      "strategy": "database-row",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-failure-multi-multiset",
+      "strategy": "multi-multiset",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-failure-reconciliation",
+      "strategy": "reconciliation",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-failure-summary-tree",
+      "strategy": "summary-tree",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

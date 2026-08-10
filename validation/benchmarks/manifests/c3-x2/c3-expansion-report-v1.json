@@ -1,0 +1,65 @@
+{
+  "schema": "algesum-c3-expansion-report-v1",
+  "campaign_id": "algesum-c3-x2-v1",
+  "source": "c3-x2-factor-plan-v1.json",
+  "total_cells": 133,
+  "total_preflight_cells": 19,
+  "shards": [
+    {
+      "id": "x2-wire-roundtrip",
+      "operations": 11,
+      "primary_combinations": 3,
+      "secondary_combinations": 3,
+      "publication_cells": 99,
+      "smoke_cells": 11,
+      "preflight_cells": 11,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.1111111111111111,
+      "publication_manifest": "c3-x2-wire-roundtrip-publication-v1.json",
+      "smoke_manifest": "c3-x2-wire-roundtrip-smoke-v1.json",
+      "preflight_manifest": "c3-x2-wire-roundtrip-preflight-v1.json"
+    },
+    {
+      "id": "x2-wire-failure",
+      "operations": 6,
+      "primary_combinations": 2,
+      "secondary_combinations": 2,
+      "publication_cells": 24,
+      "smoke_cells": 6,
+      "preflight_cells": 6,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.25,
+      "publication_manifest": "c3-x2-wire-failure-publication-v1.json",
+      "smoke_manifest": "c3-x2-wire-failure-smoke-v1.json",
+      "preflight_manifest": "c3-x2-wire-failure-preflight-v1.json"
+    },
+    {
+      "id": "x2-package-consumer",
+      "operations": 1,
+      "primary_combinations": 1,
+      "secondary_combinations": 1,
+      "publication_cells": 1,
+      "smoke_cells": 1,
+      "preflight_cells": 1,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 1.0,
+      "publication_manifest": "c3-x2-package-consumer-publication-v1.json",
+      "smoke_manifest": "c3-x2-package-consumer-smoke-v1.json",
+      "preflight_manifest": "c3-x2-package-consumer-preflight-v1.json"
+    },
+    {
+      "id": "x2-legacy-facade",
+      "operations": 1,
+      "primary_combinations": 3,
+      "secondary_combinations": 3,
+      "publication_cells": 9,
+      "smoke_cells": 1,
+      "preflight_cells": 1,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.1111111111111111,
+      "publication_manifest": "c3-x2-legacy-facade-publication-v1.json",
+      "smoke_manifest": "c3-x2-legacy-facade-smoke-v1.json",
+      "preflight_manifest": "c3-x2-legacy-facade-preflight-v1.json"
+    }
+  ]
+}

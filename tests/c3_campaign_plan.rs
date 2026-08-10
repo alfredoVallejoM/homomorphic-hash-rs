@@ -111,7 +111,12 @@ fn c3_operation_inventory_owns_every_suite_and_exposes_every_gap() {
             suite["id"]
         );
         assert!(
-            !missing.is_empty() || status == "implemented",
+            !missing.is_empty()
+                || status == "implemented"
+                || (status == "external"
+                    && suite["executed_external_operations"]
+                        .as_array()
+                        .is_some_and(|operations| !operations.is_empty())),
             "suite {} hides its remaining workload gaps",
             suite["id"]
         );
@@ -140,11 +145,16 @@ fn c3_generated_scaling_inventory_reaches_the_declared_volume_floor() {
         "../validation/benchmarks/manifests/c3-g1-g2/c3-expansion-report-v1.json"
     ))
     .unwrap();
+    let x2: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/manifests/c3-x2/c3-expansion-report-v1.json"
+    ))
+    .unwrap();
 
     let generated_cells = p0["total_cells"].as_u64().unwrap()
         + f3_s3["total_cells"].as_u64().unwrap()
         + t1_r1_d1["total_cells"].as_u64().unwrap()
-        + g1_g2["total_cells"].as_u64().unwrap();
+        + g1_g2["total_cells"].as_u64().unwrap()
+        + x2["total_cells"].as_u64().unwrap();
     let targets = &ledger["targets"];
     assert!(
         generated_cells >= targets["timed_cells_lower_bound"].as_u64().unwrap(),
@@ -154,7 +164,7 @@ fn c3_generated_scaling_inventory_reaches_the_declared_volume_floor() {
         generated_cells <= targets["timed_cells_upper_bound"].as_u64().unwrap(),
         "the generated C3 inventory exceeds its declared reviewable envelope"
     );
-    assert_eq!(generated_cells, 3_110);
+    assert_eq!(generated_cells, 3_243);
 }
 
 #[test]

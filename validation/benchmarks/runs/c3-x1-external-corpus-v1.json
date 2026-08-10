@@ -1,0 +1,51 @@
+{
+  "schema": "algesum-c3-external-corpus-report-v1",
+  "campaign_id": "algesum-c3-x1-v1",
+  "date": "2026-08-11",
+  "classification": "informative-external",
+  "claims_allowed": false,
+  "sources": [
+    { "id": "networkx-graph-atlas", "bytes": 8887, "sha256": "73fc416df0164923607751cb759f4ae81deb5f6550bf25be59c86de3b747e41d" },
+    { "id": "tudataset-mutag", "bytes": 24550, "sha256": "c419bdc853c367d2d83da4973c45100954ae15e10f5ae2cddde6ca431f8207f6" },
+    { "id": "snap-email-eu-core", "bytes": 79754, "sha256": "4b47acdb80197b085fe63c819c357ae488131ee904ed93d1b219a68b0f9e245f" },
+    { "id": "snap-email-eu-core-labels", "bytes": 2663, "sha256": "e5abe5b4581a480032a63adcf2576c161785f45692642c6ebb0b1276f0f33669" },
+    { "id": "xgi-diseasome", "bytes": 108339, "sha256": "1b8e89e6a42ca7c6a1e966f45b21928e5d04d437b02c80d0fc8b315a5b05807f" }
+  ],
+  "tests": [
+    {
+      "id": "graph-atlas-v2-separation",
+      "status": "passed",
+      "records": 1253,
+      "test_reported_seconds": 0.14,
+      "validated": ["renumbering-invariance", "global-channel-invariance", "no-v2-digest-collision-between-nonisomorphic-representatives"]
+    },
+    {
+      "id": "mutag-chemistry",
+      "status": "passed",
+      "records": 188,
+      "test_reported_seconds": 0.05,
+      "validated": ["atom-label-preservation", "bond-label-preservation", "renumbering-invariance"]
+    },
+    {
+      "id": "snap-email-directed-network",
+      "status": "passed",
+      "vertices": 1005,
+      "incidences": 25571,
+      "test_reported_seconds": 0.09,
+      "validated": ["direction-and-department-labels", "weak-and-strong-components", "renumbering-invariance"]
+    },
+    {
+      "id": "xgi-diseasome-hypergraph",
+      "status": "passed",
+      "entity_vertices": 516,
+      "hyperedges": 903,
+      "test_reported_seconds": 0.03,
+      "validated": ["hyperedge-labels", "incidence-roles", "renumbering-invariance"]
+    }
+  ],
+  "limitations": [
+    "test-reported durations are one-shot informative timings, not publication confidence intervals",
+    "the corpora are downloaded into an ignored cache and verified against the checked-in SHA-256 manifest",
+    "no fingerprint equality is interpreted as an exact isomorphism proof"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-x2-v1-x2-legacy-facade-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "x2-legacy-facade-multiset-p1-n1",
+      "process_index": 0,
+      "seed": 3010120948341328312,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 1,
+      "cell": "x2-legacy-facade-multiset-p1-n1",
+      "process_index": 1,
+      "seed": 17162600978751173524,
+      "status": "success"
+    }
+  ]
+}

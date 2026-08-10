@@ -1,0 +1,182 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-x2-v1-x2-wire-roundtrip-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-multi-sequence-p4096-n1",
+      "process_index": 0,
+      "seed": 8412005032998172162,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-additive-p1-n1",
+      "process_index": 0,
+      "seed": 10351817929664115476,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-database-row-p1-n64",
+      "process_index": 0,
+      "seed": 12083435652914872657,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-multi-multiset-p4096-n1",
+      "process_index": 0,
+      "seed": 587745131325698414,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-journal-p4096-n64",
+      "process_index": 0,
+      "seed": 16534364237930455578,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-summary-tree-p1-n64",
+      "process_index": 0,
+      "seed": 9537779474769192581,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-bidirectional-p64-n1",
+      "process_index": 0,
+      "seed": 12227987758328460854,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-multiset-p64-n1",
+      "process_index": 0,
+      "seed": 6308565587886898770,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-reconciliation-p64-n64",
+      "process_index": 0,
+      "seed": 10788137404079445278,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-dag-p64-n64",
+      "process_index": 0,
+      "seed": 6965387533098594280,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 0,
+      "cell": "x2-wire-roundtrip-sequence-p1-n1",
+      "process_index": 0,
+      "seed": 8984295601074052659,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-reconciliation-p64-n64",
+      "process_index": 1,
+      "seed": 5357668081782821507,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-sequence-p1-n1",
+      "process_index": 1,
+      "seed": 5607803324336061195,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-multi-sequence-p4096-n1",
+      "process_index": 1,
+      "seed": 9024641927227715254,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-bidirectional-p64-n1",
+      "process_index": 1,
+      "seed": 4999391331765092315,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-dag-p64-n64",
+      "process_index": 1,
+      "seed": 1325397106426108878,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-summary-tree-p1-n64",
+      "process_index": 1,
+      "seed": 12421276787862274809,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-multiset-p64-n1",
+      "process_index": 1,
+      "seed": 8157255699697479024,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-multi-multiset-p4096-n1",
+      "process_index": 1,
+      "seed": 5536377875167155723,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-database-row-p1-n64",
+      "process_index": 1,
+      "seed": 3949724337556403955,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-journal-p4096-n64",
+      "process_index": 1,
+      "seed": 2015157933579757174,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 1,
+      "cell": "x2-wire-roundtrip-additive-p1-n1",
+      "process_index": 1,
+      "seed": 2976871375949494034,
+      "status": "success"
+    }
+  ]
+}

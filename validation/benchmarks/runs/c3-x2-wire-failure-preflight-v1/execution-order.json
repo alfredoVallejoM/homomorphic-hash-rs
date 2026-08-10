@@ -1,0 +1,102 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-x2-v1-x2-wire-failure-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "x2-wire-failure-multi-multiset-p1-n1",
+      "process_index": 0,
+      "seed": 10538907771676466050,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "x2-wire-failure-reconciliation-p1-n64",
+      "process_index": 0,
+      "seed": 15538183253526954354,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "x2-wire-failure-dag-p64-n64",
+      "process_index": 0,
+      "seed": 4932992891073333882,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "x2-wire-failure-additive-p1-n1",
+      "process_index": 0,
+      "seed": 3768868115484125709,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "x2-wire-failure-summary-tree-p64-n1",
+      "process_index": 0,
+      "seed": 6486141280498204932,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "x2-wire-failure-database-row-p64-n1",
+      "process_index": 0,
+      "seed": 14865105798504475172,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 1,
+      "cell": "x2-wire-failure-additive-p1-n1",
+      "process_index": 1,
+      "seed": 13158977398539108804,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "x2-wire-failure-database-row-p64-n1",
+      "process_index": 1,
+      "seed": 433447386298382084,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "x2-wire-failure-multi-multiset-p1-n1",
+      "process_index": 1,
+      "seed": 7246465504755950370,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "x2-wire-failure-summary-tree-p64-n1",
+      "process_index": 1,
+      "seed": 17959934036303345025,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "x2-wire-failure-reconciliation-p1-n64",
+      "process_index": 1,
+      "seed": 17677576471328189924,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "x2-wire-failure-dag-p64-n64",
+      "process_index": 1,
+      "seed": 12574929405573788452,
+      "status": "success"
+    }
+  ]
+}

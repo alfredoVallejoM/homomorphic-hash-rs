@@ -1,0 +1,79 @@
+{
+  "schema": "algesum-c3-factor-plan-v1",
+  "campaign_id": "algesum-c3-x2-v1",
+  "seed": 130320260814,
+  "shards": [
+    {
+      "id": "x2-wire-roundtrip",
+      "family": "wire-family-roundtrip",
+      "scale_unit": "items-or-bytes",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "additive", "operation": "wire.family-roundtrip-total", "strategy": "additive" },
+        { "id": "sequence", "operation": "wire.family-roundtrip-total", "strategy": "sequence" },
+        { "id": "bidirectional", "operation": "wire.family-roundtrip-total", "strategy": "bidirectional" },
+        { "id": "multiset", "operation": "wire.family-roundtrip-total", "strategy": "multiset" },
+        { "id": "multi-sequence", "operation": "wire.family-roundtrip-total", "strategy": "multi-sequence" },
+        { "id": "multi-multiset", "operation": "wire.family-roundtrip-total", "strategy": "multi-multiset" },
+        { "id": "summary-tree", "operation": "wire.family-roundtrip-total", "strategy": "summary-tree" },
+        { "id": "database-row", "operation": "wire.family-roundtrip-total", "strategy": "database-row" },
+        { "id": "reconciliation", "operation": "wire.family-roundtrip-total", "strategy": "reconciliation" },
+        { "id": "dag", "operation": "wire.family-roundtrip-total", "strategy": "dag" },
+        { "id": "journal", "operation": "wire.family-roundtrip-total", "strategy": "journal" }
+      ],
+      "primary_factors": {
+        "scale": [1, 64, 4096]
+      },
+      "secondary_factors": {
+        "payload_bytes": [1, 64, 4096]
+      }
+    },
+    {
+      "id": "x2-wire-failure",
+      "family": "wire-fail-closed",
+      "scale_unit": "items-or-bytes",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "additive", "operation": "wire.failure-matrix", "strategy": "additive" },
+        { "id": "multi-multiset", "operation": "wire.failure-matrix", "strategy": "multi-multiset" },
+        { "id": "summary-tree", "operation": "wire.failure-matrix", "strategy": "summary-tree" },
+        { "id": "database-row", "operation": "wire.failure-matrix", "strategy": "database-row" },
+        { "id": "reconciliation", "operation": "wire.failure-matrix", "strategy": "reconciliation" },
+        { "id": "dag", "operation": "wire.failure-matrix", "strategy": "dag" }
+      ],
+      "primary_factors": {
+        "scale": [1, 64]
+      },
+      "secondary_factors": {
+        "payload_bytes": [1, 64]
+      }
+    },
+    {
+      "id": "x2-package-consumer",
+      "family": "external-package-consumer",
+      "scale_unit": "consumer-builds",
+      "preflight_max_scale": 1,
+      "operations": [
+        { "id": "consumer", "operation": "package.consumer-total", "strategy": "locked-offline-check" }
+      ],
+      "primary_factors": {
+        "scale": [1]
+      }
+    },
+    {
+      "id": "x2-legacy-facade",
+      "family": "legacy-facade-equivalence",
+      "scale_unit": "items",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "multiset", "operation": "legacy.facade-semantic", "strategy": "multiset-byte-equivalence" }
+      ],
+      "primary_factors": {
+        "scale": [1, 64, 4096]
+      },
+      "secondary_factors": {
+        "payload_bytes": [1, 64, 4096]
+      }
+    }
+  ]
+}

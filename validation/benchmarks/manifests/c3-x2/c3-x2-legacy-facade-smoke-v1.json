@@ -1,0 +1,31 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-x2-v1-x2-legacy-facade-smoke",
+  "profile": "smoke",
+  "seed": 130320260814,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "x2-legacy-facade-multiset-p1-n1",
+      "family": "legacy-facade-equivalence",
+      "operation": "legacy.facade-semantic",
+      "scale": 1,
+      "scale_unit": "items",
+      "payload_bytes": 1,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "x2-legacy-facade-multiset",
+      "strategy": "multiset-byte-equivalence"
+    }
+  ]
+}

@@ -312,8 +312,8 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
   suelo normativo;
 - T1/R1/D1 completadas en preflight: 374 celdas nuevas, 16 variantes, cero
   checksums inestables y 16/16 precisas tras recalibrar restore; el inventario
-  acumulado alcanza 3.110 celdas;
-- continuar por X1/X2 y D2, y cerrar los huecos de backend F1/F2;
+  acumulado alcanza 3.243 celdas;
+- continuar por D2 y cerrar los huecos de backend/reference F1/F2;
 - completar C3-Semantic, C3-Scaling y C3-Systems;
 - replicar los claims en Intel x86-64, AMD x86-64 y AArch64 dedicados;
 - decidir go/no-go con cobertura, efectos, intervalos, límites e inconclusos;
@@ -328,6 +328,8 @@ Evidencia T1/R1/D1:
 [`c3-t1-r1-d1-implementation-and-preflight-report.md`](c3-t1-r1-d1-implementation-and-preflight-report.md).
 Evidencia G1/G2:
 [`c3-g1-g2-implementation-and-preflight-report.md`](c3-g1-g2-implementation-and-preflight-report.md).
+Evidencia X1/X2:
+[`c3-x1-x2-implementation-and-preflight-report.md`](c3-x1-x2-implementation-and-preflight-report.md).
 
 ### 5. Base de datos real
 

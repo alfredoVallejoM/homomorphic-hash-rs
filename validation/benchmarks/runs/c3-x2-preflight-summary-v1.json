@@ -1,0 +1,23 @@
+{
+  "schema": "algesum-c3-preflight-summary-v1",
+  "campaign_id": "algesum-c3-x2-v1",
+  "classification": "smoke",
+  "claims_allowed": false,
+  "publication_cells": 133,
+  "preflight_cells": 19,
+  "workers": 38,
+  "observations": 190,
+  "precise_cells": 19,
+  "median_relative_ci_half_width": 0.02910124028331546,
+  "maximum_relative_ci_half_width": 0.19218650483012492,
+  "maximum_peak_allocated_bytes": 58398,
+  "consumer_compile_median_ns": 10146738635,
+  "legacy_equivalence_allocation_free": true,
+  "findings": [
+    "all eleven maintained wire-family round trips completed deterministically",
+    "all six selected wire families rejected both truncation and corrupted magic",
+    "the locked offline external consumer compiled successfully in independent processes",
+    "the legacy multiset facade remained byte-identical to the maintained legacy encoder profile",
+    "child-process memory is not included in the in-process allocation counter"
+  ]
+}

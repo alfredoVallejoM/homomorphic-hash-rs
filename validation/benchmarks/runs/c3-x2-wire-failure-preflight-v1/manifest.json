@@ -1,0 +1,91 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-x2-v1-x2-wire-failure-preflight",
+  "profile": "smoke",
+  "seed": 130320260814,
+  "host_mode": "interactive",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 250000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "x2-wire-failure-additive-p1-n1",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "payload_bytes": 1,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "x2-wire-failure-additive",
+      "strategy": "additive"
+    },
+    {
+      "id": "x2-wire-failure-multi-multiset-p1-n1",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "payload_bytes": 1,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "x2-wire-failure-multi-multiset",
+      "strategy": "multi-multiset"
+    },
+    {
+      "id": "x2-wire-failure-summary-tree-p64-n1",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "payload_bytes": 64,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "x2-wire-failure-summary-tree",
+      "strategy": "summary-tree"
+    },
+    {
+      "id": "x2-wire-failure-database-row-p64-n1",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "payload_bytes": 64,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "x2-wire-failure-database-row",
+      "strategy": "database-row"
+    },
+    {
+      "id": "x2-wire-failure-reconciliation-p1-n64",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "payload_bytes": 1,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "x2-wire-failure-reconciliation",
+      "strategy": "reconciliation"
+    },
+    {
+      "id": "x2-wire-failure-dag-p64-n64",
+      "family": "wire-fail-closed",
+      "operation": "wire.failure-matrix",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "payload_bytes": 64,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "x2-wire-failure-dag",
+      "strategy": "dag"
+    }
+  ]
+}

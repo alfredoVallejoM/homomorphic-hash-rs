@@ -1,0 +1,7 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+x2-wire-failure-additive-p1-n1,wire-fail-closed,wire.failure-matrix,1,items-or-bytes,2,10,9.503577848,11.548259472,12.606692824,0.365130669,9.153000553,9.854155144,0.036888980,true,Precise,,,,,,,
+x2-wire-failure-multi-multiset-p1-n1,wire-fail-closed,wire.failure-matrix,1,items-or-bytes,2,10,8.854716533,9.020428632,9.044182855,0.033189928,8.838075380,8.871357686,0.001879355,true,Precise,,,,,,,
+x2-wire-failure-summary-tree-p64-n1,wire-fail-closed,wire.failure-matrix,1,items-or-bytes,2,10,2.118285500,2.160637700,2.171044315,0.006104781,2.115173656,2.121397345,0.001469039,true,Precise,,,,,,,
+x2-wire-failure-database-row-p64-n1,wire-fail-closed,wire.failure-matrix,1,items-or-bytes,2,10,2.663294350,3.169802782,3.417525724,0.073200505,2.569550305,2.757038396,0.035198530,true,Precise,,,,,,,
+x2-wire-failure-reconciliation-p1-n64,wire-fail-closed,wire.failure-matrix,64,items-or-bytes,2,10,3.275016785,3.488071442,3.565827179,0.005630493,3.269409180,3.280624390,0.001712237,true,Precise,,,,,,,
+x2-wire-failure-dag-p64-n64,wire-fail-closed,wire.failure-matrix,64,items-or-bytes,2,10,2.724506177,3.273261298,3.274331810,0.094629097,2.200892857,3.248119496,0.192186505,true,Precise,,,,,,,

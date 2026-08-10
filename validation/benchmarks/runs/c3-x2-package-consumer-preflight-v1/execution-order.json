@@ -1,0 +1,22 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-x2-v1-x2-package-consumer-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "x2-package-consumer-consumer-n1",
+      "process_index": 0,
+      "seed": 315830810232478341,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 1,
+      "cell": "x2-package-consumer-consumer-n1",
+      "process_index": 1,
+      "seed": 2725158242796568983,
+      "status": "success"
+    }
+  ]
+}

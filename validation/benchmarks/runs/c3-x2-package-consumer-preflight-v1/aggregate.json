@@ -1,0 +1,54 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-x2-v1-x2-package-consumer-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "x2-package-consumer-consumer-n1",
+      "family": "external-package-consumer",
+      "operation": "package.consumer-total",
+      "scale": 1,
+      "scale_unit": "consumer-builds",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 10146738635.0,
+      "p95_ns_per_unit": 10438410784.35,
+      "p99_ns_per_unit": 10491031536.87,
+      "mad_ns_per_unit": 31689555.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 10140036937.0,
+        "upper": 10153440333.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 10172456846.0,
+        "upper": 10504186725.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 10172456846.0,
+        "upper": 10504186725.0
+      },
+      "relative_median_ci_half_width": 0.0006604780354628697,
+      "precision_met": true,
+      "allocation_count_median": 1203.0,
+      "allocated_bytes_median": 60065.0,
+      "peak_allocated_bytes_median": 22471.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "x2-package-consumer-consumer",
+      "strategy": "locked-offline-check",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

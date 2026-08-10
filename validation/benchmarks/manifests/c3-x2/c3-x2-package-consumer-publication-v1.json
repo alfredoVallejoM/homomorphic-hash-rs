@@ -1,0 +1,31 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-x2-v1-x2-package-consumer-publication",
+  "profile": "publication",
+  "seed": 130320260814,
+  "host_mode": "dedicated",
+  "minimum_processes": 30,
+  "maximum_processes": 100,
+  "precision_check_every": 5,
+  "warmup_observations": 10,
+  "measured_observations": 50,
+  "target_observation_ns": 1000000,
+  "maximum_batch_iterations": 10000,
+  "bootstrap_resamples": 10000,
+  "maximum_relative_ci_half_width": 0.03,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "x2-package-consumer-consumer-n1",
+      "family": "external-package-consumer",
+      "operation": "package.consumer-total",
+      "scale": 1,
+      "scale_unit": "consumer-builds",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "x2-package-consumer-consumer",
+      "strategy": "locked-offline-check"
+    }
+  ]
+}

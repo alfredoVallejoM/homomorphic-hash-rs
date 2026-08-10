@@ -84,6 +84,20 @@ All 17 preflight cells were precise with stable checksums. The generated C3
 inventory now contains 3,110 publication cells. See
 `docs/microfield/c3-g1-g2-implementation-and-preflight-report.md`.
 
+X1 executes the pinned external graph/domain corpora. X2 adds 133 generated
+cells for wire round-trips, failure paths, an isolated package consumer and
+legacy-facade equivalence:
+
+```text
+cargo run -p microfield-validation-lab --locked -- c3-expand \
+  --manifest validation/benchmarks/c3-x2-factor-plan-v1.json \
+  --out-dir validation/benchmarks/manifests/c3-x2
+```
+
+All four external corpora and all 19 X2 preflight cells passed. The generated
+inventory now contains 3,243 publication cells. See
+`docs/microfield/c3-x1-x2-implementation-and-preflight-report.md`.
+
 C2 is also versioned and remains informative:
 
 ```text

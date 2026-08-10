@@ -1,0 +1,464 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-x2-v1-x2-wire-roundtrip-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "x2-wire-roundtrip-additive-p1-n1",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 690.208984375,
+      "p95_ns_per_unit": 965.48505859375,
+      "p99_ns_per_unit": 972.37357421875,
+      "mad_ns_per_unit": 6.32421875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 670.123046875,
+        "upper": 710.294921875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 676.81162109375,
+        "upper": 974.095703125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 670.2578125,
+        "upper": 974.095703125
+      },
+      "relative_median_ci_half_width": 0.02910124028331546,
+      "precision_met": true,
+      "allocation_count_median": 512.0,
+      "allocated_bytes_median": 57856.0,
+      "peak_allocated_bytes_median": 113.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-sequence-p1-n1",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 648.9013671875,
+      "p95_ns_per_unit": 691.9095703125,
+      "p99_ns_per_unit": 694.7881640625,
+      "mad_ns_per_unit": 32.3564453125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 620.552734375,
+        "upper": 677.25
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 632.2413623046874,
+        "upper": 695.5078125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 640.391876953125,
+        "upper": 695.5078125
+      },
+      "relative_median_ci_half_width": 0.04368712141164077,
+      "precision_met": true,
+      "allocation_count_median": 512.0,
+      "allocated_bytes_median": 57856.0,
+      "peak_allocated_bytes_median": 113.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-bidirectional-p64-n1",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 985.60546875,
+      "p95_ns_per_unit": 1899.5294921874995,
+      "p99_ns_per_unit": 2088.1371484375,
+      "mad_ns_per_unit": 15.193359375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 934.51171875,
+        "upper": 1036.69921875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 943.919921875,
+        "upper": 2135.2890625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1036.69921875,
+        "upper": 2135.2890625
+      },
+      "relative_median_ci_half_width": 0.0518399619523215,
+      "precision_met": true,
+      "allocation_count_median": 384.0,
+      "allocated_bytes_median": 43776.0,
+      "peak_allocated_bytes_median": 114.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-multiset-p64-n1",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 653.470703125,
+      "p95_ns_per_unit": 681.17490234375,
+      "p99_ns_per_unit": 682.20216796875,
+      "mad_ns_per_unit": 14.9541015625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 642.123046875,
+        "upper": 664.818359375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 672.398046875,
+        "upper": 682.458984375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 676.291591796875,
+        "upper": 682.458984375
+      },
+      "relative_median_ci_half_width": 0.01736521039999761,
+      "precision_met": true,
+      "allocation_count_median": 512.0,
+      "allocated_bytes_median": 61952.0,
+      "peak_allocated_bytes_median": 121.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-multi-sequence-p4096-n1",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 462.0751953125,
+      "p95_ns_per_unit": 708.5532226562499,
+      "p99_ns_per_unit": 761.7833007812501,
+      "mad_ns_per_unit": 51.14501953125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 430.6123046875,
+        "upper": 493.5380859375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 494.97431640625,
+        "upper": 775.0908203125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 496.1494140625,
+        "upper": 775.0908203125
+      },
+      "relative_median_ci_half_width": 0.06809041243540837,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 12288.0,
+      "peak_allocated_bytes_median": 12.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-multi-multiset-p4096-n1",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 1,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 459.16650390625,
+      "p95_ns_per_unit": 463.804248046875,
+      "p99_ns_per_unit": 464.360068359375,
+      "mad_ns_per_unit": 2.36328125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 457.8232421875,
+        "upper": 460.509765625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 461.520068359375,
+        "upper": 464.4990234375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 462.3466796875,
+        "upper": 464.4990234375
+      },
+      "relative_median_ci_half_width": 0.002925434907212351,
+      "precision_met": true,
+      "allocation_count_median": 2048.0,
+      "allocated_bytes_median": 24576.0,
+      "peak_allocated_bytes_median": 24.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-summary-tree-p1-n64",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 7046.9609375,
+      "p95_ns_per_unit": 8007.5921874999985,
+      "p99_ns_per_unit": 8350.2559375,
+      "mad_ns_per_unit": 230.0390625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6625.734375,
+        "upper": 7468.1875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6753.6991992187495,
+        "upper": 8435.921875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6845.144296875,
+        "upper": 8435.921875
+      },
+      "relative_median_ci_half_width": 0.05977421561377855,
+      "precision_met": true,
+      "allocation_count_median": 139.0,
+      "allocated_bytes_median": 25224.0,
+      "peak_allocated_bytes_median": 24144.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-database-row-p1-n64",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 521.75830078125,
+      "p95_ns_per_unit": 983.7128417968742,
+      "p99_ns_per_unit": 1276.602724609375,
+      "mad_ns_per_unit": 7.27001953125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 518.1396484375,
+        "upper": 525.376953125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 525.2136669921874,
+        "upper": 1349.8251953125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 532.022125,
+        "upper": 1349.8251953125
+      },
+      "relative_median_ci_half_width": 0.006935495493472062,
+      "precision_met": true,
+      "allocation_count_median": 4608.0,
+      "allocated_bytes_median": 276480.0,
+      "peak_allocated_bytes_median": 240.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-reconciliation-p64-n64",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 634.4462890625,
+      "p95_ns_per_unit": 741.67822265625,
+      "p99_ns_per_unit": 744.27626953125,
+      "mad_ns_per_unit": 88.44921875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 531.4375,
+        "upper": 737.455078125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 590.3746020507812,
+        "upper": 744.92578125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 550.205078125,
+        "upper": 744.92578125
+      },
+      "relative_median_ci_half_width": 0.16236014117871606,
+      "precision_met": true,
+      "allocation_count_median": 2560.0,
+      "allocated_bytes_median": 122880.0,
+      "peak_allocated_bytes_median": 184.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-dag-p64-n64",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 41.3279890507381,
+      "p95_ns_per_unit": 44.1090722455763,
+      "p99_ns_per_unit": 44.16376380877897,
+      "mad_ns_per_unit": 0.6436601818359584,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 41.1251344217421,
+        "upper": 41.53084367973409
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 41.65196988952977,
+        "upper": 44.17743669957963
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 41.641068530648155,
+        "upper": 44.17743669957963
+      },
+      "relative_median_ci_half_width": 0.004908407925363852,
+      "precision_met": true,
+      "allocation_count_median": 4888.0,
+      "allocated_bytes_median": 477256.0,
+      "peak_allocated_bytes_median": 44959.0,
+      "status": "Precise"
+    },
+    {
+      "id": "x2-wire-roundtrip-journal-p4096-n64",
+      "family": "wire-family-roundtrip",
+      "operation": "wire.family-roundtrip-total",
+      "scale": 64,
+      "scale_unit": "items-or-bytes",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 196006.75,
+      "p95_ns_per_unit": 227639.84999999998,
+      "p99_ns_per_unit": 237772.77000000002,
+      "mad_ns_per_unit": 15147.25,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 180537.0,
+        "upper": 211476.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 182588.5,
+        "upper": 240306.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 182646.835,
+        "upper": 240306.0
+      },
+      "relative_median_ci_half_width": 0.07892457785254844,
+      "precision_met": true,
+      "allocation_count_median": 1304.0,
+      "allocated_bytes_median": 373820.0,
+      "peak_allocated_bytes_median": 58398.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "x2-wire-roundtrip-additive",
+      "strategy": "additive",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-bidirectional",
+      "strategy": "bidirectional",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-dag",
+      "strategy": "dag",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-database-row",
+      "strategy": "database-row",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-journal",
+      "strategy": "journal",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-multi-multiset",
+      "strategy": "multi-multiset",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-multi-sequence",
+      "strategy": "multi-sequence",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-multiset",
+      "strategy": "multiset",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-reconciliation",
+      "strategy": "reconciliation",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-sequence",
+      "strategy": "sequence",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "x2-wire-roundtrip-summary-tree",
+      "strategy": "summary-tree",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

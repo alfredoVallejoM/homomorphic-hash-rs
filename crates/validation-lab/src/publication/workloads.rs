@@ -12,13 +12,14 @@ use algesum::{
     DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema, DatabaseTransactionLimits,
     DatabaseTransactionLog, DatabaseValue, DeltaJournal, DeltaJournalLimits,
     DynamicAdditiveSignature, DynamicMultiEvaluationMultisetSignature,
-    DynamicMultiEvaluationSequenceSignature, FastGraphLabeler, FileChunkProfile, GraphDelta,
-    GraphDeltaPolicy, GraphExecution, GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree,
-    IncidenceGraph, IncidenceGraphBuilder, IncrementalGraphWorkspace, Microcanon,
-    MicrocanonOutcome, MicrocanonPath, MultiEvaluationMultisetSignature,
-    MultiEvaluationSequenceSignature, MultisetDelta, MultisetSignature, PartitionedDatabase,
-    PrimeIntegerEncoder, ReconciliationLimits, RevisionedSignature, RowMutation, SequenceAppend,
-    SequenceSignature, SequenceTrim, SummaryEditPolicy, SummaryRangeEdit, SummaryTreeLimits,
+    DynamicMultiEvaluationSequenceSignature, FastGraphLabeler, FileChunkProfile,
+    GaloisSignature256, GraphDelta, GraphDeltaPolicy, GraphExecution, GraphSchemaId,
+    GraphWorkspace, HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder,
+    IncrementalGraphWorkspace, LegacyAffineEncoderV1, Microcanon, MicrocanonOutcome,
+    MicrocanonPath, MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature,
+    MultisetAggregator, MultisetDelta, MultisetSignature, PartitionedDatabase, PrimeIntegerEncoder,
+    ReconciliationLimits, RevisionedSignature, RowMutation, SequenceAppend, SequenceSignature,
+    SequenceTrim, SummaryEditPolicy, SummaryRangeEdit, SummaryTreeLimits, TopoHasher,
     TrackedMultiset, TrackedSequence, TrackedSnapshotLimits, TransactionDelta, VertexId,
 };
 use microfield::{
@@ -183,6 +184,10 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "field.runtime-operation-total",
     "tool.prime-manifest-total",
     "tool.artifact-compile-consumer-total",
+    "wire.family-roundtrip-total",
+    "wire.failure-matrix",
+    "package.consumer-total",
+    "legacy.facade-semantic",
 ];
 
 pub struct PreparedOperation {
@@ -336,6 +341,10 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "field.runtime-operation-total" => field_runtime_operation_total(cell, seed),
         "tool.prime-manifest-total" => tool_prime_manifest_total(cell),
         "tool.artifact-compile-consumer-total" => tool_artifact_compile_consumer_total(),
+        "wire.family-roundtrip-total" => wire_family_roundtrip_total(cell, seed),
+        "wire.failure-matrix" => wire_failure_matrix(cell, seed),
+        "package.consumer-total" => tool_artifact_compile_consumer_total(),
+        "legacy.facade-semantic" => legacy_facade_semantic(cell, seed),
         other => Err(format!(
             "unsupported publication benchmark operation {other:?}"
         )),
@@ -3200,6 +3209,155 @@ fn tool_artifact_compile_consumer_total() -> Result<PreparedOperation, String> {
             checksum_bytes(manifest.as_os_str().as_encoded_bytes())
         }),
     })
+}
+
+fn wire_family_roundtrip_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    match cell.strategy.as_deref().unwrap_or("additive") {
+        "additive" | "sequence" | "bidirectional" | "multiset" => {
+            signature_base_wire_total(cell, seed)
+        }
+        "multi-sequence" | "multi-multiset" => signature_multi_wire_restore_total(cell, seed),
+        "summary-tree" => summary_tree_restore_total(cell, seed),
+        "database-row" => database_row_wire_total(cell),
+        "reconciliation" => reconciliation_wire_total(cell),
+        "dag" => graph_dag_persist_restore_total(cell),
+        "journal" => journal_append_replay_total(cell, seed),
+        strategy => Err(format!("unsupported wire family {strategy:?}")),
+    }
+}
+
+fn wire_failure_matrix(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    type Rejector = Box<dyn Fn(&[u8]) -> bool>;
+
+    let strategy = cell.strategy.as_deref().unwrap_or("additive");
+    let (wire, rejects): (Vec<u8>, Rejector) = match strategy {
+        "additive" => {
+            let mut signature = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+            signature
+                .absorb_many(payloads(cell.scale, cell.payload_bytes, seed)?.iter())
+                .map_err(debug_error)?;
+            (
+                signature.to_canonical_bytes(),
+                Box::new(|bytes| {
+                    AdditiveSignature::<Fp251V1, _>::from_canonical_bytes(prime_encoder(), bytes)
+                        .is_err()
+                }),
+            )
+        }
+        "multi-multiset" => {
+            let offsets = [
+                Fp251V1::ONE,
+                Fp251V1::from_u64_mod(2),
+                Fp251V1::from_u64_mod(3),
+                Fp251V1::from_u64_mod(4),
+            ];
+            let mut signature =
+                MultiEvaluationMultisetSignature::<Fp251V1, _, 4>::new(prime_encoder(), offsets)
+                    .map_err(debug_error)?;
+            signature
+                .insert_many(payloads(cell.scale, cell.payload_bytes, seed)?.iter())
+                .map_err(debug_error)?;
+            (
+                signature.to_canonical_bytes(),
+                Box::new(move |bytes| {
+                    MultiEvaluationMultisetSignature::<Fp251V1, _, 4>::from_canonical_bytes(
+                        prime_encoder(),
+                        offsets,
+                        bytes,
+                    )
+                    .is_err()
+                }),
+            )
+        }
+        "summary-tree" => {
+            let profile =
+                FileChunkProfile::fixed(cell.payload_bytes.max(1)).map_err(debug_error)?;
+            let tree = build_tree(profile, &deterministic_bytes(cell.scale.max(1), seed))?;
+            (
+                tree.to_checkpoint_bytes().map_err(debug_error)?,
+                Box::new(move |bytes| {
+                    SummaryTree::from_checkpoint_bytes(
+                        profile,
+                        binary_encoder(),
+                        Gf2_128V1::from_polynomial_bytes_mod(&[2]),
+                        bytes,
+                        SummaryTreeLimits::default(),
+                    )
+                    .is_err()
+                }),
+            )
+        }
+        "database-row" => {
+            let schema = database_schema()?;
+            (
+                schema
+                    .encode_row(&database_row(1, seed))
+                    .map_err(debug_error)?,
+                Box::new(move |bytes| schema.decode_row(bytes).is_err()),
+            )
+        }
+        "reconciliation" => {
+            let reconciler = BoundedSetReconciler::new(ReconciliationLimits::new(64, 8, 8, 4096))
+                .map_err(debug_error)?;
+            let sketch = reconciler.sketch(&[1, 2, 3]).map_err(debug_error)?;
+            (
+                sketch.to_canonical_bytes(),
+                Box::new(move |bytes| reconciler.sketch_from_canonical_bytes(bytes).is_err()),
+            )
+        }
+        "dag" => {
+            let schema = GraphSchemaId::derive(b"c3-wire-failure-dag-v1");
+            let canonizer = Microcanon::new(schema);
+            let budget = CanonicalSearchBudget::new(1_000_000);
+            let mut dag = CanonicalGraphDag::new(schema);
+            dag.resolve(&distinct_path(4)?, &canonizer, budget, &[], None)
+                .map_err(debug_error)?;
+            (
+                dag.to_canonical_bytes(),
+                Box::new(move |bytes| {
+                    CanonicalGraphDag::from_canonical_bytes(
+                        bytes,
+                        &canonizer,
+                        budget,
+                        CanonicalGraphDagLimits::default(),
+                    )
+                    .is_err()
+                }),
+            )
+        }
+        other => return Err(format!("unsupported wire failure family {other:?}")),
+    };
+    Ok(scaled(wire.len(), move || {
+        assert!(!wire.is_empty());
+        assert!(rejects(&wire[..wire.len() - 1]));
+        let mut corrupt = wire.clone();
+        corrupt[0] ^= 0xff;
+        assert!(rejects(&corrupt));
+        checksum_bytes(&wire)
+    }))
+}
+
+fn legacy_facade_semantic(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let mut generator = [0_u8; 32];
+    generator[31] = 0x80;
+    let offset = Gf2_256HhV1::from_canonical(&generator).map_err(debug_error)?;
+    Ok(scaled(items.len(), move || {
+        let mut legacy = TopoHasher::<GaloisSignature256, MultisetAggregator>::new();
+        let mut maintained =
+            MultisetSignature::<Gf2_256HhV1, _>::new(LegacyAffineEncoderV1, offset);
+        for item in &items {
+            legacy.update(item);
+            maintained.insert(item).unwrap();
+        }
+        let legacy = legacy.finalize().to_canonical_bytes();
+        let current = maintained.evaluated_product().to_canonical();
+        assert_eq!(legacy, current);
+        checksum_bytes(&legacy)
+    }))
 }
 
 fn single_unit(action: impl FnMut() -> u64 + 'static) -> PreparedOperation {

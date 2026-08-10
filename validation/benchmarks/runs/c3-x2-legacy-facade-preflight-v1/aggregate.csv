@@ -1,0 +1,2 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+x2-legacy-facade-multiset-p1-n1,legacy-facade-equivalence,legacy.facade-semantic,1,items,2,10,694.699218750,838.330468750,920.205156250,13.300781250,685.537109375,703.861328125,0.013188599,true,Precise,,,,,,,

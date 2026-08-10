@@ -93,14 +93,15 @@
       "id": "X1",
       "status": "external",
       "implemented_operations": [],
-      "missing_operations": ["corpus.graph-timed", "domain.chemistry-total", "domain.logic-total", "domain.network-total"],
+      "missing_operations": [],
+      "executed_external_operations": ["corpus.graph-timed", "domain.chemistry-total", "domain.logic-total", "domain.network-total"],
       "external_runner": "tests/external_graph_corpus.rs and domain harnesses"
     },
     {
       "id": "X2",
-      "status": "partial",
-      "implemented_operations": ["tool.binary-manifest.parse", "tool.binary-manifest.generate"],
-      "missing_operations": ["wire.family-roundtrip-total", "wire.failure-matrix", "package.consumer-total", "legacy.facade-semantic"]
+      "status": "implemented",
+      "implemented_operations": ["tool.binary-manifest.parse", "tool.binary-manifest.generate", "wire.family-roundtrip-total", "wire.failure-matrix", "package.consumer-total", "legacy.facade-semantic"],
+      "missing_operations": []
     }
   ]
 }
