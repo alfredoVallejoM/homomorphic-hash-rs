@@ -1,0 +1,118 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-f3-derived-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f3-derived-scan-prefix-inclusive-n1",
+      "process_index": 0,
+      "seed": 1841915327997835645,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f3-derived-batch-invert-n63",
+      "process_index": 0,
+      "seed": 234457268923217193,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f3-derived-scan-suffix-exclusive-n16",
+      "process_index": 0,
+      "seed": 1484519449034084923,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f3-derived-scan-suffix-inclusive-n8",
+      "process_index": 0,
+      "seed": 11918554944287978533,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f3-derived-mask-n4096",
+      "process_index": 0,
+      "seed": 17117042712138328141,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f3-derived-powers-n255",
+      "process_index": 0,
+      "seed": 18419601541046879948,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "f3-derived-scan-prefix-exclusive-n3",
+      "process_index": 0,
+      "seed": 12881644394627533746,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "f3-derived-scan-prefix-inclusive-n1",
+      "process_index": 1,
+      "seed": 5567560644325127451,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "f3-derived-scan-suffix-exclusive-n16",
+      "process_index": 1,
+      "seed": 14240084384672757823,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "f3-derived-scan-prefix-exclusive-n3",
+      "process_index": 1,
+      "seed": 7147511399395280855,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "f3-derived-powers-n255",
+      "process_index": 1,
+      "seed": 8851728554066668542,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "f3-derived-mask-n4096",
+      "process_index": 1,
+      "seed": 752553552619780315,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 1,
+      "cell": "f3-derived-scan-suffix-inclusive-n8",
+      "process_index": 1,
+      "seed": 13096909351495109561,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 1,
+      "cell": "f3-derived-batch-invert-n63",
+      "process_index": 1,
+      "seed": 10362111919168200535,
+      "status": "success"
+    }
+  ]
+}

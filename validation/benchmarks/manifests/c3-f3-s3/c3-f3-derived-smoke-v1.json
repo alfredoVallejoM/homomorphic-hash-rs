@@ -1,0 +1,103 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-f3-derived-smoke",
+  "profile": "smoke",
+  "seed": 130320260811,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f3-derived-scan-prefix-inclusive-n1",
+      "family": "finite-field-derived",
+      "operation": "algorithm.scan-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-derived-scan-prefix-inclusive",
+      "strategy": "prefix-inclusive"
+    },
+    {
+      "id": "f3-derived-scan-prefix-exclusive-n1",
+      "family": "finite-field-derived",
+      "operation": "algorithm.scan-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-derived-scan-prefix-exclusive",
+      "strategy": "prefix-exclusive"
+    },
+    {
+      "id": "f3-derived-scan-suffix-inclusive-n1",
+      "family": "finite-field-derived",
+      "operation": "algorithm.scan-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-derived-scan-suffix-inclusive",
+      "strategy": "suffix-inclusive"
+    },
+    {
+      "id": "f3-derived-scan-suffix-exclusive-n1",
+      "family": "finite-field-derived",
+      "operation": "algorithm.scan-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-derived-scan-suffix-exclusive",
+      "strategy": "suffix-exclusive"
+    },
+    {
+      "id": "f3-derived-batch-invert-n1",
+      "family": "finite-field-derived",
+      "operation": "algorithm.batch-invert-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-derived-batch-invert",
+      "strategy": "borrowed-workspace"
+    },
+    {
+      "id": "f3-derived-powers-n1",
+      "family": "finite-field-derived",
+      "operation": "algorithm.powers-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-derived-powers",
+      "strategy": "borrowed-output"
+    },
+    {
+      "id": "f3-derived-mask-n1",
+      "family": "finite-field-derived",
+      "operation": "algorithm.mask-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-derived-mask",
+      "strategy": "borrowed-compact-mask"
+    }
+  ]
+}

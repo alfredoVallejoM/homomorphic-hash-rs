@@ -1,0 +1,102 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-f4-runtime-tools-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f4-runtime-tools-runtime-lifecycle-binary-n2",
+      "process_index": 0,
+      "seed": 13852466277272961200,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f4-runtime-tools-prime-manifest-generate-n1",
+      "process_index": 0,
+      "seed": 7059444584373016026,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f4-runtime-tools-runtime-batch-n8",
+      "process_index": 0,
+      "seed": 5902823572530366749,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f4-runtime-tools-prime-manifest-parse-n1",
+      "process_index": 0,
+      "seed": 14703952388002347244,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f4-runtime-tools-consumer-check-n1",
+      "process_index": 0,
+      "seed": 13139048852885077616,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f4-runtime-tools-runtime-lifecycle-prime-n1",
+      "process_index": 0,
+      "seed": 8466355499717968695,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 1,
+      "cell": "f4-runtime-tools-runtime-lifecycle-prime-n1",
+      "process_index": 1,
+      "seed": 1811431613597644368,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "f4-runtime-tools-consumer-check-n1",
+      "process_index": 1,
+      "seed": 7640264063525041585,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "f4-runtime-tools-runtime-lifecycle-binary-n2",
+      "process_index": 1,
+      "seed": 15715183802970198301,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "f4-runtime-tools-prime-manifest-generate-n1",
+      "process_index": 1,
+      "seed": 9008504573765775450,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "f4-runtime-tools-prime-manifest-parse-n1",
+      "process_index": 1,
+      "seed": 12562333500423125919,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "f4-runtime-tools-runtime-batch-n8",
+      "process_index": 1,
+      "seed": 95675310569100113,
+      "status": "success"
+    }
+  ]
+}

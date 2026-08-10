@@ -545,6 +545,10 @@ fn sample_cells(
             .enumerate()
             .filter(|(_, cell)| {
                 cell.operation == operation.operation
+                    && operation
+                        .strategy
+                        .as_deref()
+                        .is_none_or(|strategy| cell.strategy.as_deref() == Some(strategy))
                     && maximum_scale.is_none_or(|maximum| cell.scale <= maximum)
             })
             .map(|(index, _)| index)
@@ -675,10 +679,25 @@ mod tests {
 
     #[test]
     fn checked_in_p0_manifests_are_byte_reproducible() {
-        let plan = Path::new("../../validation/benchmarks/c3-p0-factor-plan-v1.json");
-        let checked_in = Path::new("../../validation/benchmarks/manifests/c3-p0");
+        assert_checked_in_manifests(
+            Path::new("../../validation/benchmarks/c3-p0-factor-plan-v1.json"),
+            Path::new("../../validation/benchmarks/manifests/c3-p0"),
+            "p0",
+        );
+    }
+
+    #[test]
+    fn checked_in_f3_s3_manifests_are_byte_reproducible() {
+        assert_checked_in_manifests(
+            Path::new("../../validation/benchmarks/c3-f3-s3-factor-plan-v1.json"),
+            Path::new("../../validation/benchmarks/manifests/c3-f3-s3"),
+            "f3-s3",
+        );
+    }
+
+    fn assert_checked_in_manifests(plan: &Path, checked_in: &Path, label: &str) {
         let generated = std::env::temp_dir().join(format!(
-            "algesum-c3-expand-{}-{}",
+            "algesum-c3-expand-{label}-{}-{}",
             std::process::id(),
             std::thread::current().name().unwrap_or("test")
         ));

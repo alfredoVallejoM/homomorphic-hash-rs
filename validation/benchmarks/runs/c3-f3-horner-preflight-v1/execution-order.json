@@ -1,0 +1,38 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-f3-horner-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f3-horner-many-points-p1-n1",
+      "process_index": 0,
+      "seed": 3319456221648674022,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f3-horner-many-polynomials-p64-n1024",
+      "process_index": 0,
+      "seed": 9199925711740777379,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 1,
+      "cell": "f3-horner-many-points-p1-n1",
+      "process_index": 1,
+      "seed": 10531561742478426291,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 1,
+      "cell": "f3-horner-many-polynomials-p64-n1024",
+      "process_index": 1,
+      "seed": 11697636076447020666,
+      "status": "success"
+    }
+  ]
+}

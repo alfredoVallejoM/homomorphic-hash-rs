@@ -1,0 +1,55 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-f3-batch-packed-preflight",
+  "profile": "smoke",
+  "seed": 130320260811,
+  "host_mode": "interactive",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 250000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f3-batch-packed-batch-portable-n1",
+      "family": "finite-field-derived",
+      "operation": "field.batch-portable-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-batch-packed-batch-portable",
+      "strategy": "portable"
+    },
+    {
+      "id": "f3-batch-packed-packed-owned-n16",
+      "family": "finite-field-derived",
+      "operation": "field.packed-owned-total",
+      "scale": 16,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-batch-packed-packed-owned",
+      "strategy": "detected-owned-reused"
+    },
+    {
+      "id": "f3-batch-packed-packed-view-n4096",
+      "family": "finite-field-derived",
+      "operation": "field.packed-view-total",
+      "scale": 4096,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f3-batch-packed-packed-view",
+      "strategy": "detected-borrowed-storage"
+    }
+  ]
+}

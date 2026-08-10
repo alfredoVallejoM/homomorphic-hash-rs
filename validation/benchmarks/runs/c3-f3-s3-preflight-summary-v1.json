@@ -1,0 +1,66 @@
+{
+  "schema": "algesum-c3-f3-s3-preflight-summary-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1",
+  "classification": "Smoke",
+  "claims_allowed": false,
+  "source_commit": "4dc3dcf68964a80db7f70b43c7ffc3bfd06124c9",
+  "tree_clean": false,
+  "security_classification": "non-cryptographic-algebraic-summaries",
+  "expansion": {
+    "f3_s3_publication_cells": 2112,
+    "f3_s3_preflight_cells": 56,
+    "c3_total_publication_cells_with_f1_f2": 2610,
+    "registered_operations_added": 26,
+    "operation_variants": 56,
+    "minimum_publication_workers_per_host": 63360
+  },
+  "observed": {
+    "cells": 56,
+    "workers": 112,
+    "observations": 560,
+    "precise_cells": 56,
+    "imprecise_cells": 0,
+    "measured_ns": 100361796331,
+    "setup_ns": 42721683,
+    "workers_with_unstable_observation_checksum": 0,
+    "allocating_cells": 39,
+    "allocation_free_cells": 17,
+    "allocating_workers": 78,
+    "allocated_bytes_across_worker_allocation_probes": 11827084,
+    "maximum_peak_allocated_bytes_in_one_action": 115333,
+    "artifact_bytes": 325896
+  },
+  "shards": [
+    { "id": "F3 batch/packed", "cells": 3, "precise": 3, "allocating": 0 },
+    { "id": "F3 Horner", "cells": 2, "precise": 2, "allocating": 0 },
+    { "id": "F3 derived algorithms", "cells": 7, "precise": 7, "allocating": 0 },
+    { "id": "F4 runtime/tools", "cells": 6, "precise": 6, "allocating": 6 },
+    { "id": "S1 base signatures", "cells": 14, "precise": 14, "allocating": 9 },
+    { "id": "S2 multi-evaluation signatures", "cells": 9, "precise": 9, "allocating": 9 },
+    { "id": "S3 tracked/delta/journal", "cells": 15, "precise": 15, "allocating": 15 }
+  ],
+  "definitions": {
+    "artifact_compile_consumer": "every action removes only its isolated temporary target and performs a clean cargo check --locked --offline",
+    "packed_owned": "reused owned packed buffers including pack, multiply and unpack",
+    "packed_view": "caller-owned aligned storage including pack, borrowed-view multiply and unpack",
+    "compact_snapshot": "compact MFSG state without retained source items",
+    "tracked_snapshot": "MFTS state with exact retained source items and full restore validation",
+    "failure_path": "malformed journals must be rejected without publishing partial state"
+  },
+  "limitations": [
+    "Smoke results from a dirty interactive host are not publication claims",
+    "two workers and five observations per worker validate the harness but do not replace Controlled replication",
+    "allocation is expected in end-to-end wire, runtime, tracked and journal operations",
+    "child-process allocations performed by cargo/rustc are outside the in-process allocation counter",
+    "performance comparisons require equal scales, payloads, strategies and dedicated hosts"
+  ],
+  "runs": [
+    "validation/benchmarks/runs/c3-f3-batch-packed-preflight-v1",
+    "validation/benchmarks/runs/c3-f3-horner-preflight-v1",
+    "validation/benchmarks/runs/c3-f3-derived-preflight-v1",
+    "validation/benchmarks/runs/c3-f4-runtime-tools-preflight-v2",
+    "validation/benchmarks/runs/c3-s1-base-signatures-preflight-v2",
+    "validation/benchmarks/runs/c3-s2-multi-signatures-preflight-v1",
+    "validation/benchmarks/runs/c3-s3-state-delta-journal-preflight-v2"
+  ]
+}

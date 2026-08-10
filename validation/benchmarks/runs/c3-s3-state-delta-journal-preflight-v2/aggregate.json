@@ -1,0 +1,628 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f3-s3-v1-s3-state-delta-journal-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "s3-state-delta-journal-tracked-sequence-update-p1-n1",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "signature.tracked-update-total",
+      "scale": 1,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 300.9814453125,
+      "p95_ns_per_unit": 346.941943359375,
+      "p99_ns_per_unit": 353.593857421875,
+      "mad_ns_per_unit": 32.07421875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 270.3251953125,
+        "upper": 331.6376953125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 277.6255859375,
+        "upper": 355.2568359375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 282.1596943359375,
+        "upper": 355.2568359375
+      },
+      "relative_median_ci_half_width": 0.10185428529712366,
+      "precision_met": true,
+      "allocation_count_median": 3072.0,
+      "allocated_bytes_median": 26624.0,
+      "peak_allocated_bytes_median": 26.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-tracked-multiset-update-p1-n3",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "signature.tracked-update-total",
+      "scale": 3,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 465.8564453125,
+      "p95_ns_per_unit": 468.928759765625,
+      "p99_ns_per_unit": 469.249033203125,
+      "mad_ns_per_unit": 1.859375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 464.763671875,
+        "upper": 466.94921875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 465.826171875,
+        "upper": 469.3291015625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 466.921142578125,
+        "upper": 469.3291015625
+      },
+      "relative_median_ci_half_width": 0.0023457299957864905,
+      "precision_met": true,
+      "allocation_count_median": 5120.0,
+      "allocated_bytes_median": 380928.0,
+      "peak_allocated_bytes_median": 371.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-compact-additive-p1-n8",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "signature.compact-snapshot-total",
+      "scale": 8,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 340.49951171875,
+      "p95_ns_per_unit": 375.46220703125,
+      "p99_ns_per_unit": 377.45416015625,
+      "mad_ns_per_unit": 2.6220703125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 313.6943359375,
+        "upper": 367.3046875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 367.35920410156245,
+        "upper": 377.9521484375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 367.384765625,
+        "upper": 377.9521484375
+      },
+      "relative_median_ci_half_width": 0.0787230960947482,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 115712.0,
+      "peak_allocated_bytes_median": 113.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-compact-sequence-p1-n16",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "signature.compact-snapshot-total",
+      "scale": 16,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 263.1494140625,
+      "p95_ns_per_unit": 330.1936523437499,
+      "p99_ns_per_unit": 372.34810546875,
+      "mad_ns_per_unit": 2.38525390625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 260.5908203125,
+        "upper": 265.7080078125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 260.748046875,
+        "upper": 382.88671875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 260.748046875,
+        "upper": 382.88671875
+      },
+      "relative_median_ci_half_width": 0.00972296958788711,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 115712.0,
+      "peak_allocated_bytes_median": 113.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-compact-bidirectional-p1-n64",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "signature.compact-snapshot-total",
+      "scale": 64,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 316.41357421875,
+      "p95_ns_per_unit": 374.2931640625,
+      "p99_ns_per_unit": 374.3859765625,
+      "mad_ns_per_unit": 54.53857421875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 262.9970703125,
+        "upper": 369.830078125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 263.7861328125,
+        "upper": 374.4091796875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 265.837265625,
+        "upper": 374.4091796875
+      },
+      "relative_median_ci_half_width": 0.16881862302570155,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 116736.0,
+      "peak_allocated_bytes_median": 114.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-compact-multiset-p16-n1",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "signature.compact-snapshot-total",
+      "scale": 1,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 334.85107421875,
+      "p95_ns_per_unit": 395.83681640625,
+      "p99_ns_per_unit": 396.14548828125,
+      "mad_ns_per_unit": 56.18408203125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 277.19140625,
+        "upper": 392.5107421875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 277.2109375,
+        "upper": 396.22265625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 277.2109375,
+        "upper": 396.22265625
+      },
+      "relative_median_ci_half_width": 0.17219496190441472,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 123904.0,
+      "peak_allocated_bytes_median": 121.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-tracked-sequence-snapshot-p16-n4",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "signature.tracked-snapshot-total",
+      "scale": 4,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 2843.015625,
+      "p95_ns_per_unit": 2904.336328125,
+      "p99_ns_per_unit": 2906.729765625,
+      "mad_ns_per_unit": 31.984375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2810.9453125,
+        "upper": 2875.0859375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2846.34375,
+        "upper": 2907.328125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2847.744296875,
+        "upper": 2907.328125
+      },
+      "relative_median_ci_half_width": 0.011280385594081989,
+      "precision_met": true,
+      "allocation_count_median": 2048.0,
+      "allocated_bytes_median": 177920.0,
+      "peak_allocated_bytes_median": 555.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-tracked-multiset-snapshot-p16-n8",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "signature.tracked-snapshot-total",
+      "scale": 8,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 4716.2578125,
+      "p95_ns_per_unit": 5185.8734375,
+      "p99_ns_per_unit": 5193.9621875,
+      "mad_ns_per_unit": 383.6015625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4319.0,
+        "upper": 5113.515625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4406.3125,
+        "upper": 5195.984375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4406.3125,
+        "upper": 5195.984375
+      },
+      "relative_median_ci_half_width": 0.08423157263521629,
+      "precision_met": true,
+      "allocation_count_median": 1792.0,
+      "allocated_bytes_median": 221312.0,
+      "peak_allocated_bytes_median": 1169.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-delta-additive-p16-n31",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "delta.per-law-total",
+      "scale": 31,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 87.318359375,
+      "p95_ns_per_unit": 97.5287109375,
+      "p99_ns_per_unit": 101.30730468750001,
+      "mad_ns_per_unit": 4.35791015625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82.9609375,
+        "upper": 91.67578125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 84.97609008789061,
+        "upper": 102.251953125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 86.31833984375,
+        "upper": 102.251953125
+      },
+      "relative_median_ci_half_width": 0.04990269980092603,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 376832.0,
+      "peak_allocated_bytes_median": 368.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-delta-multiset-p16-n64",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "delta.per-law-total",
+      "scale": 64,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 150.18896484375,
+      "p95_ns_per_unit": 165.52353515625,
+      "p99_ns_per_unit": 167.42970703125,
+      "mad_ns_per_unit": 12.17822265625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 138.2314453125,
+        "upper": 162.146484375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 138.2548828125,
+        "upper": 167.90625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 138.2548828125,
+        "upper": 167.90625
+      },
+      "relative_median_ci_half_width": 0.07961649874669606,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 376832.0,
+      "peak_allocated_bytes_median": 368.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-delta-sequence-append-p256-n2",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "delta.per-law-total",
+      "scale": 2,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 476.04150390625,
+      "p95_ns_per_unit": 499.9810546875,
+      "p99_ns_per_unit": 507.7266796875,
+      "mad_ns_per_unit": 4.67138671875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 467.8046875,
+        "upper": 484.2783203125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 467.90625,
+        "upper": 509.6630859375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 467.90625,
+        "upper": 509.6630859375
+      },
+      "relative_median_ci_half_width": 0.01730272746947739,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 376832.0,
+      "peak_allocated_bytes_median": 368.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-delta-sequence-trim-p256-n4",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "delta.per-law-total",
+      "scale": 4,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 461.24365234375,
+      "p95_ns_per_unit": 535.1920410156249,
+      "p99_ns_per_unit": 573.907158203125,
+      "mad_ns_per_unit": 13.14306640625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 447.919921875,
+        "upper": 474.5673828125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 449.7578125,
+        "upper": 583.5859375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 458.96978515625,
+        "upper": 583.5859375
+      },
+      "relative_median_ci_half_width": 0.028886534049947756,
+      "precision_met": true,
+      "allocation_count_median": 768.0,
+      "allocated_bytes_median": 282624.0,
+      "peak_allocated_bytes_median": 368.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-journal-append-replay-p256-n15",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "journal.append-replay-total",
+      "scale": 15,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 44035.5625,
+      "p95_ns_per_unit": 50006.23125,
+      "p99_ns_per_unit": 51403.34625,
+      "mad_ns_per_unit": 3096.3125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 40939.25,
+        "upper": 47131.875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 41395.25,
+        "upper": 51752.625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 41420.31481249999,
+        "upper": 51752.625
+      },
+      "relative_median_ci_half_width": 0.07031390821906726,
+      "precision_met": true,
+      "allocation_count_median": 1248.0,
+      "allocated_bytes_median": 353752.0,
+      "peak_allocated_bytes_median": 14099.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-journal-truncated-p256-n31",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "journal.failure-path",
+      "scale": 31,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 98961.125,
+      "p95_ns_per_unit": 128698.07499999998,
+      "p99_ns_per_unit": 132894.415,
+      "mad_ns_per_unit": 1305.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 85999.75,
+        "upper": 111922.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 87248.0,
+        "upper": 133943.5
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 87248.0,
+        "upper": 133943.5
+      },
+      "relative_median_ci_half_width": 0.13097441040610644,
+      "precision_met": true,
+      "allocation_count_median": 616.0,
+      "allocated_bytes_median": 174900.0,
+      "peak_allocated_bytes_median": 14533.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s3-state-delta-journal-journal-corrupt-p256-n256",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "operation": "journal.failure-path",
+      "scale": 256,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 374277.0,
+      "p95_ns_per_unit": 381734.4,
+      "p99_ns_per_unit": 382226.88,
+      "mad_ns_per_unit": 2575.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 372945.0,
+        "upper": 375609.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 376039.0,
+        "upper": 382350.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 377822.3725,
+        "upper": 382350.0
+      },
+      "relative_median_ci_half_width": 0.00355886148494297,
+      "precision_met": true,
+      "allocation_count_median": 645.0,
+      "allocated_bytes_median": 241829.0,
+      "peak_allocated_bytes_median": 115333.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "s3-state-delta-journal-compact-additive",
+      "strategy": "additive-compact",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-compact-bidirectional",
+      "strategy": "bidirectional-compact",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-compact-multiset",
+      "strategy": "multiset-compact",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-compact-sequence",
+      "strategy": "sequence-compact",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-delta-additive",
+      "strategy": "additive",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-delta-multiset",
+      "strategy": "multiset",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-delta-sequence-append",
+      "strategy": "append",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-delta-sequence-trim",
+      "strategy": "trim",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-journal-append-replay",
+      "strategy": "append-persist-restore-replay",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-journal-corrupt",
+      "strategy": "corrupt",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-journal-truncated",
+      "strategy": "truncated",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-tracked-multiset-snapshot",
+      "strategy": "multiset-tracked",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-tracked-multiset-update",
+      "strategy": "multiset-update",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-tracked-sequence-snapshot",
+      "strategy": "sequence-tracked",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s3-state-delta-journal-tracked-sequence-update",
+      "strategy": "sequence-update",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

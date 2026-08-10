@@ -119,6 +119,35 @@ fn c3_operation_inventory_owns_every_suite_and_exposes_every_gap() {
 }
 
 #[test]
+fn c3_generated_scaling_inventory_reaches_the_declared_volume_floor() {
+    let ledger: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/c3-coverage-ledger-v1.json"
+    ))
+    .unwrap();
+    let p0: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/manifests/c3-p0/c3-expansion-report-v1.json"
+    ))
+    .unwrap();
+    let f3_s3: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/manifests/c3-f3-s3/c3-expansion-report-v1.json"
+    ))
+    .unwrap();
+
+    let generated_cells =
+        p0["total_cells"].as_u64().unwrap() + f3_s3["total_cells"].as_u64().unwrap();
+    let targets = &ledger["targets"];
+    assert!(
+        generated_cells >= targets["timed_cells_lower_bound"].as_u64().unwrap(),
+        "the generated C3 inventory has not reached its declared lower bound"
+    );
+    assert!(
+        generated_cells <= targets["timed_cells_upper_bound"].as_u64().unwrap(),
+        "the generated C3 inventory exceeds its declared reviewable envelope"
+    );
+    assert_eq!(generated_cells, 2_610);
+}
+
+#[test]
 fn c3_plan_names_the_required_campaign_lanes_and_rejects_weak_selection() {
     let plan = include_str!("../docs/microfield/c3-extensive-campaign-plan.md");
     for required in [

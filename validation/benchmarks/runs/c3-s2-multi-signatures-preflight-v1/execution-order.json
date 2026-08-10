@@ -1,0 +1,150 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-s2-multi-signatures-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "s2-multi-signatures-k8-sequence-p1-n7",
+      "process_index": 0,
+      "seed": 6521614383208848377,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "s2-multi-signatures-runtime-sequence-p256-n3",
+      "process_index": 0,
+      "seed": 18090920928300774592,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "s2-multi-signatures-wire-multiset-p256-n16",
+      "process_index": 0,
+      "seed": 11741143633680359833,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "s2-multi-signatures-k16-multiset-p1-n32",
+      "process_index": 0,
+      "seed": 9948097121659223454,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "s2-multi-signatures-k16-sequence-p16-n2",
+      "process_index": 0,
+      "seed": 3699906097751256923,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "s2-multi-signatures-runtime-multiset-p16-n64",
+      "process_index": 0,
+      "seed": 17386675904337974381,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "s2-multi-signatures-runtime-additive-p16-n15",
+      "process_index": 0,
+      "seed": 17228197641829101454,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "s2-multi-signatures-k8-multiset-p1-n1",
+      "process_index": 0,
+      "seed": 10791368890122122605,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "s2-multi-signatures-wire-sequence-p256-n1024",
+      "process_index": 0,
+      "seed": 14130588812781375861,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "s2-multi-signatures-k16-multiset-p1-n32",
+      "process_index": 1,
+      "seed": 16530786879863592531,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "s2-multi-signatures-runtime-additive-p16-n15",
+      "process_index": 1,
+      "seed": 7018635630297222432,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "s2-multi-signatures-wire-sequence-p256-n1024",
+      "process_index": 1,
+      "seed": 2751242307694150880,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 1,
+      "cell": "s2-multi-signatures-runtime-multiset-p16-n64",
+      "process_index": 1,
+      "seed": 18085728362388416331,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 1,
+      "cell": "s2-multi-signatures-k16-sequence-p16-n2",
+      "process_index": 1,
+      "seed": 6808602960364270970,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 1,
+      "cell": "s2-multi-signatures-k8-multiset-p1-n1",
+      "process_index": 1,
+      "seed": 14045136631765706597,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 1,
+      "cell": "s2-multi-signatures-wire-multiset-p256-n16",
+      "process_index": 1,
+      "seed": 13428770035338601099,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 1,
+      "cell": "s2-multi-signatures-runtime-sequence-p256-n3",
+      "process_index": 1,
+      "seed": 17965345663420271700,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 1,
+      "cell": "s2-multi-signatures-k8-sequence-p1-n7",
+      "process_index": 1,
+      "seed": 5336014754318376795,
+      "status": "success"
+    }
+  ]
+}

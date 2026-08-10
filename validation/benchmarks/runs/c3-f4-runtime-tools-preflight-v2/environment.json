@@ -1,0 +1,60 @@
+{
+  "schema": "microfield-publication-environment-v1",
+  "classification": "smoke",
+  "host_mode": "interactive",
+  "commit": "4dc3dcf68964a80db7f70b43c7ffc3bfd06124c9",
+  "tree_clean": false,
+  "binary_sha256": "eb573b1ba9fc0d20d3374783d64bcd3e590586f129502347f785cbf7165285e6",
+  "profile": "release",
+  "architecture": "x86_64",
+  "operating_system": "Pop!_OS 24.04 LTS",
+  "kernel": "Linux 6.18.7-76061807-generic #202601231045~1769703228~24.04~cb87b5b SMP PREEMPT_DYNAMIC Thu J GNU/Linux",
+  "rustc": "rustc 1.96.0-nightly (1d8897a4e 2026-03-13)\nbinary: rustc\ncommit-hash: 1d8897a4e88051480b36c501e66809425c6e08ad\ncommit-date: 2026-03-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.96.0-nightly\nLLVM version: 22.1.0",
+  "cargo": "cargo 1.96.0-nightly (cbb9bb8bd 2026-03-13)",
+  "rustflags": "",
+  "cpu": {
+    "cache size": "30720 KB",
+    "cpu cores": "16",
+    "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb intel_pt sha_ni xsaveopt xsavec xgetbv1 xsaves split_lock_detect user_shstk avx_vnni dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req hfi vnmi umip pku ospke waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize arch_lbr ibt flush_l1d arch_capabilities",
+    "microcode": "0x12f",
+    "model name": "13th Gen Intel(R) Core(TM) i7-13700HX",
+    "siblings": "24",
+    "vendor_id": "GenuineIntel"
+  },
+  "memory": {
+    "HugePages_Total": "0",
+    "MemAvailable": "13305008 kB",
+    "MemTotal": "32559872 kB",
+    "SwapTotal": "20970996 kB"
+  },
+  "frequency": {
+    "cpuinfo_max_freq": "4800000",
+    "cpuinfo_min_freq": "800000",
+    "scaling_cur_freq": "2083893",
+    "scaling_driver": "intel_pstate",
+    "scaling_governor": "performance",
+    "scaling_max_freq": "2100000",
+    "scaling_min_freq": "800000",
+    "turbo": "/sys/devices/system/cpu/intel_pstate/no_turbo=0"
+  },
+  "temperature": {
+    "INT3400 Thermal": "20000",
+    "SEN1": "59050",
+    "SEN2": "42050",
+    "SEN3": "50050",
+    "SEN4": "50050",
+    "SEN5": "53050",
+    "TCPU": "58050",
+    "TCPU_PCI": "58000",
+    "acpitz": "27800",
+    "x86_pkg_temp": "58000"
+  },
+  "filesystem": {
+    "page-size": "4096",
+    "working-directory": "Filesystem            Type 1K-blocks      Used Available Use% Mounted on\n/dev/mapper/data-root ext4 974067752 321021176 603492964  35% /home/alfred/Documentos/Proyectos/c++/homomorphic-hash-rs"
+  },
+  "affinity": "0-23",
+  "container": "not-detected",
+  "utc_started": "2026-08-10T18:29:01Z",
+  "disclosed_unknowns": []
+}

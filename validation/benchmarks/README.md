@@ -42,6 +42,22 @@ workloads remain explicit until their suite is implemented. Initial Smoke
 results and cost bounds are documented in
 `docs/microfield/c3-p0-implementation-and-preflight-report.md`.
 
+F3–S3 extend the deterministic inventory through batch/packed algorithms,
+runtime fields and tooling, base and multi-evaluation signatures, tracked
+state, snapshots, deltas and journals:
+
+```text
+cargo run -p microfield-validation-lab --locked -- c3-expand \
+  --manifest validation/benchmarks/c3-f3-s3-factor-plan-v1.json \
+  --out-dir validation/benchmarks/manifests/c3-f3-s3
+```
+
+These seven shards add 2,112 publication cells and 56 preflight cells. Together
+with F1/F2 the generated C3-Scaling inventory is 2,610 cells. All 56 F3–S3
+Smoke cells completed precisely under the exploratory threshold with stable
+checksums; this is harness evidence, not a publication claim. See
+`docs/microfield/c3-f3-s3-implementation-and-preflight-report.md`.
+
 C2 is also versioned and remains informative:
 
 ```text

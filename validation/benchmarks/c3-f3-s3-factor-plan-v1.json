@@ -1,0 +1,144 @@
+{
+  "schema": "algesum-c3-factor-plan-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1",
+  "seed": 130320260811,
+  "shards": [
+    {
+      "id": "f3-batch-packed",
+      "family": "finite-field-derived",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 4096,
+      "operations": [
+        { "id": "batch-portable", "operation": "field.batch-portable-total", "strategy": "portable" },
+        { "id": "packed-owned", "operation": "field.packed-owned-total", "strategy": "detected-owned-reused" },
+        { "id": "packed-view", "operation": "field.packed-view-total", "strategy": "detected-borrowed-storage" }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 255, 256, 1024, 4096, 16384, 65536]
+      }
+    },
+    {
+      "id": "f3-horner",
+      "family": "finite-field-derived",
+      "scale_unit": "evaluations",
+      "preflight_max_scale": 1024,
+      "operations": [
+        { "id": "many-points", "operation": "algorithm.horner-total", "strategy": "one-polynomial-many-points", "maximum_scale": 4096 },
+        { "id": "many-polynomials", "operation": "algorithm.horner-total", "strategy": "many-polynomials-one-point", "maximum_scale": 4096 }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 256, 1024, 4096],
+        "payload_bytes": [1, 4, 16, 64]
+      }
+    },
+    {
+      "id": "f3-derived",
+      "family": "finite-field-derived",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 4096,
+      "operations": [
+        { "id": "scan-prefix-inclusive", "operation": "algorithm.scan-total", "strategy": "prefix-inclusive" },
+        { "id": "scan-prefix-exclusive", "operation": "algorithm.scan-total", "strategy": "prefix-exclusive" },
+        { "id": "scan-suffix-inclusive", "operation": "algorithm.scan-total", "strategy": "suffix-inclusive" },
+        { "id": "scan-suffix-exclusive", "operation": "algorithm.scan-total", "strategy": "suffix-exclusive" },
+        { "id": "batch-invert", "operation": "algorithm.batch-invert-total", "strategy": "borrowed-workspace", "maximum_scale": 16384 },
+        { "id": "powers", "operation": "algorithm.powers-total", "strategy": "borrowed-output" },
+        { "id": "mask", "operation": "algorithm.mask-total", "strategy": "borrowed-compact-mask" }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 255, 256, 1024, 4096, 16384, 65536]
+      }
+    },
+    {
+      "id": "f4-runtime-tools",
+      "family": "runtime-field-and-generation",
+      "scale_unit": "operations",
+      "preflight_max_scale": 1024,
+      "operations": [
+        { "id": "runtime-lifecycle-prime", "operation": "field.runtime-lifecycle-total", "strategy": "prime-build-reduce", "maximum_scale": 16 },
+        { "id": "runtime-lifecycle-binary", "operation": "field.runtime-lifecycle-total", "strategy": "binary-build-reduce", "maximum_scale": 16 },
+        { "id": "runtime-batch", "operation": "field.runtime-operation-total", "strategy": "fp251-dynamic-batch", "maximum_scale": 65536 },
+        { "id": "prime-manifest-parse", "operation": "tool.prime-manifest-total", "strategy": "parse-normalize", "maximum_scale": 1 },
+        { "id": "prime-manifest-generate", "operation": "tool.prime-manifest-total", "strategy": "generate-source", "maximum_scale": 1 },
+        { "id": "consumer-check", "operation": "tool.artifact-compile-consumer-total", "strategy": "offline-incremental-check", "maximum_scale": 1 }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 256, 1024, 4096, 16384, 65536]
+      }
+    },
+    {
+      "id": "s1-base-signatures",
+      "family": "algebraic-signatures-non-cryptographic",
+      "scale_unit": "items",
+      "preflight_max_scale": 1024,
+      "operations": [
+        { "id": "remove-multiset", "operation": "signature.base-remove-total", "strategy": "tracked-multiset-remove", "maximum_scale": 4096 },
+        { "id": "remove-sequence", "operation": "signature.base-remove-total", "strategy": "tracked-sequence-remove", "maximum_scale": 4096 },
+        { "id": "wire-additive", "operation": "signature.base-wire-total", "strategy": "additive-wire", "maximum_scale": 4096 },
+        { "id": "wire-sequence", "operation": "signature.base-wire-total", "strategy": "sequence-wire", "maximum_scale": 4096 },
+        { "id": "wire-bidirectional", "operation": "signature.base-wire-total", "strategy": "bidirectional-wire", "maximum_scale": 4096 },
+        { "id": "wire-multiset", "operation": "signature.base-wire-total", "strategy": "multiset-wire", "maximum_scale": 4096 },
+        { "id": "restore-additive", "operation": "signature.base-restore-total", "strategy": "additive-restore", "maximum_scale": 4096 },
+        { "id": "restore-sequence", "operation": "signature.base-restore-total", "strategy": "sequence-restore", "maximum_scale": 4096 },
+        { "id": "restore-bidirectional", "operation": "signature.base-restore-total", "strategy": "bidirectional-restore", "maximum_scale": 4096 },
+        { "id": "restore-multiset", "operation": "signature.base-restore-total", "strategy": "multiset-restore", "maximum_scale": 4096 },
+        { "id": "pattern-distinct", "operation": "signature.base-input-pattern-total", "strategy": "distinct", "maximum_scale": 4096 },
+        { "id": "pattern-repeated", "operation": "signature.base-input-pattern-total", "strategy": "repeated", "maximum_scale": 4096 },
+        { "id": "pattern-empty", "operation": "signature.base-input-pattern-total", "strategy": "empty", "maximum_scale": 4096 },
+        { "id": "pattern-skewed", "operation": "signature.base-input-pattern-total", "strategy": "skewed", "maximum_scale": 4096 }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 64, 256, 1024, 4096],
+        "payload_bytes": [1, 16, 256, 4096]
+      }
+    },
+    {
+      "id": "s2-multi-signatures",
+      "family": "algebraic-signatures-non-cryptographic",
+      "scale_unit": "items",
+      "preflight_max_scale": 1024,
+      "operations": [
+        { "id": "k8-multiset", "operation": "signature.multi-k8-total", "strategy": "multiset-k8", "maximum_scale": 4096 },
+        { "id": "k8-sequence", "operation": "signature.multi-k8-total", "strategy": "sequence-k8", "maximum_scale": 4096 },
+        { "id": "k16-multiset", "operation": "signature.multi-k16-total", "strategy": "multiset-k16", "maximum_scale": 4096 },
+        { "id": "k16-sequence", "operation": "signature.multi-k16-total", "strategy": "sequence-k16", "maximum_scale": 4096 },
+        { "id": "runtime-additive", "operation": "signature.runtime-total", "strategy": "additive-runtime", "maximum_scale": 4096 },
+        { "id": "runtime-multiset", "operation": "signature.runtime-total", "strategy": "multiset-runtime-k4", "maximum_scale": 4096 },
+        { "id": "runtime-sequence", "operation": "signature.runtime-total", "strategy": "sequence-runtime-k4", "maximum_scale": 4096 },
+        { "id": "wire-multiset", "operation": "signature.multi-wire-restore-total", "strategy": "multiset-wire-restore-k4", "maximum_scale": 4096 },
+        { "id": "wire-sequence", "operation": "signature.multi-wire-restore-total", "strategy": "sequence-wire-restore-k4", "maximum_scale": 4096 }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 64, 256, 1024, 4096],
+        "payload_bytes": [1, 16, 256]
+      }
+    },
+    {
+      "id": "s3-state-delta-journal",
+      "family": "algebraic-signature-state-non-cryptographic",
+      "scale_unit": "items",
+      "preflight_max_scale": 256,
+      "operations": [
+        { "id": "tracked-sequence-update", "operation": "signature.tracked-update-total", "strategy": "sequence-update", "maximum_scale": 4096 },
+        { "id": "tracked-multiset-update", "operation": "signature.tracked-update-total", "strategy": "multiset-update", "maximum_scale": 4096 },
+        { "id": "compact-additive", "operation": "signature.compact-snapshot-total", "strategy": "additive-compact", "maximum_scale": 4096 },
+        { "id": "compact-sequence", "operation": "signature.compact-snapshot-total", "strategy": "sequence-compact", "maximum_scale": 4096 },
+        { "id": "compact-bidirectional", "operation": "signature.compact-snapshot-total", "strategy": "bidirectional-compact", "maximum_scale": 4096 },
+        { "id": "compact-multiset", "operation": "signature.compact-snapshot-total", "strategy": "multiset-compact", "maximum_scale": 4096 },
+        { "id": "tracked-sequence-snapshot", "operation": "signature.tracked-snapshot-total", "strategy": "sequence-tracked", "maximum_scale": 1024 },
+        { "id": "tracked-multiset-snapshot", "operation": "signature.tracked-snapshot-total", "strategy": "multiset-tracked", "maximum_scale": 1024 },
+        { "id": "delta-additive", "operation": "delta.per-law-total", "strategy": "additive", "maximum_scale": 4096 },
+        { "id": "delta-multiset", "operation": "delta.per-law-total", "strategy": "multiset", "maximum_scale": 4096 },
+        { "id": "delta-sequence-append", "operation": "delta.per-law-total", "strategy": "append", "maximum_scale": 4096 },
+        { "id": "delta-sequence-trim", "operation": "delta.per-law-total", "strategy": "trim", "maximum_scale": 4096 },
+        { "id": "journal-append-replay", "operation": "journal.append-replay-total", "strategy": "append-persist-restore-replay", "maximum_scale": 1024 },
+        { "id": "journal-truncated", "operation": "journal.failure-path", "strategy": "truncated", "maximum_scale": 1024 },
+        { "id": "journal-corrupt", "operation": "journal.failure-path", "strategy": "corrupt", "maximum_scale": 1024 }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 64, 256, 1024, 4096],
+        "payload_bytes": [1, 16, 256]
+      }
+    }
+  ]
+}

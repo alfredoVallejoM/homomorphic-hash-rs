@@ -1,0 +1,91 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-f4-runtime-tools-smoke",
+  "profile": "smoke",
+  "seed": 130320260811,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f4-runtime-tools-runtime-lifecycle-prime-n1",
+      "family": "runtime-field-and-generation",
+      "operation": "field.runtime-lifecycle-total",
+      "scale": 1,
+      "scale_unit": "operations",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f4-runtime-tools-runtime-lifecycle-prime",
+      "strategy": "prime-build-reduce"
+    },
+    {
+      "id": "f4-runtime-tools-runtime-lifecycle-binary-n1",
+      "family": "runtime-field-and-generation",
+      "operation": "field.runtime-lifecycle-total",
+      "scale": 1,
+      "scale_unit": "operations",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f4-runtime-tools-runtime-lifecycle-binary",
+      "strategy": "binary-build-reduce"
+    },
+    {
+      "id": "f4-runtime-tools-runtime-batch-n1",
+      "family": "runtime-field-and-generation",
+      "operation": "field.runtime-operation-total",
+      "scale": 1,
+      "scale_unit": "operations",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f4-runtime-tools-runtime-batch",
+      "strategy": "fp251-dynamic-batch"
+    },
+    {
+      "id": "f4-runtime-tools-prime-manifest-parse-n1",
+      "family": "runtime-field-and-generation",
+      "operation": "tool.prime-manifest-total",
+      "scale": 1,
+      "scale_unit": "operations",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f4-runtime-tools-prime-manifest-parse",
+      "strategy": "parse-normalize"
+    },
+    {
+      "id": "f4-runtime-tools-prime-manifest-generate-n1",
+      "family": "runtime-field-and-generation",
+      "operation": "tool.prime-manifest-total",
+      "scale": 1,
+      "scale_unit": "operations",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f4-runtime-tools-prime-manifest-generate",
+      "strategy": "generate-source"
+    },
+    {
+      "id": "f4-runtime-tools-consumer-check-n1",
+      "family": "runtime-field-and-generation",
+      "operation": "tool.artifact-compile-consumer-total",
+      "scale": 1,
+      "scale_unit": "operations",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f4-runtime-tools-consumer-check",
+      "strategy": "offline-incremental-check"
+    }
+  ]
+}

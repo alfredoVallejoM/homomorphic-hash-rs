@@ -302,11 +302,14 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
 - P0 completado: ledger activado, inventario explícito de operaciones y huecos,
   generador determinista de cruces primarios/covering arrays y schemas
   versionados;
-- F1/F2 iniciadas: 30 workloads de campos, 30 celdas preflight, 60 procesos y
+- F1/F2 completadas en preflight: 30 workloads de campos, 30 celdas, 60 procesos y
   300 observaciones; 23/30 celdas alcanzan el objetivo exploratorio de
   precisión y ninguna asigna memoria dentro de la región medida;
-- aplicar el mismo cierre a F3/F4 y después a firmas, estructuras, DB, grafos,
-  corpora y compatibilidad, siguiendo el inventario;
+- F3–S3 completadas en preflight: 26 operaciones nuevas, 2.112 celdas
+  publicables generadas, 56 celdas Smoke, 112 procesos y 560 observaciones;
+  56/56 precisas bajo el umbral exploratorio y cero checksums inestables;
+- el inventario combinado F1–S3 alcanza 2.610 celdas C3-Scaling y satisface el
+  suelo normativo; continuar por T1/R1/D1, G1/G2/X1/X2 y D2;
 - completar C3-Semantic, C3-Scaling y C3-Systems;
 - replicar los claims en Intel x86-64, AMD x86-64 y AArch64 dedicados;
 - decidir go/no-go con cobertura, efectos, intervalos, límites e inconclusos;
@@ -315,6 +318,8 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
 Especificación: [`c3-extensive-campaign-plan.md`](c3-extensive-campaign-plan.md).
 Evidencia P0:
 [`c3-p0-implementation-and-preflight-report.md`](c3-p0-implementation-and-preflight-report.md).
+Evidencia F3–S3:
+[`c3-f3-s3-implementation-and-preflight-report.md`](c3-f3-s3-implementation-and-preflight-report.md).
 
 ### 5. Base de datos real
 

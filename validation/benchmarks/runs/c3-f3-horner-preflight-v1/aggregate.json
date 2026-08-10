@@ -1,0 +1,95 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f3-s3-v1-f3-horner-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f3-horner-many-points-p1-n1",
+      "family": "finite-field-derived",
+      "operation": "algorithm.horner-total",
+      "scale": 1,
+      "scale_unit": "evaluations",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 104.85302734375,
+      "p95_ns_per_unit": 125.287353515625,
+      "p99_ns_per_unit": 125.770751953125,
+      "mad_ns_per_unit": 3.64111328125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 92.1748046875,
+        "upper": 117.53125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 117.56719116210938,
+        "upper": 125.8916015625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 117.5673828125,
+        "upper": 125.8916015625
+      },
+      "relative_median_ci_half_width": 0.12091422610704157,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f3-horner-many-polynomials-p64-n1024",
+      "family": "finite-field-derived",
+      "operation": "algorithm.horner-total",
+      "scale": 1024,
+      "scale_unit": "evaluations",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 49037055.0,
+      "p95_ns_per_unit": 51517863.9,
+      "p99_ns_per_unit": 51528007.98,
+      "mad_ns_per_unit": 2388180.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 46650090.0,
+        "upper": 51424020.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 46696905.35,
+        "upper": 51530544.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 46723328.27,
+        "upper": 51530544.0
+      },
+      "relative_median_ci_half_width": 0.04867676086991766,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "f3-horner-many-points",
+      "strategy": "one-polynomial-many-points",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f3-horner-many-polynomials",
+      "strategy": "many-polynomials-one-point",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

@@ -1,21 +1,34 @@
-use std::fs;
+use std::{
+    fs,
+    mem::MaybeUninit,
+    process::{Command, Stdio},
+    sync::atomic::{AtomicU64, Ordering},
+};
 
 use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
     BinaryPolynomialEncoder, BoundedSetReconciler, CanonicalBudgetLimit, CanonicalGraphDag,
-    CanonicalSearchBudget, DatabaseApplyPolicy, DatabaseColumn, DatabaseColumnType, DatabaseRow,
-    DatabaseSchema, DatabaseTransactionLimits, DatabaseValue, FastGraphLabeler, FileChunkProfile,
-    GraphExecution, GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree, IncidenceGraph,
-    IncidenceGraphBuilder, IncrementalGraphWorkspace, Microcanon, MicrocanonOutcome,
-    MicrocanonPath, MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature,
-    MultisetSignature, PartitionedDatabase, PrimeIntegerEncoder, ReconciliationLimits,
-    RevisionedSignature, RowMutation, SequenceSignature, SummaryEditPolicy, SummaryRangeEdit,
-    TransactionDelta,
+    CanonicalSearchBudget, CompactSignature, DatabaseApplyPolicy, DatabaseColumn,
+    DatabaseColumnType, DatabaseRow, DatabaseSchema, DatabaseTransactionLimits, DatabaseValue,
+    DeltaJournal, DeltaJournalLimits, DynamicAdditiveSignature,
+    DynamicMultiEvaluationMultisetSignature, DynamicMultiEvaluationSequenceSignature,
+    FastGraphLabeler, FileChunkProfile, GraphExecution, GraphSchemaId, GraphWorkspace,
+    HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder, IncrementalGraphWorkspace,
+    Microcanon, MicrocanonOutcome, MicrocanonPath, MultiEvaluationMultisetSignature,
+    MultiEvaluationSequenceSignature, MultisetDelta, MultisetSignature, PartitionedDatabase,
+    PrimeIntegerEncoder, ReconciliationLimits, RevisionedSignature, RowMutation, SequenceAppend,
+    SequenceSignature, SequenceTrim, SummaryEditPolicy, SummaryRangeEdit, TrackedMultiset,
+    TrackedSequence, TrackedSnapshotLimits, TransactionDelta,
 };
 use microfield::{
-    generator::BinaryFieldFactory, BinaryPolynomialField, CanonicalEncoding, Engine, Field,
-    Fp251V1, Fp256GenericV1, FpGoldilocks64V1, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1, Invert,
-    PrimeField, Square,
+    fill_fixed_base_powers,
+    generator::{BinaryFieldFactory, PrimeFieldFactory, PrimeFieldManifest},
+    pack_into_storage, required_mask_words, required_packed_bytes, BatchInvertPlan,
+    BatchInvertWorkspace, BinaryPolynomialField, BitMaskViewMut, CanonicalEncoding,
+    CoefficientLayout, DynBatch, DynField, Engine, Field, Fp251V1, Fp256GenericV1,
+    FpGoldilocks64V1, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1, Invert, ManyPointsHornerPlan,
+    ManyPolynomialsHornerPlan, PackedBatch, PrimeField, ProductScanPlan, ScanDirection, ScanMode,
+    Square,
 };
 
 use super::model::{
@@ -25,6 +38,9 @@ use super::model::{
 type BinaryEncoder = BinaryPolynomialEncoder;
 type Database = PartitionedDatabase<Gf2_128V1, BinaryEncoder>;
 type SummaryTree = HomomorphicSummaryTree<Gf2_128V1, BinaryEncoder>;
+type PrimeAdditive = AdditiveSignature<Fp251V1, PrimeIntegerEncoder>;
+type PrimeAdditiveJournal = DeltaJournal<AdditiveDelta<Fp251V1, PrimeIntegerEncoder>>;
+type AdditiveJournalFixture = (ApplicationNamespace, PrimeAdditive, PrimeAdditiveJournal);
 
 pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "field.gf2-128.add-total",
@@ -65,6 +81,14 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "field.gf2-128.batch-detected",
     "field.gf2-128.scalar-total",
     "field.gf2-128.batch-detected-total",
+    "field.batch-portable-total",
+    "field.packed-owned-total",
+    "field.packed-view-total",
+    "algorithm.horner-total",
+    "algorithm.scan-total",
+    "algorithm.batch-invert-total",
+    "algorithm.powers-total",
+    "algorithm.mask-total",
     "signature.additive.build",
     "signature.sequence.build",
     "signature.bidirectional.build",
@@ -93,6 +117,20 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "signature.multi-sequence-k4.concatenate-total",
     "signature.multi-multiset-k4.fragmented-merge-total",
     "signature.multi-sequence-k4.fragmented-concatenate-total",
+    "signature.base-remove-total",
+    "signature.base-wire-total",
+    "signature.base-restore-total",
+    "signature.base-input-pattern-total",
+    "signature.multi-k8-total",
+    "signature.multi-k16-total",
+    "signature.runtime-total",
+    "signature.multi-wire-restore-total",
+    "signature.tracked-update-total",
+    "signature.compact-snapshot-total",
+    "signature.tracked-snapshot-total",
+    "delta.per-law-total",
+    "journal.append-replay-total",
+    "journal.failure-path",
     "delta.additive.end-to-end",
     "summary-tree.rebuild",
     "summary-tree.local-edit-total",
@@ -117,6 +155,10 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "graph.incremental-topology-update-total",
     "tool.binary-manifest.parse",
     "tool.binary-manifest.generate",
+    "field.runtime-lifecycle-total",
+    "field.runtime-operation-total",
+    "tool.prime-manifest-total",
+    "tool.artifact-compile-consumer-total",
 ];
 
 pub struct PreparedOperation {
@@ -139,6 +181,14 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "field.gf2-128.batch-detected" => field_batch(cell.scale, seed),
         "field.gf2-128.scalar-total" => field_scalar_total(cell.scale, seed),
         "field.gf2-128.batch-detected-total" => field_batch_total(cell.scale, seed),
+        "field.batch-portable-total" => field_batch_portable_total(cell, seed),
+        "field.packed-owned-total" => field_packed_owned_total(cell, seed),
+        "field.packed-view-total" => field_packed_view_total(cell, seed),
+        "algorithm.horner-total" => algorithm_horner_total(cell, seed),
+        "algorithm.scan-total" => algorithm_scan_total(cell, seed),
+        "algorithm.batch-invert-total" => algorithm_batch_invert_total(cell, seed),
+        "algorithm.powers-total" => algorithm_powers_total(cell, seed),
+        "algorithm.mask-total" => algorithm_mask_total(cell, seed),
         "signature.additive.build" => signature_additive(cell, seed),
         "signature.sequence.build" => signature_sequence(cell, seed),
         "signature.bidirectional.build" => signature_bidirectional(cell, seed),
@@ -187,6 +237,20 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "signature.multi-sequence-k4.fragmented-concatenate-total" => {
             signature_multi_sequence_fragmented_k4(cell, seed)
         }
+        "signature.base-remove-total" => signature_base_remove_total(cell, seed),
+        "signature.base-wire-total" => signature_base_wire_total(cell, seed),
+        "signature.base-restore-total" => signature_base_restore_total(cell, seed),
+        "signature.base-input-pattern-total" => signature_base_input_pattern_total(cell, seed),
+        "signature.multi-k8-total" => signature_multi_k8_total(cell, seed),
+        "signature.multi-k16-total" => signature_multi_k16_total(cell, seed),
+        "signature.runtime-total" => signature_runtime_total(cell, seed),
+        "signature.multi-wire-restore-total" => signature_multi_wire_restore_total(cell, seed),
+        "signature.tracked-update-total" => signature_tracked_update_total(cell, seed),
+        "signature.compact-snapshot-total" => signature_compact_snapshot_total(cell, seed),
+        "signature.tracked-snapshot-total" => signature_tracked_snapshot_total(cell, seed),
+        "delta.per-law-total" => delta_per_law_total(cell, seed),
+        "journal.append-replay-total" => journal_append_replay_total(cell, seed),
+        "journal.failure-path" => journal_failure_path(cell, seed),
         "delta.additive.end-to-end" => delta_additive(cell, seed),
         "summary-tree.rebuild" => summary_tree_rebuild(cell, seed),
         "summary-tree.local-edit-total" => summary_tree_local_edit_total(cell, seed),
@@ -221,6 +285,10 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "graph.incremental-topology-update-total" => graph_incremental_topology_update(cell),
         "tool.binary-manifest.parse" => tool_binary_manifest(false),
         "tool.binary-manifest.generate" => tool_binary_manifest(true),
+        "field.runtime-lifecycle-total" => field_runtime_lifecycle_total(cell, seed),
+        "field.runtime-operation-total" => field_runtime_operation_total(cell, seed),
+        "tool.prime-manifest-total" => tool_prime_manifest_total(cell),
+        "tool.artifact-compile-consumer-total" => tool_artifact_compile_consumer_total(),
         other => Err(format!(
             "unsupported publication benchmark operation {other:?}"
         )),
@@ -430,6 +498,182 @@ fn field_batch_total(scale: usize, seed: u64) -> Result<PreparedOperation, Strin
     let mut operation = field_batch(scale, seed)?;
     operation.logical_units_per_action = 1;
     Ok(operation)
+}
+
+fn field_batch_portable_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let scale = cell.scale;
+    let lhs = gf2_256_values(scale, seed, false)?;
+    let rhs = gf2_256_values(scale, seed.rotate_left(19), false)?;
+    let mut output = vec![Gf2_256HhV1::ZERO; scale];
+    let engine = Engine::<Gf2_256HhV1>::portable();
+    Ok(single_unit(move || {
+        engine.mul_into(&mut output, &lhs, &rhs).unwrap();
+        checksum_fields(&output)
+    }))
+}
+
+fn field_packed_owned_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let scale = cell.scale;
+    let lhs = gf2_256_values(scale, seed, false)?;
+    let rhs = gf2_256_values(scale, seed.rotate_left(19), false)?;
+    let engine = Engine::<Gf2_256HhV1>::builder()
+        .expected_batch(scale)
+        .detect()
+        .map_err(debug_error)?;
+    let mut packed_lhs = PackedBatch::from_aos(&engine, &lhs).map_err(debug_error)?;
+    let mut packed_rhs = PackedBatch::from_aos(&engine, &rhs).map_err(debug_error)?;
+    let mut packed_output = PackedBatch::new(&engine, scale).map_err(debug_error)?;
+    let mut output = vec![Gf2_256HhV1::ZERO; scale];
+    Ok(single_unit(move || {
+        packed_lhs.pack_from(&lhs).unwrap();
+        packed_rhs.pack_from(&rhs).unwrap();
+        engine
+            .mul_packed_into(&mut packed_output, &packed_lhs, &packed_rhs)
+            .unwrap();
+        packed_output.unpack_into(&mut output).unwrap();
+        checksum_fields(&output)
+    }))
+}
+
+fn field_packed_view_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let scale = cell.scale;
+    let lhs = gf2_256_values(scale, seed, false)?;
+    let rhs = gf2_256_values(scale, seed.rotate_left(19), false)?;
+    let zeros = vec![Gf2_256HhV1::ZERO; scale];
+    let engine = Engine::<Gf2_256HhV1>::builder()
+        .expected_batch(scale)
+        .detect()
+        .map_err(debug_error)?;
+    let plan = engine.packing_plan(scale).map_err(debug_error)?;
+    let storage_bytes = required_packed_bytes(&plan).map_err(debug_error)?;
+    let mut lhs_storage = vec![MaybeUninit::uninit(); storage_bytes];
+    let mut rhs_storage = vec![MaybeUninit::uninit(); storage_bytes];
+    let mut out_storage = vec![MaybeUninit::uninit(); storage_bytes];
+    let mut output = zeros.clone();
+    Ok(single_unit(move || {
+        let packed_lhs = pack_into_storage(&engine, &mut lhs_storage, &lhs).unwrap();
+        let packed_rhs = pack_into_storage(&engine, &mut rhs_storage, &rhs).unwrap();
+        let mut packed_output = pack_into_storage(&engine, &mut out_storage, &zeros).unwrap();
+        engine
+            .mul_packed_view_into(
+                &mut packed_output,
+                &packed_lhs.as_view(),
+                &packed_rhs.as_view(),
+            )
+            .unwrap();
+        packed_output.unpack_into(&mut output).unwrap();
+        checksum_fields(&output)
+    }))
+}
+
+fn algorithm_horner_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let scale = cell.scale;
+    let coefficient_count = cell.payload_bytes.max(1);
+    let engine = Engine::<Gf2_256HhV1>::portable();
+    let mut output = vec![Gf2_256HhV1::ZERO; scale];
+    if cell
+        .strategy
+        .as_deref()
+        .is_some_and(|strategy| strategy.contains("many-polynomials"))
+    {
+        let coefficients = gf2_256_values(
+            scale
+                .checked_mul(coefficient_count)
+                .ok_or("Horner matrix size overflow")?,
+            seed,
+            false,
+        )?;
+        let point = gf2_256_values(1, seed.rotate_left(9), false)?[0];
+        let plan = ManyPolynomialsHornerPlan::new(
+            &engine,
+            scale,
+            coefficient_count,
+            CoefficientLayout::PolynomialMajor,
+        )
+        .map_err(debug_error)?;
+        Ok(single_unit(move || {
+            plan.execute(&engine, &mut output, &coefficients, point)
+                .unwrap();
+            checksum_fields(&output)
+        }))
+    } else {
+        let coefficients = gf2_256_values(coefficient_count, seed, false)?;
+        let points = gf2_256_values(scale, seed.rotate_left(9), false)?;
+        let plan =
+            ManyPointsHornerPlan::new(&engine, scale, coefficient_count).map_err(debug_error)?;
+        Ok(single_unit(move || {
+            plan.execute(&engine, &mut output, &coefficients, &points)
+                .unwrap();
+            checksum_fields(&output)
+        }))
+    }
+}
+
+fn algorithm_scan_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let values = gf2_256_values(cell.scale, seed, false)?;
+    let mut output = vec![Gf2_256HhV1::ZERO; cell.scale];
+    let engine = Engine::<Gf2_256HhV1>::portable();
+    let strategy = cell.strategy.as_deref().unwrap_or("prefix-inclusive");
+    let direction = if strategy.contains("suffix") {
+        ScanDirection::Suffix
+    } else {
+        ScanDirection::Prefix
+    };
+    let mode = if strategy.contains("exclusive") {
+        ScanMode::Exclusive
+    } else {
+        ScanMode::Inclusive
+    };
+    let plan = ProductScanPlan::new(&engine, cell.scale, direction, mode);
+    Ok(single_unit(move || {
+        plan.execute(&engine, &mut output, &values).unwrap();
+        checksum_fields(&output)
+    }))
+}
+
+fn algorithm_batch_invert_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let values = gf2_256_values(cell.scale, seed, true)?;
+    let mut output = vec![Gf2_256HhV1::ZERO; cell.scale];
+    let mut prefixes = vec![Gf2_256HhV1::ZERO; cell.scale];
+    let mut mask_words = vec![0_u64; required_mask_words(cell.scale).map_err(debug_error)?];
+    let engine = Engine::<Gf2_256HhV1>::portable();
+    let plan = BatchInvertPlan::new(&engine, cell.scale).map_err(debug_error)?;
+    Ok(single_unit(move || {
+        let mut workspace = BatchInvertWorkspace::new(&mut prefixes);
+        let mut mask = BitMaskViewMut::new(&mut mask_words, values.len()).unwrap();
+        plan.execute(&engine, &mut output, &values, &mut mask, &mut workspace)
+            .unwrap();
+        checksum_fields(&output) ^ mask.count_ones() as u64
+    }))
+}
+
+fn algorithm_powers_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let base = gf2_256_values(1, seed, false)?[0];
+    let mut output = vec![Gf2_256HhV1::ZERO; cell.scale];
+    Ok(single_unit(move || {
+        fill_fixed_base_powers(&mut output, base);
+        checksum_fields(&output)
+    }))
+}
+
+fn algorithm_mask_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let scale = cell.scale;
+    let mut words = vec![seed | 1; required_mask_words(scale).map_err(debug_error)?];
+    Ok(single_unit(move || {
+        for (index, word) in words.iter_mut().enumerate() {
+            *word = seed.rotate_left(index as u32) ^ index as u64;
+        }
+        let mut mask = BitMaskViewMut::new(&mut words, scale).unwrap();
+        let count = mask.count_ones() as u64;
+        mask.clear();
+        count ^ mask.len() as u64
+    }))
 }
 
 fn signature_additive(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
@@ -1003,6 +1247,589 @@ fn signature_multi_sequence_fragmented_k4(
             .states()
             .iter()
             .fold(0, |sum, value| sum ^ checksum_field(*value))
+    }))
+}
+
+fn signature_base_remove_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    if signature_law(cell) == "sequence" {
+        let mut baseline =
+            TrackedSequence::<Fp251V1, _>::new(prime_encoder(), Fp251V1::from_u64_mod(7))
+                .map_err(debug_error)?;
+        for item in &items {
+            baseline.push(item).map_err(debug_error)?;
+        }
+        return Ok(single_unit(move || {
+            let mut candidate = baseline.clone();
+            while !candidate.signature().is_empty() {
+                candidate.pop().unwrap();
+            }
+            checksum_field(candidate.signature().state())
+        }));
+    }
+    let mut baseline = TrackedMultiset::<Fp251V1, _>::new(prime_encoder(), Fp251V1::ONE);
+    for item in &items {
+        baseline.insert(item).map_err(debug_error)?;
+    }
+    Ok(single_unit(move || {
+        let mut candidate = baseline.clone();
+        for item in &items {
+            candidate.remove(item).unwrap();
+        }
+        checksum_field(candidate.signature().evaluated_product())
+    }))
+}
+
+fn signature_base_wire_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    match signature_law(cell) {
+        "sequence" => {
+            let base = Fp251V1::from_u64_mod(7);
+            let mut signature =
+                SequenceSignature::<Fp251V1, _>::new(prime_encoder(), base).map_err(debug_error)?;
+            signature
+                .push_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            Ok(single_unit(move || {
+                let bytes = signature.to_canonical_bytes();
+                let restored =
+                    SequenceSignature::from_canonical_bytes(prime_encoder(), base, &bytes).unwrap();
+                checksum_field(restored.state()) ^ checksum_bytes(&bytes)
+            }))
+        }
+        "bidirectional" => {
+            let base = Fp251V1::from_u64_mod(7);
+            let mut signature =
+                BidirectionalSequenceSignature::<Fp251V1, _>::new(prime_encoder(), base)
+                    .map_err(debug_error)?;
+            signature
+                .push_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            Ok(single_unit(move || {
+                let bytes = signature.to_canonical_bytes();
+                let restored = BidirectionalSequenceSignature::from_canonical_bytes(
+                    prime_encoder(),
+                    base,
+                    &bytes,
+                )
+                .unwrap();
+                checksum_field(restored.forward_state()) ^ checksum_bytes(&bytes)
+            }))
+        }
+        "multiset" => {
+            let offset = Fp251V1::ONE;
+            let mut signature = MultisetSignature::<Fp251V1, _>::new(prime_encoder(), offset);
+            signature
+                .insert_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            Ok(single_unit(move || {
+                let bytes = signature.to_canonical_bytes();
+                let restored =
+                    MultisetSignature::from_canonical_bytes(prime_encoder(), offset, &bytes)
+                        .unwrap();
+                checksum_field(restored.evaluated_product()) ^ checksum_bytes(&bytes)
+            }))
+        }
+        _ => {
+            let mut signature = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+            signature
+                .absorb_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            Ok(single_unit(move || {
+                let bytes = signature.to_canonical_bytes();
+                let restored =
+                    AdditiveSignature::<Fp251V1, _>::from_canonical_bytes(prime_encoder(), &bytes)
+                        .unwrap();
+                checksum_field(restored.state()) ^ checksum_bytes(&bytes)
+            }))
+        }
+    }
+}
+
+fn signature_base_restore_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    match signature_law(cell) {
+        "sequence" => {
+            let base = Fp251V1::from_u64_mod(7);
+            let mut signature =
+                SequenceSignature::<Fp251V1, _>::new(prime_encoder(), base).map_err(debug_error)?;
+            signature
+                .push_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            let bytes = signature.to_canonical_bytes();
+            Ok(single_unit(move || {
+                checksum_field(
+                    SequenceSignature::from_canonical_bytes(prime_encoder(), base, &bytes)
+                        .unwrap()
+                        .state(),
+                )
+            }))
+        }
+        "bidirectional" => {
+            let base = Fp251V1::from_u64_mod(7);
+            let mut signature =
+                BidirectionalSequenceSignature::<Fp251V1, _>::new(prime_encoder(), base)
+                    .map_err(debug_error)?;
+            signature
+                .push_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            let bytes = signature.to_canonical_bytes();
+            Ok(single_unit(move || {
+                let restored = BidirectionalSequenceSignature::from_canonical_bytes(
+                    prime_encoder(),
+                    base,
+                    &bytes,
+                )
+                .unwrap();
+                checksum_field(restored.forward_state()) ^ checksum_field(restored.reverse_state())
+            }))
+        }
+        "multiset" => {
+            let offset = Fp251V1::ONE;
+            let mut signature = MultisetSignature::<Fp251V1, _>::new(prime_encoder(), offset);
+            signature
+                .insert_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            let bytes = signature.to_canonical_bytes();
+            Ok(single_unit(move || {
+                checksum_field(
+                    MultisetSignature::from_canonical_bytes(prime_encoder(), offset, &bytes)
+                        .unwrap()
+                        .evaluated_product(),
+                )
+            }))
+        }
+        _ => {
+            let mut signature = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+            signature
+                .absorb_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            let bytes = signature.to_canonical_bytes();
+            Ok(single_unit(move || {
+                checksum_field(
+                    AdditiveSignature::<Fp251V1, _>::from_canonical_bytes(prime_encoder(), &bytes)
+                        .unwrap()
+                        .state(),
+                )
+            }))
+        }
+    }
+}
+
+fn signature_base_input_pattern_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let pattern = cell.strategy.as_deref().unwrap_or("distinct");
+    let mut items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    if pattern.contains("repeated") && !items.is_empty() {
+        let first = items[0].clone();
+        items.fill(first);
+    } else if pattern.contains("empty") {
+        items.iter_mut().for_each(Vec::clear);
+    } else if pattern.contains("skewed") {
+        for (index, item) in items.iter_mut().enumerate() {
+            item.truncate(if index % 16 == 0 {
+                cell.payload_bytes
+            } else {
+                1
+            });
+        }
+    }
+    Ok(single_unit(move || {
+        let mut signature = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+        signature
+            .absorb_many(items.iter().map(Vec::as_slice))
+            .unwrap();
+        checksum_field(signature.state())
+    }))
+}
+
+fn signature_multi_k8_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    signature_multi_wide_total::<8>(cell, seed)
+}
+
+fn signature_multi_k16_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    signature_multi_wide_total::<16>(cell, seed)
+}
+
+fn signature_multi_wide_total<const K: usize>(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    if signature_law(cell) == "sequence" {
+        let bases = std::array::from_fn(|index| Fp251V1::from_u64_mod(index as u64 + 2));
+        Ok(single_unit(move || {
+            let mut signature =
+                MultiEvaluationSequenceSignature::<Fp251V1, _, K>::new(prime_encoder(), bases)
+                    .unwrap();
+            signature
+                .push_many(items.iter().map(Vec::as_slice))
+                .unwrap();
+            checksum_fields(signature.states())
+        }))
+    } else {
+        let offsets = std::array::from_fn(|index| Fp251V1::from_u64_mod(index as u64 + 1));
+        Ok(single_unit(move || {
+            let mut signature =
+                MultiEvaluationMultisetSignature::<Fp251V1, _, K>::new(prime_encoder(), offsets)
+                    .unwrap();
+            signature
+                .insert_many(items.iter().map(Vec::as_slice))
+                .unwrap();
+            checksum_fields(&signature.evaluated_products())
+        }))
+    }
+}
+
+fn signature_runtime_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let field = DynField::builder("c3_signature_runtime_fp251")
+        .prime("251")
+        .build()
+        .map_err(debug_error)?;
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    match signature_law(cell) {
+        "sequence" => {
+            let bases = (2_u64..6)
+                .map(|value| field.reduce_bytes_mod_order(&value.to_le_bytes()))
+                .collect::<Vec<_>>();
+            Ok(single_unit(move || {
+                let mut signature = DynamicMultiEvaluationSequenceSignature::new(
+                    field.clone(),
+                    prime_encoder(),
+                    bases.clone(),
+                )
+                .unwrap();
+                signature
+                    .push_many(items.iter().map(Vec::as_slice))
+                    .unwrap();
+                checksum_dyn_fields(&field, signature.states())
+            }))
+        }
+        "multiset" => {
+            let offsets = (1_u64..=4)
+                .map(|value| field.reduce_bytes_mod_order(&value.to_le_bytes()))
+                .collect::<Vec<_>>();
+            Ok(single_unit(move || {
+                let mut signature = DynamicMultiEvaluationMultisetSignature::new(
+                    field.clone(),
+                    prime_encoder(),
+                    offsets.clone(),
+                )
+                .unwrap();
+                signature
+                    .insert_many(items.iter().map(Vec::as_slice))
+                    .unwrap();
+                checksum_dyn_fields(&field, &signature.evaluated_products())
+            }))
+        }
+        _ => Ok(single_unit(move || {
+            let mut signature = DynamicAdditiveSignature::new(field.clone(), prime_encoder());
+            signature
+                .absorb_many(items.iter().map(Vec::as_slice))
+                .unwrap();
+            checksum_dyn(&field, signature.state())
+        })),
+    }
+}
+
+fn signature_multi_wire_restore_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    if signature_law(cell) == "sequence" {
+        let bases = [
+            Fp251V1::from_u64_mod(2),
+            Fp251V1::from_u64_mod(3),
+            Fp251V1::from_u64_mod(4),
+            Fp251V1::from_u64_mod(5),
+        ];
+        let mut signature =
+            MultiEvaluationSequenceSignature::<Fp251V1, _, 4>::new(prime_encoder(), bases)
+                .map_err(debug_error)?;
+        signature
+            .push_many(items.iter().map(Vec::as_slice))
+            .map_err(debug_error)?;
+        let bytes = signature.to_canonical_bytes();
+        Ok(single_unit(move || {
+            let restored = MultiEvaluationSequenceSignature::from_canonical_bytes(
+                prime_encoder(),
+                bases,
+                &bytes,
+            )
+            .unwrap();
+            checksum_fields(restored.states())
+        }))
+    } else {
+        let offsets = [
+            Fp251V1::ONE,
+            Fp251V1::from_u64_mod(2),
+            Fp251V1::from_u64_mod(3),
+            Fp251V1::from_u64_mod(4),
+        ];
+        let mut signature =
+            MultiEvaluationMultisetSignature::<Fp251V1, _, 4>::new(prime_encoder(), offsets)
+                .map_err(debug_error)?;
+        signature
+            .insert_many(items.iter().map(Vec::as_slice))
+            .map_err(debug_error)?;
+        let bytes = signature.to_canonical_bytes();
+        Ok(single_unit(move || {
+            checksum_fields(
+                &MultiEvaluationMultisetSignature::from_canonical_bytes(
+                    prime_encoder(),
+                    offsets,
+                    &bytes,
+                )
+                .unwrap()
+                .evaluated_products(),
+            )
+        }))
+    }
+}
+
+fn signature_tracked_update_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    if signature_law(cell) == "sequence" {
+        let mut baseline =
+            TrackedSequence::<Fp251V1, _>::new(prime_encoder(), Fp251V1::from_u64_mod(7))
+                .map_err(debug_error)?;
+        for item in &items {
+            baseline.push(item).map_err(debug_error)?;
+        }
+        Ok(single_unit(move || {
+            let mut candidate = baseline.clone();
+            let removed = candidate.pop().unwrap();
+            candidate.push(&removed).unwrap();
+            checksum_field(candidate.signature().state())
+        }))
+    } else {
+        let mut baseline = TrackedMultiset::<Fp251V1, _>::new(prime_encoder(), Fp251V1::ONE);
+        for item in &items {
+            baseline.insert(item).map_err(debug_error)?;
+        }
+        let selected = items
+            .first()
+            .cloned()
+            .ok_or("tracked update needs one item")?;
+        Ok(single_unit(move || {
+            let mut candidate = baseline.clone();
+            candidate.remove(&selected).unwrap();
+            candidate.insert(&selected).unwrap();
+            checksum_field(candidate.signature().evaluated_product())
+        }))
+    }
+}
+
+fn signature_compact_snapshot_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    if signature_law(cell) == "sequence" {
+        let mut signature =
+            SequenceSignature::<Fp251V1, _>::new(prime_encoder(), Fp251V1::from_u64_mod(7))
+                .map_err(debug_error)?;
+        signature
+            .push_many(items.iter().map(Vec::as_slice))
+            .map_err(debug_error)?;
+        Ok(single_unit(move || {
+            checksum_bytes(&signature.to_compact_snapshot().unwrap())
+        }))
+    } else if signature_law(cell) == "bidirectional" {
+        let mut signature = BidirectionalSequenceSignature::<Fp251V1, _>::new(
+            prime_encoder(),
+            Fp251V1::from_u64_mod(7),
+        )
+        .map_err(debug_error)?;
+        signature
+            .push_many(items.iter().map(Vec::as_slice))
+            .map_err(debug_error)?;
+        Ok(single_unit(move || {
+            checksum_bytes(&signature.to_compact_snapshot().unwrap())
+        }))
+    } else if signature_law(cell) == "multiset" {
+        let mut signature = MultisetSignature::<Fp251V1, _>::new(prime_encoder(), Fp251V1::ONE);
+        signature
+            .insert_many(items.iter().map(Vec::as_slice))
+            .map_err(debug_error)?;
+        Ok(single_unit(move || {
+            checksum_bytes(&signature.to_compact_snapshot().unwrap())
+        }))
+    } else {
+        let mut signature = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+        signature
+            .absorb_many(items.iter().map(Vec::as_slice))
+            .map_err(debug_error)?;
+        Ok(single_unit(move || {
+            checksum_bytes(&signature.to_compact_snapshot().unwrap())
+        }))
+    }
+}
+
+fn signature_tracked_snapshot_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    if signature_law(cell) == "sequence" {
+        let base = Fp251V1::from_u64_mod(7);
+        let mut tracked =
+            TrackedSequence::<Fp251V1, _>::new(prime_encoder(), base).map_err(debug_error)?;
+        for item in &items {
+            tracked.push(item).map_err(debug_error)?;
+        }
+        Ok(single_unit(move || {
+            let bytes = tracked
+                .to_snapshot_bytes_with_limits(TrackedSnapshotLimits::default())
+                .unwrap();
+            let restored =
+                TrackedSequence::from_snapshot_bytes(prime_encoder(), base, &bytes).unwrap();
+            checksum_field(restored.signature().state()) ^ checksum_bytes(&bytes)
+        }))
+    } else {
+        let offset = Fp251V1::ONE;
+        let mut tracked = TrackedMultiset::<Fp251V1, _>::new(prime_encoder(), offset);
+        for item in &items {
+            tracked.insert(item).map_err(debug_error)?;
+        }
+        Ok(single_unit(move || {
+            let bytes = tracked
+                .to_snapshot_bytes_with_limits(TrackedSnapshotLimits::default())
+                .unwrap();
+            let restored =
+                TrackedMultiset::from_snapshot_bytes(prime_encoder(), offset, &bytes).unwrap();
+            checksum_field(restored.signature().evaluated_product()) ^ checksum_bytes(&bytes)
+        }))
+    }
+}
+
+fn delta_per_law_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let items = payloads(cell.scale, cell.payload_bytes, seed)?;
+    let namespace = ApplicationNamespace::derive(b"c3-delta-per-law-v1");
+    match signature_law(cell) {
+        "multiset" => {
+            let offset = Fp251V1::ONE;
+            let empty = MultisetSignature::<Fp251V1, _>::new(prime_encoder(), offset);
+            let mut added = empty.clone();
+            added
+                .insert_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            let delta =
+                MultisetDelta::new(namespace, 0, empty.clone(), added).map_err(debug_error)?;
+            Ok(single_unit(move || {
+                let mut state = RevisionedSignature::new(namespace, empty.clone());
+                state.apply(&delta).unwrap();
+                checksum_field(state.state().evaluated_product())
+            }))
+        }
+        "trim" | "append" => {
+            let base = Fp251V1::from_u64_mod(7);
+            let empty =
+                SequenceSignature::<Fp251V1, _>::new(prime_encoder(), base).map_err(debug_error)?;
+            let mut suffix = empty.clone();
+            suffix
+                .push_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            if signature_law(cell) == "trim" {
+                let delta = SequenceTrim::new(namespace, 0, suffix.clone()).map_err(debug_error)?;
+                Ok(single_unit(move || {
+                    let mut state = RevisionedSignature::new(namespace, suffix.clone());
+                    state.apply(&delta).unwrap();
+                    checksum_field(state.state().state())
+                }))
+            } else {
+                let delta = SequenceAppend::new(namespace, 0, suffix).map_err(debug_error)?;
+                Ok(single_unit(move || {
+                    let mut state = RevisionedSignature::new(namespace, empty.clone());
+                    state.apply(&delta).unwrap();
+                    checksum_field(state.state().state())
+                }))
+            }
+        }
+        _ => {
+            let empty = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+            let mut added = empty.clone();
+            added
+                .absorb_many(items.iter().map(Vec::as_slice))
+                .map_err(debug_error)?;
+            let delta =
+                AdditiveDelta::new(namespace, 0, empty.clone(), added).map_err(debug_error)?;
+            Ok(single_unit(move || {
+                let mut state = RevisionedSignature::new(namespace, empty.clone());
+                state.apply(&delta).unwrap();
+                checksum_field(state.state().state())
+            }))
+        }
+    }
+}
+
+fn additive_journal(count: usize) -> Result<AdditiveJournalFixture, String> {
+    let namespace = ApplicationNamespace::derive(b"c3-additive-journal-v1");
+    let empty = AdditiveSignature::<Fp251V1, _>::new(prime_encoder());
+    let mut journal = DeltaJournal::new();
+    for revision in 0..count {
+        let mut added = empty.clone();
+        added.absorb(&revision.to_le_bytes()).map_err(debug_error)?;
+        journal
+            .append(
+                AdditiveDelta::new(namespace, revision as u64, empty.clone(), added)
+                    .map_err(debug_error)?,
+            )
+            .map_err(debug_error)?;
+    }
+    Ok((namespace, empty, journal))
+}
+
+fn journal_append_replay_total(
+    cell: &BenchmarkCell,
+    _seed: u64,
+) -> Result<PreparedOperation, String> {
+    let (namespace, empty, journal) = additive_journal(cell.scale)?;
+    Ok(single_unit(move || {
+        let bytes = journal.to_canonical_bytes().unwrap();
+        let restored =
+            DeltaJournal::from_canonical_bytes(&bytes, DeltaJournalLimits::default(), |entry| {
+                AdditiveDelta::<Fp251V1, _>::from_canonical_bytes(prime_encoder(), entry)
+            })
+            .unwrap();
+        let mut state = RevisionedSignature::new(namespace, empty.clone());
+        let report = restored.replay(&mut state).unwrap();
+        checksum_field(state.state().state()) ^ report.revision()
+    }))
+}
+
+fn journal_failure_path(cell: &BenchmarkCell, _seed: u64) -> Result<PreparedOperation, String> {
+    let (_, _, journal) = additive_journal(cell.scale)?;
+    let mut bytes = journal.to_canonical_bytes().map_err(debug_error)?;
+    if cell
+        .strategy
+        .as_deref()
+        .is_some_and(|strategy| strategy.contains("corrupt"))
+    {
+        let index = bytes.len() / 2;
+        bytes[index] ^= 0x80;
+    } else {
+        bytes.pop();
+    }
+    Ok(single_unit(move || {
+        let error =
+            DeltaJournal::from_canonical_bytes(&bytes, DeltaJournalLimits::default(), |entry| {
+                AdditiveDelta::<Fp251V1, _>::from_canonical_bytes(prime_encoder(), entry)
+            })
+            .expect_err("invalid journal must fail closed");
+        checksum_bytes(format!("{error:?}").as_bytes())
     }))
 }
 
@@ -1640,6 +2467,126 @@ fn tool_binary_manifest(generate: bool) -> Result<PreparedOperation, String> {
     }))
 }
 
+fn field_runtime_lifecycle_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let binary = cell
+        .strategy
+        .as_deref()
+        .is_some_and(|strategy| strategy.contains("binary"));
+    let iterations = cell.scale;
+    Ok(single_unit(move || {
+        let mut checksum = 0_u64;
+        for index in 0..iterations {
+            let field = if binary {
+                DynField::builder(format!("c3_runtime_binary_{index}"))
+                    .binary(8, vec![8, 4, 3, 1, 0])
+                    .build()
+                    .unwrap()
+            } else {
+                DynField::builder(format!("c3_runtime_prime_{index}"))
+                    .prime("251")
+                    .build()
+                    .unwrap()
+            };
+            let value =
+                field.reduce_bytes_mod_order(&seed.wrapping_add(index as u64).to_le_bytes());
+            checksum = checksum.rotate_left(5) ^ checksum_dyn(&field, &value);
+        }
+        checksum
+    }))
+}
+
+fn field_runtime_operation_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let field = DynField::builder("c3_runtime_fp251")
+        .prime("251")
+        .build()
+        .map_err(debug_error)?;
+    let values = (0..cell.scale)
+        .map(|index| field.reduce_bytes_mod_order(&seed.wrapping_add(index as u64).to_le_bytes()))
+        .collect::<Vec<_>>();
+    let lhs = DynBatch::from_elements(&field, &values).map_err(debug_error)?;
+    let rhs = lhs.clone();
+    let mut output = DynBatch::zeroed(&field, cell.scale);
+    let engine = field.engine();
+    Ok(single_unit(move || {
+        engine.mul_into(&mut output, &lhs, &rhs).unwrap();
+        (0..output.len()).fold(0_u64, |checksum, index| {
+            checksum.rotate_left(7)
+                ^ checksum_dyn(&field, &output.element(index).expect("batch element"))
+        })
+    }))
+}
+
+fn tool_prime_manifest_total(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../microfield/fields/fp65521_external_v1.toml");
+    let source = fs::read_to_string(&path)
+        .map_err(|error| format!("read prime field manifest {}: {error}", path.display()))?;
+    let generate = cell
+        .strategy
+        .as_deref()
+        .is_some_and(|strategy| strategy.contains("generate"));
+    Ok(single_unit(move || {
+        if generate {
+            let package = PrimeFieldFactory::from_manifest_toml(&source)
+                .unwrap()
+                .generate()
+                .unwrap();
+            checksum_bytes(package.rust_source())
+        } else {
+            let normalized = PrimeFieldManifest::parse_toml(&source)
+                .unwrap()
+                .normalize()
+                .unwrap();
+            checksum_bytes(normalized.modulus_decimal().as_bytes())
+        }
+    }))
+}
+
+fn tool_artifact_compile_consumer_total() -> Result<PreparedOperation, String> {
+    static NEXT_TARGET: AtomicU64 = AtomicU64::new(0);
+
+    let manifest = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../microfield/test-fixtures/external-consumer/Cargo.toml");
+    if !manifest.is_file() {
+        return Err(format!("missing external consumer {}", manifest.display()));
+    }
+    let target = std::env::temp_dir().join(format!(
+        "algesum-c3-consumer-check-{}-{}",
+        std::process::id(),
+        NEXT_TARGET.fetch_add(1, Ordering::Relaxed)
+    ));
+    Ok(PreparedOperation {
+        logical_units_per_action: 1,
+        maximum_batch_iterations: Some(1),
+        graph_exact: None,
+        run: Box::new(move || {
+            if target.exists() {
+                fs::remove_dir_all(&target).expect("remove isolated consumer target");
+            }
+            fs::create_dir_all(&target).expect("create isolated consumer target");
+            let status = Command::new("cargo")
+                .arg("check")
+                .arg("--locked")
+                .arg("--offline")
+                .arg("--manifest-path")
+                .arg(&manifest)
+                .env("CARGO_TARGET_DIR", &target)
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .expect("launch external consumer cargo check");
+            assert!(status.success(), "external consumer compilation failed");
+            checksum_bytes(manifest.as_os_str().as_encoded_bytes())
+        }),
+    })
+}
+
 fn single_unit(action: impl FnMut() -> u64 + 'static) -> PreparedOperation {
     PreparedOperation {
         logical_units_per_action: 1,
@@ -1656,6 +2603,41 @@ fn scaled(scale: usize, action: impl FnMut() -> u64 + 'static) -> PreparedOperat
         graph_exact: None,
         run: Box::new(action),
     }
+}
+
+fn signature_law(cell: &BenchmarkCell) -> &str {
+    let strategy = cell.strategy.as_deref().unwrap_or("additive");
+    for law in ["bidirectional", "multiset", "sequence", "append", "trim"] {
+        if strategy.contains(law) {
+            return law;
+        }
+    }
+    "additive"
+}
+
+fn gf2_256_values(
+    count: usize,
+    seed: u64,
+    include_zeroes: bool,
+) -> Result<Vec<Gf2_256HhV1>, String> {
+    if count == 0 {
+        return Err("GF(2^256) workload scale must be positive".into());
+    }
+    Ok((0..count)
+        .map(|index| {
+            if include_zeroes && index % 29 == 0 {
+                return Gf2_256HhV1::ZERO;
+            }
+            let value = Gf2_256HhV1::from_polynomial_bytes_mod(&seed_bytes::<32>(
+                seed.wrapping_add(index as u64),
+            ));
+            if value.is_zero() {
+                Gf2_256HhV1::ONE
+            } else {
+                value
+            }
+        })
+        .collect())
 }
 
 fn seed_bytes<const N: usize>(seed: u64) -> [u8; N] {
@@ -1856,6 +2838,32 @@ fn checksum_field<F: CanonicalEncoding>(value: F) -> u64 {
     checksum_bytes(value.to_canonical().as_ref())
 }
 
+fn checksum_fields<F: CanonicalEncoding>(values: &[F]) -> u64 {
+    values
+        .iter()
+        .enumerate()
+        .fold(0_u64, |checksum, (index, value)| {
+            checksum.rotate_left(7) ^ checksum_field(*value) ^ index as u64
+        })
+}
+
+fn checksum_dyn(field: &DynField, value: &microfield::DynElement) -> u64 {
+    let mut bytes = vec![0_u8; field.canonical_bytes()];
+    field
+        .encode(value, &mut bytes)
+        .expect("matching runtime field");
+    checksum_bytes(&bytes)
+}
+
+fn checksum_dyn_fields(field: &DynField, values: &[microfield::DynElement]) -> u64 {
+    values
+        .iter()
+        .enumerate()
+        .fold(0_u64, |checksum, (index, value)| {
+            checksum.rotate_left(7) ^ checksum_dyn(field, value) ^ index as u64
+        })
+}
+
 fn checksum_bytes(bytes: &[u8]) -> u64 {
     bytes
         .iter()
@@ -1872,6 +2880,7 @@ fn debug_error(error: impl std::fmt::Debug) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::Path;
 
     fn cell(operation: &str, scale: usize) -> BenchmarkCell {
         BenchmarkCell {
@@ -1936,6 +2945,44 @@ mod tests {
             let second = (prepared.run)();
             assert_eq!(first, second, "stateful C3 primitive workload: {operation}");
         }
+    }
+
+    #[test]
+    fn c3_f3_s3_preflight_actions_are_repeatable() {
+        let root = Path::new("../../validation/benchmarks/manifests/c3-f3-s3");
+        for manifest in [
+            "c3-f3-batch-packed-preflight-v1.json",
+            "c3-f3-horner-preflight-v1.json",
+            "c3-f3-derived-preflight-v1.json",
+            "c3-f4-runtime-tools-preflight-v1.json",
+            "c3-s1-base-signatures-preflight-v1.json",
+            "c3-s2-multi-signatures-preflight-v1.json",
+            "c3-s3-state-delta-journal-preflight-v1.json",
+        ] {
+            let manifest = crate::publication::load_manifest(&root.join(manifest)).unwrap();
+            for benchmark_cell in manifest.cells {
+                let mut prepared = prepare(&benchmark_cell, 0x1234_5678).unwrap_or_else(|error| {
+                    panic!("prepare repeatability cell {}: {error}", benchmark_cell.id)
+                });
+                let first = (prepared.run)();
+                let second = (prepared.run)();
+                assert_eq!(first, second, "stateful C3 workload: {}", benchmark_cell.id);
+            }
+        }
+    }
+
+    #[test]
+    fn c3_f3_scalar_layouts_compute_the_same_products() {
+        let mut checksums = Vec::new();
+        for operation in [
+            "field.batch-portable-total",
+            "field.packed-owned-total",
+            "field.packed-view-total",
+        ] {
+            let mut prepared = prepare(&cell(operation, 257), 0xfeed_beef).unwrap();
+            checksums.push((prepared.run)());
+        }
+        assert!(checksums.windows(2).all(|pair| pair[0] == pair[1]));
     }
 
     #[test]

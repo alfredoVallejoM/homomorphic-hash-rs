@@ -1,0 +1,382 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f3-s3-v1-s2-multi-signatures-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "s2-multi-signatures-k8-multiset-p1-n1",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.multi-k8-total",
+      "scale": 1,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 630.5771484375,
+      "p95_ns_per_unit": 642.21083984375,
+      "p99_ns_per_unit": 643.13123046875,
+      "mad_ns_per_unit": 4.1318359375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 627.91015625,
+        "upper": 633.244140625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 636.4423803710938,
+        "upper": 643.361328125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 636.44921875,
+        "upper": 643.361328125
+      },
+      "relative_median_ci_half_width": 0.0042294463002798465,
+      "precision_met": true,
+      "allocation_count_median": 1024.0,
+      "allocated_bytes_median": 12288.0,
+      "peak_allocated_bytes_median": 24.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s2-multi-signatures-k8-sequence-p1-n7",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.multi-k8-total",
+      "scale": 7,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1231.53125,
+      "p95_ns_per_unit": 1568.8480468749995,
+      "p99_ns_per_unit": 1773.5446093750002,
+      "mad_ns_per_unit": 5.50390625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1229.51953125,
+        "upper": 1233.54296875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1250.4397900390625,
+        "upper": 1824.71875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1250.5546875,
+        "upper": 1824.71875
+      },
+      "relative_median_ci_half_width": 0.0016335101119033723,
+      "precision_met": true,
+      "allocation_count_median": 256.0,
+      "allocated_bytes_median": 4096.0,
+      "peak_allocated_bytes_median": 16.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s2-multi-signatures-k16-multiset-p1-n32",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.multi-k16-total",
+      "scale": 32,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 5604.15625,
+      "p95_ns_per_unit": 6370.146875,
+      "p99_ns_per_unit": 6378.179375,
+      "mad_ns_per_unit": 615.3515625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4913.90625,
+        "upper": 6294.40625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5084.504765625,
+        "upper": 6380.1875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5188.550953125,
+        "upper": 6380.1875
+      },
+      "relative_median_ci_half_width": 0.12316751518125499,
+      "precision_met": true,
+      "allocation_count_median": 144.0,
+      "allocated_bytes_median": 2688.0,
+      "peak_allocated_bytes_median": 48.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s2-multi-signatures-k16-sequence-p16-n2",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.multi-k16-total",
+      "scale": 2,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 895.4208984375,
+      "p95_ns_per_unit": 1090.3049804687498,
+      "p99_ns_per_unit": 1112.43443359375,
+      "mad_ns_per_unit": 33.1943359375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 892.013671875,
+        "upper": 898.828125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 906.771484375,
+        "upper": 1117.966796875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 906.771484375,
+        "upper": 1117.966796875
+      },
+      "relative_median_ci_half_width": 0.0038051675680627673,
+      "precision_met": true,
+      "allocation_count_median": 512.0,
+      "allocated_bytes_median": 12288.0,
+      "peak_allocated_bytes_median": 24.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s2-multi-signatures-runtime-additive-p16-n15",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.runtime-total",
+      "scale": 15,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 5846.640625,
+      "p95_ns_per_unit": 5962.90859375,
+      "p99_ns_per_unit": 5968.49421875,
+      "mad_ns_per_unit": 52.515625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5798.5625,
+        "upper": 5894.71875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5899.29921875,
+        "upper": 5969.890625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5894.71875,
+        "upper": 5969.890625
+      },
+      "relative_median_ci_half_width": 0.008223205099082006,
+      "precision_met": true,
+      "allocation_count_median": 6976.0,
+      "allocated_bytes_median": 124032.0,
+      "peak_allocated_bytes_median": 48.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s2-multi-signatures-runtime-multiset-p16-n64",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.runtime-total",
+      "scale": 64,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 121169.0,
+      "p95_ns_per_unit": 125921.625,
+      "p99_ns_per_unit": 126082.725,
+      "mad_ns_per_unit": 2615.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 119336.0,
+        "upper": 123002.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 119404.0,
+        "upper": 126123.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 122832.065875,
+        "upper": 126123.0
+      },
+      "relative_median_ci_half_width": 0.015127631654961253,
+      "precision_met": true,
+      "allocation_count_median": 5472.0,
+      "allocated_bytes_median": 78200.0,
+      "peak_allocated_bytes_median": 1552.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s2-multi-signatures-runtime-sequence-p256-n3",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.runtime-total",
+      "scale": 3,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 9175.125,
+      "p95_ns_per_unit": 9353.59375,
+      "p99_ns_per_unit": 9391.16875,
+      "mad_ns_per_unit": 53.03125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9156.46875,
+        "upper": 9193.78125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9202.8706640625,
+        "upper": 9400.5625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9202.88571875,
+        "upper": 9400.5625
+      },
+      "relative_median_ci_half_width": 0.002033351044263702,
+      "precision_met": true,
+      "allocation_count_median": 5824.0,
+      "allocated_bytes_median": 137600.0,
+      "peak_allocated_bytes_median": 1712.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s2-multi-signatures-wire-multiset-p256-n16",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.multi-wire-restore-total",
+      "scale": 16,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 528.34130859375,
+      "p95_ns_per_unit": 789.9174316406247,
+      "p99_ns_per_unit": 890.492080078125,
+      "mad_ns_per_unit": 3.80615234375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 522.51953125,
+        "upper": 534.1630859375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 528.1904296875,
+        "upper": 915.6357421875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 528.1904296875,
+        "upper": 915.6357421875
+      },
+      "relative_median_ci_half_width": 0.011018970595438445,
+      "precision_met": true,
+      "allocation_count_median": 2048.0,
+      "allocated_bytes_median": 24576.0,
+      "peak_allocated_bytes_median": 24.0,
+      "status": "Precise"
+    },
+    {
+      "id": "s2-multi-signatures-wire-sequence-p256-n1024",
+      "family": "algebraic-signatures-non-cryptographic",
+      "operation": "signature.multi-wire-restore-total",
+      "scale": 1024,
+      "scale_unit": "items",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 436.7451171875,
+      "p95_ns_per_unit": 498.00537109375,
+      "p99_ns_per_unit": 499.83701171875,
+      "mad_ns_per_unit": 52.349609375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 385.529296875,
+        "upper": 487.9609375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 395.0318981933594,
+        "upper": 500.294921875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 397.5562531738281,
+        "upper": 500.294921875
+      },
+      "relative_median_ci_half_width": 0.11726707019030604,
+      "precision_met": true,
+      "allocation_count_median": 768.0,
+      "allocated_bytes_median": 9216.0,
+      "peak_allocated_bytes_median": 12.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "s2-multi-signatures-k16-multiset",
+      "strategy": "multiset-k16",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s2-multi-signatures-k16-sequence",
+      "strategy": "sequence-k16",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s2-multi-signatures-k8-multiset",
+      "strategy": "multiset-k8",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s2-multi-signatures-k8-sequence",
+      "strategy": "sequence-k8",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s2-multi-signatures-runtime-additive",
+      "strategy": "additive-runtime",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s2-multi-signatures-runtime-multiset",
+      "strategy": "multiset-runtime-k4",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s2-multi-signatures-runtime-sequence",
+      "strategy": "sequence-runtime-k4",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s2-multi-signatures-wire-multiset",
+      "strategy": "multiset-wire-restore-k4",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "s2-multi-signatures-wire-sequence",
+      "strategy": "sequence-wire-restore-k4",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

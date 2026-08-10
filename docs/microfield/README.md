@@ -45,6 +45,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`pre-rc-comprehensive-campaign-plan.md`](pre-rc-comprehensive-campaign-plan.md) | matriz C0–C3 de todas las estructuras, priorizando firmas y grafos |
 | [`c3-extensive-campaign-plan.md`](c3-extensive-campaign-plan.md) | especificación C3 extensiva: 15 suites, tres carriles, réplica multihost y sistemas reales |
 | [`c3-p0-implementation-and-preflight-report.md`](c3-p0-implementation-and-preflight-report.md) | expansor factorial, inventario de gaps y primer preflight F1/F2 |
+| [`c3-f3-s3-implementation-and-preflight-report.md`](c3-f3-s3-implementation-and-preflight-report.md) | batería F3–S3: batch, runtime, herramientas, firmas, estado, deltas y journals |
 | [`pre-rc-comprehensive-smoke-results.md`](pre-rc-comprehensive-smoke-results.md) | C1 de 65 celdas y piloto PostgreSQL hasta un millón de filas |
 | [`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md) | C2 de firmas K/fragmentación, grafos y PostgreSQL repetido a un millón |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |
@@ -73,7 +74,9 @@ G6–G7 y ADR 0032–0034 fijan assurance, comparación pareada y pipeline/delta
   celdas de firmas/grafos y 33 muestras PostgreSQL verificadas. La selección
   DB densa y la telemetría exacta ya se corrigieron. C3 se ha replanificado
   como campaña extensiva de 12.000+ casos semánticos, 2.500–4.000 celdas de
-  timing y 150–300 escenarios, pendiente de ampliar el harness y del preflight.
+  timing y 150–300 escenarios. P0 y F1–S3 ya aportan 2.610 celdas generadas y
+  sus preflights; quedan estructuras, DB, grafos, semántica/sistemas y réplica
+  multihost `Controlled`.
 - `post-rc-benchmark-and-publication-plan.md`: primera integración PostgreSQL
   ejecutada; logical decoding, concurrencia, corpus real y release externa
   continúan después de reevaluar B.1–B.3.

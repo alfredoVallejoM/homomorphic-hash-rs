@@ -1,0 +1,136 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f3-s3-v1-f3-batch-packed-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f3-batch-packed-batch-portable-n1",
+      "family": "finite-field-derived",
+      "operation": "field.batch-portable-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1300.193359375,
+      "p95_ns_per_unit": 1490.63515625,
+      "p99_ns_per_unit": 1495.01140625,
+      "mad_ns_per_unit": 144.400390625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1155.79296875,
+        "upper": 1444.59375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1283.75390625,
+        "upper": 1496.10546875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1311.8513115234375,
+        "upper": 1496.10546875
+      },
+      "relative_median_ci_half_width": 0.1110607046127454,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f3-batch-packed-packed-owned-n16",
+      "family": "finite-field-derived",
+      "operation": "field.packed-owned-total",
+      "scale": 16,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1132.4931640625,
+      "p95_ns_per_unit": 1382.073046875,
+      "p99_ns_per_unit": 1387.689609375,
+      "mad_ns_per_unit": 233.3818359375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 897.697265625,
+        "upper": 1367.2890625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 904.6435546875,
+        "upper": 1389.09375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 905.418046875,
+        "upper": 1389.09375
+      },
+      "relative_median_ci_half_width": 0.20732654808726253,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f3-batch-packed-packed-view-n4096",
+      "family": "finite-field-derived",
+      "operation": "field.packed-view-total",
+      "scale": 4096,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 377349.0,
+      "p95_ns_per_unit": 449649.79999999993,
+      "p99_ns_per_unit": 468375.56,
+      "mad_ns_per_unit": 29467.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 349704.0,
+        "upper": 404994.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 409580.54624999996,
+        "upper": 473057.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 412381.41375,
+        "upper": 473057.0
+      },
+      "relative_median_ci_half_width": 0.07326109251647679,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "f3-batch-packed-batch-portable",
+      "strategy": "portable",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f3-batch-packed-packed-owned",
+      "strategy": "detected-owned-reused",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f3-batch-packed-packed-view",
+      "strategy": "detected-borrowed-storage",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

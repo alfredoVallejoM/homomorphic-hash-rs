@@ -1,0 +1,54 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-f3-batch-packed-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f3-batch-packed-packed-owned-n16",
+      "process_index": 0,
+      "seed": 9172039764916581678,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f3-batch-packed-batch-portable-n1",
+      "process_index": 0,
+      "seed": 15212318808073837472,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f3-batch-packed-packed-view-n4096",
+      "process_index": 0,
+      "seed": 11617286069951336506,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 1,
+      "cell": "f3-batch-packed-packed-owned-n16",
+      "process_index": 1,
+      "seed": 1515437666782017966,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 1,
+      "cell": "f3-batch-packed-packed-view-n4096",
+      "process_index": 1,
+      "seed": 3516289325273858651,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 1,
+      "cell": "f3-batch-packed-batch-portable-n1",
+      "process_index": 1,
+      "seed": 2107375145843290628,
+      "status": "success"
+    }
+  ]
+}

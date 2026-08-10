@@ -1,0 +1,246 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f3-s3-v1-s3-state-delta-journal-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "s3-state-delta-journal-delta-sequence-trim-p256-n4",
+      "process_index": 0,
+      "seed": 10065716201249900278,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "s3-state-delta-journal-tracked-sequence-snapshot-p16-n4",
+      "process_index": 0,
+      "seed": 18148867299239758020,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "s3-state-delta-journal-journal-truncated-p256-n31",
+      "process_index": 0,
+      "seed": 4072895794190872708,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "s3-state-delta-journal-delta-additive-p16-n31",
+      "process_index": 0,
+      "seed": 16175951646941871072,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "s3-state-delta-journal-tracked-multiset-update-p1-n3",
+      "process_index": 0,
+      "seed": 10677072228691638343,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "s3-state-delta-journal-compact-additive-p1-n8",
+      "process_index": 0,
+      "seed": 7919427570883896721,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "s3-state-delta-journal-journal-append-replay-p256-n15",
+      "process_index": 0,
+      "seed": 5463800031963540074,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "s3-state-delta-journal-compact-sequence-p1-n16",
+      "process_index": 0,
+      "seed": 10172896576801647514,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "s3-state-delta-journal-tracked-sequence-update-p1-n1",
+      "process_index": 0,
+      "seed": 12657887071090676961,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "s3-state-delta-journal-compact-multiset-p16-n1",
+      "process_index": 0,
+      "seed": 7861400045295169272,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 0,
+      "cell": "s3-state-delta-journal-compact-bidirectional-p1-n64",
+      "process_index": 0,
+      "seed": 5624559734781972199,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 0,
+      "cell": "s3-state-delta-journal-tracked-multiset-snapshot-p16-n8",
+      "process_index": 0,
+      "seed": 2577862333834270627,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 0,
+      "cell": "s3-state-delta-journal-journal-corrupt-p256-n256",
+      "process_index": 0,
+      "seed": 13703469257285854897,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 0,
+      "cell": "s3-state-delta-journal-delta-sequence-append-p256-n2",
+      "process_index": 0,
+      "seed": 10250489658781536432,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 0,
+      "cell": "s3-state-delta-journal-delta-multiset-p16-n64",
+      "process_index": 0,
+      "seed": 7906946125972407097,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 1,
+      "cell": "s3-state-delta-journal-compact-sequence-p1-n16",
+      "process_index": 1,
+      "seed": 5845187758510446840,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 1,
+      "cell": "s3-state-delta-journal-tracked-sequence-update-p1-n1",
+      "process_index": 1,
+      "seed": 10253663846163750575,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 1,
+      "cell": "s3-state-delta-journal-delta-sequence-trim-p256-n4",
+      "process_index": 1,
+      "seed": 5625304129434869013,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "s3-state-delta-journal-delta-additive-p16-n31",
+      "process_index": 1,
+      "seed": 14769008945773664198,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "s3-state-delta-journal-delta-multiset-p16-n64",
+      "process_index": 1,
+      "seed": 4996192520402881873,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 1,
+      "cell": "s3-state-delta-journal-delta-sequence-append-p256-n2",
+      "process_index": 1,
+      "seed": 18035853619572277332,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 1,
+      "cell": "s3-state-delta-journal-journal-truncated-p256-n31",
+      "process_index": 1,
+      "seed": 5265643053665621776,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 1,
+      "cell": "s3-state-delta-journal-compact-bidirectional-p1-n64",
+      "process_index": 1,
+      "seed": 8025484093765956088,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 1,
+      "cell": "s3-state-delta-journal-tracked-multiset-update-p1-n3",
+      "process_index": 1,
+      "seed": 12449076878942996973,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 1,
+      "cell": "s3-state-delta-journal-tracked-multiset-snapshot-p16-n8",
+      "process_index": 1,
+      "seed": 14333710139293625499,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 1,
+      "cell": "s3-state-delta-journal-tracked-sequence-snapshot-p16-n4",
+      "process_index": 1,
+      "seed": 4043496823962496816,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 1,
+      "cell": "s3-state-delta-journal-compact-multiset-p16-n1",
+      "process_index": 1,
+      "seed": 160821242176412032,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 1,
+      "cell": "s3-state-delta-journal-journal-append-replay-p256-n15",
+      "process_index": 1,
+      "seed": 2879324749195682141,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 1,
+      "cell": "s3-state-delta-journal-compact-additive-p1-n8",
+      "process_index": 1,
+      "seed": 17478412429886263124,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 1,
+      "cell": "s3-state-delta-journal-journal-corrupt-p256-n256",
+      "process_index": 1,
+      "seed": 9135115060104655316,
+      "status": "success"
+    }
+  ]
+}

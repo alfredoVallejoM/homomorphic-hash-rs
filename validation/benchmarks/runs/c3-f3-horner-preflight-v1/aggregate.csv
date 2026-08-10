@@ -1,0 +1,3 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+f3-horner-many-points-p1-n1,finite-field-derived,algorithm.horner-total,1,evaluations,2,10,104.853027344,125.287353516,125.770751953,3.641113281,92.174804688,117.531250000,0.120914226,true,Precise,,,,,,,
+f3-horner-many-polynomials-p64-n1024,finite-field-derived,algorithm.horner-total,1024,evaluations,2,10,49037055.000000000,51517863.899999999,51528007.979999997,2388180.500000000,46650090.000000000,51424020.000000000,0.048676761,true,Precise,,,,,,,

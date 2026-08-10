@@ -24,33 +24,33 @@
     },
     {
       "id": "F3",
-      "status": "partial",
-      "implemented_operations": ["field.gf2-128.scalar-total", "field.gf2-128.batch-detected-total"],
-      "missing_operations": ["field.batch-portable-total", "field.packed-owned-total", "field.packed-view-total", "algorithm.horner-total", "algorithm.scan-total", "algorithm.batch-invert-total", "algorithm.powers-total", "algorithm.mask-total"]
+      "status": "implemented",
+      "implemented_operations": ["field.gf2-128.scalar-total", "field.gf2-128.batch-detected-total", "field.batch-portable-total", "field.packed-owned-total", "field.packed-view-total", "algorithm.horner-total", "algorithm.scan-total", "algorithm.batch-invert-total", "algorithm.powers-total", "algorithm.mask-total"],
+      "missing_operations": []
     },
     {
       "id": "F4",
-      "status": "partial",
-      "implemented_operations": ["tool.binary-manifest.parse", "tool.binary-manifest.generate"],
-      "missing_operations": ["field.runtime-lifecycle-total", "field.runtime-operation-total", "tool.prime-manifest-total", "tool.artifact-compile-consumer-total"]
+      "status": "implemented",
+      "implemented_operations": ["tool.binary-manifest.parse", "tool.binary-manifest.generate", "field.runtime-lifecycle-total", "field.runtime-operation-total", "tool.prime-manifest-total", "tool.artifact-compile-consumer-total"],
+      "missing_operations": []
     },
     {
       "id": "S1",
-      "status": "partial",
-      "implemented_operations": ["signature.additive.build-total", "signature.sequence.build-total", "signature.bidirectional.build-total", "signature.multiset.build-total", "signature.additive.merge-total", "signature.sequence.concatenate-total", "signature.bidirectional.concatenate-total", "signature.multiset.merge-total"],
-      "missing_operations": ["signature.base-remove-total", "signature.base-wire-total", "signature.base-restore-total", "signature.base-input-pattern-total"]
+      "status": "implemented",
+      "implemented_operations": ["signature.additive.build-total", "signature.sequence.build-total", "signature.bidirectional.build-total", "signature.multiset.build-total", "signature.additive.merge-total", "signature.sequence.concatenate-total", "signature.bidirectional.concatenate-total", "signature.multiset.merge-total", "signature.base-remove-total", "signature.base-wire-total", "signature.base-restore-total", "signature.base-input-pattern-total"],
+      "missing_operations": []
     },
     {
       "id": "S2",
-      "status": "partial",
-      "implemented_operations": ["signature.multi-multiset-k2.build-total", "signature.multi-sequence-k2.build-total", "signature.multi-multiset-k3.build-total", "signature.multi-multiset-k4.build-total", "signature.multi-sequence-k3.build-total", "signature.multi-sequence-k4.build-total", "signature.multi-multiset-k4.fragmented-merge-total", "signature.multi-sequence-k4.fragmented-concatenate-total"],
-      "missing_operations": ["signature.multi-k8-total", "signature.multi-k16-total", "signature.runtime-total", "signature.multi-wire-restore-total"]
+      "status": "implemented",
+      "implemented_operations": ["signature.multi-multiset-k2.build-total", "signature.multi-sequence-k2.build-total", "signature.multi-multiset-k3.build-total", "signature.multi-multiset-k4.build-total", "signature.multi-sequence-k3.build-total", "signature.multi-sequence-k4.build-total", "signature.multi-multiset-k4.fragmented-merge-total", "signature.multi-sequence-k4.fragmented-concatenate-total", "signature.multi-k8-total", "signature.multi-k16-total", "signature.runtime-total", "signature.multi-wire-restore-total"],
+      "missing_operations": []
     },
     {
       "id": "S3",
-      "status": "partial",
-      "implemented_operations": ["delta.additive.end-to-end"],
-      "missing_operations": ["signature.tracked-update-total", "signature.compact-snapshot-total", "signature.tracked-snapshot-total", "delta.per-law-total", "journal.append-replay-total", "journal.failure-path"]
+      "status": "implemented",
+      "implemented_operations": ["delta.additive.end-to-end", "signature.tracked-update-total", "signature.compact-snapshot-total", "signature.tracked-snapshot-total", "delta.per-law-total", "journal.append-replay-total", "journal.failure-path"],
+      "missing_operations": []
     },
     {
       "id": "T1",
