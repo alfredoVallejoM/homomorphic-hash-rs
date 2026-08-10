@@ -24,6 +24,8 @@ struct Config {
     incremental_ceiling: usize,
     partition_density_numerator: usize,
     partition_density_denominator: usize,
+    full_rebuild_density_numerator: usize,
+    full_rebuild_density_denominator: usize,
     max_mutations: usize,
     max_transaction_bytes: usize,
     distribution: IdDistribution,
@@ -48,6 +50,8 @@ struct Report {
     incremental_ceiling: usize,
     partition_density_numerator: usize,
     partition_density_denominator: usize,
+    full_rebuild_density_numerator: usize,
+    full_rebuild_density_denominator: usize,
     max_mutations: usize,
     max_transaction_bytes: usize,
     distribution: IdDistribution,
@@ -162,6 +166,12 @@ fn run() -> Result<(), String> {
                         config.partition_density_numerator,
                         config.partition_density_denominator,
                     )
+                    .and_then(|policy| {
+                        policy.with_full_rebuild_fraction(
+                            config.full_rebuild_density_numerator,
+                            config.full_rebuild_density_denominator,
+                        )
+                    })
                     .map_err(|error| error.to_string())?,
                     || exact_rows.clone(),
                 )
@@ -200,13 +210,15 @@ fn run() -> Result<(), String> {
     }
 
     let report = Report {
-        schema: "algesum-postgresql-scaling-v2",
+        schema: "algesum-postgresql-scaling-v3",
         rows: config.rows,
         partitions: config.partitions,
         repetitions: config.repetitions,
         incremental_ceiling: config.incremental_ceiling,
         partition_density_numerator: config.partition_density_numerator,
         partition_density_denominator: config.partition_density_denominator,
+        full_rebuild_density_numerator: config.full_rebuild_density_numerator,
+        full_rebuild_density_denominator: config.full_rebuild_density_denominator,
         max_mutations: config.max_mutations,
         max_transaction_bytes: config.max_transaction_bytes,
         distribution: config.distribution,
@@ -236,6 +248,8 @@ fn parse_config() -> Result<Config, String> {
     let mut incremental_ceiling = 65_536;
     let mut partition_density_numerator = 2;
     let mut partition_density_denominator = 3;
+    let mut full_rebuild_density_numerator = 1;
+    let mut full_rebuild_density_denominator = 1;
     let mut max_mutations = DatabaseTransactionLimits::default().max_mutations;
     let mut max_transaction_bytes = DatabaseTransactionLimits::default().max_transaction_bytes;
     let mut distribution = IdDistribution::Clustered;
@@ -262,16 +276,14 @@ fn parse_config() -> Result<Config, String> {
                 incremental_ceiling = parse_usize(args.next(), "--incremental-ceiling")?
             }
             "--partition-density" => {
-                let value = args.next().ok_or("--partition-density requires N/D")?;
-                let (numerator, denominator) = value
-                    .split_once('/')
-                    .ok_or("--partition-density requires N/D")?;
-                partition_density_numerator = numerator
-                    .parse::<usize>()
-                    .map_err(|error| format!("invalid partition-density numerator: {error}"))?;
-                partition_density_denominator = denominator
-                    .parse::<usize>()
-                    .map_err(|error| format!("invalid partition-density denominator: {error}"))?;
+                (partition_density_numerator, partition_density_denominator) =
+                    parse_fraction(args.next(), "--partition-density")?;
+            }
+            "--full-rebuild-density" => {
+                (
+                    full_rebuild_density_numerator,
+                    full_rebuild_density_denominator,
+                ) = parse_fraction(args.next(), "--full-rebuild-density")?;
             }
             "--max-mutations" => {
                 max_mutations = parse_usize(args.next(), "--max-mutations")?;
@@ -304,12 +316,28 @@ fn parse_config() -> Result<Config, String> {
         incremental_ceiling,
         partition_density_numerator,
         partition_density_denominator,
+        full_rebuild_density_numerator,
+        full_rebuild_density_denominator,
         max_mutations,
         max_transaction_bytes,
         distribution,
         hotspot_rows,
         output,
     })
+}
+
+fn parse_fraction(value: Option<String>, flag: &str) -> Result<(usize, usize), String> {
+    let value = value.ok_or_else(|| format!("{flag} requires N/D"))?;
+    let (numerator, denominator) = value
+        .split_once('/')
+        .ok_or_else(|| format!("{flag} requires N/D"))?;
+    let numerator = numerator
+        .parse::<usize>()
+        .map_err(|error| format!("invalid {flag} numerator: {error}"))?;
+    let denominator = denominator
+        .parse::<usize>()
+        .map_err(|error| format!("invalid {flag} denominator: {error}"))?;
+    Ok((numerator, denominator))
 }
 
 fn parse_usize(value: Option<String>, flag: &str) -> Result<usize, String> {
@@ -320,7 +348,7 @@ fn parse_usize(value: Option<String>, flag: &str) -> Result<usize, String> {
 }
 
 fn usage() -> &'static str {
-    "usage: algesum-postgres-lab [--database-url URL] [--rows N] [--partitions N] [--repetitions N] [--batches N,N,...] [--incremental-ceiling N] [--partition-density N/D] [--max-mutations N] [--max-transaction-bytes N] [--distribution clustered|strided|hotspot] [--hotspot-rows N] [--output PATH]"
+    "usage: algesum-postgres-lab [--database-url URL] [--rows N] [--partitions N] [--repetitions N] [--batches N,N,...] [--incremental-ceiling N] [--partition-density N/D] [--full-rebuild-density N/D] [--max-mutations N] [--max-transaction-bytes N] [--distribution clustered|strided|hotspot] [--hotspot-rows N] [--output PATH]"
 }
 
 fn initialize(client: &mut Client, rows: usize) -> Result<(), String> {

@@ -430,6 +430,7 @@ fn adaptive_policy_rebuilds_only_dense_partitions() {
     .unwrap();
     let policy = DatabaseApplyPolicy::adaptive(usize::MAX, 1, 2).unwrap();
     assert_eq!(policy.max_incremental_partition_fraction(), (1, 2));
+    assert_eq!(policy.full_rebuild_fraction(), None);
     assert_eq!(
         DatabaseApplyPolicy::adaptive(10, 2, 1),
         Err(DatabaseError::InvalidPolicy)
@@ -451,6 +452,123 @@ fn adaptive_policy_rebuilds_only_dense_partitions() {
         Table::from_rows(namespace(), schema, 8, encoder(), Gf2_128V1::ONE, target).unwrap();
     assert_eq!(table.rows(), rebuilt.rows());
     assert_eq!(table.summary().unwrap(), rebuilt.summary().unwrap());
+}
+
+#[test]
+fn adaptive_policy_routes_only_above_the_global_density_frontier() {
+    let schema = schema();
+    let initial = (0..512_u64)
+        .map(|id| row(id, 1, id + 10))
+        .collect::<Vec<_>>();
+    let policy = DatabaseApplyPolicy::adaptive(usize::MAX, 2, 3)
+        .unwrap()
+        .with_full_rebuild_fraction(1, 2)
+        .unwrap();
+    assert_eq!(policy.full_rebuild_fraction(), Some((1, 2)));
+    assert_eq!(
+        DatabaseApplyPolicy::new(usize::MAX).with_full_rebuild_fraction(2, 1),
+        Err(DatabaseError::InvalidPolicy)
+    );
+
+    let at_frontier = (0..256_u64)
+        .map(|id| RowMutation::Update {
+            before: initial[id as usize].clone(),
+            after: row(id, 2, id + 1_000),
+        })
+        .collect();
+    let mut partitioned = Table::from_rows(
+        namespace(),
+        schema.clone(),
+        8,
+        encoder(),
+        Gf2_128V1::ONE,
+        initial.clone(),
+    )
+    .unwrap();
+    let frontier_transaction = TransactionDelta::new(namespace(), &schema, 0, at_frontier).unwrap();
+    let frontier_report = partitioned
+        .apply_transaction_with_policy(
+            &frontier_transaction,
+            DatabaseTransactionLimits::default(),
+            policy,
+            || -> Vec<DatabaseRow> { panic!("the inclusive frontier stays partition-local") },
+        )
+        .unwrap();
+    assert_ne!(
+        frontier_report.path(),
+        DatabaseApplyPath::AuthoritativeRebuild
+    );
+
+    let changed = 257_u64;
+    let mutations = (0..changed)
+        .map(|id| RowMutation::Update {
+            before: initial[id as usize].clone(),
+            after: row(id, 2, id + 10_000),
+        })
+        .collect::<Vec<_>>();
+    let target = (0..512_u64)
+        .map(|id| {
+            if id < changed {
+                row(id, 2, id + 10_000)
+            } else {
+                initial[id as usize].clone()
+            }
+        })
+        .collect::<Vec<_>>();
+    let mut limited = Table::from_rows(
+        namespace(),
+        schema.clone(),
+        8,
+        encoder(),
+        Gf2_128V1::ONE,
+        initial.clone(),
+    )
+    .unwrap();
+    let limited_summary = limited.summary().unwrap();
+    let transaction = TransactionDelta::new(namespace(), &schema, 0, mutations.clone()).unwrap();
+    let limits = DatabaseTransactionLimits {
+        max_row_bytes: 1,
+        ..DatabaseTransactionLimits::default()
+    };
+    assert_eq!(
+        limited.apply_transaction_with_policy(
+            &transaction,
+            limits,
+            policy,
+            || -> Vec<DatabaseRow> {
+                panic!("an internal full rebuild does not request authoritative rows")
+            }
+        ),
+        Err(DatabaseError::LimitExceeded("row bytes"))
+    );
+    assert_eq!(limited.revision(), 0);
+    assert_eq!(limited.summary().unwrap(), limited_summary);
+
+    let mut rebuilt = Table::from_rows(
+        namespace(),
+        schema.clone(),
+        8,
+        encoder(),
+        Gf2_128V1::ONE,
+        initial,
+    )
+    .unwrap();
+    let transaction = TransactionDelta::new(namespace(), &schema, 0, mutations).unwrap();
+    let report = rebuilt
+        .apply_transaction_with_policy(
+            &transaction,
+            DatabaseTransactionLimits::default(),
+            policy,
+            || target.clone(),
+        )
+        .unwrap();
+    assert_eq!(report.path(), DatabaseApplyPath::FullRebuild);
+    for expected in &target {
+        assert_eq!(rebuilt.get_by_row_key(expected).unwrap(), Some(expected));
+    }
+    let reference =
+        Table::from_rows(namespace(), schema, 8, encoder(), Gf2_128V1::ONE, target).unwrap();
+    assert_eq!(rebuilt.summary().unwrap(), reference.summary().unwrap());
 }
 
 #[test]

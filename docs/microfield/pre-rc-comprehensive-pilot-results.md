@@ -114,8 +114,9 @@ de selección de estrategia, no de exactitud.
 
 C2 cierra como calibración informativa. Antes de congelar C3 deben completarse:
 
-1. añadir `FullRebuild` al selector adaptativo de DB y medir el cruce entre
-   25 % y 75 % de densidad;
+1. ~~añadir `FullRebuild` al selector adaptativo de DB y medir el cruce entre
+   25 % y 75 % de densidad~~: cerrado; la ruta global perdió el A/B y queda
+   opt-in, mientras la ruta por particiones mejoró 15-16 % a alta densidad;
 2. registrar outcome y presupuesto exacto de grafos como métricas estructuradas;
 3. ampliar grafos con topología incremental, mallas, densidad y corpus externo;
 4. añadir el quinto punto de fragmentación y conservar operandos alternantes;

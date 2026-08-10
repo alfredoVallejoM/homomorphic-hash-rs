@@ -55,3 +55,38 @@ algorítmico mínimo, no como competidor transaccional directo.
 La campaña usa un único cliente y una tabla sintética reproducible. Todavía no
 mide logical decoding/WAL real, crashes, 16–256 clientes concurrentes ni el
 corpus NYC TLC. Esos puntos permanecen como siguiente fase antes de la RC.
+
+## Cierre de la frontera densa sobre un millón de filas
+
+Se añadió una ruta exacta `FullRebuild`, seleccionable mediante una frontera
+global explícita, y se comparó A/B con la política por particiones. Ambas
+campañas usaron PostgreSQL 17, 1.000.000 de filas, 1.024 particiones, datos
+`strided`, tres repeticiones y verificación exacta tras cada commit. Las 18
+muestras conservaron filas y resumen; son mediciones algebraicas, no pruebas
+de propiedades criptográficas.
+
+Medianas en microsegundos:
+
+| Cambios | Ruta seleccionada | Aplicación | Full rebuild | Diferencia |
+|---:|---|---:|---:|---:|
+| 500.001 | incremental | 3.051.224 | 4.033.309 | +32,2 % |
+| 750.000 | rebuild por partición | 3.635.490 | 4.481.986 | +23,3 % |
+| 1.000.000 | rebuild por partición | 4.254.540 | 5.181.904 | +21,8 % |
+
+La reconstrucción global no es el selector ganador en este perfil: reconstruir
+mapas ordenados desde cero cuesta más que clonar y reconstruir únicamente las
+particiones afectadas. Por ello queda disponible sólo como mecanismo opt-in y
+el laboratorio la desactiva por defecto con `1/1`; la recomendación operativa
+continúa siendo la frontera por partición `2/3`.
+
+La corrección que sí mejora el camino seleccionado elimina una serialización
+temporal completa de cada before/after image al comprobar `max_row_bytes`. El
+tamaño se valida aritméticamente y la codificación se realiza una sola vez al
+reconstruir la firma. Frente al control anterior del mismo bloque, la mediana
+por particiones bajó de 4.287.364 a 3.635.490 us en 750.000 cambios (-15,2 %) y
+de 5.049.170 a 4.254.540 us en un millón (-15,7 %).
+
+Evidencia final:
+
+- [`full-selector-v3`](../../validation/benchmarks/runs/pre-rc-postgresql-1m-full-selector-v3.json);
+- [`partition-control-v3`](../../validation/benchmarks/runs/pre-rc-postgresql-1m-partition-control-v3.json).

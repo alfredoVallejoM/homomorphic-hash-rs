@@ -897,6 +897,11 @@ where
                 rebuilt_partitions: 0,
             });
         }
+        if transaction.mutations.len() <= policy.max_incremental_mutations
+            && policy.rebuilds_full_table(transaction.mutations.len(), self.row_count())
+        {
+            return self.apply_transaction_full_rebuild(transaction, limits);
+        }
         if transaction.mutations.len() <= policy.max_incremental_mutations {
             let report = self.apply_transaction_partitioned(transaction, limits, Some(policy))?;
             let path = match (report.rebuilt_partitions, report.touched_partitions) {
@@ -936,6 +941,85 @@ where
             revision: self.revision,
             touched_partitions,
             rebuilt_partitions: touched_partitions,
+        })
+    }
+
+    fn apply_transaction_full_rebuild(
+        &mut self,
+        transaction: &TransactionDelta,
+        limits: DatabaseTransactionLimits,
+    ) -> Result<DatabasePolicyApplyReport, DatabaseError> {
+        self.preflight_transaction(transaction, limits)?;
+        let mut grouped = BTreeMap::<usize, BTreeMap<DatabaseRowKey, &RowMutation>>::new();
+        for (&key, mutation) in transaction.mutation_keys.iter().zip(&transaction.mutations) {
+            let index = partition_index(key, self.partitions.len());
+            grouped.entry(index).or_default().insert(key, mutation);
+            match mutation {
+                RowMutation::Insert(after) => {
+                    check_validated_row_size(after, limits)?;
+                }
+                RowMutation::Delete(before) => {
+                    check_validated_row_size(before, limits)?;
+                }
+                RowMutation::Update { before, after } => {
+                    check_validated_row_size(before, limits)?;
+                    check_validated_row_size(after, limits)?;
+                }
+            }
+        }
+
+        let mut candidate = Self::new(
+            self.namespace,
+            self.schema.clone(),
+            self.partitions.len(),
+            self.encoder.clone(),
+            self.offset,
+        )?;
+        for (index, partition) in self.partitions.iter().enumerate() {
+            let mut mutations = grouped.remove(&index).unwrap_or_default();
+            for (&key, current) in &partition.rows {
+                match mutations.remove(&key) {
+                    None => candidate.insert_rebuild(current.clone())?,
+                    Some(RowMutation::Insert(_)) => {
+                        return Err(DatabaseError::Conflict("inserted key already exists"));
+                    }
+                    Some(RowMutation::Delete(before)) => {
+                        if current != before {
+                            return Err(DatabaseError::Conflict("delete before image mismatch"));
+                        }
+                    }
+                    Some(RowMutation::Update { before, after }) => {
+                        if current != before {
+                            return Err(DatabaseError::Conflict("update before image mismatch"));
+                        }
+                        candidate.insert_rebuild(after.clone())?;
+                    }
+                }
+            }
+            for (_, mutation) in mutations {
+                match mutation {
+                    RowMutation::Insert(after) => candidate.insert_rebuild(after.clone())?,
+                    RowMutation::Delete(_) => {
+                        return Err(DatabaseError::Conflict("delete before image mismatch"));
+                    }
+                    RowMutation::Update { .. } => {
+                        return Err(DatabaseError::Conflict("update before image mismatch"));
+                    }
+                }
+            }
+        }
+        debug_assert!(grouped.is_empty());
+        candidate.applied = self.applied.clone();
+        candidate.applied.insert(transaction.transaction_id);
+        candidate.revision = transaction.target_revision;
+        let rebuilt_partitions = candidate.partitions.len();
+        *self = candidate;
+        Ok(DatabasePolicyApplyReport {
+            status: DatabaseApplyStatus::Applied,
+            path: DatabaseApplyPath::FullRebuild,
+            revision: self.revision,
+            touched_partitions: rebuilt_partitions,
+            rebuilt_partitions,
         })
     }
 
@@ -1100,7 +1184,7 @@ where
                             if candidate.rows.contains_key(key) {
                                 return Err(DatabaseError::Conflict("inserted key already exists"));
                             }
-                            checked_row_bytes(&self.schema, after, limits)?;
+                            check_validated_row_size(after, limits)?;
                             candidate.rows.insert(*key, after.clone());
                         }
                         RowMutation::Delete(before) => {
@@ -1109,7 +1193,7 @@ where
                                     "delete before image mismatch",
                                 ));
                             }
-                            checked_row_bytes(&self.schema, before, limits)?;
+                            check_validated_row_size(before, limits)?;
                             candidate.rows.remove(key);
                         }
                         RowMutation::Update { before, after } => {
@@ -1118,8 +1202,8 @@ where
                                     "update before image mismatch",
                                 ));
                             }
-                            checked_row_bytes(&self.schema, before, limits)?;
-                            checked_row_bytes(&self.schema, after, limits)?;
+                            check_validated_row_size(before, limits)?;
+                            check_validated_row_size(after, limits)?;
                             candidate.rows.insert(*key, after.clone());
                         }
                     }
@@ -1229,6 +1313,7 @@ pub struct DatabaseApplyPolicy {
     max_incremental_mutations: usize,
     max_incremental_partition_numerator: usize,
     max_incremental_partition_denominator: usize,
+    full_rebuild_fraction: Option<(usize, usize)>,
 }
 
 impl DatabaseApplyPolicy {
@@ -1239,6 +1324,7 @@ impl DatabaseApplyPolicy {
             max_incremental_mutations,
             max_incremental_partition_numerator: 1,
             max_incremental_partition_denominator: 1,
+            full_rebuild_fraction: None,
         }
     }
 
@@ -1259,7 +1345,25 @@ impl DatabaseApplyPolicy {
             max_incremental_mutations,
             max_incremental_partition_numerator: numerator,
             max_incremental_partition_denominator: denominator,
+            full_rebuild_fraction: None,
         })
+    }
+
+    /// Adds a global mutation-density frontier for an internal full rebuild.
+    /// A transaction whose mutation count is strictly above
+    /// `numerator / denominator` of the current row count bypasses all
+    /// partition candidates. Existing policies have no global frontier until
+    /// this method is called.
+    pub const fn with_full_rebuild_fraction(
+        mut self,
+        numerator: usize,
+        denominator: usize,
+    ) -> Result<Self, DatabaseError> {
+        if denominator == 0 || numerator > denominator {
+            return Err(DatabaseError::InvalidPolicy);
+        }
+        self.full_rebuild_fraction = Some((numerator, denominator));
+        Ok(self)
     }
 
     /// Largest transaction routed through partition-local candidates.
@@ -1275,6 +1379,21 @@ impl DatabaseApplyPolicy {
             self.max_incremental_partition_numerator,
             self.max_incremental_partition_denominator,
         )
+    }
+
+    /// Optional global mutation density above which the exact in-memory state
+    /// is rebuilt transactionally as one table.
+    #[must_use]
+    pub const fn full_rebuild_fraction(self) -> Option<(usize, usize)> {
+        self.full_rebuild_fraction
+    }
+
+    fn rebuilds_full_table(self, mutations: usize, rows: usize) -> bool {
+        self.full_rebuild_fraction
+            .is_some_and(|(numerator, denominator)| {
+                (mutations as u128) * (denominator as u128)
+                    > (rows.max(1) as u128) * (numerator as u128)
+            })
     }
 
     fn rebuilds_partition(self, mutations: usize, rows: usize) -> bool {
@@ -1298,6 +1417,8 @@ pub enum DatabaseApplyPath {
     PartitionHybrid,
     /// Every touched partition was dense and rebuilt independently.
     PartitionRebuild,
+    /// The exact in-memory state was rebuilt transactionally as one table.
+    FullRebuild,
     /// Exact authoritative target rows were rebuilt and verified before commit.
     AuthoritativeRebuild,
     /// The exact transaction ID had already been committed.
@@ -1603,6 +1724,17 @@ fn checked_row_bytes(
         Err(DatabaseError::LimitExceeded("row bytes"))
     } else {
         Ok(bytes)
+    }
+}
+
+fn check_validated_row_size(
+    row: &DatabaseRow,
+    limits: DatabaseTransactionLimits,
+) -> Result<(), DatabaseError> {
+    if row_wire_len(row).is_none_or(|length| length > limits.max_row_bytes) {
+        Err(DatabaseError::LimitExceeded("row bytes"))
+    } else {
+        Ok(())
     }
 }
 
