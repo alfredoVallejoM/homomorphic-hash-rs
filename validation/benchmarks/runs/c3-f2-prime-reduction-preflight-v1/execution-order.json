@@ -1,0 +1,54 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f2-prime-reduction-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f2-prime-reduction-goldilocks-reduction-p256-n1",
+      "process_index": 0,
+      "seed": 8824902329459202931,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f2-prime-reduction-fp251-reduction-p1-n1",
+      "process_index": 0,
+      "seed": 7482638841195339952,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f2-prime-reduction-fp256-generic-reduction-p256-n8",
+      "process_index": 0,
+      "seed": 16466382587693067652,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 1,
+      "cell": "f2-prime-reduction-fp256-generic-reduction-p256-n8",
+      "process_index": 1,
+      "seed": 2551444981816143869,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 1,
+      "cell": "f2-prime-reduction-fp251-reduction-p1-n1",
+      "process_index": 1,
+      "seed": 16440380781549549926,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 1,
+      "cell": "f2-prime-reduction-goldilocks-reduction-p256-n1",
+      "process_index": 1,
+      "seed": 12490817919844938551,
+      "status": "success"
+    }
+  ]
+}

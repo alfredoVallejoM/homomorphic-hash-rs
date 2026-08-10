@@ -1,0 +1,44 @@
+{
+  "schema": "algesum-c3-f1-f2-closure-summary-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1",
+  "classification": "preflight",
+  "claims_allowed": false,
+  "publication_cells": 366,
+  "c3_publication_cells_cumulative": 3609,
+  "initial_preflight": {
+    "cells": 85,
+    "precise_cells": 79,
+    "workers": 170,
+    "observations": 850,
+    "median_relative_ci_half_width": 0.010306409126968473,
+    "maximum_relative_ci_half_width": 0.29582807142118817,
+    "zero_allocation_cells": 79,
+    "semantic_failures": 0,
+    "unstable_checksums": 0
+  },
+  "calibration": {
+    "cells": 5,
+    "precise_cells": 4,
+    "workers": 36,
+    "observations": 480,
+    "variants_without_a_precise_run_after_calibration": 0,
+    "retained_inconclusive_calibration_cells": 1
+  },
+  "paired_x86_ratios": [
+    { "field": "gf2-128", "backend": "x86-pclmul", "scale": 8, "forced_over_portable": 0.0721766101528636 },
+    { "field": "gf2-128", "backend": "x86-vpclmul", "scale": 8, "forced_over_portable": 0.13278190545717647 },
+    { "field": "gf2-256-hh", "backend": "x86-pclmul", "scale": 8, "forced_over_portable": 0.06754250659368762 },
+    { "field": "gf2-256-hh", "backend": "x86-vpclmul", "scale": 8, "forced_over_portable": 0.05156085132062352 },
+    { "field": "gf2-256-alt", "backend": "x86-pclmul", "scale": 8, "forced_over_portable": 0.0633051022870674 },
+    { "field": "gf2-256-alt", "backend": "x86-vpclmul", "scale": 64, "forced_over_portable": 0.05946010779204465 },
+    { "field": "fp251", "backend": "x86-prime-avx2", "scale": 8, "forced_over_portable": 1.3633928706022815 },
+    { "field": "goldilocks", "backend": "x86-prime-avx2", "scale": 8, "forced_over_portable": 0.9602398572410106 },
+    { "field": "fp256-generic", "backend": "x86-prime-bmi2", "scale": 64, "forced_over_portable": 1.6517902066596215 }
+  ],
+  "limits": [
+    "single shared Intel x86-64 host",
+    "Smoke and Informative classifications only",
+    "explicit x86 manifests are not portable to AArch64",
+    "full 3609-cell Controlled campaign remains unexecuted"
+  ]
+}

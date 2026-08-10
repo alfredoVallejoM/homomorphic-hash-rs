@@ -1,0 +1,55 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-portable-smoke",
+  "profile": "smoke",
+  "seed": 130320260815,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f1-binary-portable-gf2-128-portable-n1",
+      "family": "binary-field-backend",
+      "operation": "binary.portable-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f1-binary-portable-gf2-128-portable",
+      "strategy": "gf2-128"
+    },
+    {
+      "id": "f1-binary-portable-gf2-256-hh-portable-n1",
+      "family": "binary-field-backend",
+      "operation": "binary.portable-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f1-binary-portable-gf2-256-hh-portable",
+      "strategy": "gf2-256-hh"
+    },
+    {
+      "id": "f1-binary-portable-gf2-256-alt-portable-n1",
+      "family": "binary-field-backend",
+      "operation": "binary.portable-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f1-binary-portable-gf2-256-alt-portable",
+      "strategy": "gf2-256-alt"
+    }
+  ]
+}

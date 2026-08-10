@@ -16,6 +16,8 @@ Los corpora externos, wires y packaging están en
 [`c3-x1-x2-implementation-and-preflight-report.md`](c3-x1-x2-implementation-and-preflight-report.md).
 Los sistemas PostgreSQL están en
 [`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md).
+El cierre de referencias, backends y patrones F1/F2 está en
+[`c3-f1-f2-closure-preflight-report.md`](c3-f1-f2-closure-preflight-report.md).
 
 Este documento sustituye cualquier propuesta de ejecutar C3 sobre unas pocas
 celdas «seleccionadas». Algesum reúne un núcleo de campos finitos, algoritmos

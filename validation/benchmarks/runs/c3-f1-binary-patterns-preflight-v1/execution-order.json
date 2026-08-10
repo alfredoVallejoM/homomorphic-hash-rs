@@ -1,0 +1,294 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-patterns-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-hh-dense-n1",
+      "process_index": 0,
+      "seed": 17336512358956350278,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-128-dense-n1",
+      "process_index": 0,
+      "seed": 7325795503850895754,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-alt-zero-n1",
+      "process_index": 0,
+      "seed": 5661892693986018309,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-hh-random-n1",
+      "process_index": 0,
+      "seed": 1554115889121143453,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-128-alternating-n1",
+      "process_index": 0,
+      "seed": 7045533261554540723,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-hh-one-n1",
+      "process_index": 0,
+      "seed": 11945226659644746399,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-128-one-n1",
+      "process_index": 0,
+      "seed": 1472824814544039995,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-alt-dense-n1",
+      "process_index": 0,
+      "seed": 12163774942200767402,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-hh-zero-n1",
+      "process_index": 0,
+      "seed": 14804906169677753810,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-alt-basis-high-n1",
+      "process_index": 0,
+      "seed": 321734214586136230,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-alt-random-n64",
+      "process_index": 0,
+      "seed": 7074897799243121587,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-hh-alternating-n1",
+      "process_index": 0,
+      "seed": 12612842412346554669,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-alt-alternating-n1",
+      "process_index": 0,
+      "seed": 16409314527797612481,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-128-zero-n1",
+      "process_index": 0,
+      "seed": 16265318496156112595,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-128-random-n1",
+      "process_index": 0,
+      "seed": 16182990580306622822,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-alt-one-n1",
+      "process_index": 0,
+      "seed": 5575635214834372257,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-256-hh-basis-high-n1",
+      "process_index": 0,
+      "seed": 176057946827877226,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 0,
+      "cell": "f1-binary-patterns-gf2-128-basis-high-n1",
+      "process_index": 0,
+      "seed": 14652150253919320529,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-128-one-n1",
+      "process_index": 1,
+      "seed": 663366979385952449,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-128-dense-n1",
+      "process_index": 1,
+      "seed": 4618405413810876980,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-128-alternating-n1",
+      "process_index": 1,
+      "seed": 5075326501086306116,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-alt-basis-high-n1",
+      "process_index": 1,
+      "seed": 12324505237570695217,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-hh-one-n1",
+      "process_index": 1,
+      "seed": 3795899537836278799,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-alt-one-n1",
+      "process_index": 1,
+      "seed": 6968073676729479653,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-128-zero-n1",
+      "process_index": 1,
+      "seed": 12040651193360831279,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-hh-basis-high-n1",
+      "process_index": 1,
+      "seed": 11459465127220688547,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-alt-zero-n1",
+      "process_index": 1,
+      "seed": 11225498471315733181,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-hh-alternating-n1",
+      "process_index": 1,
+      "seed": 12322602661286282133,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-alt-random-n64",
+      "process_index": 1,
+      "seed": 2809947380351031963,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-hh-dense-n1",
+      "process_index": 1,
+      "seed": 2197389742411277893,
+      "status": "success"
+    },
+    {
+      "sequence": 30,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-hh-random-n1",
+      "process_index": 1,
+      "seed": 5499622916710279651,
+      "status": "success"
+    },
+    {
+      "sequence": 31,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-128-basis-high-n1",
+      "process_index": 1,
+      "seed": 12475330991506524410,
+      "status": "success"
+    },
+    {
+      "sequence": 32,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-128-random-n1",
+      "process_index": 1,
+      "seed": 18340462269577218226,
+      "status": "success"
+    },
+    {
+      "sequence": 33,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-hh-zero-n1",
+      "process_index": 1,
+      "seed": 10046484404072140352,
+      "status": "success"
+    },
+    {
+      "sequence": 34,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-alt-alternating-n1",
+      "process_index": 1,
+      "seed": 7821744799297516917,
+      "status": "success"
+    },
+    {
+      "sequence": 35,
+      "round": 1,
+      "cell": "f1-binary-patterns-gf2-256-alt-dense-n1",
+      "process_index": 1,
+      "seed": 14359863354345726609,
+      "status": "success"
+    }
+  ]
+}

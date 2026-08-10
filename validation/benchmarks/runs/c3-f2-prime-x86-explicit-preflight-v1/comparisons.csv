@@ -1,0 +1,4 @@
+cell,baseline_cell,paired_processes,median_ratio,ratio_ci95_lower,ratio_ci95_upper,status
+f2-prime-x86-explicit-fp251-avx2-n8,f2-prime-x86-explicit-fp251-portable-x86-n8,2,1.363392871,1.363065119,1.363720622,Paired
+f2-prime-x86-explicit-goldilocks-avx2-n8,f2-prime-x86-explicit-goldilocks-portable-x86-n8,2,0.950465534,0.943037379,0.957893688,Paired
+f2-prime-x86-explicit-fp256-generic-bmi2-n64,f2-prime-x86-explicit-fp256-generic-portable-x86-n64,2,1.651790207,1.622624748,1.680955665,Paired

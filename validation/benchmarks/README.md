@@ -98,6 +98,20 @@ All four external corpora and all 19 X2 preflight cells passed. The generated
 inventory now contains 3,243 publication cells. See
 `docs/microfield/c3-x1-x2-implementation-and-preflight-report.md`.
 
+The F1/F2 closure adds independent references, portable/forced and explicit
+x86 backend pairs, edge-value patterns and independent prime reduction:
+
+```text
+cargo run -p microfield-validation-lab --locked -- c3-expand \
+  --manifest validation/benchmarks/c3-f1-f2-closure-factor-plan-v1.json \
+  --out-dir validation/benchmarks/manifests/c3-f1-f2-closure
+```
+
+Its 366 cells bring the generated inventory to 3,609. All 85 preflight cells
+passed semantic checks; precision calibrations are retained beside the first
+inconclusive timing samples. See
+`docs/microfield/c3-f1-f2-closure-preflight-report.md`.
+
 C2 is also versioned and remains informative:
 
 ```text

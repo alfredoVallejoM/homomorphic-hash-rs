@@ -1,0 +1,2 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+f2-prime-forced-goldilocks-forced-n8-calibration-v2,prime-field-backend,prime.backend-forced-total,8,field-elements,8,120,77.033676147,77.212187958,77.803352509,0.060211182,76.967056274,77.062492371,0.000619444,true,Precise,,,,,,,

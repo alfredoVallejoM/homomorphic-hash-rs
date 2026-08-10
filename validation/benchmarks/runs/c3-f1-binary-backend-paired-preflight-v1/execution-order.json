@@ -1,0 +1,118 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-backend-paired-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f1-binary-backend-paired-gf2-256-hh-portable-paired-n8",
+      "process_index": 0,
+      "seed": 6226442961855808727,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f1-binary-backend-paired-gf2-256-alt-forced-paired-n64",
+      "process_index": 0,
+      "seed": 9144957119204647780,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f1-binary-backend-paired-gf2-128-forced-paired-n8",
+      "process_index": 0,
+      "seed": 10021998067717253806,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f1-binary-backend-paired-gf2-128-portable-paired-n8",
+      "process_index": 0,
+      "seed": 10021998067717253806,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f1-binary-backend-paired-gf2-256-hh-forced-paired-n8",
+      "process_index": 0,
+      "seed": 6226442961855808727,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n8",
+      "process_index": 0,
+      "seed": 17914650555160149535,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n64",
+      "process_index": 0,
+      "seed": 9144957119204647780,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "f1-binary-backend-paired-gf2-128-portable-paired-n8",
+      "process_index": 1,
+      "seed": 2174144285035120993,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "f1-binary-backend-paired-gf2-128-forced-paired-n8",
+      "process_index": 1,
+      "seed": 2174144285035120993,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "f1-binary-backend-paired-gf2-256-hh-forced-paired-n8",
+      "process_index": 1,
+      "seed": 4223029474386390158,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n64",
+      "process_index": 1,
+      "seed": 2532619279460499202,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "f1-binary-backend-paired-gf2-256-alt-forced-paired-n64",
+      "process_index": 1,
+      "seed": 2532619279460499202,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 1,
+      "cell": "f1-binary-backend-paired-gf2-256-hh-portable-paired-n8",
+      "process_index": 1,
+      "seed": 4223029474386390158,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 1,
+      "cell": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n8",
+      "process_index": 1,
+      "seed": 17476808913250938437,
+      "status": "success"
+    }
+  ]
+}

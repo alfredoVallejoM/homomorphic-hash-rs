@@ -1,0 +1,108 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-goldilocks-avx2-paired-calibration-v3",
+  "profile": "pilot",
+  "environment_classification": "informative",
+  "cells": [
+    {
+      "id": "f2-goldilocks-portable-n8-calibration-v3",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 8,
+      "observation_count": 120,
+      "median_ns_per_unit": 83.06575012207031,
+      "p95_ns_per_unit": 85.89936981201171,
+      "p99_ns_per_unit": 140.4197313690186,
+      "mad_ns_per_unit": 0.09684371948242188,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82.98760223388672,
+        "upper": 83.18058013916016
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 83.3035846710205,
+        "upper": 143.61862182617188
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 83.84553527832031,
+        "upper": 145.79966735839844
+      },
+      "relative_median_ci_half_width": 0.001161597318930151,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-goldilocks-avx2-n8-calibration-v3",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 8,
+      "observation_count": 120,
+      "median_ns_per_unit": 79.7988166809082,
+      "p95_ns_per_unit": 93.09069061279295,
+      "p99_ns_per_unit": 126.59569213867188,
+      "mad_ns_per_unit": 0.10157394409179688,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 79.66664123535156,
+        "upper": 79.92467498779297
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 80.22989654541016,
+        "upper": 126.81715393066406
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82.92710876464844,
+        "upper": 131.13542938232422
+      },
+      "relative_median_ci_half_width": 0.0016167768093179043,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [
+    {
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "baseline_cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "paired_processes": 8,
+      "median_ratio": 0.9602398572410106,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.9590948801873307,
+        "upper": 0.9620883861656516
+      },
+      "status": "Paired"
+    }
+  ],
+  "curves": [
+    {
+      "curve": "f2-goldilocks-avx2-calibration",
+      "strategy": "goldilocks",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-goldilocks-avx2-calibration",
+      "strategy": "goldilocks@x86-prime-avx2",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

@@ -1,0 +1,91 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f2-prime-backend-paired-smoke",
+  "profile": "smoke",
+  "seed": 130320260815,
+  "host_mode": "ci-shared",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.5,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f2-prime-backend-paired-fp251-portable-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-prime-backend-paired-fp251-portable-paired",
+      "strategy": "fp251"
+    },
+    {
+      "id": "f2-prime-backend-paired-fp251-forced-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": "f2-prime-backend-paired-fp251-portable-paired-n8",
+      "curve": "f2-prime-backend-paired-fp251-forced-paired",
+      "strategy": "fp251"
+    },
+    {
+      "id": "f2-prime-backend-paired-goldilocks-portable-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-prime-backend-paired-goldilocks-portable-paired",
+      "strategy": "goldilocks"
+    },
+    {
+      "id": "f2-prime-backend-paired-goldilocks-forced-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": "f2-prime-backend-paired-goldilocks-portable-paired-n8",
+      "curve": "f2-prime-backend-paired-goldilocks-forced-paired",
+      "strategy": "goldilocks"
+    },
+    {
+      "id": "f2-prime-backend-paired-fp256-generic-portable-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-prime-backend-paired-fp256-generic-portable-paired",
+      "strategy": "fp256-generic"
+    },
+    {
+      "id": "f2-prime-backend-paired-fp256-generic-forced-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": "f2-prime-backend-paired-fp256-generic-portable-paired-n8",
+      "curve": "f2-prime-backend-paired-fp256-generic-forced-paired",
+      "strategy": "fp256-generic"
+    }
+  ]
+}

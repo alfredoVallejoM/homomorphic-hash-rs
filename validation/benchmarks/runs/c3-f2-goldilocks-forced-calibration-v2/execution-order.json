@@ -1,0 +1,70 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-goldilocks-forced-calibration-v2",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "process_index": 0,
+      "seed": 12478763195884115073,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 1,
+      "cell": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "process_index": 1,
+      "seed": 2225882062726618678,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 2,
+      "cell": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "process_index": 2,
+      "seed": 6213176489695617119,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 3,
+      "cell": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "process_index": 3,
+      "seed": 7033664341164490283,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 4,
+      "cell": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "process_index": 4,
+      "seed": 18169110211370541522,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 5,
+      "cell": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "process_index": 5,
+      "seed": 4058834025249703023,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 6,
+      "cell": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "process_index": 6,
+      "seed": 7376824690282485282,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 7,
+      "cell": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "process_index": 7,
+      "seed": 15933686197267781710,
+      "status": "success"
+    }
+  ]
+}

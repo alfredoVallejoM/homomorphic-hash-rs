@@ -9,6 +9,7 @@ description = "Reproducible F6.V validation harness for Algesum"
 allocation-counter = "0.8.1"
 algesum = { path = "../..", features = ["dynamic-signatures", "legacy"] }
 microfield = { path = "../microfield", features = ["generator", "dynamic"] }
+num-bigint = "0.4"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10.9"

@@ -1,0 +1,55 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f2-prime-reduction-preflight",
+  "profile": "smoke",
+  "seed": 130320260815,
+  "host_mode": "interactive",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 250000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f2-prime-reduction-fp251-reduction-p1-n1",
+      "family": "prime-field-reduction",
+      "operation": "prime.reduction-total",
+      "scale": 1,
+      "scale_unit": "wide-integers",
+      "payload_bytes": 1,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-prime-reduction-fp251-reduction",
+      "strategy": "fp251"
+    },
+    {
+      "id": "f2-prime-reduction-goldilocks-reduction-p256-n1",
+      "family": "prime-field-reduction",
+      "operation": "prime.reduction-total",
+      "scale": 1,
+      "scale_unit": "wide-integers",
+      "payload_bytes": 256,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-prime-reduction-goldilocks-reduction",
+      "strategy": "goldilocks"
+    },
+    {
+      "id": "f2-prime-reduction-fp256-generic-reduction-p256-n8",
+      "family": "prime-field-reduction",
+      "operation": "prime.reduction-total",
+      "scale": 8,
+      "scale_unit": "wide-integers",
+      "payload_bytes": 256,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-prime-reduction-fp256-generic-reduction",
+      "strategy": "fp256-generic"
+    }
+  ]
+}

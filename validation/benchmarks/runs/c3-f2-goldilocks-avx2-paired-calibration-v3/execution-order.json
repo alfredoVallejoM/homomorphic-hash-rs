@@ -1,0 +1,134 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-goldilocks-avx2-paired-calibration-v3",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "process_index": 0,
+      "seed": 7021686994504215308,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "process_index": 0,
+      "seed": 7021686994504215308,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 1,
+      "cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "process_index": 1,
+      "seed": 3251591782694443241,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 1,
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "process_index": 1,
+      "seed": 3251591782694443241,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 2,
+      "cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "process_index": 2,
+      "seed": 9822968038424313444,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 2,
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "process_index": 2,
+      "seed": 9822968038424313444,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 3,
+      "cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "process_index": 3,
+      "seed": 17396191832239668611,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 3,
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "process_index": 3,
+      "seed": 17396191832239668611,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 4,
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "process_index": 4,
+      "seed": 4525195222588827033,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 4,
+      "cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "process_index": 4,
+      "seed": 4525195222588827033,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 5,
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "process_index": 5,
+      "seed": 11013184389269853169,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 5,
+      "cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "process_index": 5,
+      "seed": 11013184389269853169,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 6,
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "process_index": 6,
+      "seed": 11395480708498010978,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 6,
+      "cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "process_index": 6,
+      "seed": 11395480708498010978,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 7,
+      "cell": "f2-goldilocks-avx2-n8-calibration-v3",
+      "process_index": 7,
+      "seed": 93148362839836879,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 7,
+      "cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "process_index": 7,
+      "seed": 93148362839836879,
+      "status": "success"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-goldilocks-forced-calibration-v2",
+  "profile": "pilot",
+  "environment_classification": "informative",
+  "cells": [
+    {
+      "id": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "family": "prime-field-backend",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 8,
+      "observation_count": 120,
+      "median_ns_per_unit": 77.03367614746094,
+      "p95_ns_per_unit": 77.21218795776367,
+      "p99_ns_per_unit": 77.80335250854492,
+      "mad_ns_per_unit": 0.060211181640625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 76.96705627441406,
+        "upper": 77.06249237060547
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 77.1187759399414,
+        "upper": 77.89430236816406
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 77.15371704101562,
+        "upper": 78.65371704101562
+      },
+      "relative_median_ci_half_width": 0.0006194439949141117,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "f2-prime-forced-goldilocks-forced",
+      "strategy": "goldilocks",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

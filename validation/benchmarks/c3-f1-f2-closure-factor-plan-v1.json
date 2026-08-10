@@ -1,0 +1,197 @@
+{
+  "schema": "algesum-c3-factor-plan-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1",
+  "seed": 130320260815,
+  "shards": [
+    {
+      "id": "f1-binary-reference",
+      "family": "binary-field-reference",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 8,
+      "operations": [
+        { "id": "gf2-128-reference", "operation": "binary.reference-total", "strategy": "gf2-128:random" },
+        { "id": "gf2-256-hh-reference", "operation": "binary.reference-total", "strategy": "gf2-256-hh:random" },
+        { "id": "gf2-256-alt-reference", "operation": "binary.reference-total", "strategy": "gf2-256-alt:random" }
+      ],
+      "primary_factors": { "scale": [1, 2, 8, 32] }
+    },
+    {
+      "id": "f1-binary-portable",
+      "family": "binary-field-backend",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 4096,
+      "operations": [
+        { "id": "gf2-128-portable", "operation": "binary.portable-total", "strategy": "gf2-128" },
+        { "id": "gf2-256-hh-portable", "operation": "binary.portable-total", "strategy": "gf2-256-hh" },
+        { "id": "gf2-256-alt-portable", "operation": "binary.portable-total", "strategy": "gf2-256-alt" }
+      ],
+      "primary_factors": { "scale": [1, 2, 4, 8, 16, 64, 256, 4096, 65536] }
+    },
+    {
+      "id": "f1-binary-forced",
+      "family": "binary-field-backend",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 4096,
+      "operations": [
+        { "id": "gf2-128-forced", "operation": "binary.backend-forced-total", "strategy": "gf2-128" },
+        { "id": "gf2-256-hh-forced", "operation": "binary.backend-forced-total", "strategy": "gf2-256-hh" },
+        { "id": "gf2-256-alt-forced", "operation": "binary.backend-forced-total", "strategy": "gf2-256-alt" }
+      ],
+      "primary_factors": { "scale": [1, 2, 4, 8, 16, 64, 256, 4096, 65536] }
+    },
+    {
+      "id": "f1-binary-patterns",
+      "family": "binary-field-pattern",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "gf2-128-zero", "operation": "binary.input-pattern-total", "strategy": "gf2-128:zero" },
+        { "id": "gf2-128-one", "operation": "binary.input-pattern-total", "strategy": "gf2-128:one" },
+        { "id": "gf2-128-dense", "operation": "binary.input-pattern-total", "strategy": "gf2-128:dense" },
+        { "id": "gf2-128-alternating", "operation": "binary.input-pattern-total", "strategy": "gf2-128:alternating" },
+        { "id": "gf2-128-basis-high", "operation": "binary.input-pattern-total", "strategy": "gf2-128:basis-high" },
+        { "id": "gf2-128-random", "operation": "binary.input-pattern-total", "strategy": "gf2-128:random" },
+        { "id": "gf2-256-hh-zero", "operation": "binary.input-pattern-total", "strategy": "gf2-256-hh:zero" },
+        { "id": "gf2-256-hh-one", "operation": "binary.input-pattern-total", "strategy": "gf2-256-hh:one" },
+        { "id": "gf2-256-hh-dense", "operation": "binary.input-pattern-total", "strategy": "gf2-256-hh:dense" },
+        { "id": "gf2-256-hh-alternating", "operation": "binary.input-pattern-total", "strategy": "gf2-256-hh:alternating" },
+        { "id": "gf2-256-hh-basis-high", "operation": "binary.input-pattern-total", "strategy": "gf2-256-hh:basis-high" },
+        { "id": "gf2-256-hh-random", "operation": "binary.input-pattern-total", "strategy": "gf2-256-hh:random" },
+        { "id": "gf2-256-alt-zero", "operation": "binary.input-pattern-total", "strategy": "gf2-256-alt:zero" },
+        { "id": "gf2-256-alt-one", "operation": "binary.input-pattern-total", "strategy": "gf2-256-alt:one" },
+        { "id": "gf2-256-alt-dense", "operation": "binary.input-pattern-total", "strategy": "gf2-256-alt:dense" },
+        { "id": "gf2-256-alt-alternating", "operation": "binary.input-pattern-total", "strategy": "gf2-256-alt:alternating" },
+        { "id": "gf2-256-alt-basis-high", "operation": "binary.input-pattern-total", "strategy": "gf2-256-alt:basis-high" },
+        { "id": "gf2-256-alt-random", "operation": "binary.input-pattern-total", "strategy": "gf2-256-alt:random" }
+      ],
+      "primary_factors": { "scale": [1, 64, 4096] }
+    },
+    {
+      "id": "f2-prime-portable",
+      "family": "prime-field-backend",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 4096,
+      "operations": [
+        { "id": "fp251-portable", "operation": "prime.portable-total", "strategy": "fp251" },
+        { "id": "goldilocks-portable", "operation": "prime.portable-total", "strategy": "goldilocks" },
+        { "id": "fp256-generic-portable", "operation": "prime.portable-total", "strategy": "fp256-generic" }
+      ],
+      "primary_factors": { "scale": [1, 2, 4, 8, 16, 64, 256, 4096, 65536] }
+    },
+    {
+      "id": "f2-prime-forced",
+      "family": "prime-field-backend",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 4096,
+      "operations": [
+        { "id": "fp251-forced", "operation": "prime.backend-forced-total", "strategy": "fp251" },
+        { "id": "goldilocks-forced", "operation": "prime.backend-forced-total", "strategy": "goldilocks" },
+        { "id": "fp256-generic-forced", "operation": "prime.backend-forced-total", "strategy": "fp256-generic" }
+      ],
+      "primary_factors": { "scale": [1, 2, 4, 8, 16, 64, 256, 4096, 65536] }
+    },
+    {
+      "id": "f2-prime-ranges",
+      "family": "prime-field-range",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "fp251-zero", "operation": "prime.range-pattern-total", "strategy": "fp251:zero" },
+        { "id": "fp251-one", "operation": "prime.range-pattern-total", "strategy": "fp251:one" },
+        { "id": "fp251-near-modulus", "operation": "prime.range-pattern-total", "strategy": "fp251:near-modulus" },
+        { "id": "fp251-dense", "operation": "prime.range-pattern-total", "strategy": "fp251:dense" },
+        { "id": "fp251-alternating", "operation": "prime.range-pattern-total", "strategy": "fp251:alternating" },
+        { "id": "fp251-random", "operation": "prime.range-pattern-total", "strategy": "fp251:random" },
+        { "id": "goldilocks-zero", "operation": "prime.range-pattern-total", "strategy": "goldilocks:zero" },
+        { "id": "goldilocks-one", "operation": "prime.range-pattern-total", "strategy": "goldilocks:one" },
+        { "id": "goldilocks-near-modulus", "operation": "prime.range-pattern-total", "strategy": "goldilocks:near-modulus" },
+        { "id": "goldilocks-dense", "operation": "prime.range-pattern-total", "strategy": "goldilocks:dense" },
+        { "id": "goldilocks-alternating", "operation": "prime.range-pattern-total", "strategy": "goldilocks:alternating" },
+        { "id": "goldilocks-random", "operation": "prime.range-pattern-total", "strategy": "goldilocks:random" },
+        { "id": "fp256-generic-zero", "operation": "prime.range-pattern-total", "strategy": "fp256-generic:zero" },
+        { "id": "fp256-generic-one", "operation": "prime.range-pattern-total", "strategy": "fp256-generic:one" },
+        { "id": "fp256-generic-near-modulus", "operation": "prime.range-pattern-total", "strategy": "fp256-generic:near-modulus" },
+        { "id": "fp256-generic-dense", "operation": "prime.range-pattern-total", "strategy": "fp256-generic:dense" },
+        { "id": "fp256-generic-alternating", "operation": "prime.range-pattern-total", "strategy": "fp256-generic:alternating" },
+        { "id": "fp256-generic-random", "operation": "prime.range-pattern-total", "strategy": "fp256-generic:random" }
+      ],
+      "primary_factors": { "scale": [1, 64, 4096] }
+    },
+    {
+      "id": "f2-prime-reduction",
+      "family": "prime-field-reduction",
+      "scale_unit": "wide-integers",
+      "preflight_max_scale": 8,
+      "operations": [
+        { "id": "fp251-reduction", "operation": "prime.reduction-total", "strategy": "fp251" },
+        { "id": "goldilocks-reduction", "operation": "prime.reduction-total", "strategy": "goldilocks" },
+        { "id": "fp256-generic-reduction", "operation": "prime.reduction-total", "strategy": "fp256-generic" }
+      ],
+      "primary_factors": { "scale": [1, 8, 64] },
+      "secondary_factors": { "payload_bytes": [1, 8, 32, 64, 256] }
+    },
+    {
+      "id": "f1-binary-backend-paired",
+      "family": "binary-field-backend-paired",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "gf2-128-portable-paired", "operation": "binary.portable-total", "strategy": "gf2-128" },
+        { "id": "gf2-128-forced-paired", "operation": "binary.backend-forced-total", "strategy": "gf2-128", "baseline": "gf2-128-portable-paired" },
+        { "id": "gf2-256-hh-portable-paired", "operation": "binary.portable-total", "strategy": "gf2-256-hh" },
+        { "id": "gf2-256-hh-forced-paired", "operation": "binary.backend-forced-total", "strategy": "gf2-256-hh", "baseline": "gf2-256-hh-portable-paired" },
+        { "id": "gf2-256-alt-portable-paired", "operation": "binary.portable-total", "strategy": "gf2-256-alt" },
+        { "id": "gf2-256-alt-forced-paired", "operation": "binary.backend-forced-total", "strategy": "gf2-256-alt", "baseline": "gf2-256-alt-portable-paired" }
+      ],
+      "primary_factors": { "scale": [8, 64, 256, 4096] }
+    },
+    {
+      "id": "f2-prime-backend-paired",
+      "family": "prime-field-backend-paired",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "fp251-portable-paired", "operation": "prime.portable-total", "strategy": "fp251" },
+        { "id": "fp251-forced-paired", "operation": "prime.backend-forced-total", "strategy": "fp251", "baseline": "fp251-portable-paired" },
+        { "id": "goldilocks-portable-paired", "operation": "prime.portable-total", "strategy": "goldilocks" },
+        { "id": "goldilocks-forced-paired", "operation": "prime.backend-forced-total", "strategy": "goldilocks", "baseline": "goldilocks-portable-paired" },
+        { "id": "fp256-generic-portable-paired", "operation": "prime.portable-total", "strategy": "fp256-generic" },
+        { "id": "fp256-generic-forced-paired", "operation": "prime.backend-forced-total", "strategy": "fp256-generic", "baseline": "fp256-generic-portable-paired" }
+      ],
+      "primary_factors": { "scale": [8, 64, 256, 4096] }
+    },
+    {
+      "id": "f1-binary-x86-explicit",
+      "family": "binary-field-x86-explicit",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "gf2-128-portable-x86", "operation": "binary.portable-total", "strategy": "gf2-128" },
+        { "id": "gf2-128-pclmul", "operation": "binary.backend-forced-total", "strategy": "gf2-128@x86-pclmul", "baseline": "gf2-128-portable-x86" },
+        { "id": "gf2-128-vpclmul", "operation": "binary.backend-forced-total", "strategy": "gf2-128@x86-vpclmul", "baseline": "gf2-128-portable-x86" },
+        { "id": "gf2-256-hh-portable-x86", "operation": "binary.portable-total", "strategy": "gf2-256-hh" },
+        { "id": "gf2-256-hh-pclmul", "operation": "binary.backend-forced-total", "strategy": "gf2-256-hh@x86-pclmul", "baseline": "gf2-256-hh-portable-x86" },
+        { "id": "gf2-256-hh-vpclmul", "operation": "binary.backend-forced-total", "strategy": "gf2-256-hh@x86-vpclmul", "baseline": "gf2-256-hh-portable-x86" },
+        { "id": "gf2-256-alt-portable-x86", "operation": "binary.portable-total", "strategy": "gf2-256-alt" },
+        { "id": "gf2-256-alt-pclmul", "operation": "binary.backend-forced-total", "strategy": "gf2-256-alt@x86-pclmul", "baseline": "gf2-256-alt-portable-x86" },
+        { "id": "gf2-256-alt-vpclmul", "operation": "binary.backend-forced-total", "strategy": "gf2-256-alt@x86-vpclmul", "baseline": "gf2-256-alt-portable-x86" }
+      ],
+      "primary_factors": { "scale": [8, 64, 4096] }
+    },
+    {
+      "id": "f2-prime-x86-explicit",
+      "family": "prime-field-x86-explicit",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 64,
+      "operations": [
+        { "id": "fp251-portable-x86", "operation": "prime.portable-total", "strategy": "fp251" },
+        { "id": "fp251-avx2", "operation": "prime.backend-forced-total", "strategy": "fp251@x86-prime-avx2", "baseline": "fp251-portable-x86" },
+        { "id": "goldilocks-portable-x86", "operation": "prime.portable-total", "strategy": "goldilocks" },
+        { "id": "goldilocks-avx2", "operation": "prime.backend-forced-total", "strategy": "goldilocks@x86-prime-avx2", "baseline": "goldilocks-portable-x86" },
+        { "id": "fp256-generic-portable-x86", "operation": "prime.portable-total", "strategy": "fp256-generic" },
+        { "id": "fp256-generic-bmi2", "operation": "prime.backend-forced-total", "strategy": "fp256-generic@x86-prime-bmi2", "baseline": "fp256-generic-portable-x86" }
+      ],
+      "primary_factors": { "scale": [8, 64, 4096] }
+    }
+  ]
+}

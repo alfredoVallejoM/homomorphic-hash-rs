@@ -1,0 +1,7 @@
+cell,baseline_cell,paired_processes,median_ratio,ratio_ci95_lower,ratio_ci95_upper,status
+f1-binary-x86-explicit-gf2-128-pclmul-n8,f1-binary-x86-explicit-gf2-128-portable-x86-n8,2,0.072176610,0.054345007,0.090008213,Paired
+f1-binary-x86-explicit-gf2-128-vpclmul-n8,f1-binary-x86-explicit-gf2-128-portable-x86-n8,2,0.132781905,0.100168153,0.165395658,Paired
+f1-binary-x86-explicit-gf2-256-hh-pclmul-n8,f1-binary-x86-explicit-gf2-256-hh-portable-x86-n8,2,0.067542507,0.066580552,0.068504461,Paired
+f1-binary-x86-explicit-gf2-256-hh-vpclmul-n8,f1-binary-x86-explicit-gf2-256-hh-portable-x86-n8,2,0.051560851,0.049468954,0.053652749,Paired
+f1-binary-x86-explicit-gf2-256-alt-pclmul-n8,f1-binary-x86-explicit-gf2-256-alt-portable-x86-n8,2,0.063305102,0.062236836,0.064373368,Paired
+f1-binary-x86-explicit-gf2-256-alt-vpclmul-n64,f1-binary-x86-explicit-gf2-256-alt-portable-x86-n64,2,0.059460108,0.059293088,0.059627128,Paired

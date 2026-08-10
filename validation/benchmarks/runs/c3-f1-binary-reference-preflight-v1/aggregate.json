@@ -1,0 +1,136 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-reference-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f1-binary-reference-gf2-128-reference-n1",
+      "family": "binary-field-reference",
+      "operation": "binary.reference-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 14497.09375,
+      "p95_ns_per_unit": 18696.984374999996,
+      "p99_ns_per_unit": 19978.696875,
+      "mad_ns_per_unit": 528.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 12537.0625,
+        "upper": 16457.125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16415.415625,
+        "upper": 20299.125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16449.947640625,
+        "upper": 20299.125
+      },
+      "relative_median_ci_half_width": 0.13520166757561322,
+      "precision_met": true,
+      "allocation_count_median": 32.0,
+      "allocated_bytes_median": 4352.0,
+      "peak_allocated_bytes_median": 272.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-reference-gf2-256-hh-reference-n2",
+      "family": "binary-field-reference",
+      "operation": "binary.reference-total",
+      "scale": 2,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 107276.25,
+      "p95_ns_per_unit": 121412.6375,
+      "p99_ns_per_unit": 121625.1275,
+      "mad_ns_per_unit": 791.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 94587.5,
+        "upper": 119965.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 95190.6409375,
+        "upper": 121678.25
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 95320.2775,
+        "upper": 121678.25
+      },
+      "relative_median_ci_half_width": 0.11828107339695412,
+      "precision_met": true,
+      "allocation_count_median": 16.0,
+      "allocated_bytes_median": 4352.0,
+      "peak_allocated_bytes_median": 544.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-reference-gf2-256-alt-reference-n8",
+      "family": "binary-field-reference",
+      "operation": "binary.reference-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 480116.0,
+      "p95_ns_per_unit": 529932.8,
+      "p99_ns_per_unit": 531666.56,
+      "mad_ns_per_unit": 8641.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 443581.0,
+        "upper": 516651.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 517775.55,
+        "upper": 532100.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 517368.0,
+        "upper": 532100.0
+      },
+      "relative_median_ci_half_width": 0.07609619341992352,
+      "precision_met": true,
+      "allocation_count_median": 16.0,
+      "allocated_bytes_median": 4352.0,
+      "peak_allocated_bytes_median": 544.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "f1-binary-reference-gf2-128-reference",
+      "strategy": "gf2-128:random",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-reference-gf2-256-alt-reference",
+      "strategy": "gf2-256-alt:random",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-reference-gf2-256-hh-reference",
+      "strategy": "gf2-256-hh:random",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

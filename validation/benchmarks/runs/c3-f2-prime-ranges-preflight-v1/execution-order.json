@@ -1,0 +1,294 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f2-prime-ranges-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f2-prime-ranges-goldilocks-near-modulus-n1",
+      "process_index": 0,
+      "seed": 7526889192363643790,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp251-near-modulus-n1",
+      "process_index": 0,
+      "seed": 14497285360772087386,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp256-generic-zero-n1",
+      "process_index": 0,
+      "seed": 9233270748838359551,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f2-prime-ranges-goldilocks-random-n1",
+      "process_index": 0,
+      "seed": 12438695564482578799,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp251-alternating-n1",
+      "process_index": 0,
+      "seed": 13282229283775203463,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f2-prime-ranges-goldilocks-one-n1",
+      "process_index": 0,
+      "seed": 10775044819364204557,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp251-one-n1",
+      "process_index": 0,
+      "seed": 10386802657961221009,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp256-generic-near-modulus-n1",
+      "process_index": 0,
+      "seed": 6042705766959298519,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "f2-prime-ranges-goldilocks-zero-n1",
+      "process_index": 0,
+      "seed": 518183584388197328,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp256-generic-dense-n1",
+      "process_index": 0,
+      "seed": 16568352157756675700,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp256-generic-random-n64",
+      "process_index": 0,
+      "seed": 1941142610915787307,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 0,
+      "cell": "f2-prime-ranges-goldilocks-alternating-n1",
+      "process_index": 0,
+      "seed": 6335227014788470282,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp256-generic-alternating-n1",
+      "process_index": 0,
+      "seed": 7828264021118778071,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp251-zero-n1",
+      "process_index": 0,
+      "seed": 4884966837884094440,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp251-random-n1",
+      "process_index": 0,
+      "seed": 238179891632084759,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp256-generic-one-n1",
+      "process_index": 0,
+      "seed": 14131655155356785666,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 0,
+      "cell": "f2-prime-ranges-goldilocks-dense-n1",
+      "process_index": 0,
+      "seed": 4681443654282939362,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 0,
+      "cell": "f2-prime-ranges-fp251-dense-n1",
+      "process_index": 0,
+      "seed": 2546126776847065391,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp251-one-n1",
+      "process_index": 1,
+      "seed": 13116573340822620521,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp251-near-modulus-n1",
+      "process_index": 1,
+      "seed": 16323369940879182107,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp251-alternating-n1",
+      "process_index": 1,
+      "seed": 14254192381784770732,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp256-generic-dense-n1",
+      "process_index": 1,
+      "seed": 10420217337381697280,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 1,
+      "cell": "f2-prime-ranges-goldilocks-one-n1",
+      "process_index": 1,
+      "seed": 8339863535564905766,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp256-generic-one-n1",
+      "process_index": 1,
+      "seed": 4056307366695895832,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp251-zero-n1",
+      "process_index": 1,
+      "seed": 13764892552055589313,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 1,
+      "cell": "f2-prime-ranges-goldilocks-dense-n1",
+      "process_index": 1,
+      "seed": 13215479796830916880,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp256-generic-zero-n1",
+      "process_index": 1,
+      "seed": 4446816351129262471,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 1,
+      "cell": "f2-prime-ranges-goldilocks-alternating-n1",
+      "process_index": 1,
+      "seed": 3921018900968079802,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp256-generic-random-n64",
+      "process_index": 1,
+      "seed": 3399077077392612552,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 1,
+      "cell": "f2-prime-ranges-goldilocks-near-modulus-n1",
+      "process_index": 1,
+      "seed": 12111464863651950685,
+      "status": "success"
+    },
+    {
+      "sequence": 30,
+      "round": 1,
+      "cell": "f2-prime-ranges-goldilocks-random-n1",
+      "process_index": 1,
+      "seed": 16203113905401576939,
+      "status": "success"
+    },
+    {
+      "sequence": 31,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp251-dense-n1",
+      "process_index": 1,
+      "seed": 9487052673024556100,
+      "status": "success"
+    },
+    {
+      "sequence": 32,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp251-random-n1",
+      "process_index": 1,
+      "seed": 2002852537817825199,
+      "status": "success"
+    },
+    {
+      "sequence": 33,
+      "round": 1,
+      "cell": "f2-prime-ranges-goldilocks-zero-n1",
+      "process_index": 1,
+      "seed": 2666326820591646861,
+      "status": "success"
+    },
+    {
+      "sequence": 34,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp256-generic-alternating-n1",
+      "process_index": 1,
+      "seed": 5510054619234099458,
+      "status": "success"
+    },
+    {
+      "sequence": 35,
+      "round": 1,
+      "cell": "f2-prime-ranges-fp256-generic-near-modulus-n1",
+      "process_index": 1,
+      "seed": 17915575167728552673,
+      "status": "success"
+    }
+  ]
+}

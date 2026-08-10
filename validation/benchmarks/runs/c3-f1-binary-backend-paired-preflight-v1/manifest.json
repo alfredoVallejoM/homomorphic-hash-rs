@@ -1,0 +1,103 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-backend-paired-preflight",
+  "profile": "smoke",
+  "seed": 130320260815,
+  "host_mode": "interactive",
+  "minimum_processes": 2,
+  "maximum_processes": 2,
+  "precision_check_every": 1,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 250000,
+  "maximum_batch_iterations": 1024,
+  "bootstrap_resamples": 200,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f1-binary-backend-paired-gf2-128-portable-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f1-binary-backend-paired-gf2-128-portable-paired",
+      "strategy": "gf2-128"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-128-forced-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": "f1-binary-backend-paired-gf2-128-portable-paired-n8",
+      "curve": "f1-binary-backend-paired-gf2-128-forced-paired",
+      "strategy": "gf2-128"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-hh-portable-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f1-binary-backend-paired-gf2-256-hh-portable-paired",
+      "strategy": "gf2-256-hh"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-hh-forced-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": "f1-binary-backend-paired-gf2-256-hh-portable-paired-n8",
+      "curve": "f1-binary-backend-paired-gf2-256-hh-forced-paired",
+      "strategy": "gf2-256-hh"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f1-binary-backend-paired-gf2-256-alt-portable-paired",
+      "strategy": "gf2-256-alt"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n64",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.portable-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f1-binary-backend-paired-gf2-256-alt-portable-paired",
+      "strategy": "gf2-256-alt"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-alt-forced-paired-n64",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.backend-forced-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n64",
+      "curve": "f1-binary-backend-paired-gf2-256-alt-forced-paired",
+      "strategy": "gf2-256-alt"
+    }
+  ]
+}

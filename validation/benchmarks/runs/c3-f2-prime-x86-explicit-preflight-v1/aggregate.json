@@ -1,0 +1,330 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f2-prime-x86-explicit-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f2-prime-x86-explicit-fp251-portable-x86-n8",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 29.51513671875,
+      "p95_ns_per_unit": 33.97065429687499,
+      "p99_ns_per_unit": 36.765224609375004,
+      "mad_ns_per_unit": 0.06787109375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.501953125,
+        "upper": 29.5283203125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.55732421875,
+        "upper": 37.4638671875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.5797744140625,
+        "upper": 37.4638671875
+      },
+      "relative_median_ci_half_width": 0.000446672291428855,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-x86-explicit-fp251-avx2-n8",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 40.24072265625,
+      "p95_ns_per_unit": 47.16328124999998,
+      "p99_ns_per_unit": 51.601406250000004,
+      "mad_ns_per_unit": 0.064453125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 40.232421875,
+        "upper": 40.2490234375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 40.265625,
+        "upper": 52.7109375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 40.272556640625,
+        "upper": 52.7109375
+      },
+      "relative_median_ci_half_width": 0.00020627813573101332,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-x86-explicit-goldilocks-portable-x86-n8",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 115.02099609375,
+      "p95_ns_per_unit": 147.100244140625,
+      "p99_ns_per_unit": 147.122392578125,
+      "mad_ns_per_unit": 31.96630859375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82.9765625,
+        "upper": 147.0654296875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 83.095703125,
+        "upper": 147.1279296875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 83.23939990234375,
+        "upper": 147.1279296875
+      },
+      "relative_median_ci_half_width": 0.2785963839822043,
+      "precision_met": false,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "f2-prime-x86-explicit-goldilocks-avx2-n8",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 109.5615234375,
+      "p95_ns_per_unit": 142.889013671875,
+      "p99_ns_per_unit": 144.146552734375,
+      "mad_ns_per_unit": 31.3115234375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 78.25,
+        "upper": 140.873046875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 78.312841796875,
+        "upper": 144.4609375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 78.3095703125,
+        "upper": 144.4609375
+      },
+      "relative_median_ci_half_width": 0.28578941269798824,
+      "precision_met": false,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "f2-prime-x86-explicit-fp256-generic-portable-x86-n8",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1453.982421875,
+      "p95_ns_per_unit": 1468.7396484375,
+      "p99_ns_per_unit": 1468.9604296875,
+      "mad_ns_per_unit": 1.3046875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1453.1328125,
+        "upper": 1454.83203125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1461.868359375,
+        "upper": 1469.015625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1467.0269931640626,
+        "upper": 1469.015625
+      },
+      "relative_median_ci_half_width": 0.0005843326316864109,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-x86-explicit-fp256-generic-portable-x86-n64",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.portable-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 7139.890625,
+      "p95_ns_per_unit": 7240.2171875,
+      "p99_ns_per_unit": 7250.2184375,
+      "mad_ns_per_unit": 74.5234375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7068.375,
+        "upper": 7211.40625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7071.0625,
+        "upper": 7252.71875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7211.40625,
+        "upper": 7252.71875
+      },
+      "relative_median_ci_half_width": 0.010016347414285495,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-x86-explicit-fp256-generic-bmi2-n64",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.backend-forced-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 11791.515625,
+      "p95_ns_per_unit": 12470.529687499999,
+      "p99_ns_per_unit": 12775.9559375,
+      "mad_ns_per_unit": 90.109375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11701.40625,
+        "upper": 11881.625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11818.681679687501,
+        "upper": 12852.3125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11819.9869609375,
+        "upper": 12852.3125
+      },
+      "relative_median_ci_half_width": 0.00764188233859886,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [
+    {
+      "cell": "f2-prime-x86-explicit-fp251-avx2-n8",
+      "baseline_cell": "f2-prime-x86-explicit-fp251-portable-x86-n8",
+      "paired_processes": 2,
+      "median_ratio": 1.3633928706022815,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.3630651188940701,
+        "upper": 1.3637206223104932
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "f2-prime-x86-explicit-goldilocks-avx2-n8",
+      "baseline_cell": "f2-prime-x86-explicit-goldilocks-portable-x86-n8",
+      "paired_processes": 2,
+      "median_ratio": 0.9504655335736802,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.9430373787778928,
+        "upper": 0.9578936883694678
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "f2-prime-x86-explicit-fp256-generic-bmi2-n64",
+      "baseline_cell": "f2-prime-x86-explicit-fp256-generic-portable-x86-n64",
+      "paired_processes": 2,
+      "median_ratio": 1.6517902066596215,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.6226247481203822,
+        "upper": 1.680955665198861
+      },
+      "status": "Paired"
+    }
+  ],
+  "curves": [
+    {
+      "curve": "f2-prime-x86-explicit-fp251-avx2",
+      "strategy": "fp251@x86-prime-avx2",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-x86-explicit-fp251-portable-x86",
+      "strategy": "fp251",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-x86-explicit-fp256-generic-bmi2",
+      "strategy": "fp256-generic@x86-prime-bmi2",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-x86-explicit-fp256-generic-portable-x86",
+      "strategy": "fp256-generic",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-x86-explicit-goldilocks-avx2",
+      "strategy": "goldilocks@x86-prime-avx2",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-x86-explicit-goldilocks-portable-x86",
+      "strategy": "goldilocks",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": false,
+  "claims_allowed": false
+}

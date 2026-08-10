@@ -1,0 +1,330 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-backend-paired-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f1-binary-backend-paired-gf2-128-portable-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 2800.171875,
+      "p95_ns_per_unit": 2988.3328125,
+      "p99_ns_per_unit": 3043.2665625,
+      "mad_ns_per_unit": 69.9375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2732.4609375,
+        "upper": 2867.8828125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2780.71328125,
+        "upper": 3057.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2764.53125,
+        "upper": 3057.0
+      },
+      "relative_median_ci_half_width": 0.02418099335420259,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-128-forced-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 271.99267578125,
+      "p95_ns_per_unit": 278.83388671875,
+      "p99_ns_per_unit": 279.33943359375,
+      "mad_ns_per_unit": 0.22998046875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 271.884765625,
+        "upper": 272.1005859375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 272.0947265625,
+        "upper": 279.4658203125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 272.0947265625,
+        "upper": 279.4658203125
+      },
+      "relative_median_ci_half_width": 0.00039673919873043457,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-hh-portable-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 11506.390625,
+      "p95_ns_per_unit": 12385.793749999999,
+      "p99_ns_per_unit": 12808.20875,
+      "mad_ns_per_unit": 128.890625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11398.65625,
+        "upper": 11614.125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11524.003359375,
+        "upper": 12913.8125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11518.40625,
+        "upper": 12913.8125
+      },
+      "relative_median_ci_half_width": 0.009363003439664643,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-hh-forced-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 716.8701171875,
+      "p95_ns_per_unit": 752.4611328125,
+      "p99_ns_per_unit": 767.2000390625,
+      "mad_ns_per_unit": 8.576171875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 712.125,
+        "upper": 721.615234375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 722.0421411132812,
+        "upper": 770.884765625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 712.568359375,
+        "upper": 770.884765625
+      },
+      "relative_median_ci_half_width": 0.0066192146579028025,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n8",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 6593.8046875,
+      "p95_ns_per_unit": 6953.990624999999,
+      "p99_ns_per_unit": 7060.123125,
+      "mad_ns_per_unit": 181.84375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6407.296875,
+        "upper": 6780.3125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6469.118320312499,
+        "upper": 7086.65625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6459.046875,
+        "upper": 7086.65625
+      },
+      "relative_median_ci_half_width": 0.0282853104298898,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n64",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.portable-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 75090.0,
+      "p95_ns_per_unit": 96205.275,
+      "p99_ns_per_unit": 96936.255,
+      "mad_ns_per_unit": 1258.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 56383.25,
+        "upper": 93796.75
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 56560.25,
+        "upper": 97119.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 57832.99875,
+        "upper": 97119.0
+      },
+      "relative_median_ci_half_width": 0.2491243840724464,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-backend-paired-gf2-256-alt-forced-paired-n64",
+      "family": "binary-field-backend-paired",
+      "operation": "binary.backend-forced-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 4450.1796875,
+      "p95_ns_per_unit": 5516.17734375,
+      "p99_ns_per_unit": 5529.77296875,
+      "mad_ns_per_unit": 1002.5546875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3467.4375,
+        "upper": 5432.921875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3537.009609375,
+        "upper": 5533.171875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3472.546875,
+        "upper": 5533.171875
+      },
+      "relative_median_ci_half_width": 0.22083202398779544,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [
+    {
+      "cell": "f1-binary-backend-paired-gf2-128-forced-paired-n8",
+      "baseline_cell": "f1-binary-backend-paired-gf2-128-portable-paired-n8",
+      "paired_processes": 2,
+      "median_ratio": 0.09719204090205186,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.09480330383095108,
+        "upper": 0.09958077797315264
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "f1-binary-backend-paired-gf2-256-hh-forced-paired-n8",
+      "baseline_cell": "f1-binary-backend-paired-gf2-256-hh-portable-paired-n8",
+      "paired_processes": 2,
+      "median_ratio": 0.06230351103431787,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.06213255276441402,
+        "upper": 0.062474469304221715
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "f1-binary-backend-paired-gf2-256-alt-forced-paired-n64",
+      "baseline_cell": "f1-binary-backend-paired-gf2-256-alt-portable-paired-n64",
+      "paired_processes": 2,
+      "median_ratio": 0.05970996749163826,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.057922282754999506,
+        "upper": 0.061497652228277015
+      },
+      "status": "Paired"
+    }
+  ],
+  "curves": [
+    {
+      "curve": "f1-binary-backend-paired-gf2-128-forced-paired",
+      "strategy": "gf2-128",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-backend-paired-gf2-128-portable-paired",
+      "strategy": "gf2-128",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-backend-paired-gf2-256-alt-forced-paired",
+      "strategy": "gf2-256-alt",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-backend-paired-gf2-256-alt-portable-paired",
+      "strategy": "gf2-256-alt",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-backend-paired-gf2-256-hh-forced-paired",
+      "strategy": "gf2-256-hh",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-backend-paired-gf2-256-hh-portable-paired",
+      "strategy": "gf2-256-hh",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

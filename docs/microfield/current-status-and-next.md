@@ -302,9 +302,10 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
 - P0 completado: ledger activado, inventario explícito de operaciones y huecos,
   generador determinista de cruces primarios/covering arrays y schemas
   versionados;
-- F1/F2 completadas en preflight: 30 workloads de campos, 30 celdas, 60 procesos y
-  300 observaciones; 23/30 celdas alcanzan el objetivo exploratorio de
-  precisión y ninguna asigna memoria dentro de la región medida;
+- F1/F2 base completadas en preflight: 30 workloads de campos, 30 celdas, 60
+  procesos y 300 observaciones; su cierre posterior añade referencias
+  independientes, portable/forzado, backends x86 explícitos, seis patrones y
+  reducción contra `BigUint`;
 - F3–S3 completadas en preflight: 26 operaciones nuevas, 2.112 celdas
   publicables generadas, 56 celdas Smoke, 112 procesos y 560 observaciones;
   56/56 precisas bajo el umbral exploratorio y cero checksums inestables;
@@ -317,7 +318,9 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
   acumulado alcanza 3.243 celdas;
 - D2 ejecutada como preflight externo: 1.888 commits WAL observados, 1–32
   clientes, drenaje 2×/5×, migración y recuperación exacta tras restart;
-- cerrar los huecos de backend/reference F1/F2;
+- cierre F1/F2 ejecutado: 366 celdas nuevas definidas, 85 preflights más cinco
+  calibraciones, 206 procesos y 1.330 observaciones; todas las variantes tienen
+  una ejecución precisa y el inventario acumulado alcanza 3.609 celdas;
 - completar C3-Semantic, C3-Scaling y C3-Systems;
 - replicar los claims en Intel x86-64, AMD x86-64 y AArch64 dedicados;
 - decidir go/no-go con cobertura, efectos, intervalos, límites e inconclusos;
@@ -336,6 +339,8 @@ Evidencia X1/X2:
 [`c3-x1-x2-implementation-and-preflight-report.md`](c3-x1-x2-implementation-and-preflight-report.md).
 Evidencia D2:
 [`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md).
+Evidencia de cierre F1/F2:
+[`c3-f1-f2-closure-preflight-report.md`](c3-f1-f2-closure-preflight-report.md).
 
 ### 5. Base de datos real
 

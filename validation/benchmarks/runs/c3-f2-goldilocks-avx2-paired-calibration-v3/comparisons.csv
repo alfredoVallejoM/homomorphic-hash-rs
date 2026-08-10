@@ -1,0 +1,2 @@
+cell,baseline_cell,paired_processes,median_ratio,ratio_ci95_lower,ratio_ci95_upper,status
+f2-goldilocks-avx2-n8-calibration-v3,f2-goldilocks-portable-n8-calibration-v3,8,0.960239857,0.959094880,0.962088386,Paired

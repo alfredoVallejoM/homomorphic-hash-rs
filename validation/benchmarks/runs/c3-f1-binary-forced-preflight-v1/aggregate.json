@@ -1,0 +1,136 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-forced-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f1-binary-forced-gf2-128-forced-n1",
+      "family": "binary-field-backend",
+      "operation": "binary.backend-forced-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 67.32666015625,
+      "p95_ns_per_unit": 132.49248046874987,
+      "p99_ns_per_unit": 170.36490234375003,
+      "mad_ns_per_unit": 0.03515625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 67.3251953125,
+        "upper": 67.328125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 67.32909057617188,
+        "upper": 179.8330078125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 67.3291015625,
+        "upper": 179.8330078125
+      },
+      "relative_median_ci_half_width": 0.00002175726148602096,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-forced-gf2-256-hh-forced-n8",
+      "family": "binary-field-backend",
+      "operation": "binary.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 581.51171875,
+      "p95_ns_per_unit": 856.5534179687497,
+      "p99_ns_per_unit": 941.6434960937501,
+      "mad_ns_per_unit": 131.5185546875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 440.271484375,
+        "upper": 722.751953125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 455.529296875,
+        "upper": 962.916015625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 718.6697045898438,
+        "upper": 962.916015625
+      },
+      "relative_median_ci_half_width": 0.24288458825663176,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-forced-gf2-256-alt-forced-n4096",
+      "family": "binary-field-backend",
+      "operation": "binary.backend-forced-total",
+      "scale": 4096,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 287620.5,
+      "p95_ns_per_unit": 373836.39999999997,
+      "p99_ns_per_unit": 391040.08,
+      "mad_ns_per_unit": 2696.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 228053.0,
+        "upper": 347188.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 230028.89562499998,
+        "upper": 395341.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 229472.0,
+        "upper": 395341.0
+      },
+      "relative_median_ci_half_width": 0.20710450054846577,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "f1-binary-forced-gf2-128-forced",
+      "strategy": "gf2-128",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-forced-gf2-256-alt-forced",
+      "strategy": "gf2-256-alt",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-forced-gf2-256-hh-forced",
+      "strategy": "gf2-256-hh",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

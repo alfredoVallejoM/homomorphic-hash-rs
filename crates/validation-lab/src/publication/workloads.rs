@@ -25,13 +25,14 @@ use algesum::{
 use microfield::{
     fill_fixed_base_powers,
     generator::{BinaryFieldFactory, PrimeFieldFactory, PrimeFieldManifest},
-    pack_into_storage, required_mask_words, required_packed_bytes, BatchInvertPlan,
+    pack_into_storage, required_mask_words, required_packed_bytes, BackendId, BatchInvertPlan,
     BatchInvertWorkspace, BinaryPolynomialField, BitMaskViewMut, CanonicalEncoding,
-    CoefficientLayout, DynBatch, DynField, Engine, Field, Fp251V1, Fp256GenericV1,
+    CoefficientLayout, CpuCapabilities, DynBatch, DynField, Engine, Field, Fp251V1, Fp256GenericV1,
     FpGoldilocks64V1, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1, Invert, ManyPointsHornerPlan,
     ManyPolynomialsHornerPlan, PackedBatch, PrimeField, ProductScanPlan, ScanDirection, ScanMode,
     Square,
 };
+use num_bigint::BigUint;
 
 use super::model::{
     BenchmarkCell, GraphExactLimit, GraphExactOutcome, GraphExactPath, GraphExactTelemetry,
@@ -75,6 +76,14 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "field.fp256-generic.square-total",
     "field.fp256-generic.invert-total",
     "field.fp256-generic.canonical-roundtrip-total",
+    "binary.reference-total",
+    "binary.portable-total",
+    "binary.backend-forced-total",
+    "binary.input-pattern-total",
+    "prime.portable-total",
+    "prime.backend-forced-total",
+    "prime.range-pattern-total",
+    "prime.reduction-total",
     "field.gf2-128.mul",
     "field.gf2-256-hh.mul",
     "field.gf2-256-alt.mul",
@@ -210,6 +219,14 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "field.gf2-128.batch-detected" => field_batch(cell.scale, seed),
         "field.gf2-128.scalar-total" => field_scalar_total(cell.scale, seed),
         "field.gf2-128.batch-detected-total" => field_batch_total(cell.scale, seed),
+        "binary.reference-total" => binary_reference_total(cell, seed),
+        "binary.portable-total" => binary_engine_total(cell, seed, false),
+        "binary.backend-forced-total" => binary_engine_total(cell, seed, true),
+        "binary.input-pattern-total" => binary_input_pattern_total(cell, seed),
+        "prime.portable-total" => prime_engine_total(cell, seed, false),
+        "prime.backend-forced-total" => prime_engine_total(cell, seed, true),
+        "prime.range-pattern-total" => prime_range_pattern_total(cell, seed),
+        "prime.reduction-total" => prime_reduction_total(cell, seed),
         "field.batch-portable-total" => field_batch_portable_total(cell, seed),
         "field.packed-owned-total" => field_packed_owned_total(cell, seed),
         "field.packed-view-total" => field_packed_view_total(cell, seed),
@@ -462,6 +479,469 @@ where
                 checksum.rotate_left(7) ^ checksum_field(*value) ^ index as u64
             })
     }))
+}
+
+fn binary_reference_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    match cell.strategy.as_deref().unwrap_or("gf2-128:random") {
+        strategy if strategy.starts_with("gf2-128:") => binary_reference_for::<Gf2_128V1>(
+            cell.scale,
+            seed,
+            16,
+            &[128, 7, 2, 1, 0],
+            strategy_pattern(strategy),
+        ),
+        strategy if strategy.starts_with("gf2-256-hh:") => binary_reference_for::<Gf2_256HhV1>(
+            cell.scale,
+            seed,
+            32,
+            &[256, 10, 5, 2, 0],
+            strategy_pattern(strategy),
+        ),
+        strategy if strategy.starts_with("gf2-256-alt:") => binary_reference_for::<Gf2_256AltV1>(
+            cell.scale,
+            seed,
+            32,
+            &[256, 16, 3, 1, 0],
+            strategy_pattern(strategy),
+        ),
+        strategy => Err(format!(
+            "unsupported binary reference strategy {strategy:?}"
+        )),
+    }
+}
+
+fn binary_reference_for<F>(
+    scale: usize,
+    seed: u64,
+    width: usize,
+    modulus: &'static [usize],
+    pattern: &str,
+) -> Result<PreparedOperation, String>
+where
+    F: BinaryPolynomialField + CanonicalEncoding,
+{
+    let left = binary_pattern_values::<F>(scale, seed, width, pattern)?;
+    let right = binary_pattern_values::<F>(scale, seed.rotate_left(29), width, pattern)?;
+    let left_bytes = left
+        .iter()
+        .map(|value| value.to_canonical().as_ref().to_vec())
+        .collect::<Vec<_>>();
+    let right_bytes = right
+        .iter()
+        .map(|value| value.to_canonical().as_ref().to_vec())
+        .collect::<Vec<_>>();
+    Ok(single_unit(move || {
+        let mut checksum = 0_u64;
+        for index in 0..scale {
+            let expected = binary_reference_multiply(
+                &left_bytes[index],
+                &right_bytes[index],
+                width * 8,
+                modulus,
+            );
+            let actual = left[index].mul(right[index]).to_canonical();
+            assert_eq!(actual.as_ref(), expected.as_slice());
+            checksum = checksum.rotate_left(7) ^ checksum_bytes(&expected) ^ index as u64;
+        }
+        checksum
+    }))
+}
+
+fn binary_engine_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+    force_detected: bool,
+) -> Result<PreparedOperation, String> {
+    let field = strategy_field(cell);
+    let backend = strategy_backend(cell)?;
+    match if field.is_empty() { "gf2-128" } else { field } {
+        "gf2-128" => binary_engine_for::<Gf2_128V1>(cell.scale, seed, 16, force_detected, backend),
+        "gf2-256-hh" => {
+            binary_engine_for::<Gf2_256HhV1>(cell.scale, seed, 32, force_detected, backend)
+        }
+        "gf2-256-alt" => {
+            binary_engine_for::<Gf2_256AltV1>(cell.scale, seed, 32, force_detected, backend)
+        }
+        strategy => Err(format!("unsupported binary engine strategy {strategy:?}")),
+    }
+}
+
+fn binary_engine_for<F>(
+    scale: usize,
+    seed: u64,
+    width: usize,
+    force_detected: bool,
+    forced_backend: Option<BackendId>,
+) -> Result<PreparedOperation, String>
+where
+    F: BinaryPolynomialField + CanonicalEncoding + microfield::__private::PortableField,
+{
+    let left = binary_pattern_values::<F>(scale, seed, width, "random")?;
+    let right = binary_pattern_values::<F>(scale, seed.rotate_left(23), width, "random")?;
+    let engine = if force_detected {
+        let backend = match forced_backend {
+            Some(backend) => backend,
+            None => Engine::<F>::builder()
+                .expected_batch(scale)
+                .detect()
+                .map_err(debug_error)?
+                .backend_id(),
+        };
+        Engine::<F>::builder()
+            .expected_batch(scale)
+            .capabilities(CpuCapabilities::detect())
+            .force_backend(backend)
+            .build()
+            .map_err(debug_error)?
+    } else {
+        Engine::<F>::portable()
+    };
+    let backend = engine.backend_id();
+    if force_detected && backend == BackendId::Portable {
+        // Portable is still a valid forced backend on hosts without a certified ISA path.
+    }
+    let mut output = vec![F::ZERO; scale];
+    let expected = left
+        .iter()
+        .zip(&right)
+        .map(|(left, right)| left.mul(*right))
+        .collect::<Vec<_>>();
+    Ok(single_unit(move || {
+        engine.mul_into(&mut output, &left, &right).unwrap();
+        assert!(output == expected, "forced/portable binary output mismatch");
+        checksum_fields(&output) ^ backend_checksum(backend)
+    }))
+}
+
+fn binary_input_pattern_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<PreparedOperation, String> {
+    let strategy = cell.strategy.as_deref().unwrap_or("gf2-128:random");
+    let pattern = strategy_pattern(strategy);
+    match strategy.split_once(':').map_or(strategy, |pair| pair.0) {
+        "gf2-128" => binary_pattern_for::<Gf2_128V1>(cell.scale, seed, 16, pattern),
+        "gf2-256-hh" => binary_pattern_for::<Gf2_256HhV1>(cell.scale, seed, 32, pattern),
+        "gf2-256-alt" => binary_pattern_for::<Gf2_256AltV1>(cell.scale, seed, 32, pattern),
+        field => Err(format!("unsupported binary pattern field {field:?}")),
+    }
+}
+
+fn binary_pattern_for<F>(
+    scale: usize,
+    seed: u64,
+    width: usize,
+    pattern: &str,
+) -> Result<PreparedOperation, String>
+where
+    F: BinaryPolynomialField + CanonicalEncoding + Square + Invert,
+{
+    let values = binary_pattern_values::<F>(scale, seed, width, pattern)?;
+    let mut output = vec![F::ZERO; scale];
+    Ok(single_unit(move || {
+        for (destination, value) in output.iter_mut().zip(&values) {
+            let square = value.square();
+            *destination = square.add(value.mul(F::ONE));
+            if !value.is_zero() {
+                assert!(value.mul(value.invert().unwrap()) == F::ONE);
+            }
+            assert!(F::from_canonical(&value.to_canonical()).unwrap() == *value);
+        }
+        checksum_fields(&output)
+    }))
+}
+
+fn prime_engine_total(
+    cell: &BenchmarkCell,
+    seed: u64,
+    force_detected: bool,
+) -> Result<PreparedOperation, String> {
+    let field = strategy_field(cell);
+    let backend = strategy_backend(cell)?;
+    match if field.is_empty() { "fp251" } else { field } {
+        "fp251" => prime_engine_for::<Fp251V1>(cell.scale, seed, force_detected, backend),
+        "goldilocks" => {
+            prime_engine_for::<FpGoldilocks64V1>(cell.scale, seed, force_detected, backend)
+        }
+        "fp256-generic" => {
+            prime_engine_for::<Fp256GenericV1>(cell.scale, seed, force_detected, backend)
+        }
+        strategy => Err(format!("unsupported prime engine strategy {strategy:?}")),
+    }
+}
+
+fn prime_engine_for<F>(
+    scale: usize,
+    seed: u64,
+    force_detected: bool,
+    forced_backend: Option<BackendId>,
+) -> Result<PreparedOperation, String>
+where
+    F: PrimeField + microfield::__private::PortableField,
+{
+    let left = prime_values::<F>(scale, seed, 64)?;
+    let right = prime_values::<F>(scale, seed.rotate_left(23), 64)?;
+    let engine = if force_detected {
+        let backend = match forced_backend {
+            Some(backend) => backend,
+            None => Engine::<F>::builder()
+                .expected_batch(scale)
+                .detect()
+                .map_err(debug_error)?
+                .backend_id(),
+        };
+        Engine::<F>::builder()
+            .expected_batch(scale)
+            .capabilities(CpuCapabilities::detect())
+            .force_backend(backend)
+            .build()
+            .map_err(debug_error)?
+    } else {
+        Engine::<F>::portable()
+    };
+    let backend = engine.backend_id();
+    let expected = left
+        .iter()
+        .zip(&right)
+        .map(|(left, right)| left.mul(*right))
+        .collect::<Vec<_>>();
+    let mut output = vec![F::ZERO; scale];
+    Ok(single_unit(move || {
+        engine.mul_into(&mut output, &left, &right).unwrap();
+        assert!(output == expected, "forced/portable prime output mismatch");
+        checksum_fields(&output) ^ backend_checksum(backend)
+    }))
+}
+
+fn prime_range_pattern_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let strategy = cell.strategy.as_deref().unwrap_or("fp251:random");
+    let pattern = strategy_pattern(strategy);
+    match strategy.split_once(':').map_or(strategy, |pair| pair.0) {
+        "fp251" => prime_range_for::<Fp251V1>(cell.scale, seed, pattern),
+        "goldilocks" => prime_range_for::<FpGoldilocks64V1>(cell.scale, seed, pattern),
+        "fp256-generic" => prime_range_for::<Fp256GenericV1>(cell.scale, seed, pattern),
+        field => Err(format!("unsupported prime range field {field:?}")),
+    }
+}
+
+fn prime_range_for<F>(scale: usize, seed: u64, pattern: &str) -> Result<PreparedOperation, String>
+where
+    F: PrimeField + Square + Invert,
+{
+    let values = prime_pattern_values::<F>(scale, seed, pattern)?;
+    let mut output = vec![F::ZERO; scale];
+    Ok(single_unit(move || {
+        for (destination, value) in output.iter_mut().zip(&values) {
+            *destination = value.square().add(value.neg());
+            assert!(F::from_canonical(&value.to_canonical()).unwrap() == *value);
+            if !value.is_zero() {
+                assert!(value.mul(value.invert().unwrap()) == F::ONE);
+            }
+        }
+        checksum_fields(&output)
+    }))
+}
+
+fn prime_reduction_total(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    let field = strategy_field(cell);
+    match if field.is_empty() { "fp251" } else { field } {
+        "fp251" => prime_reduction_for::<Fp251V1>(
+            cell.scale,
+            seed,
+            cell.payload_bytes,
+            BigUint::from(Fp251V1::MODULUS),
+        ),
+        "goldilocks" => prime_reduction_for::<FpGoldilocks64V1>(
+            cell.scale,
+            seed,
+            cell.payload_bytes,
+            BigUint::from(FpGoldilocks64V1::MODULUS),
+        ),
+        "fp256-generic" => prime_reduction_for::<Fp256GenericV1>(
+            cell.scale,
+            seed,
+            cell.payload_bytes,
+            BigUint::from_bytes_le(&Fp256GenericV1::modulus_le_bytes()),
+        ),
+        field => Err(format!("unsupported prime reduction field {field:?}")),
+    }
+}
+
+fn prime_reduction_for<F>(
+    scale: usize,
+    seed: u64,
+    payload_bytes: usize,
+    modulus: BigUint,
+) -> Result<PreparedOperation, String>
+where
+    F: PrimeField,
+{
+    if scale == 0 || payload_bytes == 0 || payload_bytes > 4_096 {
+        return Err("invalid prime reduction dimensions".into());
+    }
+    let inputs = (0..scale)
+        .map(|index| deterministic_bytes(payload_bytes, seed ^ index as u64))
+        .collect::<Vec<_>>();
+    Ok(single_unit(move || {
+        let mut checksum = 0_u64;
+        for (index, input) in inputs.iter().enumerate() {
+            let actual = F::from_bytes_mod_order(input).to_canonical();
+            let expected_integer = BigUint::from_bytes_le(input) % &modulus;
+            let mut expected = expected_integer.to_bytes_le();
+            expected.resize(actual.as_ref().len(), 0);
+            assert_eq!(actual.as_ref(), expected.as_slice());
+            checksum = checksum.rotate_left(7) ^ checksum_bytes(&expected) ^ index as u64;
+        }
+        checksum
+    }))
+}
+
+fn binary_pattern_values<F>(
+    scale: usize,
+    seed: u64,
+    width: usize,
+    pattern: &str,
+) -> Result<Vec<F>, String>
+where
+    F: BinaryPolynomialField,
+{
+    if scale == 0 {
+        return Err("binary pattern scale must be positive".into());
+    }
+    (0..scale)
+        .map(|index| {
+            let bytes = match pattern {
+                "zero" => vec![0; width],
+                "one" => {
+                    let mut bytes = vec![0; width];
+                    bytes[0] = 1;
+                    bytes
+                }
+                "dense" => vec![0xff; width],
+                "alternating" => vec![if index % 2 == 0 { 0xaa } else { 0x55 }; width],
+                "basis-high" => {
+                    let mut bytes = vec![0; width];
+                    bytes[width - 1] = 0x80;
+                    bytes
+                }
+                "random" => deterministic_bytes(width, seed ^ index as u64),
+                other => return Err(format!("unsupported binary input pattern {other:?}")),
+            };
+            Ok(F::from_polynomial_bytes_mod(&bytes))
+        })
+        .collect()
+}
+
+fn prime_pattern_values<F>(scale: usize, seed: u64, pattern: &str) -> Result<Vec<F>, String>
+where
+    F: PrimeField,
+{
+    if scale == 0 {
+        return Err("prime pattern scale must be positive".into());
+    }
+    (0..scale)
+        .map(|index| match pattern {
+            "zero" => Ok(F::ZERO),
+            "one" => Ok(F::ONE),
+            "near-modulus" => Ok(F::ONE.neg()),
+            "alternating" => Ok(F::from_bytes_mod_order(
+                &[if index % 2 == 0 { 0xaa } else { 0x55 }; 64],
+            )),
+            "dense" => Ok(F::from_bytes_mod_order(&[0xff; 64])),
+            "random" => Ok(F::from_bytes_mod_order(&deterministic_bytes(
+                64,
+                seed ^ index as u64,
+            ))),
+            other => Err(format!("unsupported prime input pattern {other:?}")),
+        })
+        .collect()
+}
+
+fn prime_values<F>(scale: usize, seed: u64, bytes: usize) -> Result<Vec<F>, String>
+where
+    F: PrimeField,
+{
+    if scale == 0 {
+        return Err("prime engine scale must be positive".into());
+    }
+    Ok((0..scale)
+        .map(|index| F::from_bytes_mod_order(&deterministic_bytes(bytes, seed ^ index as u64)))
+        .collect())
+}
+
+fn binary_reference_multiply(lhs: &[u8], rhs: &[u8], degree: usize, modulus: &[usize]) -> Vec<u8> {
+    let mut product = vec![false; degree * 2];
+    for lhs_bit in 0..degree {
+        if reference_bit(lhs, lhs_bit) {
+            for rhs_bit in 0..degree {
+                if reference_bit(rhs, rhs_bit) {
+                    product[lhs_bit + rhs_bit] ^= true;
+                }
+            }
+        }
+    }
+    for source in (degree..product.len()).rev() {
+        if product[source] {
+            for &exponent in modulus {
+                product[source - degree + exponent] ^= true;
+            }
+        }
+    }
+    let mut output = vec![0_u8; degree / 8];
+    for (index, coefficient) in product[..degree].iter().copied().enumerate() {
+        if coefficient {
+            output[index / 8] |= 1 << (index % 8);
+        }
+    }
+    output
+}
+
+fn reference_bit(bytes: &[u8], bit: usize) -> bool {
+    bytes[bit / 8] & (1 << (bit % 8)) != 0
+}
+
+fn strategy_field(cell: &BenchmarkCell) -> &str {
+    let strategy = cell
+        .strategy
+        .as_deref()
+        .unwrap_or_default()
+        .split_once(':')
+        .map_or_else(
+            || cell.strategy.as_deref().unwrap_or_default(),
+            |pair| pair.0,
+        );
+    strategy.split_once('@').map_or(strategy, |pair| pair.0)
+}
+
+fn strategy_backend(cell: &BenchmarkCell) -> Result<Option<BackendId>, String> {
+    let Some((_, backend)) = cell.strategy.as_deref().unwrap_or_default().split_once('@') else {
+        return Ok(None);
+    };
+    match backend.split_once(':').map_or(backend, |pair| pair.0) {
+        "portable" => Ok(Some(BackendId::Portable)),
+        "x86-pclmul" => Ok(Some(BackendId::X86Pclmul)),
+        "x86-vpclmul" => Ok(Some(BackendId::X86Vpclmul)),
+        "aarch64-pmull" => Ok(Some(BackendId::Aarch64Pmull)),
+        "x86-prime-avx2" => Ok(Some(BackendId::X86PrimeAvx2)),
+        "x86-prime-bmi2" => Ok(Some(BackendId::X86PrimeBmi2)),
+        other => Err(format!("unknown forced backend {other:?}")),
+    }
+}
+
+fn strategy_pattern(strategy: &str) -> &str {
+    strategy.split_once(':').map_or("random", |pair| pair.1)
+}
+
+const fn backend_checksum(backend: BackendId) -> u64 {
+    match backend {
+        BackendId::Portable => 1,
+        BackendId::X86Pclmul => 2,
+        BackendId::X86Vpclmul => 3,
+        BackendId::Aarch64Pmull => 4,
+        BackendId::X86PrimeAvx2 => 5,
+        BackendId::X86PrimeBmi2 => 6,
+        _ => 255,
+    }
 }
 
 fn field_gf2_128(seed: u64) -> Result<PreparedOperation, String> {
@@ -3755,6 +4235,35 @@ mod tests {
             "c3-s1-base-signatures-preflight-v1.json",
             "c3-s2-multi-signatures-preflight-v1.json",
             "c3-s3-state-delta-journal-preflight-v1.json",
+        ] {
+            let manifest = crate::publication::load_manifest(&root.join(manifest)).unwrap();
+            for benchmark_cell in manifest.cells {
+                let mut prepared = prepare(&benchmark_cell, 0x1234_5678).unwrap_or_else(|error| {
+                    panic!("prepare repeatability cell {}: {error}", benchmark_cell.id)
+                });
+                let first = (prepared.run)();
+                let second = (prepared.run)();
+                assert_eq!(first, second, "stateful C3 workload: {}", benchmark_cell.id);
+            }
+        }
+    }
+
+    #[test]
+    fn c3_f1_f2_closure_preflight_actions_are_repeatable() {
+        let root = Path::new("../../validation/benchmarks/manifests/c3-f1-f2-closure");
+        for manifest in [
+            "c3-f1-binary-reference-preflight-v1.json",
+            "c3-f1-binary-portable-preflight-v1.json",
+            "c3-f1-binary-forced-preflight-v1.json",
+            "c3-f1-binary-patterns-preflight-v1.json",
+            "c3-f2-prime-portable-preflight-v1.json",
+            "c3-f2-prime-forced-preflight-v1.json",
+            "c3-f2-prime-ranges-preflight-v1.json",
+            "c3-f2-prime-reduction-preflight-v1.json",
+            "c3-f1-binary-backend-paired-preflight-v1.json",
+            "c3-f2-prime-backend-paired-preflight-v1.json",
+            "c3-f1-binary-x86-explicit-preflight-v1.json",
+            "c3-f2-prime-x86-explicit-preflight-v1.json",
         ] {
             let manifest = crate::publication::load_manifest(&root.join(manifest)).unwrap();
             for benchmark_cell in manifest.cells {

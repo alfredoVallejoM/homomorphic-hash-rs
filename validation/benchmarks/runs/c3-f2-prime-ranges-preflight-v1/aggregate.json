@@ -1,0 +1,751 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f2-prime-ranges-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f2-prime-ranges-fp251-zero-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 7.62158203125,
+      "p95_ns_per_unit": 9.417431640625,
+      "p99_ns_per_unit": 9.424111328125,
+      "mad_ns_per_unit": 1.76220703125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.859375,
+        "upper": 9.3837890625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.8662109375,
+        "upper": 9.42578125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 5.8662109375,
+        "upper": 9.42578125
+      },
+      "relative_median_ci_half_width": 0.23121276186815298,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp251-one-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 50.498046875,
+      "p95_ns_per_unit": 53.848095703125,
+      "p99_ns_per_unit": 54.642275390625,
+      "mad_ns_per_unit": 0.576171875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 50.20703125,
+        "upper": 50.7890625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 50.92578125,
+        "upper": 54.8408203125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 50.92578125,
+        "upper": 54.8408203125
+      },
+      "relative_median_ci_half_width": 0.005762908528331077,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp251-near-modulus-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 52.5615234375,
+      "p95_ns_per_unit": 55.276513671875,
+      "p99_ns_per_unit": 55.632646484375,
+      "mad_ns_per_unit": 1.51025390625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 50.728515625,
+        "upper": 54.39453125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 51.69803466796875,
+        "upper": 55.7216796875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 50.7568359375,
+        "upper": 55.7216796875
+      },
+      "relative_median_ci_half_width": 0.03487356706240827,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp251-dense-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 41.517578125,
+      "p95_ns_per_unit": 256.9794433593746,
+      "p99_ns_per_unit": 391.91932617187507,
+      "mad_ns_per_unit": 9.1513671875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 32.2861328125,
+        "upper": 50.7490234375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 32.291015625,
+        "upper": 425.654296875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 32.2923486328125,
+        "upper": 425.654296875
+      },
+      "relative_median_ci_half_width": 0.22235028461212777,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp251-alternating-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 51.18994140625,
+      "p95_ns_per_unit": 57.80244140624999,
+      "p99_ns_per_unit": 61.09095703125,
+      "mad_ns_per_unit": 0.33935546875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 50.7421875,
+        "upper": 51.6376953125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 50.9705908203125,
+        "upper": 61.9130859375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 50.97076220703125,
+        "upper": 61.9130859375
+      },
+      "relative_median_ci_half_width": 0.008746911872716694,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp251-random-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 41.23681640625,
+      "p95_ns_per_unit": 50.801708984375,
+      "p99_ns_per_unit": 50.847060546875,
+      "mad_ns_per_unit": 3.212890625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 31.7529296875,
+        "upper": 50.720703125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 38.81686523437499,
+        "upper": 50.8583984375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 31.7685546875,
+        "upper": 50.8583984375
+      },
+      "relative_median_ci_half_width": 0.22998590932234497,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-goldilocks-zero-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 16.52978515625,
+      "p95_ns_per_unit": 16.5779296875,
+      "p99_ns_per_unit": 16.5905859375,
+      "mad_ns_per_unit": 0.02587890625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16.5146484375,
+        "upper": 16.544921875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16.5166015625,
+        "upper": 16.59375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16.519267578125,
+        "upper": 16.59375
+      },
+      "relative_median_ci_half_width": 0.0009157238649454997,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-goldilocks-one-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1666.392578125,
+      "p95_ns_per_unit": 1983.09609375,
+      "p99_ns_per_unit": 1997.17546875,
+      "mad_ns_per_unit": 281.220703125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1371.28515625,
+        "upper": 1961.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1398.970546875,
+        "upper": 2000.6953125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1408.3098164062499,
+        "upper": 2000.6953125
+      },
+      "relative_median_ci_half_width": 0.17709357671710857,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-goldilocks-near-modulus-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1298.15234375,
+      "p95_ns_per_unit": 1346.4912109375,
+      "p99_ns_per_unit": 1348.6357421875,
+      "mad_ns_per_unit": 5.541015625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1293.6328125,
+        "upper": 1302.671875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1302.450390625,
+        "upper": 1349.171875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1302.6546572265624,
+        "upper": 1349.171875
+      },
+      "relative_median_ci_half_width": 0.0034815106807451696,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-goldilocks-dense-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1643.51171875,
+      "p95_ns_per_unit": 1978.075390625,
+      "p99_ns_per_unit": 1988.490078125,
+      "mad_ns_per_unit": 304.0078125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1325.9765625,
+        "upper": 1961.046875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1357.747177734375,
+        "upper": 1991.09375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1354.1484375,
+        "upper": 1991.09375
+      },
+      "relative_median_ci_half_width": 0.19320528878948706,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-goldilocks-alternating-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1319.943359375,
+      "p95_ns_per_unit": 1366.8767578125,
+      "p99_ns_per_unit": 1372.6409765625,
+      "mad_ns_per_unit": 24.013671875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1289.109375,
+        "upper": 1350.77734375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1329.25220703125,
+        "upper": 1374.08203125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1294.15625,
+        "upper": 1374.08203125
+      },
+      "relative_median_ci_half_width": 0.02336008144288862,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-goldilocks-random-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1627.193359375,
+      "p95_ns_per_unit": 2027.740234375,
+      "p99_ns_per_unit": 2029.835546875,
+      "mad_ns_per_unit": 345.189453125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1292.82421875,
+        "upper": 1961.5625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1332.5,
+        "upper": 2030.359375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1352.7523876953126,
+        "upper": 2030.359375
+      },
+      "relative_median_ci_half_width": 0.20548826523814612,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp256-generic-zero-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 269.951171875,
+      "p95_ns_per_unit": 339.858740234375,
+      "p99_ns_per_unit": 348.428779296875,
+      "mad_ns_per_unit": 9.66552734375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 222.07421875,
+        "upper": 317.828125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 307.4345703125,
+        "upper": 350.5712890625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 317.828125,
+        "upper": 350.5712890625
+      },
+      "relative_median_ci_half_width": 0.17735412220091887,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp256-generic-one-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 25295.15625,
+      "p95_ns_per_unit": 28214.606249999997,
+      "p99_ns_per_unit": 29164.42125,
+      "mad_ns_per_unit": 1286.78125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 23873.0625,
+        "upper": 26717.25
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 24103.375,
+        "upper": 29401.875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 24146.878046875,
+        "upper": 29401.875
+      },
+      "relative_median_ci_half_width": 0.05622000259437022,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp256-generic-near-modulus-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 16274.90625,
+      "p95_ns_per_unit": 16970.165625,
+      "p99_ns_per_unit": 17097.133125,
+      "mad_ns_per_unit": 28.03125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16268.75,
+        "upper": 16281.0625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16302.1875,
+        "upper": 17128.875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16302.1875,
+        "upper": 17128.875
+      },
+      "relative_median_ci_half_width": 0.00037826638786321733,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp256-generic-dense-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 21383.375,
+      "p95_ns_per_unit": 28930.856249999997,
+      "p99_ns_per_unit": 30444.07125,
+      "mad_ns_per_unit": 4804.25,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16396.1875,
+        "upper": 26370.5625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16541.95,
+        "upper": 30822.375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16409.8125,
+        "upper": 30822.375
+      },
+      "relative_median_ci_half_width": 0.23322733198103668,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp256-generic-alternating-n1",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 16474.40625,
+      "p95_ns_per_unit": 16957.765625,
+      "p99_ns_per_unit": 17027.403125,
+      "mad_ns_per_unit": 122.40625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16368.4375,
+        "upper": 16580.375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16494.6921875,
+        "upper": 17044.8125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 16580.375,
+        "upper": 17044.8125
+      },
+      "relative_median_ci_half_width": 0.006432325899453888,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-ranges-fp256-generic-random-n64",
+      "family": "prime-field-range",
+      "operation": "prime.range-pattern-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1062967.0,
+      "p95_ns_per_unit": 1080308.75,
+      "p99_ns_per_unit": 1080310.55,
+      "mad_ns_per_unit": 7694.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1052926.0,
+        "upper": 1073008.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1058713.85,
+        "upper": 1080311.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1059904.37,
+        "upper": 1080311.0
+      },
+      "relative_median_ci_half_width": 0.009446201057982044,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "f2-prime-ranges-fp251-alternating",
+      "strategy": "fp251:alternating",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp251-dense",
+      "strategy": "fp251:dense",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp251-near-modulus",
+      "strategy": "fp251:near-modulus",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp251-one",
+      "strategy": "fp251:one",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp251-random",
+      "strategy": "fp251:random",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp251-zero",
+      "strategy": "fp251:zero",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp256-generic-alternating",
+      "strategy": "fp256-generic:alternating",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp256-generic-dense",
+      "strategy": "fp256-generic:dense",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp256-generic-near-modulus",
+      "strategy": "fp256-generic:near-modulus",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp256-generic-one",
+      "strategy": "fp256-generic:one",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp256-generic-random",
+      "strategy": "fp256-generic:random",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-fp256-generic-zero",
+      "strategy": "fp256-generic:zero",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-goldilocks-alternating",
+      "strategy": "goldilocks:alternating",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-goldilocks-dense",
+      "strategy": "goldilocks:dense",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-goldilocks-near-modulus",
+      "strategy": "goldilocks:near-modulus",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-goldilocks-one",
+      "strategy": "goldilocks:one",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-goldilocks-random",
+      "strategy": "goldilocks:random",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-ranges-goldilocks-zero",
+      "strategy": "goldilocks:zero",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

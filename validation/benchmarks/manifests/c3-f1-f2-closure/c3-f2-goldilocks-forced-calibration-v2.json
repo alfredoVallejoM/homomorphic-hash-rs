@@ -1,0 +1,31 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-goldilocks-forced-calibration-v2",
+  "profile": "pilot",
+  "seed": 130320260815,
+  "host_mode": "interactive",
+  "minimum_processes": 8,
+  "maximum_processes": 8,
+  "precision_check_every": 1,
+  "warmup_observations": 5,
+  "measured_observations": 15,
+  "target_observation_ns": 10000000,
+  "maximum_batch_iterations": 131072,
+  "bootstrap_resamples": 2000,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f2-prime-forced-goldilocks-forced-n8-calibration-v2",
+      "family": "prime-field-backend",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-prime-forced-goldilocks-forced",
+      "strategy": "goldilocks"
+    }
+  ]
+}

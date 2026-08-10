@@ -1,0 +1,330 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f2-prime-backend-paired-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f2-prime-backend-paired-fp251-portable-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 29.5126953125,
+      "p95_ns_per_unit": 29.575439453125,
+      "p99_ns_per_unit": 29.587744140625,
+      "mad_ns_per_unit": 0.033203125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.50390625,
+        "upper": 29.521484375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.5337841796875,
+        "upper": 29.5908203125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.54188427734375,
+        "upper": 29.5908203125
+      },
+      "relative_median_ci_half_width": 0.0002978061612785811,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-backend-paired-fp251-forced-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 29.53466796875,
+      "p95_ns_per_unit": 29.590283203125,
+      "p99_ns_per_unit": 29.596962890625,
+      "mad_ns_per_unit": 0.04296875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.5107421875,
+        "upper": 29.55859375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.5537109375,
+        "upper": 29.5986328125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 29.54296875,
+        "upper": 29.5986328125
+      },
+      "relative_median_ci_half_width": 0.0008100914246036338,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-backend-paired-goldilocks-portable-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 115.0712890625,
+      "p95_ns_per_unit": 150.784228515625,
+      "p99_ns_per_unit": 152.925595703125,
+      "mad_ns_per_unit": 32.3583984375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82.740234375,
+        "upper": 147.40234375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82.810791015625,
+        "upper": 153.4609375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82.84540942382812,
+        "upper": 153.4609375
+      },
+      "relative_median_ci_half_width": 0.2809654341313554,
+      "precision_met": false,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "f2-prime-backend-paired-goldilocks-forced-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 108.6318359375,
+      "p95_ns_per_unit": 140.893212890625,
+      "p99_ns_per_unit": 140.901298828125,
+      "mad_ns_per_unit": 28.1416015625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 76.5068359375,
+        "upper": 140.7568359375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 76.55078125,
+        "upper": 140.9033203125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 83.90486157226563,
+        "upper": 140.9033203125
+      },
+      "relative_median_ci_half_width": 0.2957236221109503,
+      "precision_met": false,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "f2-prime-backend-paired-fp256-generic-portable-paired-n8",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 1469.806640625,
+      "p95_ns_per_unit": 1492.8716796875,
+      "p99_ns_per_unit": 1493.7055859375,
+      "mad_ns_per_unit": 7.1171875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1463.99609375,
+        "upper": 1475.6171875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1468.44921875,
+        "upper": 1493.9140625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1471.0237109375,
+        "upper": 1493.9140625
+      },
+      "relative_median_ci_half_width": 0.00395327297781782,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-backend-paired-fp256-generic-portable-paired-n64",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.portable-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 7059.53125,
+      "p95_ns_per_unit": 7213.0078125,
+      "p99_ns_per_unit": 7266.7265625,
+      "mad_ns_per_unit": 11.484375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7057.09375,
+        "upper": 7061.96875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7070.09375,
+        "upper": 7280.15625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 7070.09375,
+        "upper": 7280.15625
+      },
+      "relative_median_ci_half_width": 0.00034527788229565527,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f2-prime-backend-paired-fp256-generic-forced-paired-n64",
+      "family": "prime-field-backend-paired",
+      "operation": "prime.backend-forced-total",
+      "scale": 64,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 11506.296875,
+      "p95_ns_per_unit": 11651.25625,
+      "p99_ns_per_unit": 11651.75125,
+      "mad_ns_per_unit": 16.640625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11500.78125,
+        "upper": 11511.8125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11574.546875,
+        "upper": 11651.875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 11607.8125,
+        "upper": 11651.875
+      },
+      "relative_median_ci_half_width": 0.0004793570911579665,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [
+    {
+      "cell": "f2-prime-backend-paired-fp251-forced-paired-n8",
+      "baseline_cell": "f2-prime-backend-paired-fp251-portable-paired-n8",
+      "paired_processes": 2,
+      "median_ratio": 1.0007448455875974,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.9996361230565664,
+        "upper": 1.0018535681186285
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "f2-prime-backend-paired-goldilocks-forced-paired-n8",
+      "baseline_cell": "f2-prime-backend-paired-goldilocks-portable-paired-n8",
+      "paired_processes": 2,
+      "median_ratio": 1.110111885354153,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.5190340532661984,
+        "upper": 1.7011897174421076
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "f2-prime-backend-paired-fp256-generic-forced-paired-n64",
+      "baseline_cell": "f2-prime-backend-paired-fp256-generic-portable-paired-n64",
+      "paired_processes": 2,
+      "median_ratio": 1.6298952345200957,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1.6296766994203526,
+        "upper": 1.6301137696198387
+      },
+      "status": "Paired"
+    }
+  ],
+  "curves": [
+    {
+      "curve": "f2-prime-backend-paired-fp251-forced-paired",
+      "strategy": "fp251",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-backend-paired-fp251-portable-paired",
+      "strategy": "fp251",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-backend-paired-fp256-generic-forced-paired",
+      "strategy": "fp256-generic",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-backend-paired-fp256-generic-portable-paired",
+      "strategy": "fp256-generic",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-backend-paired-goldilocks-forced-paired",
+      "strategy": "goldilocks",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f2-prime-backend-paired-goldilocks-portable-paired",
+      "strategy": "goldilocks",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": false,
+  "claims_allowed": false
+}

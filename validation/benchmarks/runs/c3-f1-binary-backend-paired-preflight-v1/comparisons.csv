@@ -1,0 +1,4 @@
+cell,baseline_cell,paired_processes,median_ratio,ratio_ci95_lower,ratio_ci95_upper,status
+f1-binary-backend-paired-gf2-128-forced-paired-n8,f1-binary-backend-paired-gf2-128-portable-paired-n8,2,0.097192041,0.094803304,0.099580778,Paired
+f1-binary-backend-paired-gf2-256-hh-forced-paired-n8,f1-binary-backend-paired-gf2-256-hh-portable-paired-n8,2,0.062303511,0.062132553,0.062474469,Paired
+f1-binary-backend-paired-gf2-256-alt-forced-paired-n64,f1-binary-backend-paired-gf2-256-alt-portable-paired-n64,2,0.059709967,0.057922283,0.061497652,Paired

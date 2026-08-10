@@ -1,0 +1,118 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f2-prime-x86-explicit-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f2-prime-x86-explicit-goldilocks-portable-x86-n8",
+      "process_index": 0,
+      "seed": 3414781346698210870,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f2-prime-x86-explicit-fp256-generic-bmi2-n64",
+      "process_index": 0,
+      "seed": 7729002951586874390,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f2-prime-x86-explicit-fp251-avx2-n8",
+      "process_index": 0,
+      "seed": 708873489175300031,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f2-prime-x86-explicit-fp251-portable-x86-n8",
+      "process_index": 0,
+      "seed": 708873489175300031,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f2-prime-x86-explicit-goldilocks-avx2-n8",
+      "process_index": 0,
+      "seed": 3414781346698210870,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f2-prime-x86-explicit-fp256-generic-portable-x86-n8",
+      "process_index": 0,
+      "seed": 3172265535760488596,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "f2-prime-x86-explicit-fp256-generic-portable-x86-n64",
+      "process_index": 0,
+      "seed": 7729002951586874390,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "f2-prime-x86-explicit-fp251-portable-x86-n8",
+      "process_index": 1,
+      "seed": 2925898134228280389,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "f2-prime-x86-explicit-fp251-avx2-n8",
+      "process_index": 1,
+      "seed": 2925898134228280389,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "f2-prime-x86-explicit-goldilocks-avx2-n8",
+      "process_index": 1,
+      "seed": 9008407349691505707,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "f2-prime-x86-explicit-fp256-generic-portable-x86-n64",
+      "process_index": 1,
+      "seed": 9197822344792371753,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "f2-prime-x86-explicit-fp256-generic-bmi2-n64",
+      "process_index": 1,
+      "seed": 9197822344792371753,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 1,
+      "cell": "f2-prime-x86-explicit-goldilocks-portable-x86-n8",
+      "process_index": 1,
+      "seed": 9008407349691505707,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 1,
+      "cell": "f2-prime-x86-explicit-fp256-generic-portable-x86-n8",
+      "process_index": 1,
+      "seed": 17984276460152995238,
+      "status": "success"
+    }
+  ]
+}

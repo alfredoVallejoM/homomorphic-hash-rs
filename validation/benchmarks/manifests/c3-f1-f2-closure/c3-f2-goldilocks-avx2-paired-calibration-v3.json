@@ -1,0 +1,43 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-goldilocks-avx2-paired-calibration-v3",
+  "profile": "pilot",
+  "seed": 130320260815,
+  "host_mode": "interactive",
+  "minimum_processes": 8,
+  "maximum_processes": 8,
+  "precision_check_every": 1,
+  "warmup_observations": 5,
+  "measured_observations": 15,
+  "target_observation_ns": 10000000,
+  "maximum_batch_iterations": 131072,
+  "bootstrap_resamples": 2000,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f2-goldilocks-portable-n8-calibration-v3",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-goldilocks-avx2-calibration",
+      "strategy": "goldilocks"
+    },
+    {
+      "id": "f2-goldilocks-avx2-n8-calibration-v3",
+      "family": "prime-field-x86-explicit",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": "f2-goldilocks-portable-n8-calibration-v3",
+      "curve": "f2-goldilocks-avx2-calibration",
+      "strategy": "goldilocks@x86-prime-avx2"
+    }
+  ]
+}

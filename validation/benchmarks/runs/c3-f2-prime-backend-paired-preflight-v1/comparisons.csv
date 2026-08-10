@@ -1,0 +1,4 @@
+cell,baseline_cell,paired_processes,median_ratio,ratio_ci95_lower,ratio_ci95_upper,status
+f2-prime-backend-paired-fp251-forced-paired-n8,f2-prime-backend-paired-fp251-portable-paired-n8,2,1.000744846,0.999636123,1.001853568,Paired
+f2-prime-backend-paired-goldilocks-forced-paired-n8,f2-prime-backend-paired-goldilocks-portable-paired-n8,2,1.110111885,0.519034053,1.701189717,Paired
+f2-prime-backend-paired-fp256-generic-forced-paired-n64,f2-prime-backend-paired-fp256-generic-portable-paired-n64,2,1.629895235,1.629676699,1.630113770,Paired

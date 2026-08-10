@@ -1,0 +1,43 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-precision-calibration",
+  "profile": "pilot",
+  "seed": 130320260815,
+  "host_mode": "interactive",
+  "minimum_processes": 6,
+  "maximum_processes": 6,
+  "precision_check_every": 1,
+  "warmup_observations": 3,
+  "measured_observations": 10,
+  "target_observation_ns": 1000000,
+  "maximum_batch_iterations": 4096,
+  "bootstrap_resamples": 1000,
+  "maximum_relative_ci_half_width": 0.25,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "f1-binary-portable-gf2-256-hh-portable-n8-calibration",
+      "family": "binary-field-backend",
+      "operation": "binary.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f1-binary-portable-gf2-256-hh-portable",
+      "strategy": "gf2-256-hh"
+    },
+    {
+      "id": "f2-prime-forced-goldilocks-forced-n8-calibration",
+      "family": "prime-field-backend",
+      "operation": "prime.backend-forced-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "f2-prime-forced-goldilocks-forced",
+      "strategy": "goldilocks"
+    }
+  ]
+}

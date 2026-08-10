@@ -1,0 +1,54 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-forced-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f1-binary-forced-gf2-256-hh-forced-n8",
+      "process_index": 0,
+      "seed": 5405617220372028758,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f1-binary-forced-gf2-128-forced-n1",
+      "process_index": 0,
+      "seed": 109207747278349353,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f1-binary-forced-gf2-256-alt-forced-n4096",
+      "process_index": 0,
+      "seed": 6559243734373265482,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 1,
+      "cell": "f1-binary-forced-gf2-256-alt-forced-n4096",
+      "process_index": 1,
+      "seed": 13647851761440839918,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 1,
+      "cell": "f1-binary-forced-gf2-128-forced-n1",
+      "process_index": 1,
+      "seed": 11860903473675869956,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 1,
+      "cell": "f1-binary-forced-gf2-256-hh-forced-n8",
+      "process_index": 1,
+      "seed": 9618035087650298153,
+      "status": "success"
+    }
+  ]
+}

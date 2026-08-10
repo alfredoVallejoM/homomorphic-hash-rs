@@ -4,23 +4,25 @@
   "suites": [
     {
       "id": "F1",
-      "status": "partial",
+      "status": "implemented",
       "implemented_operations": [
         "field.gf2-128.add-total", "field.gf2-128.mul-total", "field.gf2-128.square-total", "field.gf2-128.invert-total", "field.gf2-128.canonical-roundtrip-total",
         "field.gf2-256-hh.add-total", "field.gf2-256-hh.mul-total", "field.gf2-256-hh.square-total", "field.gf2-256-hh.invert-total", "field.gf2-256-hh.canonical-roundtrip-total",
-        "field.gf2-256-alt.add-total", "field.gf2-256-alt.mul-total", "field.gf2-256-alt.square-total", "field.gf2-256-alt.invert-total", "field.gf2-256-alt.canonical-roundtrip-total"
+        "field.gf2-256-alt.add-total", "field.gf2-256-alt.mul-total", "field.gf2-256-alt.square-total", "field.gf2-256-alt.invert-total", "field.gf2-256-alt.canonical-roundtrip-total",
+        "binary.reference-total", "binary.portable-total", "binary.backend-forced-total", "binary.input-pattern-total"
       ],
-      "missing_operations": ["binary.reference-total", "binary.portable-total", "binary.backend-forced-total", "binary.input-pattern-total"]
+      "missing_operations": []
     },
     {
       "id": "F2",
-      "status": "partial",
+      "status": "implemented",
       "implemented_operations": [
         "field.fp251.add-total", "field.fp251.mul-total", "field.fp251.square-total", "field.fp251.invert-total", "field.fp251.canonical-roundtrip-total",
         "field.goldilocks.add-total", "field.goldilocks.mul-total", "field.goldilocks.square-total", "field.goldilocks.invert-total", "field.goldilocks.canonical-roundtrip-total",
-        "field.fp256-generic.add-total", "field.fp256-generic.mul-total", "field.fp256-generic.square-total", "field.fp256-generic.invert-total", "field.fp256-generic.canonical-roundtrip-total"
+        "field.fp256-generic.add-total", "field.fp256-generic.mul-total", "field.fp256-generic.square-total", "field.fp256-generic.invert-total", "field.fp256-generic.canonical-roundtrip-total",
+        "prime.portable-total", "prime.backend-forced-total", "prime.range-pattern-total", "prime.reduction-total"
       ],
-      "missing_operations": ["prime.portable-total", "prime.backend-forced-total", "prime.range-pattern-total", "prime.reduction-total"]
+      "missing_operations": []
     },
     {
       "id": "F3",

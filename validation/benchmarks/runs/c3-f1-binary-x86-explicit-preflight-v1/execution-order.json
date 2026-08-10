@@ -1,0 +1,166 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-x86-explicit-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-128-pclmul-n8",
+      "process_index": 0,
+      "seed": 4478663806671995346,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-256-hh-portable-x86-n8",
+      "process_index": 0,
+      "seed": 12412684595112280584,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-256-alt-portable-x86-n8",
+      "process_index": 0,
+      "seed": 17956624675906221910,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-256-alt-portable-x86-n64",
+      "process_index": 0,
+      "seed": 17291721406042363555,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-256-alt-vpclmul-n64",
+      "process_index": 0,
+      "seed": 17291721406042363555,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-256-hh-vpclmul-n8",
+      "process_index": 0,
+      "seed": 12412684595112280584,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-128-vpclmul-n8",
+      "process_index": 0,
+      "seed": 4478663806671995346,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-128-portable-x86-n8",
+      "process_index": 0,
+      "seed": 4478663806671995346,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-256-hh-pclmul-n8",
+      "process_index": 0,
+      "seed": 12412684595112280584,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "f1-binary-x86-explicit-gf2-256-alt-pclmul-n8",
+      "process_index": 0,
+      "seed": 17956624675906221910,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-256-hh-vpclmul-n8",
+      "process_index": 1,
+      "seed": 5594624139728330948,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-128-vpclmul-n8",
+      "process_index": 1,
+      "seed": 12305354749780551450,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-256-alt-pclmul-n8",
+      "process_index": 1,
+      "seed": 17392397682024834490,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-256-alt-vpclmul-n64",
+      "process_index": 1,
+      "seed": 3644052086698620781,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-128-portable-x86-n8",
+      "process_index": 1,
+      "seed": 12305354749780551450,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-256-alt-portable-x86-n8",
+      "process_index": 1,
+      "seed": 17392397682024834490,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-256-hh-pclmul-n8",
+      "process_index": 1,
+      "seed": 5594624139728330948,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-128-pclmul-n8",
+      "process_index": 1,
+      "seed": 12305354749780551450,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-256-alt-portable-x86-n64",
+      "process_index": 1,
+      "seed": 3644052086698620781,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "f1-binary-x86-explicit-gf2-256-hh-portable-x86-n8",
+      "process_index": 1,
+      "seed": 5594624139728330948,
+      "status": "success"
+    }
+  ]
+}

@@ -149,12 +149,17 @@ fn c3_generated_scaling_inventory_reaches_the_declared_volume_floor() {
         "../validation/benchmarks/manifests/c3-x2/c3-expansion-report-v1.json"
     ))
     .unwrap();
+    let f1_f2_closure: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/manifests/c3-f1-f2-closure/c3-expansion-report-v1.json"
+    ))
+    .unwrap();
 
     let generated_cells = p0["total_cells"].as_u64().unwrap()
         + f3_s3["total_cells"].as_u64().unwrap()
         + t1_r1_d1["total_cells"].as_u64().unwrap()
         + g1_g2["total_cells"].as_u64().unwrap()
-        + x2["total_cells"].as_u64().unwrap();
+        + x2["total_cells"].as_u64().unwrap()
+        + f1_f2_closure["total_cells"].as_u64().unwrap();
     let targets = &ledger["targets"];
     assert!(
         generated_cells >= targets["timed_cells_lower_bound"].as_u64().unwrap(),
@@ -164,7 +169,7 @@ fn c3_generated_scaling_inventory_reaches_the_declared_volume_floor() {
         generated_cells <= targets["timed_cells_upper_bound"].as_u64().unwrap(),
         "the generated C3 inventory exceeds its declared reviewable envelope"
     );
-    assert_eq!(generated_cells, 3_243);
+    assert_eq!(generated_cells, 3_609);
 }
 
 #[test]

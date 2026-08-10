@@ -1,0 +1,136 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-portable-preflight",
+  "profile": "smoke",
+  "environment_classification": "smoke",
+  "cells": [
+    {
+      "id": "f1-binary-portable-gf2-128-portable-n1",
+      "family": "binary-field-backend",
+      "operation": "binary.portable-total",
+      "scale": 1,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 337.09814453125,
+      "p95_ns_per_unit": 354.72900390625,
+      "p99_ns_per_unit": 355.00673828125,
+      "mad_ns_per_unit": 15.7578125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 319.9443359375,
+        "upper": 354.251953125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 323.55644775390624,
+        "upper": 355.076171875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 323.56640625,
+        "upper": 355.076171875
+      },
+      "relative_median_ci_half_width": 0.05088668944649083,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "f1-binary-portable-gf2-256-hh-portable-n8",
+      "family": "binary-field-backend",
+      "operation": "binary.portable-total",
+      "scale": 8,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 9080.7890625,
+      "p95_ns_per_unit": 11677.30625,
+      "p99_ns_per_unit": 11686.48625,
+      "mad_ns_per_unit": 2380.03125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6718.609375,
+        "upper": 11442.96875
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6759.74609375,
+        "upper": 11688.78125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 6774.62421875,
+        "upper": 11688.78125
+      },
+      "relative_median_ci_half_width": 0.26012934242188823,
+      "precision_met": false,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Inconclusive"
+    },
+    {
+      "id": "f1-binary-portable-gf2-256-alt-portable-n4096",
+      "family": "binary-field-backend",
+      "operation": "binary.portable-total",
+      "scale": 4096,
+      "scale_unit": "field-elements",
+      "process_count": 2,
+      "observation_count": 10,
+      "median_ns_per_unit": 4141200.5,
+      "p95_ns_per_unit": 4233422.2,
+      "p99_ns_per_unit": 4282534.84,
+      "mad_ns_per_unit": 10826.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4135689.0,
+        "upper": 4146712.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4151353.45,
+        "upper": 4294813.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 4154231.92,
+        "upper": 4294813.0
+      },
+      "relative_median_ci_half_width": 0.001330894266046766,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "f1-binary-portable-gf2-128-portable",
+      "strategy": "gf2-128",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-portable-gf2-256-alt-portable",
+      "strategy": "gf2-256-alt",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "f1-binary-portable-gf2-256-hh-portable",
+      "strategy": "gf2-256-hh",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": false,
+  "claims_allowed": false
+}

@@ -1,0 +1,3 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+f2-goldilocks-portable-n8-calibration-v3,prime-field-x86-explicit,prime.portable-total,8,field-elements,8,120,83.065750122,85.899369812,140.419731369,0.096843719,82.987602234,83.180580139,0.001161597,true,Precise,,,,,,,
+f2-goldilocks-avx2-n8-calibration-v3,prime-field-x86-explicit,prime.backend-forced-total,8,field-elements,8,120,79.798816681,93.090690613,126.595692139,0.101573944,79.666641235,79.924674988,0.001616777,true,Precise,,,,,,,

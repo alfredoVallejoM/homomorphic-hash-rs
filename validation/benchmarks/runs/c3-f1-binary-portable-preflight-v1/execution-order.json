@@ -1,0 +1,54 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-f1-f2-closure-v1-f1-binary-portable-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f1-binary-portable-gf2-256-hh-portable-n8",
+      "process_index": 0,
+      "seed": 8773548463969015068,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f1-binary-portable-gf2-128-portable-n1",
+      "process_index": 0,
+      "seed": 1725164831233294930,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f1-binary-portable-gf2-256-alt-portable-n4096",
+      "process_index": 0,
+      "seed": 2224832354500942082,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 1,
+      "cell": "f1-binary-portable-gf2-256-alt-portable-n4096",
+      "process_index": 1,
+      "seed": 3599335038645512433,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 1,
+      "cell": "f1-binary-portable-gf2-128-portable-n1",
+      "process_index": 1,
+      "seed": 1359884922706489719,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 1,
+      "cell": "f1-binary-portable-gf2-256-hh-portable-n8",
+      "process_index": 1,
+      "seed": 269095449269326794,
+      "status": "success"
+    }
+  ]
+}
