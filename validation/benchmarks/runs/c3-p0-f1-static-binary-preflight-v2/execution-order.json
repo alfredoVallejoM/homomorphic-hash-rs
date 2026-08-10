@@ -1,0 +1,246 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-p0-v1-f1-static-binary-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-128-square-n3",
+      "process_index": 0,
+      "seed": 17828099772288932398,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-hh-wire-n32",
+      "process_index": 0,
+      "seed": 12174458198572353416,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-alt-mul-n64",
+      "process_index": 0,
+      "seed": 1146861997538165057,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-128-wire-n7",
+      "process_index": 0,
+      "seed": 14236647881240958958,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-alt-add-n63",
+      "process_index": 0,
+      "seed": 3263880314270362586,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-alt-invert-n256",
+      "process_index": 0,
+      "seed": 905872063825685787,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-hh-add-n8",
+      "process_index": 0,
+      "seed": 2615509019238992713,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-128-invert-n4",
+      "process_index": 0,
+      "seed": 6626442503369969846,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-hh-mul-n15",
+      "process_index": 0,
+      "seed": 13492309825220365566,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-hh-invert-n31",
+      "process_index": 0,
+      "seed": 8665851271312374235,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-hh-square-n16",
+      "process_index": 0,
+      "seed": 6923141302756492448,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-128-mul-n2",
+      "process_index": 0,
+      "seed": 578423098548303038,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-alt-square-n255",
+      "process_index": 0,
+      "seed": 12238655242429123768,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-128-add-n1",
+      "process_index": 0,
+      "seed": 5781656526733756966,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 0,
+      "cell": "f1-static-binary-gf2-256-alt-wire-n4096",
+      "process_index": 0,
+      "seed": 3844220844213424437,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-alt-mul-n64",
+      "process_index": 1,
+      "seed": 1400990511296934694,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-hh-square-n16",
+      "process_index": 1,
+      "seed": 2112068352012148638,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-hh-add-n8",
+      "process_index": 1,
+      "seed": 13764918992039797414,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-128-wire-n7",
+      "process_index": 1,
+      "seed": 8561579521735860547,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-hh-mul-n15",
+      "process_index": 1,
+      "seed": 5076982200656551178,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-128-add-n1",
+      "process_index": 1,
+      "seed": 5560019856079827001,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-alt-square-n255",
+      "process_index": 1,
+      "seed": 3200797629487023252,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-128-square-n3",
+      "process_index": 1,
+      "seed": 15098805316108338653,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-hh-wire-n32",
+      "process_index": 1,
+      "seed": 18154727772971478281,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-128-mul-n2",
+      "process_index": 1,
+      "seed": 14639604623481838282,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-128-invert-n4",
+      "process_index": 1,
+      "seed": 7849439391750123186,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-hh-invert-n31",
+      "process_index": 1,
+      "seed": 5450423793318186710,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-alt-wire-n4096",
+      "process_index": 1,
+      "seed": 6827950137141005017,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-alt-invert-n256",
+      "process_index": 1,
+      "seed": 6983556848213896463,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 1,
+      "cell": "f1-static-binary-gf2-256-alt-add-n63",
+      "process_index": 1,
+      "seed": 15474271940664975161,
+      "status": "success"
+    }
+  ]
+}

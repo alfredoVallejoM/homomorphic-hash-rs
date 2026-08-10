@@ -26,6 +26,22 @@ The machine-readable capability ownership and volume targets are frozen in
 `c3-coverage-ledger-v1.json`; `tests/c3_campaign_plan.rs` fails if the admitted
 RC surface and the C3 ledger drift apart.
 
+C3-P0 adds the deterministic factor expander and the first generated F1/F2
+shards:
+
+```text
+cargo run -p microfield-validation-lab --locked -- c3-expand \
+  --manifest validation/benchmarks/c3-p0-factor-plan-v1.json \
+  --out-dir validation/benchmarks/manifests/c3-p0
+```
+
+The checked-in output contains 498 publication cells and 30 preflight cells
+covering every registered static-field primitive. Regeneration is byte-tested.
+The implementation inventory is `c3-operation-inventory-v1.json`; missing
+workloads remain explicit until their suite is implemented. Initial Smoke
+results and cost bounds are documented in
+`docs/microfield/c3-p0-implementation-and-preflight-report.md`.
+
 C2 is also versioned and remains informative:
 
 ```text

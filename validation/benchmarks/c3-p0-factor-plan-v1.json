@@ -1,0 +1,59 @@
+{
+  "schema": "algesum-c3-factor-plan-v1",
+  "campaign_id": "algesum-c3-p0-v1",
+  "seed": 130320260810,
+  "shards": [
+    {
+      "id": "f1-static-binary",
+      "family": "finite-field",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 4096,
+      "operations": [
+        { "id": "gf2-128-add", "operation": "field.gf2-128.add-total" },
+        { "id": "gf2-128-mul", "operation": "field.gf2-128.mul-total" },
+        { "id": "gf2-128-square", "operation": "field.gf2-128.square-total" },
+        { "id": "gf2-128-invert", "operation": "field.gf2-128.invert-total", "maximum_scale": 4096 },
+        { "id": "gf2-128-wire", "operation": "field.gf2-128.canonical-roundtrip-total" },
+        { "id": "gf2-256-hh-add", "operation": "field.gf2-256-hh.add-total" },
+        { "id": "gf2-256-hh-mul", "operation": "field.gf2-256-hh.mul-total" },
+        { "id": "gf2-256-hh-square", "operation": "field.gf2-256-hh.square-total" },
+        { "id": "gf2-256-hh-invert", "operation": "field.gf2-256-hh.invert-total", "maximum_scale": 4096 },
+        { "id": "gf2-256-hh-wire", "operation": "field.gf2-256-hh.canonical-roundtrip-total" },
+        { "id": "gf2-256-alt-add", "operation": "field.gf2-256-alt.add-total" },
+        { "id": "gf2-256-alt-mul", "operation": "field.gf2-256-alt.mul-total" },
+        { "id": "gf2-256-alt-square", "operation": "field.gf2-256-alt.square-total" },
+        { "id": "gf2-256-alt-invert", "operation": "field.gf2-256-alt.invert-total", "maximum_scale": 4096 },
+        { "id": "gf2-256-alt-wire", "operation": "field.gf2-256-alt.canonical-roundtrip-total" }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 255, 256, 4096, 65536, 1048576]
+      }
+    },
+    {
+      "id": "f2-static-prime",
+      "family": "finite-field",
+      "scale_unit": "field-elements",
+      "preflight_max_scale": 4096,
+      "operations": [
+        { "id": "fp251-add", "operation": "field.fp251.add-total" },
+        { "id": "fp251-mul", "operation": "field.fp251.mul-total" },
+        { "id": "fp251-square", "operation": "field.fp251.square-total" },
+        { "id": "fp251-invert", "operation": "field.fp251.invert-total", "maximum_scale": 4096 },
+        { "id": "fp251-wire", "operation": "field.fp251.canonical-roundtrip-total" },
+        { "id": "goldilocks-add", "operation": "field.goldilocks.add-total" },
+        { "id": "goldilocks-mul", "operation": "field.goldilocks.mul-total" },
+        { "id": "goldilocks-square", "operation": "field.goldilocks.square-total" },
+        { "id": "goldilocks-invert", "operation": "field.goldilocks.invert-total", "maximum_scale": 4096 },
+        { "id": "goldilocks-wire", "operation": "field.goldilocks.canonical-roundtrip-total" },
+        { "id": "fp256-generic-add", "operation": "field.fp256-generic.add-total" },
+        { "id": "fp256-generic-mul", "operation": "field.fp256-generic.mul-total" },
+        { "id": "fp256-generic-square", "operation": "field.fp256-generic.square-total" },
+        { "id": "fp256-generic-invert", "operation": "field.fp256-generic.invert-total", "maximum_scale": 4096 },
+        { "id": "fp256-generic-wire", "operation": "field.fp256-generic.canonical-roundtrip-total" }
+      ],
+      "primary_factors": {
+        "scale": [1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 255, 256, 4096, 65536, 1048576]
+      }
+    }
+  ]
+}

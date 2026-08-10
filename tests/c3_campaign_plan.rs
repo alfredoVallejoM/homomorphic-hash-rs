@@ -18,7 +18,7 @@ fn c3_ledger_covers_every_admitted_capability_exactly_once() {
         ledger["security_classification"],
         "non-cryptographic-algebraic-summaries"
     );
-    assert_eq!(ledger["status"], "planned");
+    assert_eq!(ledger["status"], "running");
 
     let admitted = surface["capabilities"]
         .as_array()
@@ -73,6 +73,49 @@ fn c3_ledger_covers_every_admitted_capability_exactly_once() {
             .unwrap()
             >= 30
     );
+}
+
+#[test]
+fn c3_operation_inventory_owns_every_suite_and_exposes_every_gap() {
+    let ledger: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/c3-coverage-ledger-v1.json"
+    ))
+    .unwrap();
+    let inventory: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/c3-operation-inventory-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(inventory["schema"], "algesum-c3-operation-inventory-v1");
+
+    let expected = ledger["suites"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|suite| suite["id"].as_str().unwrap())
+        .collect::<BTreeSet<_>>();
+    let observed = inventory["suites"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|suite| suite["id"].as_str().unwrap())
+        .collect::<BTreeSet<_>>();
+    assert_eq!(observed, expected);
+
+    for suite in inventory["suites"].as_array().unwrap() {
+        let status = suite["status"].as_str().unwrap();
+        let implemented = suite["implemented_operations"].as_array().unwrap();
+        let missing = suite["missing_operations"].as_array().unwrap();
+        assert!(
+            !implemented.is_empty() || matches!(status, "external" | "missing"),
+            "suite {} claims partial/complete without a workload",
+            suite["id"]
+        );
+        assert!(
+            !missing.is_empty() || status == "implemented",
+            "suite {} hides its remaining workload gaps",
+            suite["id"]
+        );
+    }
 }
 
 #[test]

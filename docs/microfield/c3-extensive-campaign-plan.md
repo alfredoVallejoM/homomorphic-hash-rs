@@ -1,6 +1,10 @@
 # C3: campaña extensiva de validación y rendimiento de Algesum
 
-Fecha: 2026-08-10. Estado: **planificación normativa; ejecución no iniciada**.
+Fecha: 2026-08-10. Estado: **en ejecución; P0 y preflight F1/F2
+completados, campaña `Controlled` pendiente**.
+
+La implementación y los resultados iniciales quedan fijados en
+[`c3-p0-implementation-and-preflight-report.md`](c3-p0-implementation-and-preflight-report.md).
 
 Este documento sustituye cualquier propuesta de ejecutar C3 sobre unas pocas
 celdas «seleccionadas». Algesum reúne un núcleo de campos finitos, algoritmos

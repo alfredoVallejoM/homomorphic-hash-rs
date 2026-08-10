@@ -1,0 +1,246 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "algesum-c3-p0-v1-f2-static-prime-preflight",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "f2-static-prime-fp251-square-n3",
+      "process_index": 0,
+      "seed": 9979527875120605638,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "f2-static-prime-goldilocks-wire-n32",
+      "process_index": 0,
+      "seed": 11030936533270266773,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "f2-static-prime-fp256-generic-mul-n64",
+      "process_index": 0,
+      "seed": 15993486948428383977,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "f2-static-prime-fp251-wire-n7",
+      "process_index": 0,
+      "seed": 202312927670588913,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "f2-static-prime-fp256-generic-add-n63",
+      "process_index": 0,
+      "seed": 8192228073286701365,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "f2-static-prime-fp256-generic-invert-n256",
+      "process_index": 0,
+      "seed": 14865454636235984,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "f2-static-prime-goldilocks-add-n8",
+      "process_index": 0,
+      "seed": 5467064357237677827,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "f2-static-prime-fp251-invert-n4",
+      "process_index": 0,
+      "seed": 14832461186818910999,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "f2-static-prime-goldilocks-mul-n15",
+      "process_index": 0,
+      "seed": 7253757293055288185,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "f2-static-prime-goldilocks-invert-n31",
+      "process_index": 0,
+      "seed": 9600981244459784533,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 0,
+      "cell": "f2-static-prime-goldilocks-square-n16",
+      "process_index": 0,
+      "seed": 4388010145388512217,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 0,
+      "cell": "f2-static-prime-fp251-mul-n2",
+      "process_index": 0,
+      "seed": 17032013830092865558,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 0,
+      "cell": "f2-static-prime-fp256-generic-square-n255",
+      "process_index": 0,
+      "seed": 10145127216854958190,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 0,
+      "cell": "f2-static-prime-fp251-add-n1",
+      "process_index": 0,
+      "seed": 12505629599413558053,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 0,
+      "cell": "f2-static-prime-fp256-generic-wire-n4096",
+      "process_index": 0,
+      "seed": 10438344502893727618,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 1,
+      "cell": "f2-static-prime-fp256-generic-mul-n64",
+      "process_index": 1,
+      "seed": 7362622856791813806,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 1,
+      "cell": "f2-static-prime-goldilocks-square-n16",
+      "process_index": 1,
+      "seed": 3145750421274334776,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 1,
+      "cell": "f2-static-prime-goldilocks-add-n8",
+      "process_index": 1,
+      "seed": 5109381258758601069,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "f2-static-prime-fp251-wire-n7",
+      "process_index": 1,
+      "seed": 1778328789641334357,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "f2-static-prime-goldilocks-mul-n15",
+      "process_index": 1,
+      "seed": 9524536810712348264,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 1,
+      "cell": "f2-static-prime-fp251-add-n1",
+      "process_index": 1,
+      "seed": 6301855131472746504,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 1,
+      "cell": "f2-static-prime-fp256-generic-square-n255",
+      "process_index": 1,
+      "seed": 17278751524491041251,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 1,
+      "cell": "f2-static-prime-fp251-square-n3",
+      "process_index": 1,
+      "seed": 13747539894492098625,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 1,
+      "cell": "f2-static-prime-goldilocks-wire-n32",
+      "process_index": 1,
+      "seed": 3649722627092159373,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 1,
+      "cell": "f2-static-prime-fp251-mul-n2",
+      "process_index": 1,
+      "seed": 17175901763932408288,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 1,
+      "cell": "f2-static-prime-fp251-invert-n4",
+      "process_index": 1,
+      "seed": 17014518461562345432,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 1,
+      "cell": "f2-static-prime-goldilocks-invert-n31",
+      "process_index": 1,
+      "seed": 6095667091471461531,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 1,
+      "cell": "f2-static-prime-fp256-generic-wire-n4096",
+      "process_index": 1,
+      "seed": 15573044228939571917,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 1,
+      "cell": "f2-static-prime-fp256-generic-invert-n256",
+      "process_index": 1,
+      "seed": 953527311641310821,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 1,
+      "cell": "f2-static-prime-fp256-generic-add-n63",
+      "process_index": 1,
+      "seed": 9666161249914142639,
+      "status": "success"
+    }
+  ]
+}

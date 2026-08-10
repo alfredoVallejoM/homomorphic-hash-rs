@@ -44,6 +44,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`algesum-postgresql-results.md`](algesum-postgresql-results.md) | integración PostgreSQL, change stream y política adaptativa |
 | [`pre-rc-comprehensive-campaign-plan.md`](pre-rc-comprehensive-campaign-plan.md) | matriz C0–C3 de todas las estructuras, priorizando firmas y grafos |
 | [`c3-extensive-campaign-plan.md`](c3-extensive-campaign-plan.md) | especificación C3 extensiva: 15 suites, tres carriles, réplica multihost y sistemas reales |
+| [`c3-p0-implementation-and-preflight-report.md`](c3-p0-implementation-and-preflight-report.md) | expansor factorial, inventario de gaps y primer preflight F1/F2 |
 | [`pre-rc-comprehensive-smoke-results.md`](pre-rc-comprehensive-smoke-results.md) | C1 de 65 celdas y piloto PostgreSQL hasta un millón de filas |
 | [`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md) | C2 de firmas K/fragmentación, grafos y PostgreSQL repetido a un millón |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |

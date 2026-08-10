@@ -1,0 +1,54 @@
+{
+  "schema": "algesum-c3-p0-preflight-summary-v1",
+  "campaign_id": "algesum-c3-p0-v1",
+  "classification": "Smoke",
+  "claims_allowed": false,
+  "source_commit": "e5fd3f7ef14df227fe949ad4b9dd6f46b6570039",
+  "tree_clean": false,
+  "host": {
+    "architecture": "x86_64",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700HX",
+    "operating_system": "Pop!_OS 24.04 LTS"
+  },
+  "expansion": {
+    "publication_cells": 498,
+    "preflight_cells": 30,
+    "registered_field_operations_added": 30,
+    "minimum_publication_workers_per_host": 14940
+  },
+  "observed": {
+    "workers": 60,
+    "observations": 300,
+    "precise_cells": 23,
+    "imprecise_cells": 7,
+    "measured_ns": 715394515,
+    "setup_ns": 1290447,
+    "allocated_bytes_in_measured_actions": 0,
+    "maximum_peak_allocated_bytes_in_measured_actions": 0,
+    "workers_with_unstable_observation_checksum": 0,
+    "artifact_bytes": 160140
+  },
+  "projection": {
+    "minimum_processes_per_cell": 30,
+    "estimated_timed_host_hours": 3.643376866593525,
+    "estimated_timed_host_days": 0.15180736944139686,
+    "estimated_artifact_bytes_range": [150000000, 300000000],
+    "scope": "F1 and F2 only",
+    "limitations": [
+      "projection uses one dirty interactive x86_64 host",
+      "projection extrapolates per-element preflight medians",
+      "projection includes 10 warmups and 50 observations but excludes setup, calibration and scheduling",
+      "maximum-process and multi-host cost are not included"
+    ]
+  },
+  "corrections": [
+    "field actions now read immutable inputs and write reusable output buffers",
+    "all output elements contribute to the checksum",
+    "field inversion publication scale is capped at 4096 elements",
+    "manifest expansion records the actual preflight fraction when operation coverage exceeds one percent"
+  ],
+  "runs": [
+    "validation/benchmarks/runs/c3-p0-f1-static-binary-preflight-v2",
+    "validation/benchmarks/runs/c3-p0-f2-static-prime-preflight-v2"
+  ]
+}

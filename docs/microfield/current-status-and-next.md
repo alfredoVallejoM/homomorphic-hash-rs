@@ -297,17 +297,24 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
 [`pre-rc-b3-benchmark-results.md`](pre-rc-b3-benchmark-results.md) y
 [`pre-rc-bulk-scaling-results.md`](pre-rc-bulk-scaling-results.md).
 
-### 4. Implementar y ejecutar C3 extensiva — siguiente
+### 4. Implementar y ejecutar C3 extensiva — en curso
 
-- completar el ledger y los workloads ausentes del harness;
-- generar shards mediante cruces primarios y covering arrays versionados;
-- ejecutar el preflight del 1 % para estimar host-días y almacenamiento;
+- P0 completado: ledger activado, inventario explícito de operaciones y huecos,
+  generador determinista de cruces primarios/covering arrays y schemas
+  versionados;
+- F1/F2 iniciadas: 30 workloads de campos, 30 celdas preflight, 60 procesos y
+  300 observaciones; 23/30 celdas alcanzan el objetivo exploratorio de
+  precisión y ninguna asigna memoria dentro de la región medida;
+- aplicar el mismo cierre a F3/F4 y después a firmas, estructuras, DB, grafos,
+  corpora y compatibilidad, siguiendo el inventario;
 - completar C3-Semantic, C3-Scaling y C3-Systems;
 - replicar los claims en Intel x86-64, AMD x86-64 y AArch64 dedicados;
 - decidir go/no-go con cobertura, efectos, intervalos, límites e inconclusos;
 - solo entonces abrir PR, integrar, ejecutar CI post-merge y etiquetar.
 
 Especificación: [`c3-extensive-campaign-plan.md`](c3-extensive-campaign-plan.md).
+Evidencia P0:
+[`c3-p0-implementation-and-preflight-report.md`](c3-p0-implementation-and-preflight-report.md).
 
 ### 5. Base de datos real
 

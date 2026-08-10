@@ -1,8 +1,8 @@
 use std::{env, path::PathBuf, process::ExitCode};
 
 use microfield_validation_lab::{
-    capacity, decision, g11, g12, g13_g14, load_manifest, performance, publication, run_semantic,
-    write_json, write_semantic_csv,
+    c3, capacity, decision, g11, g12, g13_g14, load_manifest, performance, publication,
+    run_semantic, write_json, write_semantic_csv,
 };
 
 fn main() -> ExitCode {
@@ -21,6 +21,7 @@ fn run() -> Result<(), String> {
     let mut manifest = match command.as_str() {
         "rc8-capacity" | "rc8-compare" => PathBuf::from("validation/rc/capacity-manifest-v1.json"),
         "rc10-decision" => PathBuf::from("validation/rc/decision-manifest-v1.json"),
+        "c3-expand" => PathBuf::from("validation/benchmarks/c3-p0-factor-plan-v1.json"),
         "publication-campaign" | "publication-worker" | "publication-analyse" => {
             PathBuf::from("validation/benchmarks/manifests/smoke-v1.json")
         }
@@ -35,6 +36,7 @@ fn run() -> Result<(), String> {
     let mut cell = None;
     let mut process_index = None;
     let mut run_directory = None;
+    let mut output_directory = None;
     while let Some(argument) = args.next() {
         match argument.as_str() {
             "--manifest" => {
@@ -72,8 +74,24 @@ fn run() -> Result<(), String> {
                     args.next().ok_or("--run-dir requires a path")?,
                 ))
             }
+            "--out-dir" => {
+                output_directory = Some(PathBuf::from(
+                    args.next().ok_or("--out-dir requires a path")?,
+                ))
+            }
             _ => return Err(format!("unknown argument {argument:?}\n{}", usage())),
         }
+    }
+    if command == "c3-expand" {
+        let destination = output_directory.ok_or("c3-expand requires --out-dir")?;
+        let report = c3::expand_plan(&manifest, &destination)?;
+        println!(
+            "expanded {} C3 cells ({} preflight) below {}",
+            report.total_cells(),
+            report.total_preflight_cells(),
+            destination.display(),
+        );
+        return Ok(());
     }
     if command == "publication-worker" {
         let destination = output.ok_or("publication-worker requires --out")?;
@@ -224,5 +242,5 @@ fn run() -> Result<(), String> {
 }
 
 fn usage() -> String {
-    "usage: f6-validation <semantic|performance|g11|g12|g13-g14|rc8-capacity|rc8-compare|rc10-decision|publication-campaign|publication-worker|publication-analyse> [--manifest PATH] [--out PATH] [--run-dir PATH] [--cell ID] [--process-index N] [--baseline PATH] [--candidate PATH] [--capacity-report PATH]... [--consumer-report PATH]... [--required-ci-gates-passed]".into()
+    "usage: f6-validation <semantic|performance|g11|g12|g13-g14|rc8-capacity|rc8-compare|rc10-decision|c3-expand|publication-campaign|publication-worker|publication-analyse> [--manifest PATH] [--out PATH] [--out-dir PATH] [--run-dir PATH] [--cell ID] [--process-index N] [--baseline PATH] [--candidate PATH] [--capacity-report PATH]... [--consumer-report PATH]... [--required-ci-gates-passed]".into()
 }

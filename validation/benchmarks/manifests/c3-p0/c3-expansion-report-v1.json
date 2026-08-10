@@ -1,0 +1,37 @@
+{
+  "schema": "algesum-c3-expansion-report-v1",
+  "campaign_id": "algesum-c3-p0-v1",
+  "source": "c3-p0-factor-plan-v1.json",
+  "total_cells": 498,
+  "total_preflight_cells": 30,
+  "shards": [
+    {
+      "id": "f1-static-binary",
+      "operations": 15,
+      "primary_combinations": 17,
+      "secondary_combinations": 1,
+      "publication_cells": 249,
+      "smoke_cells": 15,
+      "preflight_cells": 15,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.060240963855421686,
+      "publication_manifest": "c3-f1-static-binary-publication-v1.json",
+      "smoke_manifest": "c3-f1-static-binary-smoke-v1.json",
+      "preflight_manifest": "c3-f1-static-binary-preflight-v1.json"
+    },
+    {
+      "id": "f2-static-prime",
+      "operations": 15,
+      "primary_combinations": 17,
+      "secondary_combinations": 1,
+      "publication_cells": 249,
+      "smoke_cells": 15,
+      "preflight_cells": 15,
+      "requested_preflight_fraction": 0.01,
+      "actual_preflight_fraction": 0.060240963855421686,
+      "publication_manifest": "c3-f2-static-prime-publication-v1.json",
+      "smoke_manifest": "c3-f2-static-prime-smoke-v1.json",
+      "preflight_manifest": "c3-f2-static-prime-preflight-v1.json"
+    }
+  ]
+}

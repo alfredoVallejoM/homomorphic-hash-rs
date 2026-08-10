@@ -2,7 +2,7 @@
   "schema": "algesum-c3-coverage-ledger-v1",
   "campaign_id": "algesum-c3-extensive-v1",
   "security_classification": "non-cryptographic-algebraic-summaries",
-  "status": "planned",
+  "status": "running",
   "targets": {
     "minimum_semantic_cases": 12000,
     "timed_cells_lower_bound": 2500,

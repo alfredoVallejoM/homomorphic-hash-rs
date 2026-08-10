@@ -7,14 +7,23 @@ mod stats;
 mod workloads;
 
 pub use model::{
-    AggregateReport, BenchmarkManifest, CampaignProfile, EnvironmentClassification,
+    AggregateReport, BenchmarkCell, BenchmarkManifest, CampaignProfile, EnvironmentClassification,
     EnvironmentReport, ExecutionOrder, HostMode, WorkerReport,
 };
 pub use runner::{analyse_run, load_manifest, run_campaign, run_worker};
 
+pub fn is_supported_operation(operation: &str) -> bool {
+    workloads::SUPPORTED_OPERATIONS.contains(&operation)
+}
+
+pub fn supported_operations() -> &'static [&'static str] {
+    workloads::SUPPORTED_OPERATIONS
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::BTreeSet;
 
     #[test]
     fn smoke_manifest_is_valid() {
@@ -198,5 +207,27 @@ mod tests {
         ))
         .expect("database streaming manifest");
         assert_eq!(streaming.cells.len(), 6);
+    }
+
+    #[test]
+    fn c3_inventory_implemented_operations_are_registered() {
+        let inventory: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../validation/benchmarks/c3-operation-inventory-v1.json"
+        ))
+        .unwrap();
+        let registered = supported_operations()
+            .iter()
+            .copied()
+            .collect::<BTreeSet<_>>();
+        for suite in inventory["suites"].as_array().unwrap() {
+            for operation in suite["implemented_operations"].as_array().unwrap() {
+                let operation = operation.as_str().unwrap();
+                assert!(
+                    registered.contains(operation),
+                    "suite {} names unregistered workload {operation}",
+                    suite["id"]
+                );
+            }
+        }
     }
 }

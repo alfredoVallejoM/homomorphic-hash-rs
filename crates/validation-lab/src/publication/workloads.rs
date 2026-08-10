@@ -14,7 +14,8 @@ use algesum::{
 };
 use microfield::{
     generator::BinaryFieldFactory, BinaryPolynomialField, CanonicalEncoding, Engine, Field,
-    Fp251V1, FpGoldilocks64V1, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1,
+    Fp251V1, Fp256GenericV1, FpGoldilocks64V1, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1, Invert,
+    PrimeField, Square,
 };
 
 use super::model::{
@@ -26,6 +27,36 @@ type Database = PartitionedDatabase<Gf2_128V1, BinaryEncoder>;
 type SummaryTree = HomomorphicSummaryTree<Gf2_128V1, BinaryEncoder>;
 
 pub const SUPPORTED_OPERATIONS: &[&str] = &[
+    "field.gf2-128.add-total",
+    "field.gf2-128.mul-total",
+    "field.gf2-128.square-total",
+    "field.gf2-128.invert-total",
+    "field.gf2-128.canonical-roundtrip-total",
+    "field.gf2-256-hh.add-total",
+    "field.gf2-256-hh.mul-total",
+    "field.gf2-256-hh.square-total",
+    "field.gf2-256-hh.invert-total",
+    "field.gf2-256-hh.canonical-roundtrip-total",
+    "field.gf2-256-alt.add-total",
+    "field.gf2-256-alt.mul-total",
+    "field.gf2-256-alt.square-total",
+    "field.gf2-256-alt.invert-total",
+    "field.gf2-256-alt.canonical-roundtrip-total",
+    "field.fp251.add-total",
+    "field.fp251.mul-total",
+    "field.fp251.square-total",
+    "field.fp251.invert-total",
+    "field.fp251.canonical-roundtrip-total",
+    "field.goldilocks.add-total",
+    "field.goldilocks.mul-total",
+    "field.goldilocks.square-total",
+    "field.goldilocks.invert-total",
+    "field.goldilocks.canonical-roundtrip-total",
+    "field.fp256-generic.add-total",
+    "field.fp256-generic.mul-total",
+    "field.fp256-generic.square-total",
+    "field.fp256-generic.invert-total",
+    "field.fp256-generic.canonical-roundtrip-total",
     "field.gf2-128.mul",
     "field.gf2-256-hh.mul",
     "field.gf2-256-alt.mul",
@@ -96,6 +127,9 @@ pub struct PreparedOperation {
 }
 
 pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
+    if let Some(operation) = prepare_c3_field_primitive(cell, seed)? {
+        return Ok(operation);
+    }
     match cell.operation.as_str() {
         "field.gf2-128.mul" => field_gf2_128(seed),
         "field.gf2-256-hh.mul" => field_gf2_256_hh(seed),
@@ -191,6 +225,119 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
             "unsupported publication benchmark operation {other:?}"
         )),
     }
+}
+
+#[derive(Clone, Copy)]
+enum FieldPrimitive {
+    Add,
+    Mul,
+    Square,
+    Invert,
+    CanonicalRoundtrip,
+}
+
+fn prepare_c3_field_primitive(
+    cell: &BenchmarkCell,
+    seed: u64,
+) -> Result<Option<PreparedOperation>, String> {
+    let Some((field, operation)) = cell
+        .operation
+        .strip_prefix("field.")
+        .and_then(|rest| rest.rsplit_once('.'))
+    else {
+        return Ok(None);
+    };
+    let primitive = match operation {
+        "add-total" => FieldPrimitive::Add,
+        "mul-total" => FieldPrimitive::Mul,
+        "square-total" => FieldPrimitive::Square,
+        "invert-total" => FieldPrimitive::Invert,
+        "canonical-roundtrip-total" => FieldPrimitive::CanonicalRoundtrip,
+        _ => return Ok(None),
+    };
+    let scale = cell.scale;
+    let prepared = match field {
+        "gf2-128" => field_primitive_total(
+            scale,
+            Gf2_128V1::from_polynomial_bytes_mod(&seed_bytes::<16>(seed)),
+            Gf2_128V1::from_polynomial_bytes_mod(&seed_bytes::<16>(seed.rotate_left(31))),
+            primitive,
+        )?,
+        "gf2-256-hh" => field_primitive_total(
+            scale,
+            Gf2_256HhV1::from_polynomial_bytes_mod(&seed_bytes::<32>(seed)),
+            Gf2_256HhV1::from_polynomial_bytes_mod(&seed_bytes::<32>(seed.rotate_left(31))),
+            primitive,
+        )?,
+        "gf2-256-alt" => field_primitive_total(
+            scale,
+            Gf2_256AltV1::from_polynomial_bytes_mod(&seed_bytes::<32>(seed)),
+            Gf2_256AltV1::from_polynomial_bytes_mod(&seed_bytes::<32>(seed.rotate_left(31))),
+            primitive,
+        )?,
+        "fp251" => field_primitive_total(
+            scale,
+            Fp251V1::from_u64_mod(seed % 250 + 1),
+            Fp251V1::from_u64_mod(seed.rotate_left(31) % 250 + 1),
+            primitive,
+        )?,
+        "goldilocks" => field_primitive_total(
+            scale,
+            FpGoldilocks64V1::from_u64_mod(seed | 1),
+            FpGoldilocks64V1::from_u64_mod(seed.rotate_left(31) | 1),
+            primitive,
+        )?,
+        "fp256-generic" => field_primitive_total(
+            scale,
+            Fp256GenericV1::from_bytes_mod_order(&seed_bytes::<32>(seed)),
+            Fp256GenericV1::from_bytes_mod_order(&seed_bytes::<32>(seed.rotate_left(31))),
+            primitive,
+        )?,
+        _ => return Ok(None),
+    };
+    Ok(Some(prepared))
+}
+
+fn field_primitive_total<F>(
+    scale: usize,
+    mut left: F,
+    mut right: F,
+    primitive: FieldPrimitive,
+) -> Result<PreparedOperation, String>
+where
+    F: Field + Square + Invert + CanonicalEncoding,
+{
+    if scale == 0 {
+        return Err("field primitive scale must be positive".into());
+    }
+    if left.is_zero() {
+        left = F::ONE;
+    }
+    if right.is_zero() {
+        right = F::ONE;
+    }
+    let left = vec![left; scale];
+    let rhs = vec![right; scale];
+    let mut output = vec![F::ZERO; scale];
+    Ok(single_unit(move || {
+        for ((destination, value), operand) in output.iter_mut().zip(&left).zip(&rhs) {
+            *destination = match primitive {
+                FieldPrimitive::Add => value.add(*operand),
+                FieldPrimitive::Mul => value.mul(*operand),
+                FieldPrimitive::Square => value.square(),
+                FieldPrimitive::Invert => value.invert().expect("inputs are non-zero"),
+                FieldPrimitive::CanonicalRoundtrip => {
+                    F::from_canonical(&value.to_canonical()).expect("self-encoding is canonical")
+                }
+            };
+        }
+        output
+            .iter()
+            .enumerate()
+            .fold(0_u64, |checksum, (index, value)| {
+                checksum.rotate_left(7) ^ checksum_field(*value) ^ index as u64
+            })
+    }))
 }
 
 fn field_gf2_128(seed: u64) -> Result<PreparedOperation, String> {
@@ -1771,6 +1918,24 @@ mod tests {
     fn payload_generation_is_seeded_and_reproducible() {
         assert_eq!(payloads(4, 16, 7).unwrap(), payloads(4, 16, 7).unwrap());
         assert_ne!(payloads(4, 16, 7).unwrap(), payloads(4, 16, 8).unwrap());
+    }
+
+    #[test]
+    fn c3_field_primitive_actions_are_repeatable() {
+        for operation in SUPPORTED_OPERATIONS.iter().copied().filter(|operation| {
+            operation.starts_with("field.")
+                && (operation.ends_with("add-total")
+                    || operation.ends_with("mul-total")
+                    || operation.ends_with("square-total")
+                    || operation.ends_with("invert-total")
+                    || operation.ends_with("canonical-roundtrip-total"))
+        }) {
+            let benchmark_cell = cell(operation, 17);
+            let mut prepared = prepare(&benchmark_cell, 0x1234_5678).unwrap();
+            let first = (prepared.run)();
+            let second = (prepared.run)();
+            assert_eq!(first, second, "stateful C3 primitive workload: {operation}");
+        }
     }
 
     #[test]
