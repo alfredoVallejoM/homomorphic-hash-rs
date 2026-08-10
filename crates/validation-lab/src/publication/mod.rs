@@ -51,4 +51,22 @@ mod tests {
             serde_json::to_value(&pilot.cells).expect("serialize pilot cells")
         );
     }
+
+    #[test]
+    fn bulk_scaling_manifest_covers_both_structural_adapters() {
+        let manifest = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/pilot-bulk-scaling-v1.json",
+        ))
+        .expect("bulk scaling manifest");
+        assert_eq!(manifest.profile, CampaignProfile::Pilot);
+        assert_eq!(manifest.cells.len(), 57);
+        assert!(manifest
+            .cells
+            .iter()
+            .any(|cell| cell.operation == "summary-tree.bulk-batch-total"));
+        assert!(manifest
+            .cells
+            .iter()
+            .any(|cell| cell.operation == "database.adaptive-transaction-total"));
+    }
 }

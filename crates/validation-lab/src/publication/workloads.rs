@@ -3,12 +3,13 @@ use std::fs;
 use homomorphic_hash_rs::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
     BinaryPolynomialEncoder, BoundedSetReconciler, CanonicalGraphDag, CanonicalSearchBudget,
-    DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema, DatabaseValue,
-    FastGraphLabeler, FileChunkProfile, GraphExecution, GraphSchemaId, GraphWorkspace,
-    HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder, Microcanon, MicrocanonOutcome,
-    MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature, MultisetSignature,
-    PartitionedDatabase, PrimeIntegerEncoder, ReconciliationLimits, RevisionedSignature,
-    SequenceSignature,
+    DatabaseApplyPolicy, DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema,
+    DatabaseTransactionLimits, DatabaseValue, FastGraphLabeler, FileChunkProfile, GraphExecution,
+    GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder,
+    Microcanon, MicrocanonOutcome, MultiEvaluationMultisetSignature,
+    MultiEvaluationSequenceSignature, MultisetSignature, PartitionedDatabase, PrimeIntegerEncoder,
+    ReconciliationLimits, RevisionedSignature, RowMutation, SequenceSignature, SummaryEditPolicy,
+    SummaryRangeEdit, TransactionDelta,
 };
 use microfield::{
     generator::BinaryFieldFactory, BinaryPolynomialField, CanonicalEncoding, Engine, Field,
@@ -42,9 +43,16 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "summary-tree.rebuild",
     "summary-tree.local-edit-total",
     "summary-tree.rebuild-edit-total",
+    "summary-tree.sequential-batch-total",
+    "summary-tree.bulk-batch-total",
+    "summary-tree.adaptive-batch-total",
+    "summary-tree.rebuild-batch-total",
     "database.rebuild",
     "database.transaction-end-to-end",
     "database.table-rebuild-total",
+    "database.bulk-transaction-total",
+    "database.adaptive-transaction-total",
+    "database.selected-rebuild-total",
     "reconciliation.decode",
     "graph.fast-prepared",
     "graph.exact",
@@ -81,9 +89,26 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "summary-tree.rebuild" => summary_tree_rebuild(cell, seed),
         "summary-tree.local-edit-total" => summary_tree_local_edit_total(cell, seed),
         "summary-tree.rebuild-edit-total" => summary_tree_rebuild_edit_total(cell, seed),
+        "summary-tree.sequential-batch-total" => {
+            summary_tree_batch(cell, seed, SummaryBatchMode::Sequential)
+        }
+        "summary-tree.bulk-batch-total" => summary_tree_batch(cell, seed, SummaryBatchMode::Bulk),
+        "summary-tree.adaptive-batch-total" => {
+            summary_tree_batch(cell, seed, SummaryBatchMode::Adaptive)
+        }
+        "summary-tree.rebuild-batch-total" => {
+            summary_tree_batch(cell, seed, SummaryBatchMode::Rebuild)
+        }
         "database.rebuild" => database_rebuild(cell, seed),
         "database.transaction-end-to-end" => database_transaction_end_to_end(cell, seed),
         "database.table-rebuild-total" => database_table_rebuild_total(cell, seed),
+        "database.bulk-transaction-total" => {
+            database_selected_transaction(cell, DatabaseBatchMode::Bulk)
+        }
+        "database.adaptive-transaction-total" => {
+            database_selected_transaction(cell, DatabaseBatchMode::Adaptive)
+        }
+        "database.selected-rebuild-total" => database_selected_rebuild(cell),
         "reconciliation.decode" => reconciliation_decode(cell),
         "graph.fast-prepared" => graph_fast(cell),
         "graph.exact" => graph_exact(cell),
@@ -368,6 +393,102 @@ fn summary_tree_rebuild_edit_total(
     }))
 }
 
+#[derive(Clone, Copy)]
+enum SummaryBatchMode {
+    Sequential,
+    Bulk,
+    Adaptive,
+    Rebuild,
+}
+
+fn summary_tree_batch(
+    cell: &BenchmarkCell,
+    seed: u64,
+    mode: SummaryBatchMode,
+) -> Result<PreparedOperation, String> {
+    let total = cell.dataset_size.unwrap_or(cell.scale);
+    let profile = FileChunkProfile::fixed(4_096).map_err(debug_error)?;
+    if total < 4_096 || !total.is_multiple_of(4_096) || cell.payload_bytes > 4_096 {
+        return Err("bulk summary dataset must contain complete 4096-byte chunks".into());
+    }
+    let leaf_count = total / 4_096;
+    if cell.scale > leaf_count {
+        return Err("bulk summary scale exceeds available leaves".into());
+    }
+    let clustered = cell
+        .strategy
+        .as_deref()
+        .is_some_and(|strategy| strategy.contains("clustered"));
+    let leaf_indexes = if clustered {
+        (0..cell.scale).collect::<Vec<_>>()
+    } else {
+        (0..cell.scale)
+            .map(|index| index * leaf_count / cell.scale)
+            .collect::<Vec<_>>()
+    };
+    let width = cell.payload_bytes;
+    let positions = leaf_indexes
+        .into_iter()
+        .map(|leaf| leaf * 4_096 + (4_096 - width) / 2)
+        .collect::<Vec<_>>();
+    let original = deterministic_bytes(total, seed);
+    let mut byte = 0xa5_u8;
+
+    match mode {
+        SummaryBatchMode::Rebuild => {
+            let mut bytes = original;
+            Ok(single_unit(move || {
+                byte ^= 0xff;
+                for position in &positions {
+                    bytes[*position..*position + width].fill(byte);
+                }
+                checksum_field(build_tree(profile, &bytes).unwrap().root().evaluation())
+            }))
+        }
+        selected => {
+            let mut tree = build_tree(profile, &original)?;
+            let edits_a = positions
+                .iter()
+                .map(|position| {
+                    SummaryRangeEdit::new(*position..*position + width, vec![byte; width])
+                })
+                .collect::<Vec<_>>();
+            let edits_b = positions
+                .iter()
+                .map(|position| {
+                    SummaryRangeEdit::new(*position..*position + width, vec![byte ^ 0xff; width])
+                })
+                .collect::<Vec<_>>();
+            let mut alternate = false;
+            Ok(single_unit(move || {
+                alternate = !alternate;
+                let edits = if alternate { &edits_b } else { &edits_a };
+                match selected {
+                    SummaryBatchMode::Sequential => {
+                        for edit in edits {
+                            tree.replace_range(edit.range().clone(), edit.replacement())
+                                .unwrap();
+                        }
+                    }
+                    SummaryBatchMode::Bulk => {
+                        tree.replace_ranges_with_policy(edits, SummaryEditPolicy::default())
+                            .unwrap();
+                    }
+                    SummaryBatchMode::Adaptive => {
+                        tree.replace_ranges_with_policy(
+                            edits,
+                            SummaryEditPolicy::adaptive(usize::MAX, 1, 4).unwrap(),
+                        )
+                        .unwrap();
+                    }
+                    SummaryBatchMode::Rebuild => unreachable!(),
+                }
+                checksum_field(tree.root().evaluation())
+            }))
+        }
+    }
+}
+
 fn database_rebuild(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, String> {
     let schema = database_schema()?;
     let namespace = database_namespace();
@@ -463,6 +584,132 @@ fn database_table_rebuild_total(
         let mut candidate = rows.clone();
         for (id, row) in candidate.iter_mut().enumerate().take(mutation_count) {
             *row = database_row(id as u64, version);
+        }
+        let database = Database::from_rows(
+            namespace,
+            schema.clone(),
+            16,
+            binary_encoder(),
+            Gf2_128V1::ONE,
+            candidate,
+        )
+        .unwrap();
+        checksum_field(database.summary().unwrap().evaluation())
+    }))
+}
+
+#[derive(Clone, Copy)]
+enum DatabaseBatchMode {
+    Bulk,
+    Adaptive,
+}
+
+fn database_selected_ids(
+    cell: &BenchmarkCell,
+    schema: &DatabaseSchema,
+    row_count: usize,
+) -> Result<Vec<u64>, String> {
+    if cell.scale > row_count || row_count == 0 {
+        return Err("invalid selected database mutation/dataset scale".into());
+    }
+    let clustered = cell
+        .strategy
+        .as_deref()
+        .is_some_and(|strategy| strategy.contains("clustered"));
+    if !clustered {
+        return Ok((0..cell.scale as u64).collect());
+    }
+    let mut partitions = vec![Vec::new(); 16];
+    for id in 0..row_count as u64 {
+        let key = schema.row_key(&database_row(id, 1)).map_err(debug_error)?;
+        let partition =
+            (u64::from_le_bytes(key.as_bytes()[..8].try_into().expect("key prefix")) % 16) as usize;
+        partitions[partition].push(id);
+    }
+    let mut selected = Vec::with_capacity(cell.scale);
+    for partition in partitions {
+        let remaining = cell.scale - selected.len();
+        selected.extend(partition.into_iter().take(remaining));
+        if selected.len() == cell.scale {
+            break;
+        }
+    }
+    Ok(selected)
+}
+
+fn database_selected_transaction(
+    cell: &BenchmarkCell,
+    mode: DatabaseBatchMode,
+) -> Result<PreparedOperation, String> {
+    let row_count = cell.dataset_size.unwrap_or(cell.scale);
+    let schema = database_schema()?;
+    let namespace = database_namespace();
+    let selected = database_selected_ids(cell, &schema, row_count)?;
+    let rows = (0..row_count)
+        .map(|id| database_row(id as u64, 1))
+        .collect::<Vec<_>>();
+    let mut database = Database::from_rows(
+        namespace,
+        schema.clone(),
+        16,
+        binary_encoder(),
+        Gf2_128V1::ONE,
+        rows,
+    )
+    .map_err(debug_error)?;
+    let mut revision = 0_u64;
+    Ok(PreparedOperation {
+        logical_units_per_action: 1,
+        maximum_batch_iterations: Some(1),
+        run: Box::new(move || {
+            let mutations = selected
+                .iter()
+                .map(|id| RowMutation::Update {
+                    before: database_row(*id, revision + 1),
+                    after: database_row(*id, revision + 2),
+                })
+                .collect::<Vec<_>>();
+            let transaction =
+                TransactionDelta::new(namespace, &schema, revision, mutations).unwrap();
+            match mode {
+                DatabaseBatchMode::Bulk => {
+                    database
+                        .apply_transaction(&transaction, DatabaseTransactionLimits::default())
+                        .unwrap();
+                }
+                DatabaseBatchMode::Adaptive => {
+                    database
+                        .apply_transaction_with_policy(
+                            &transaction,
+                            DatabaseTransactionLimits::default(),
+                            DatabaseApplyPolicy::adaptive(usize::MAX, 1, 4).unwrap(),
+                            || -> Vec<DatabaseRow> {
+                                panic!("partition-adaptive benchmark requested global rows")
+                            },
+                        )
+                        .unwrap();
+                }
+            }
+            revision += 1;
+            checksum_field(database.summary().unwrap().evaluation())
+        }),
+    })
+}
+
+fn database_selected_rebuild(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let row_count = cell.dataset_size.unwrap_or(cell.scale);
+    let schema = database_schema()?;
+    let namespace = database_namespace();
+    let selected = database_selected_ids(cell, &schema, row_count)?;
+    let rows = (0..row_count)
+        .map(|id| database_row(id as u64, 1))
+        .collect::<Vec<_>>();
+    let mut version = 1_u64;
+    Ok(single_unit(move || {
+        version += 1;
+        let mut candidate = rows.clone();
+        for id in &selected {
+            candidate[*id as usize] = database_row(*id, version);
         }
         let database = Database::from_rows(
             namespace,
@@ -731,7 +978,9 @@ mod tests {
     #[test]
     fn every_registered_operation_prepares_and_runs() {
         for operation in SUPPORTED_OPERATIONS {
-            let scale = if operation.contains("graph.exact") || operation.contains("dag") {
+            let scale = if operation.contains("summary-tree.") && operation.contains("batch") {
+                1
+            } else if operation.contains("graph.exact") || operation.contains("dag") {
                 8
             } else if operation.contains("tool.") {
                 1
