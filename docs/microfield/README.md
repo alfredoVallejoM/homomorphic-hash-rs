@@ -49,6 +49,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`c3-t1-r1-d1-implementation-and-preflight-report.md`](c3-t1-r1-d1-implementation-and-preflight-report.md) | archivos/árboles, reconciliación y base de datos en memoria |
 | [`c3-g1-g2-implementation-and-preflight-report.md`](c3-g1-g2-implementation-and-preflight-report.md) | pipeline de grafos, exactitud acotada, familias de simetría y DAG persistente |
 | [`c3-x1-x2-implementation-and-preflight-report.md`](c3-x1-x2-implementation-and-preflight-report.md) | corpora públicos, familias wire, fallos, packaging y compatibilidad legacy |
+| [`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md) | logical decoding, concurrencia, backlog, migración y restart PostgreSQL |
 | [`pre-rc-comprehensive-smoke-results.md`](pre-rc-comprehensive-smoke-results.md) | C1 de 65 celdas y piloto PostgreSQL hasta un millón de filas |
 | [`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md) | C2 de firmas K/fragmentación, grafos y PostgreSQL repetido a un millón |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |

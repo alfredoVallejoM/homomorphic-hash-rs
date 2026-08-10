@@ -126,7 +126,7 @@
       "id": "protocol.database-change-stream",
       "status": "conditional",
       "feature": "signatures",
-      "contract": "ordered committed-change adapter with separate sparse source position, contiguous Algesum revision, durable checkpoint and fail-closed redelivery rules; PostgreSQL logical decoding and concurrent consumers remain pre-RC work"
+      "contract": "ordered committed-change adapter with separate sparse source position, contiguous Algesum revision, durable checkpoint and fail-closed redelivery rules; PostgreSQL logical decoding, 1-32 concurrent clients, restart, backlog drain and schema migration are verified by the external D2 preflight, but a production replication-protocol consumer remains outside the supported library surface"
     },
     {
       "id": "protocol.data-delta",

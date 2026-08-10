@@ -311,9 +311,13 @@ y llega a paridad al 100 %; la DB de 65.536 filas mejora unas ocho veces con
 - el inventario combinado F1–S3 alcanza 2.610 celdas C3-Scaling y satisface el
   suelo normativo;
 - T1/R1/D1 completadas en preflight: 374 celdas nuevas, 16 variantes, cero
-  checksums inestables y 16/16 precisas tras recalibrar restore; el inventario
+  checksums inestables y 16/16 precisas tras recalibrar restore;
+- G1/G2/X1/X2 completadas: matrices sintéticas y exactas de grafos, DAG,
+  cinco corpora fijados, once familias wire y consumidor externo; el inventario
   acumulado alcanza 3.243 celdas;
-- continuar por D2 y cerrar los huecos de backend/reference F1/F2;
+- D2 ejecutada como preflight externo: 1.888 commits WAL observados, 1–32
+  clientes, drenaje 2×/5×, migración y recuperación exacta tras restart;
+- cerrar los huecos de backend/reference F1/F2;
 - completar C3-Semantic, C3-Scaling y C3-Systems;
 - replicar los claims en Intel x86-64, AMD x86-64 y AArch64 dedicados;
 - decidir go/no-go con cobertura, efectos, intervalos, límites e inconclusos;
@@ -330,11 +334,15 @@ Evidencia G1/G2:
 [`c3-g1-g2-implementation-and-preflight-report.md`](c3-g1-g2-implementation-and-preflight-report.md).
 Evidencia X1/X2:
 [`c3-x1-x2-implementation-and-preflight-report.md`](c3-x1-x2-implementation-and-preflight-report.md).
+Evidencia D2:
+[`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md).
 
 ### 5. Base de datos real
 
-- implementar el adapter LSN/revisión y una persistencia WAL reproducible;
-- probar concurrencia, crash/restart, migración y rebuild autoritativo;
+- el adapter LSN/revisión, WAL lógico reproducible, concurrencia hasta 32,
+  crash/restart, migración y rebuild autoritativo ya tienen preflight;
+- implementar un consumidor del protocolo de replicación y separar writers de
+  readers;
 - medir transacción, WAL, fsync, replay, reconciliación y fallback end-to-end.
 
 Salida requerida: equivalencia exacta tras restart y curvas de capacidad con

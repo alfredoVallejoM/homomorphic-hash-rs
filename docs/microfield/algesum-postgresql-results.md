@@ -52,9 +52,12 @@ algorítmico mínimo, no como competidor transaccional directo.
 - adaptativa inicial `1/2`: [`pre-rc-postgresql-adaptive-v1`](../../validation/benchmarks/runs/pre-rc-postgresql-adaptive-v1/report.json);
 - adaptativa seleccionada `2/3`: [`pre-rc-postgresql-adaptive-v2`](../../validation/benchmarks/runs/pre-rc-postgresql-adaptive-v2/report.json).
 
-La campaña usa un único cliente y una tabla sintética reproducible. Todavía no
-mide logical decoding/WAL real, crashes, 16–256 clientes concurrentes ni el
-corpus NYC TLC. Esos puntos permanecen como siguiente fase antes de la RC.
+Estas tres campañas históricas usan un único cliente y una tabla sintética
+reproducible. El preflight C3 posterior sí cubre WAL lógico real, 1–32 clientes,
+backlog, migración y restart, con estado exacto y resumen reconstruido; véase
+[`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md).
+Siguen pendientes 64–256 clientes, un consumidor del protocolo de replicación,
+el corpus NYC TLC, soak largo y réplica en hardware controlado.
 
 ## Cierre de la frontera densa sobre un millón de filas
 

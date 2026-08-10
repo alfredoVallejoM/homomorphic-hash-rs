@@ -1,7 +1,8 @@
 # C3: campaña extensiva de validación y rendimiento de Algesum
 
 Fecha: 2026-08-11. Estado: **en ejecución; P0 y preflights
-F1–S3/T1/R1/D1/G1/G2/X1/X2 completados, campaña `Controlled` pendiente**.
+F1–S3/T1/R1/D1/G1/G2/X1/X2 completados y D2 parcial, campaña `Controlled`
+pendiente**.
 
 La implementación y los resultados iniciales quedan fijados en
 [`c3-p0-implementation-and-preflight-report.md`](c3-p0-implementation-and-preflight-report.md)
@@ -13,6 +14,8 @@ El pipeline rápido, las matrices exactas y el DAG están en
 [`c3-g1-g2-implementation-and-preflight-report.md`](c3-g1-g2-implementation-and-preflight-report.md).
 Los corpora externos, wires y packaging están en
 [`c3-x1-x2-implementation-and-preflight-report.md`](c3-x1-x2-implementation-and-preflight-report.md).
+Los sistemas PostgreSQL están en
+[`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md).
 
 Este documento sustituye cualquier propuesta de ejecutar C3 sobre unas pocas
 celdas «seleccionadas». Algesum reúne un núcleo de campos finitos, algoritmos

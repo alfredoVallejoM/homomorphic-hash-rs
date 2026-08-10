@@ -1,0 +1,12 @@
+{
+  "balance_sum": 335504384,
+  "checkpoint_fields_match": true,
+  "postgres_version": "17.10",
+  "recovery_state": "primary",
+  "revision": 1024,
+  "rows": 8192,
+  "schema": "algesum-c3-postgresql-systems-restart-v1",
+  "schema_version": 2,
+  "summary_bytes_match": true,
+  "summary_matches_fresh_rebuild": true
+}

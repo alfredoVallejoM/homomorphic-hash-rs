@@ -1,0 +1,104 @@
+{
+  "backpressure": [
+    {
+      "backlog_monotonic": true,
+      "batch_size": 512,
+      "batches": 2,
+      "burst_factor": 2,
+      "drain_microseconds": 3613,
+      "final_backlog": 0,
+      "initial_backlog": 1024,
+      "maximum_backlog": 1024,
+      "revisions_contiguous": true
+    },
+    {
+      "backlog_monotonic": true,
+      "batch_size": 204,
+      "batches": 6,
+      "burst_factor": 5,
+      "drain_microseconds": 2602,
+      "final_backlog": 0,
+      "initial_backlog": 1024,
+      "maximum_backlog": 1024,
+      "revisions_contiguous": true
+    }
+  ],
+  "caveat": "preflight on a shared host; timings are diagnostic and not publication benchmarks",
+  "concurrency": [
+    {
+      "clients": 1,
+      "committed_transactions": 32,
+      "decoded_account_updates": 32,
+      "decoded_transactions": 32,
+      "elapsed_microseconds": 63953,
+      "exact_rows_match": true,
+      "lsn_strictly_monotonic": true,
+      "summary_matches_rebuild": true,
+      "transactions_per_second": 500.3664324112607
+    },
+    {
+      "clients": 2,
+      "committed_transactions": 64,
+      "decoded_account_updates": 64,
+      "decoded_transactions": 64,
+      "elapsed_microseconds": 81880,
+      "exact_rows_match": true,
+      "lsn_strictly_monotonic": true,
+      "summary_matches_rebuild": true,
+      "transactions_per_second": 781.6258139350497
+    },
+    {
+      "clients": 8,
+      "committed_transactions": 256,
+      "decoded_account_updates": 256,
+      "decoded_transactions": 256,
+      "elapsed_microseconds": 232041,
+      "exact_rows_match": true,
+      "lsn_strictly_monotonic": true,
+      "summary_matches_rebuild": true,
+      "transactions_per_second": 1103.2503898341718
+    },
+    {
+      "clients": 16,
+      "committed_transactions": 512,
+      "decoded_account_updates": 512,
+      "decoded_transactions": 512,
+      "elapsed_microseconds": 458385,
+      "exact_rows_match": true,
+      "lsn_strictly_monotonic": true,
+      "summary_matches_rebuild": true,
+      "transactions_per_second": 1116.9649016402561
+    },
+    {
+      "clients": 32,
+      "committed_transactions": 1024,
+      "decoded_account_updates": 1024,
+      "decoded_transactions": 1024,
+      "elapsed_microseconds": 1046352,
+      "exact_rows_match": true,
+      "lsn_strictly_monotonic": true,
+      "summary_matches_rebuild": true,
+      "transactions_per_second": 978.6379533908862
+    }
+  ],
+  "migration": {
+    "compatible_add_column": true,
+    "incompatible_change_detected": true,
+    "migrated_summary_deterministic": true,
+    "old_projection_stable": true,
+    "rollback_preserved_schema": true
+  },
+  "partitions": 256,
+  "postgres_version": "17.10",
+  "restart_checkpoint": {
+    "balance_sum": 335504384,
+    "revision": 1024,
+    "rows": 8192,
+    "schema_version": 2,
+    "summary_match_at_prepare": true
+  },
+  "rows": 8192,
+  "schema": "algesum-c3-postgresql-systems-prepare-v1",
+  "transactions_per_client": 32,
+  "wal_level": "logical"
+}

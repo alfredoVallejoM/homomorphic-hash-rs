@@ -40,6 +40,39 @@ docker stop algesum-postgres-test
 Una campaña de publicación deberá usar más repeticiones, una máquina dedicada,
 afinidad fija y un directorio de resultados nuevo.
 
+## Preflight C3 de sistemas
+
+El binario `c3_systems` cubre los escenarios que el laboratorio de lotes no
+modela: `test_decoding` sobre WAL real, clientes concurrentes, drenaje de
+backlog, migración compatible/incompatible y verificación durable tras un
+reinicio real del servidor. Requiere una instancia aislada con
+`wal_level=logical`; crea y destruye solamente tablas y slots con prefijo
+`algesum_c3_`.
+
+```text
+docker run --rm --detach --name algesum-c3-postgres \
+  -e POSTGRES_PASSWORD=postgres -p 127.0.0.1:55432:5432 \
+  postgres:17-alpine -c wal_level=logical \
+  -c max_replication_slots=8 -c max_wal_senders=8
+
+cargo run --release -p algesum-postgres-lab --bin c3_systems --locked -- \
+  --phase prepare --rows 8192 --partitions 256 \
+  --transactions-per-client 32 --clients 1,2,8,16,32 \
+  --output /tmp/c3-d2-prepare.json
+
+docker restart algesum-c3-postgres
+
+target/release/c3_systems --phase verify-restart \
+  --output /tmp/c3-d2-restart.json
+```
+
+El modo `prepare` falla si falta un commit decodificado, si los LSN no son
+estrictamente crecientes, si una before-image no coincide o si el resumen no
+iguala una reconstrucción exacta. `verify-restart` compara agregados, versión
+de schema y bytes canónicos del resumen con el checkpoint almacenado antes del
+reinicio. Es un preflight funcional: sus tiempos no son cifras de publicación
+ni equivalen a un soak sostenido de ocho horas.
+
 El informe v3 separa creación de tabla, carga inicial PostgreSQL, construcción
 inicial de Algesum, commit, aplicación, rebuild y verificación exacta. La opción
 `--distribution` acepta `clustered`, `strided` o `hotspot`; `--hotspot-rows`

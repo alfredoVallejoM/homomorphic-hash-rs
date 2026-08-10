@@ -74,7 +74,8 @@
       "id": "D2",
       "status": "external",
       "implemented_operations": [],
-      "missing_operations": ["postgres.logical-decoding", "postgres.concurrent-clients", "postgres.crash-restart", "postgres.backpressure-soak", "postgres.schema-migration"],
+      "missing_operations": ["postgres.backpressure-soak"],
+      "executed_external_operations": ["postgres.logical-decoding", "postgres.concurrent-clients", "postgres.crash-restart", "postgres.backpressure-catchup", "postgres.schema-migration"],
       "external_runner": "crates/algesum-postgres-lab"
     },
     {
