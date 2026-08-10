@@ -488,9 +488,8 @@ impl TransactionDelta {
             transaction_id: TransactionId([0; 32]),
             canonical_len: 0,
         };
-        let canonical = transaction.to_canonical_bytes();
-        transaction.canonical_len = canonical.len();
-        transaction.transaction_id = derive_transaction_id(&canonical);
+        transaction.canonical_len = transaction_wire_len(&transaction)?;
+        transaction.transaction_id = derive_transaction_id_streaming(&transaction);
         Ok(transaction)
     }
 
@@ -1587,6 +1586,112 @@ fn derive_transaction_id(bytes: &[u8]) -> TransactionId {
     hasher.update((bytes.len() as u64).to_le_bytes());
     hasher.update(bytes);
     TransactionId(hasher.finalize().into())
+}
+
+fn transaction_wire_len(transaction: &TransactionDelta) -> Result<usize, DatabaseError> {
+    let mut length = TX_HEADER_BYTES;
+    for mutation in &transaction.mutations {
+        length = length
+            .checked_add(1)
+            .ok_or(DatabaseError::LimitExceeded("transaction bytes"))?;
+        let (first, second) = match mutation {
+            RowMutation::Insert(after) => (after, None),
+            RowMutation::Delete(before) => (before, None),
+            RowMutation::Update { before, after } => (before, Some(after)),
+        };
+        length = length
+            .checked_add(8)
+            .and_then(|value| value.checked_add(row_wire_len(first)?))
+            .ok_or(DatabaseError::LimitExceeded("transaction bytes"))?;
+        if let Some(second) = second {
+            length = length
+                .checked_add(8)
+                .and_then(|value| value.checked_add(row_wire_len(second)?))
+                .ok_or(DatabaseError::LimitExceeded("transaction bytes"))?;
+        }
+    }
+    Ok(length)
+}
+
+fn row_wire_len(row: &DatabaseRow) -> Option<usize> {
+    row.values
+        .iter()
+        .try_fold(ROW_HEADER_BYTES, |length, value| {
+            let value_len = match value {
+                DatabaseValue::Null => 1,
+                DatabaseValue::Bool(_) => 2,
+                DatabaseValue::I64(_) | DatabaseValue::U64(_) => 9,
+                DatabaseValue::Bytes(value) => 9_usize.checked_add(value.len())?,
+                DatabaseValue::Text(value) => 9_usize.checked_add(value.len())?,
+            };
+            length.checked_add(value_len)
+        })
+}
+
+fn derive_transaction_id_streaming(transaction: &TransactionDelta) -> TransactionId {
+    let mut hasher = Sha256::new();
+    hasher.update(b"microfield-database-transaction-v1\0");
+    hasher.update((transaction.canonical_len as u64).to_le_bytes());
+    hasher.update(TX_MAGIC);
+    hasher.update(TX_SCHEMA.to_le_bytes());
+    hasher.update([0, 0]);
+    hasher.update(transaction.namespace.as_bytes());
+    hasher.update(transaction.schema_id.as_bytes());
+    hasher.update(transaction.source_revision.to_le_bytes());
+    hasher.update(transaction.target_revision.to_le_bytes());
+    hasher.update((transaction.mutations.len() as u64).to_le_bytes());
+    for mutation in &transaction.mutations {
+        match mutation {
+            RowMutation::Insert(after) => {
+                hasher.update([1]);
+                hash_framed_row(&mut hasher, transaction.schema_id, after);
+            }
+            RowMutation::Delete(before) => {
+                hasher.update([2]);
+                hash_framed_row(&mut hasher, transaction.schema_id, before);
+            }
+            RowMutation::Update { before, after } => {
+                hasher.update([3]);
+                hash_framed_row(&mut hasher, transaction.schema_id, before);
+                hash_framed_row(&mut hasher, transaction.schema_id, after);
+            }
+        }
+    }
+    TransactionId(hasher.finalize().into())
+}
+
+fn hash_framed_row(hasher: &mut Sha256, schema_id: DatabaseSchemaId, row: &DatabaseRow) {
+    hasher.update((row_wire_len(row).expect("validated row length") as u64).to_le_bytes());
+    hasher.update(ROW_MAGIC);
+    hasher.update(ROW_SCHEMA.to_le_bytes());
+    hasher.update([0, 0]);
+    hasher.update(schema_id.as_bytes());
+    hasher.update(row.version.to_le_bytes());
+    hasher.update((row.values.len() as u64).to_le_bytes());
+    for value in &row.values {
+        match value {
+            DatabaseValue::Null => hasher.update([0]),
+            DatabaseValue::Bool(value) => hasher.update([1, u8::from(*value)]),
+            DatabaseValue::I64(value) => {
+                hasher.update([2]);
+                hasher.update(value.to_le_bytes());
+            }
+            DatabaseValue::U64(value) => {
+                hasher.update([3]);
+                hasher.update(value.to_le_bytes());
+            }
+            DatabaseValue::Bytes(value) => {
+                hasher.update([4]);
+                hasher.update((value.len() as u64).to_le_bytes());
+                hasher.update(value);
+            }
+            DatabaseValue::Text(value) => {
+                hasher.update([5]);
+                hasher.update((value.len() as u64).to_le_bytes());
+                hasher.update(value.as_bytes());
+            }
+        }
+    }
 }
 
 fn row_wire_unchecked(schema_id: DatabaseSchemaId, row: &DatabaseRow) -> Vec<u8> {
