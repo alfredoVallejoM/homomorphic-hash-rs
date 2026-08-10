@@ -82,6 +82,8 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
     "graph.dag-reuse",
     "graph.full-label-reanalysis-total",
     "graph.incremental-label-update-total",
+    "graph.full-topology-reanalysis-total",
+    "graph.incremental-topology-update-total",
     "tool.binary-manifest.parse",
     "tool.binary-manifest.generate",
 ];
@@ -181,6 +183,8 @@ pub fn prepare(cell: &BenchmarkCell, seed: u64) -> Result<PreparedOperation, Str
         "graph.dag-reuse" => graph_dag_reuse(cell),
         "graph.full-label-reanalysis-total" => graph_full_label_reanalysis(cell),
         "graph.incremental-label-update-total" => graph_incremental_label_update(cell),
+        "graph.full-topology-reanalysis-total" => graph_full_topology_reanalysis(cell),
+        "graph.incremental-topology-update-total" => graph_incremental_topology_update(cell),
         "tool.binary-manifest.parse" => tool_binary_manifest(false),
         "tool.binary-manifest.generate" => tool_binary_manifest(true),
         other => Err(format!(
@@ -1281,6 +1285,8 @@ fn graph_fast(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
     // the measured operation without a self-referential owner.
     let graph: &'static IncidenceGraph = Box::leak(Box::new(match cell.strategy.as_deref() {
         Some("regular-8") => regular_graph(cell.scale.max(8), 8, false)?,
+        Some("regular-32") => regular_graph(cell.scale.max(32), 32, false)?,
+        Some("mesh") => mesh_graph(cell.scale.max(16))?,
         Some("star") => star_graph(cell.scale.max(4))?,
         _ => sparse_cycle(cell.scale.max(4))?,
     }));
@@ -1388,6 +1394,54 @@ fn graph_incremental_label_update(cell: &BenchmarkCell) -> Result<PreparedOperat
     let mut workspace = IncrementalGraphWorkspace::new();
     workspace
         .reserve_for(vertices, base.incidence_count(), 4)
+        .map_err(debug_error)?;
+    let mut toggle = false;
+    Ok(single_unit(move || {
+        toggle = !toggle;
+        let graph = if toggle {
+            changed.clone()
+        } else {
+            base.clone()
+        };
+        labeler
+            .update_incremental(&mut state, graph, &mut workspace)
+            .unwrap()
+            .recomputed_vertex_rounds() as u64
+    }))
+}
+
+fn graph_full_topology_reanalysis(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let vertices = cell.scale.max(16);
+    let base = regular_graph_variant(vertices, 8, false, false)?;
+    let changed = regular_graph_variant(vertices, 8, false, true)?;
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    let mut toggle = false;
+    Ok(single_unit(move || {
+        toggle = !toggle;
+        let graph = if toggle { &changed } else { &base };
+        checksum_field(labeler.analyze(graph).unwrap().signature().lanes()[0])
+    }))
+}
+
+fn graph_incremental_topology_update(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
+    let vertices = cell.scale.max(16);
+    let base = regular_graph_variant(vertices, 8, false, false)?;
+    let changed = regular_graph_variant(vertices, 8, false, true)?;
+    let labeler =
+        FastGraphLabeler::<Fp251V1, _, 2>::new(prime_encoder(), algesum::RefinementProfile::fast())
+            .map_err(debug_error)?;
+    let mut state = labeler
+        .incremental_state(base.clone())
+        .map_err(debug_error)?;
+    let mut workspace = IncrementalGraphWorkspace::new();
+    workspace
+        .reserve_for(
+            vertices,
+            base.incidence_count().max(changed.incidence_count()),
+            4,
+        )
         .map_err(debug_error)?;
     let mut toggle = false;
     Ok(single_unit(move || {
@@ -1572,6 +1626,15 @@ fn regular_graph(
     degree: usize,
     changed_label: bool,
 ) -> Result<IncidenceGraph, String> {
+    regular_graph_variant(vertices, degree, changed_label, false)
+}
+
+fn regular_graph_variant(
+    vertices: usize,
+    degree: usize,
+    changed_label: bool,
+    topology_edit: bool,
+) -> Result<IncidenceGraph, String> {
     let mut builder = IncidenceGraphBuilder::new();
     let ids = (0..vertices)
         .map(|index| {
@@ -1593,6 +1656,36 @@ fn regular_graph(
                     b"regular",
                     1,
                 )
+                .map_err(debug_error)?;
+        }
+    }
+    if topology_edit {
+        builder
+            .add_undirected_relation(ids[0], ids[vertices / 2], b"edge", b"topology-edit", 1)
+            .map_err(debug_error)?;
+    }
+    builder.build().map_err(debug_error)
+}
+
+fn mesh_graph(vertices: usize) -> Result<IncidenceGraph, String> {
+    let width = (vertices as f64).sqrt().floor() as usize;
+    let width = width.max(2);
+    let height = vertices.div_ceil(width);
+    let mut builder = IncidenceGraphBuilder::new();
+    let ids = (0..vertices)
+        .map(|_| builder.add_vertex(Vec::new()))
+        .collect::<Vec<_>>();
+    for index in 0..vertices {
+        let column = index % width;
+        let row = index / width;
+        if column + 1 < width && index + 1 < vertices {
+            builder
+                .add_undirected_relation(ids[index], ids[index + 1], b"edge", b"mesh-x", 1)
+                .map_err(debug_error)?;
+        }
+        if row + 1 < height && index + width < vertices {
+            builder
+                .add_undirected_relation(ids[index], ids[index + width], b"edge", b"mesh-y", 1)
                 .map_err(debug_error)?;
         }
     }
@@ -1694,5 +1787,29 @@ mod tests {
             Some(GraphExactLimit::SearchNodes)
         );
         assert_eq!(telemetry.path, GraphExactPath::IndividualizationRefinement);
+    }
+
+    #[test]
+    fn topology_benchmark_pair_is_differentially_exact() {
+        let base = regular_graph_variant(64, 8, false, false).unwrap();
+        let changed = regular_graph_variant(64, 8, false, true).unwrap();
+        let labeler = FastGraphLabeler::<Fp251V1, _, 2>::new(
+            prime_encoder(),
+            algesum::RefinementProfile::fast(),
+        )
+        .unwrap();
+        let mut state = labeler.incremental_state(base.clone()).unwrap();
+        let mut workspace = IncrementalGraphWorkspace::new();
+        labeler
+            .update_incremental(&mut state, changed.clone(), &mut workspace)
+            .unwrap();
+        assert_eq!(
+            state.analysis().to_owned(),
+            labeler.analyze(&changed).unwrap()
+        );
+        labeler
+            .update_incremental(&mut state, base.clone(), &mut workspace)
+            .unwrap();
+        assert_eq!(state.analysis().to_owned(), labeler.analyze(&base).unwrap());
     }
 }

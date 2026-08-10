@@ -103,6 +103,44 @@ mod tests {
     }
 
     #[test]
+    fn post_c2_manifests_cover_five_fragment_points_and_topology_edits() {
+        let fragmentation = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/comprehensive-fragmentation-pilot-v3.json",
+        ))
+        .expect("five-point fragmentation manifest");
+        for operation in [
+            "signature.multi-multiset-k4.fragmented-merge-total",
+            "signature.multi-sequence-k4.fragmented-concatenate-total",
+        ] {
+            assert_eq!(
+                fragmentation
+                    .cells
+                    .iter()
+                    .filter(|cell| cell.operation == operation)
+                    .count(),
+                5
+            );
+        }
+
+        let graphs = load_manifest(std::path::Path::new(
+            "../../validation/benchmarks/manifests/graph-topology-density-pilot-v1.json",
+        ))
+        .expect("graph topology and density manifest");
+        for operation in [
+            "graph.full-topology-reanalysis-total",
+            "graph.incremental-topology-update-total",
+        ] {
+            assert!(graphs.cells.iter().any(|cell| cell.operation == operation));
+        }
+        for strategy in ["mesh", "regular-8", "regular-32"] {
+            assert!(graphs
+                .cells
+                .iter()
+                .any(|cell| cell.strategy.as_deref() == Some(strategy)));
+        }
+    }
+
+    #[test]
     fn scaling_manifests_share_the_same_complete_cell_inventory() {
         let pilot = load_manifest(std::path::Path::new(
             "../../validation/benchmarks/manifests/pilot-scaling-v1.json",

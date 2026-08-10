@@ -1,6 +1,6 @@
 # Campaña integral pre-RC de Algesum
 
-Fecha: 2026-08-10. Estado: **C2 ejecutado; C3 pendiente**. Clasificación inicial:
+Fecha: 2026-08-10. Estado: **C2 y extensiones ejecutados; C3 controlado pendiente**. Clasificación inicial:
 **Informative**; ninguna medición habilita por sí sola afirmaciones públicas.
 
 Algesum mide resúmenes y firmas algebraicas homomórficas **no criptográficas**.
@@ -163,6 +163,11 @@ acotados, y memoria pico documentada.
   incremental y canon exacto presupuestado;
 - `comprehensive-fragmentation-pilot-v1.json`: 2–1.024 fragmentos K=4 con dos
   juegos de operandos alternantes;
+- `comprehensive-fragmentation-pilot-v3.json`: quinto punto, 10 procesos por
+  celda y pendientes estimables;
+- `graph-exact-telemetry-pilot-v4.json`: outcomes y presupuestos estructurados;
+- `graph-topology-density-pilot-v1.json`: mallas, grado 8/32 y edición
+  topológica incremental emparejada;
 - tres campañas PostgreSQL C2 de un millón de filas y tres repeticiones por
   celda para `clustered`, `strided` y `hotspot`.
 

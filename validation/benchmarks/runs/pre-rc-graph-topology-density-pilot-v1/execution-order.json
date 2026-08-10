@@ -1,0 +1,406 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "pre-rc-graph-topology-density-pilot-v1",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "graph-regular8-4096",
+      "process_index": 0,
+      "seed": 7901482697617301015,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "graph-full-topology-1024",
+      "process_index": 0,
+      "seed": 16419729692151441023,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "graph-incremental-topology-16384",
+      "process_index": 0,
+      "seed": 18007658092407360391,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "graph-incremental-topology-1024",
+      "process_index": 0,
+      "seed": 16419729692151441023,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "graph-regular32-4096",
+      "process_index": 0,
+      "seed": 2520270798949409746,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "graph-regular8-16384",
+      "process_index": 0,
+      "seed": 15045042027229699134,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 0,
+      "cell": "graph-mesh-16384",
+      "process_index": 0,
+      "seed": 7576956642553750272,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 0,
+      "cell": "graph-mesh-4096",
+      "process_index": 0,
+      "seed": 15130903723489432718,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 0,
+      "cell": "graph-regular32-16384",
+      "process_index": 0,
+      "seed": 13742651885973255313,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 0,
+      "cell": "graph-full-topology-16384",
+      "process_index": 0,
+      "seed": 18007658092407360391,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "graph-regular8-16384",
+      "process_index": 1,
+      "seed": 16192116762412112794,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "graph-regular8-4096",
+      "process_index": 1,
+      "seed": 4929856024146171995,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 1,
+      "cell": "graph-full-topology-1024",
+      "process_index": 1,
+      "seed": 16114643589033430558,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 1,
+      "cell": "graph-regular32-4096",
+      "process_index": 1,
+      "seed": 6690010153017657137,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 1,
+      "cell": "graph-full-topology-16384",
+      "process_index": 1,
+      "seed": 8759142042500239685,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 1,
+      "cell": "graph-incremental-topology-16384",
+      "process_index": 1,
+      "seed": 8759142042500239685,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 1,
+      "cell": "graph-regular32-16384",
+      "process_index": 1,
+      "seed": 4365472820190336252,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 1,
+      "cell": "graph-mesh-4096",
+      "process_index": 1,
+      "seed": 2366217259746787766,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 1,
+      "cell": "graph-incremental-topology-1024",
+      "process_index": 1,
+      "seed": 16114643589033430558,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 1,
+      "cell": "graph-mesh-16384",
+      "process_index": 1,
+      "seed": 7197101368416178237,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 2,
+      "cell": "graph-regular32-4096",
+      "process_index": 2,
+      "seed": 16581605102683747350,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 2,
+      "cell": "graph-mesh-4096",
+      "process_index": 2,
+      "seed": 3695607735938135392,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 2,
+      "cell": "graph-mesh-16384",
+      "process_index": 2,
+      "seed": 7446035176762774626,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 2,
+      "cell": "graph-regular8-16384",
+      "process_index": 2,
+      "seed": 6369481172397691486,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 2,
+      "cell": "graph-full-topology-16384",
+      "process_index": 2,
+      "seed": 17117490315985863886,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 2,
+      "cell": "graph-full-topology-1024",
+      "process_index": 2,
+      "seed": 13122363405724177447,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 2,
+      "cell": "graph-regular8-4096",
+      "process_index": 2,
+      "seed": 17965244705314440190,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 2,
+      "cell": "graph-incremental-topology-1024",
+      "process_index": 2,
+      "seed": 13122363405724177447,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 2,
+      "cell": "graph-regular32-16384",
+      "process_index": 2,
+      "seed": 4595209044639970507,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 2,
+      "cell": "graph-incremental-topology-16384",
+      "process_index": 2,
+      "seed": 17117490315985863886,
+      "status": "success"
+    },
+    {
+      "sequence": 30,
+      "round": 3,
+      "cell": "graph-full-topology-1024",
+      "process_index": 3,
+      "seed": 1607397769899540548,
+      "status": "success"
+    },
+    {
+      "sequence": 31,
+      "round": 3,
+      "cell": "graph-regular8-16384",
+      "process_index": 3,
+      "seed": 1063473904359271274,
+      "status": "success"
+    },
+    {
+      "sequence": 32,
+      "round": 3,
+      "cell": "graph-regular32-16384",
+      "process_index": 3,
+      "seed": 5498423854930598031,
+      "status": "success"
+    },
+    {
+      "sequence": 33,
+      "round": 3,
+      "cell": "graph-regular32-4096",
+      "process_index": 3,
+      "seed": 6938104438889621409,
+      "status": "success"
+    },
+    {
+      "sequence": 34,
+      "round": 3,
+      "cell": "graph-full-topology-16384",
+      "process_index": 3,
+      "seed": 18184657665866753489,
+      "status": "success"
+    },
+    {
+      "sequence": 35,
+      "round": 3,
+      "cell": "graph-mesh-16384",
+      "process_index": 3,
+      "seed": 9332562518824955227,
+      "status": "success"
+    },
+    {
+      "sequence": 36,
+      "round": 3,
+      "cell": "graph-incremental-topology-16384",
+      "process_index": 3,
+      "seed": 18184657665866753489,
+      "status": "success"
+    },
+    {
+      "sequence": 37,
+      "round": 3,
+      "cell": "graph-incremental-topology-1024",
+      "process_index": 3,
+      "seed": 1607397769899540548,
+      "status": "success"
+    },
+    {
+      "sequence": 38,
+      "round": 3,
+      "cell": "graph-mesh-4096",
+      "process_index": 3,
+      "seed": 8146986563355478427,
+      "status": "success"
+    },
+    {
+      "sequence": 39,
+      "round": 3,
+      "cell": "graph-regular8-4096",
+      "process_index": 3,
+      "seed": 5198131658063715527,
+      "status": "success"
+    },
+    {
+      "sequence": 40,
+      "round": 4,
+      "cell": "graph-incremental-topology-16384",
+      "process_index": 4,
+      "seed": 17576065156587428802,
+      "status": "success"
+    },
+    {
+      "sequence": 41,
+      "round": 4,
+      "cell": "graph-regular8-4096",
+      "process_index": 4,
+      "seed": 12182654759632418467,
+      "status": "success"
+    },
+    {
+      "sequence": 42,
+      "round": 4,
+      "cell": "graph-regular8-16384",
+      "process_index": 4,
+      "seed": 8168715478618990510,
+      "status": "success"
+    },
+    {
+      "sequence": 43,
+      "round": 4,
+      "cell": "graph-regular32-16384",
+      "process_index": 4,
+      "seed": 10062683371496366807,
+      "status": "success"
+    },
+    {
+      "sequence": 44,
+      "round": 4,
+      "cell": "graph-mesh-4096",
+      "process_index": 4,
+      "seed": 1455853761906433435,
+      "status": "success"
+    },
+    {
+      "sequence": 45,
+      "round": 4,
+      "cell": "graph-mesh-16384",
+      "process_index": 4,
+      "seed": 3412967954402924789,
+      "status": "success"
+    },
+    {
+      "sequence": 46,
+      "round": 4,
+      "cell": "graph-incremental-topology-1024",
+      "process_index": 4,
+      "seed": 2701040669404259310,
+      "status": "success"
+    },
+    {
+      "sequence": 47,
+      "round": 4,
+      "cell": "graph-full-topology-16384",
+      "process_index": 4,
+      "seed": 17576065156587428802,
+      "status": "success"
+    },
+    {
+      "sequence": 48,
+      "round": 4,
+      "cell": "graph-regular32-4096",
+      "process_index": 4,
+      "seed": 13508046014250923305,
+      "status": "success"
+    },
+    {
+      "sequence": 49,
+      "round": 4,
+      "cell": "graph-full-topology-1024",
+      "process_index": 4,
+      "seed": 2701040669404259310,
+      "status": "success"
+    }
+  ]
+}

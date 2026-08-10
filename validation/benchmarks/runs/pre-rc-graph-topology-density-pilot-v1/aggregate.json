@@ -1,0 +1,434 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "pre-rc-graph-topology-density-pilot-v1",
+  "profile": "pilot",
+  "environment_classification": "informative",
+  "cells": [
+    {
+      "id": "graph-mesh-4096",
+      "family": "graph",
+      "operation": "graph.fast-prepared",
+      "scale": 4096,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 680.1341552734375,
+      "p95_ns_per_unit": 748.4181152343748,
+      "p99_ns_per_unit": 909.4701416015622,
+      "mad_ns_per_unit": 3.9173583984375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 678.9661865234375,
+        "upper": 696.273681640625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 695.944499206543,
+        "upper": 981.9736328125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 697.4182571411133,
+        "upper": 981.9736328125
+      },
+      "relative_median_ci_half_width": 0.012723589150017974,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-regular8-4096",
+      "family": "graph",
+      "operation": "graph.fast-prepared",
+      "scale": 4096,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 1257.134033203125,
+      "p95_ns_per_unit": 1279.5867919921875,
+      "p99_ns_per_unit": 1321.81833984375,
+      "mad_ns_per_unit": 5.3388671875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1253.3968505859375,
+        "upper": 1265.630615234375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1263.6903469848633,
+        "upper": 1355.0263671875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1267.5670455932618,
+        "upper": 1355.0263671875
+      },
+      "relative_median_ci_half_width": 0.004865736001620439,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-regular32-4096",
+      "family": "graph",
+      "operation": "graph.fast-prepared",
+      "scale": 4096,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 3341.31103515625,
+      "p95_ns_per_unit": 3513.9351440429687,
+      "p99_ns_per_unit": 3607.285793457031,
+      "mad_ns_per_unit": 12.401123046875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3328.909912109375,
+        "upper": 3389.8101806640625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3357.057269287109,
+        "upper": 3641.28564453125
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3386.4902893066405,
+        "upper": 3641.28564453125
+      },
+      "relative_median_ci_half_width": 0.0091132294949368,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-mesh-16384",
+      "family": "graph",
+      "operation": "graph.fast-prepared",
+      "scale": 16384,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 679.9964599609375,
+      "p95_ns_per_unit": 697.4983703613282,
+      "p99_ns_per_unit": 713.7636834716797,
+      "mad_ns_per_unit": 2.227294921875,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 677.9202575683594,
+        "upper": 690.5969848632812
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 682.7987670898438,
+        "upper": 716.953857421875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 690.7042858886718,
+        "upper": 716.953857421875
+      },
+      "relative_median_ci_half_width": 0.00932117153642983,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-regular8-16384",
+      "family": "graph",
+      "operation": "graph.fast-prepared",
+      "scale": 16384,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 1263.9029541015625,
+      "p95_ns_per_unit": 1273.5855651855468,
+      "p99_ns_per_unit": 1279.9683270263672,
+      "mad_ns_per_unit": 2.267120361328125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1261.5853271484375,
+        "upper": 1266.953369140625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1268.3068237304688,
+        "upper": 1282.060546875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1271.4230963134767,
+        "upper": 1282.060546875
+      },
+      "relative_median_ci_half_width": 0.0021235973754026626,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-regular32-16384",
+      "family": "graph",
+      "operation": "graph.fast-prepared",
+      "scale": 16384,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 3338.7896728515625,
+      "p95_ns_per_unit": 3681.842681884765,
+      "p99_ns_per_unit": 4411.350673828124,
+      "mad_ns_per_unit": 5.337799072265625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3338.1670532226562,
+        "upper": 3416.2324829101562
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3344.1064453125,
+        "upper": 4592.087341308594
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 3516.417520935058,
+        "upper": 4592.087341308594
+      },
+      "relative_median_ci_half_width": 0.011690677960679477,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-full-topology-1024",
+      "family": "graph",
+      "operation": "graph.full-topology-reanalysis-total",
+      "scale": 1024,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 1616862.0,
+      "p95_ns_per_unit": 1670053.8499999999,
+      "p99_ns_per_unit": 1899589.2199999995,
+      "mad_ns_per_unit": 12997.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1598407.5,
+        "upper": 1633026.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1625944.0,
+        "upper": 2023129.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1634761.42575,
+        "upper": 2023129.0
+      },
+      "relative_median_ci_half_width": 0.010705613713477093,
+      "precision_met": true,
+      "allocation_count_median": 1051.0,
+      "allocated_bytes_median": 94628.0,
+      "peak_allocated_bytes_median": 57702.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-incremental-topology-1024",
+      "family": "graph",
+      "operation": "graph.incremental-topology-update-total",
+      "scale": 1024,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 656446.0,
+      "p95_ns_per_unit": 692685.8,
+      "p99_ns_per_unit": 703256.94,
+      "mad_ns_per_unit": 8512.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 647714.0,
+        "upper": 685224.5
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 660014.0,
+        "upper": 709967.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 672746.0,
+        "upper": 709967.0
+      },
+      "relative_median_ci_half_width": 0.028570895397336565,
+      "precision_met": true,
+      "allocation_count_median": 1069.0,
+      "allocated_bytes_median": 458592.0,
+      "peak_allocated_bytes_median": 422698.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-full-topology-16384",
+      "family": "graph",
+      "operation": "graph.full-topology-reanalysis-total",
+      "scale": 16384,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 25870937.0,
+      "p95_ns_per_unit": 26402296.85,
+      "p99_ns_per_unit": 27170893.59,
+      "mad_ns_per_unit": 111408.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 25740382.0,
+        "upper": 25997862.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 26033307.256249998,
+        "upper": 27598325.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 26148473.0,
+        "upper": 27598325.0
+      },
+      "relative_median_ci_half_width": 0.004976240327128468,
+      "precision_met": true,
+      "allocation_count_median": 16415.0,
+      "allocated_bytes_median": 1507748.0,
+      "peak_allocated_bytes_median": 917862.0,
+      "status": "Precise"
+    },
+    {
+      "id": "graph-incremental-topology-16384",
+      "family": "graph",
+      "operation": "graph.incremental-topology-update-total",
+      "scale": 16384,
+      "scale_unit": "vertices",
+      "process_count": 5,
+      "observation_count": 50,
+      "median_ns_per_unit": 9259522.5,
+      "p95_ns_per_unit": 9748644.75,
+      "p99_ns_per_unit": 9811286.3,
+      "mad_ns_per_unit": 130199.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9183602.0,
+        "upper": 9662142.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9332664.0,
+        "upper": 9831832.0
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9362401.0,
+        "upper": 9831832.0
+      },
+      "relative_median_ci_half_width": 0.02584042535670711,
+      "precision_met": true,
+      "allocation_count_median": 16433.0,
+      "allocated_bytes_median": 7324512.0,
+      "peak_allocated_bytes_median": 6751018.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [
+    {
+      "cell": "graph-incremental-topology-1024",
+      "baseline_cell": "graph-full-topology-1024",
+      "paired_processes": 5,
+      "median_ratio": 0.4078388189460632,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.39764121652130696,
+        "upper": 0.42379900078052424
+      },
+      "status": "Paired"
+    },
+    {
+      "cell": "graph-incremental-topology-16384",
+      "baseline_cell": "graph-full-topology-16384",
+      "paired_processes": 5,
+      "median_ratio": 0.35972747024500257,
+      "ratio_ci95": {
+        "confidence_level": 0.95,
+        "lower": 0.3536183961001101,
+        "upper": 0.3736672492159948
+      },
+      "status": "Paired"
+    }
+  ],
+  "curves": [
+    {
+      "curve": "graph-family-16384",
+      "strategy": "mesh",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "graph-family-16384",
+      "strategy": "regular-32",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "graph-family-16384",
+      "strategy": "regular-8",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "graph-family-4096",
+      "strategy": "mesh",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "graph-family-4096",
+      "strategy": "regular-32",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "graph-family-4096",
+      "strategy": "regular-8",
+      "points": 1,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "graph-topology-edit",
+      "strategy": "full",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    },
+    {
+      "curve": "graph-topology-edit",
+      "strategy": "incremental",
+      "points": 2,
+      "log_log_slope": null,
+      "status": "InsufficientScalePoints"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

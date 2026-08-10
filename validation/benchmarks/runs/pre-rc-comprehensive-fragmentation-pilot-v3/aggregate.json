@@ -1,0 +1,367 @@
+{
+  "schema": "microfield-publication-aggregate-v2",
+  "campaign_id": "pre-rc-comprehensive-fragmentation-pilot-v3",
+  "profile": "pilot",
+  "environment_classification": "informative",
+  "cells": [
+    {
+      "id": "set-k4-fragments-256",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-multiset-k4.fragmented-merge-total",
+      "scale": 256,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 9494.4296875,
+      "p95_ns_per_unit": 11708.705468749999,
+      "p99_ns_per_unit": 11881.24828125,
+      "mad_ns_per_unit": 145.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9443.75,
+        "upper": 9725.65625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9713.80390625,
+        "upper": 11881.89765625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9746.0340625,
+        "upper": 12055.8125
+      },
+      "relative_median_ci_half_width": 0.014845875912438791,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "set-k4-fragments-2",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-multiset-k4.fragmented-merge-total",
+      "scale": 2,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 46.83551025390625,
+      "p95_ns_per_unit": 47.952249145507814,
+      "p99_ns_per_unit": 48.4221875,
+      "mad_ns_per_unit": 0.228912353515625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 46.732421875,
+        "upper": 47.1051025390625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 47.3106689453125,
+        "upper": 48.343994140625
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 47.5924072265625,
+        "upper": 49.05322265625
+      },
+      "relative_median_ci_half_width": 0.00397861219021754,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "set-k4-fragments-8",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-multiset-k4.fragmented-merge-total",
+      "scale": 8,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 266.728515625,
+      "p95_ns_per_unit": 320.7712646484375,
+      "p99_ns_per_unit": 322.53375,
+      "mad_ns_per_unit": 4.839111328125,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 262.407470703125,
+        "upper": 272.900390625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 269.6118896484375,
+        "upper": 323.39794921875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 273.5268104248047,
+        "upper": 329.09228515625
+      },
+      "relative_median_ci_half_width": 0.01966966279793505,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "set-k4-fragments-64",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-multiset-k4.fragmented-merge-total",
+      "scale": 64,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 2344.49609375,
+      "p95_ns_per_unit": 2442.135546875,
+      "p99_ns_per_unit": 2670.5162109374987,
+      "mad_ns_per_unit": 29.09375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2288.18359375,
+        "upper": 2393.3984375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2353.94140625,
+        "upper": 2676.7919921874973
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 2357.2433203125,
+        "upper": 2795.859375
+      },
+      "relative_median_ci_half_width": 0.02243869035023851,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "set-k4-fragments-1024",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-multiset-k4.fragmented-merge-total",
+      "scale": 1024,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 37910.3125,
+      "p95_ns_per_unit": 39601.240625,
+      "p99_ns_per_unit": 39769.949375,
+      "mad_ns_per_unit": 304.625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 37120.375,
+        "upper": 38527.26015625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 38130.5,
+        "upper": 39691.25
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 38447.36628125,
+        "upper": 48465.4375
+      },
+      "relative_median_ci_half_width": 0.018555441296480985,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "seq-k4-fragments-256",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-sequence-k4.fragmented-concatenate-total",
+      "scale": 256,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 331011.5,
+      "p95_ns_per_unit": 333683.125,
+      "p99_ns_per_unit": 336958.935,
+      "mad_ns_per_unit": 860.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 330831.5,
+        "upper": 331334.75
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 332850.0,
+        "upper": 335691.67499999993
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 333673.225,
+        "upper": 339034.5
+      },
+      "relative_median_ci_half_width": 0.00076016996388343,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "seq-k4-fragments-2",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-sequence-k4.fragmented-concatenate-total",
+      "scale": 2,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1238.3271484375,
+      "p95_ns_per_unit": 1409.78818359375,
+      "p99_ns_per_unit": 1424.59462890625,
+      "mad_ns_per_unit": 6.474609375,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1236.9169921875,
+        "upper": 1241.44140625
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1251.3530639648438,
+        "upper": 1416.9296875
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1259.923828125,
+        "upper": 1516.69140625
+      },
+      "relative_median_ci_half_width": 0.001826825030933396,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "seq-k4-fragments-8",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-sequence-k4.fragmented-concatenate-total",
+      "scale": 8,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 9112.96875,
+      "p95_ns_per_unit": 9182.9453125,
+      "p99_ns_per_unit": 9249.88703125,
+      "mad_ns_per_unit": 29.7890625,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9103.3515625,
+        "upper": 9132.078125
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9153.59375,
+        "upper": 9246.484375
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 9159.25,
+        "upper": 9279.40625
+      },
+      "relative_median_ci_half_width": 0.0015761363441523927,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "seq-k4-fragments-64",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-sequence-k4.fragmented-concatenate-total",
+      "scale": 64,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 82174.1875,
+      "p95_ns_per_unit": 83045.76875,
+      "p99_ns_per_unit": 84286.84375,
+      "mad_ns_per_unit": 313.5,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82048.125,
+        "upper": 82345.4109375
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82640.5,
+        "upper": 83674.9
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 82797.75,
+        "upper": 98496.875
+      },
+      "relative_median_ci_half_width": 0.0018088766469397527,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    },
+    {
+      "id": "seq-k4-fragments-1024",
+      "family": "homomorphic-signature",
+      "operation": "signature.multi-sequence-k4.fragmented-concatenate-total",
+      "scale": 1024,
+      "scale_unit": "fragments",
+      "process_count": 10,
+      "observation_count": 150,
+      "median_ns_per_unit": 1328646.5,
+      "p95_ns_per_unit": 1337366.9,
+      "p99_ns_per_unit": 1345901.26,
+      "mad_ns_per_unit": 3445.0,
+      "median_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1327688.5,
+        "upper": 1329357.0
+      },
+      "p95_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1335517.0,
+        "upper": 1346130.2999999998
+      },
+      "p99_ci95": {
+        "confidence_level": 0.95,
+        "lower": 1336741.0,
+        "upper": 1492406.0
+      },
+      "relative_median_ci_half_width": 0.0006278946281046162,
+      "precision_met": true,
+      "allocation_count_median": 0.0,
+      "allocated_bytes_median": 0.0,
+      "peak_allocated_bytes_median": 0.0,
+      "status": "Precise"
+    }
+  ],
+  "comparisons": [],
+  "curves": [
+    {
+      "curve": "seq-k4-fragmentation",
+      "strategy": "alternating",
+      "points": 5,
+      "log_log_slope": 1.1011292860128432,
+      "status": "Estimated"
+    },
+    {
+      "curve": "set-k4-fragmentation",
+      "strategy": "alternating",
+      "points": 5,
+      "log_log_slope": 1.064518775617679,
+      "status": "Estimated"
+    }
+  ],
+  "all_cells_precise": true,
+  "claims_allowed": false
+}

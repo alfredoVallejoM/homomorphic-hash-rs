@@ -1,0 +1,28 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "pre-rc-graph-topology-density-pilot-v1",
+  "profile": "pilot",
+  "seed": 1311768467463790320,
+  "host_mode": "interactive",
+  "minimum_processes": 5,
+  "maximum_processes": 5,
+  "precision_check_every": 5,
+  "warmup_observations": 3,
+  "measured_observations": 10,
+  "target_observation_ns": 500000,
+  "maximum_batch_iterations": 64,
+  "bootstrap_resamples": 1000,
+  "maximum_relative_ci_half_width": 0.10,
+  "cells": [
+    {"id":"graph-mesh-4096","family":"graph","operation":"graph.fast-prepared","scale":4096,"scale_unit":"vertices","curve":"graph-family-4096","strategy":"mesh"},
+    {"id":"graph-regular8-4096","family":"graph","operation":"graph.fast-prepared","scale":4096,"scale_unit":"vertices","curve":"graph-family-4096","strategy":"regular-8"},
+    {"id":"graph-regular32-4096","family":"graph","operation":"graph.fast-prepared","scale":4096,"scale_unit":"vertices","curve":"graph-family-4096","strategy":"regular-32"},
+    {"id":"graph-mesh-16384","family":"graph","operation":"graph.fast-prepared","scale":16384,"scale_unit":"vertices","curve":"graph-family-16384","strategy":"mesh"},
+    {"id":"graph-regular8-16384","family":"graph","operation":"graph.fast-prepared","scale":16384,"scale_unit":"vertices","curve":"graph-family-16384","strategy":"regular-8"},
+    {"id":"graph-regular32-16384","family":"graph","operation":"graph.fast-prepared","scale":16384,"scale_unit":"vertices","curve":"graph-family-16384","strategy":"regular-32"},
+    {"id":"graph-full-topology-1024","family":"graph","operation":"graph.full-topology-reanalysis-total","scale":1024,"scale_unit":"vertices","curve":"graph-topology-edit","strategy":"full"},
+    {"id":"graph-incremental-topology-1024","family":"graph","operation":"graph.incremental-topology-update-total","scale":1024,"scale_unit":"vertices","baseline_cell":"graph-full-topology-1024","curve":"graph-topology-edit","strategy":"incremental"},
+    {"id":"graph-full-topology-16384","family":"graph","operation":"graph.full-topology-reanalysis-total","scale":16384,"scale_unit":"vertices","curve":"graph-topology-edit","strategy":"full"},
+    {"id":"graph-incremental-topology-16384","family":"graph","operation":"graph.incremental-topology-update-total","scale":16384,"scale_unit":"vertices","baseline_cell":"graph-full-topology-16384","curve":"graph-topology-edit","strategy":"incremental"}
+  ]
+}

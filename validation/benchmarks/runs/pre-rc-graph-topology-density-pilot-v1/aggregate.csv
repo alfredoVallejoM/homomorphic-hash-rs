@@ -1,0 +1,11 @@
+cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit
+graph-mesh-4096,graph,graph.fast-prepared,4096,vertices,5,50,680.134155273,748.418115234,909.470141602,3.917358398,678.966186523,696.273681641,0.012723589,true,Precise,,,,,,,
+graph-regular8-4096,graph,graph.fast-prepared,4096,vertices,5,50,1257.134033203,1279.586791992,1321.818339844,5.338867188,1253.396850586,1265.630615234,0.004865736,true,Precise,,,,,,,
+graph-regular32-4096,graph,graph.fast-prepared,4096,vertices,5,50,3341.311035156,3513.935144043,3607.285793457,12.401123047,3328.909912109,3389.810180664,0.009113229,true,Precise,,,,,,,
+graph-mesh-16384,graph,graph.fast-prepared,16384,vertices,5,50,679.996459961,697.498370361,713.763683472,2.227294922,677.920257568,690.596984863,0.009321172,true,Precise,,,,,,,
+graph-regular8-16384,graph,graph.fast-prepared,16384,vertices,5,50,1263.902954102,1273.585565186,1279.968327026,2.267120361,1261.585327148,1266.953369141,0.002123597,true,Precise,,,,,,,
+graph-regular32-16384,graph,graph.fast-prepared,16384,vertices,5,50,3338.789672852,3681.842681885,4411.350673828,5.337799072,3338.167053223,3416.232482910,0.011690678,true,Precise,,,,,,,
+graph-full-topology-1024,graph,graph.full-topology-reanalysis-total,1024,vertices,5,50,1616862.000000000,1670053.850000000,1899589.220000000,12997.500000000,1598407.500000000,1633026.500000000,0.010705614,true,Precise,,,,,,,
+graph-incremental-topology-1024,graph,graph.incremental-topology-update-total,1024,vertices,5,50,656446.000000000,692685.800000000,703256.940000000,8512.500000000,647714.000000000,685224.500000000,0.028570895,true,Precise,,,,,,,
+graph-full-topology-16384,graph,graph.full-topology-reanalysis-total,16384,vertices,5,50,25870937.000000000,26402296.850000001,27170893.590000000,111408.500000000,25740382.000000000,25997862.000000000,0.004976240,true,Precise,,,,,,,
+graph-incremental-topology-16384,graph,graph.incremental-topology-update-total,16384,vertices,5,50,9259522.500000000,9748644.750000000,9811286.300000001,130199.500000000,9183602.000000000,9662142.000000000,0.025840425,true,Precise,,,,,,,

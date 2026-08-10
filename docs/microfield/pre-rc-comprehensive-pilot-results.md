@@ -55,6 +55,12 @@ concatenación. El protocolo exige cinco puntos para estimar formalmente una
 pendiente y esta calibración tiene cuatro, por lo que el agregado conserva
 `InsufficientScalePoints` y no fabrica una pendiente.
 
+La extensión v3 añadió el quinto punto (256 fragmentos), repitió cada celda en
+10 procesos independientes y obtuvo 10/10 celdas precisas. Las pendientes
+log-log ya estimables son 1,0645 para multiconjunto y 1,1011 para secuencia:
+confirman crecimiento aproximadamente lineal en fragmentos, sin convertirlo en
+un claim público (`Informative`, `claims_allowed=false`).
+
 ## Grafos
 
 La firma rápida preparada se mantuvo estable al crecer de 4.096 a 131.072
@@ -129,8 +135,11 @@ C2 cierra como calibración informativa. Antes de congelar C3 deben completarse:
    opt-in, mientras la ruta por particiones mejoró 15-16 % a alta densidad;
 2. ~~registrar outcome y presupuesto exacto de grafos como métricas
    estructuradas~~: cerrado y verificado en 30 workers independientes;
-3. ampliar grafos con topología incremental, mallas, densidad y corpus externo;
-4. añadir el quinto punto de fragmentación y conservar operandos alternantes;
+3. ~~ampliar grafos con topología incremental, mallas, densidad y corpus
+   externo~~: piloto sintético preciso y cuatro suites externas verdes; sólo
+   quedan los tiempos externos en host C3;
+4. ~~añadir el quinto punto de fragmentación y conservar operandos
+   alternantes~~: cerrado con 10/10 celdas precisas y pendientes estimadas;
 5. ejecutar WAL/logical decoding, reinicio y concurrencia como campaña de
    integración separada;
 6. replicar las celdas discriminantes de todas las estructuras en host
@@ -138,5 +147,31 @@ C2 cierra como calibración informativa. Antes de congelar C3 deben completarse:
 
 Los datos crudos están en
 `validation/benchmarks/runs/pre-rc-comprehensive-pilot-v1`,
-`pre-rc-comprehensive-fragmentation-pilot-v1` y los tres informes
-`pre-rc-postgresql-1m-*-c2-v1.json`.
+`pre-rc-comprehensive-fragmentation-pilot-v1`,
+`pre-rc-comprehensive-fragmentation-pilot-v3`,
+`pre-rc-graph-exact-telemetry-pilot-v4`,
+`pre-rc-graph-topology-density-pilot-v1` y los informes PostgreSQL descritos en
+la sección correspondiente.
+
+## Resultados posteriores a C2: grafos y corpus externo
+
+La campaña de topología/densidad añadió mallas, regulares de grado 8/32 y una
+edición real de arista frente a reanálisis completo. Sus 10 celdas y 50 workers
+fueron precisos:
+
+| Familia/ruta | 4.096 vértices | 16.384 vértices |
+|---|---:|---:|
+| malla, firma preparada | 680,1 ns/vértice | 680,0 ns/vértice |
+| regular grado 8 | 1.257,1 ns/vértice | 1.263,9 ns/vértice |
+| regular grado 32 | 3.341,3 ns/vértice | 3.338,8 ns/vértice |
+| reanálisis topológico completo | — | 25,87 ms |
+| actualización topológica incremental | — | 9,26 ms |
+
+La razón incremental/completa fue 0,4078 a 1.024 vértices y 0,3597 a 16.384,
+equivalente a aproximadamente 2,45x y 2,78x en esta calibración informativa.
+
+El corpus externo fijado se verificó offline contra sus SHA-256 y pasó sus
+cuatro suites opt-in: NetworkX Graph Atlas, TUDataset MUTAG, SNAP Email-EU y XGI
+Diseasome. Cubren pares no isomorfos del atlas, moléculas etiquetadas, red
+dirigida etiquetada e hipergrafo con roles. Esto cierra cobertura semántica del
+corpus; sus tiempos sólo se medirán en la campaña C3 controlada.

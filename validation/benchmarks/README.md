@@ -60,6 +60,17 @@ This campaign introduces the backward-compatible
 continues to accept homogeneous historical `v1` worker sets; only `v2` exact
 graph workers are required to carry the structured telemetry.
 
+Two further post-C2 pilots close the selected signature/graph axes:
+
+- `comprehensive-fragmentation-pilot-v3.json` / corresponding run: five
+  alternating K=4 fragmentation points, 100 workers, 10/10 precise cells and
+  estimable slopes;
+- `graph-topology-density-pilot-v1.json` / corresponding run: mesh, regular
+  degree 8/32 and paired topology edits, 50 workers and 10/10 precise cells.
+
+The pinned external Graph Atlas, MUTAG, Email-EU and Diseasome corpus remains
+an opt-in correctness gate; public timing waits for the controlled C3 host.
+
 ```text
 cargo run --release -p microfield-validation-lab --locked -- \
   publication-campaign \
