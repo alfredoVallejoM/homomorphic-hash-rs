@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Microfield publication aggregate report v2",
+  "type": "object",
+  "required": ["schema", "campaign_id", "profile", "environment_classification", "cells", "comparisons", "curves", "all_cells_precise", "claims_allowed"],
+  "properties": {
+    "schema": { "const": "microfield-publication-aggregate-v2" },
+    "campaign_id": { "type": "string" },
+    "profile": { "enum": ["smoke", "pilot", "publication"] },
+    "environment_classification": { "enum": ["smoke", "informative", "controlled"] },
+    "cells": { "type": "array", "minItems": 1 },
+    "comparisons": { "type": "array" },
+    "curves": { "type": "array" },
+    "all_cells_precise": { "type": "boolean" },
+    "claims_allowed": { "type": "boolean" }
+  }
+}

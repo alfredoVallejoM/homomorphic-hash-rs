@@ -86,7 +86,76 @@ pub struct WorkerReport {
     pub allocation_count: u64,
     pub allocated_bytes: u64,
     pub peak_allocated_bytes: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub graph_exact: Option<GraphExactTelemetry>,
     pub observations: Vec<RawObservation>,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct GraphExactTelemetry {
+    pub outcome: GraphExactOutcome,
+    pub node_budget: u64,
+    pub explored_nodes: u64,
+    pub leaf_count: u64,
+    pub maximum_depth: usize,
+    pub path: GraphExactPath,
+    pub exhausted_limit: Option<GraphExactLimit>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum GraphExactOutcome {
+    Exact,
+    Inconclusive,
+}
+
+impl GraphExactOutcome {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Exact => "exact",
+            Self::Inconclusive => "inconclusive",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum GraphExactPath {
+    ExactRefinementDiscrete,
+    WeakComponentDecomposition,
+    IndividualizationRefinement,
+}
+
+impl GraphExactPath {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::ExactRefinementDiscrete => "exact-refinement-discrete",
+            Self::WeakComponentDecomposition => "weak-component-decomposition",
+            Self::IndividualizationRefinement => "individualization-refinement",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum GraphExactLimit {
+    SearchNodes,
+    RetainedStateCells,
+    RetainedBytes,
+    SearchDepth,
+    ElapsedTime,
+}
+
+impl GraphExactLimit {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::SearchNodes => "search-nodes",
+            Self::RetainedStateCells => "retained-state-cells",
+            Self::RetainedBytes => "retained-bytes",
+            Self::SearchDepth => "search-depth",
+            Self::ElapsedTime => "elapsed-time",
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
@@ -117,6 +186,8 @@ pub struct AggregateCell {
     pub allocation_count_median: f64,
     pub allocated_bytes_median: f64,
     pub peak_allocated_bytes_median: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub graph_exact: Option<GraphExactTelemetry>,
     pub status: String,
 }
 

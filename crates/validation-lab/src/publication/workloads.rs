@@ -2,21 +2,24 @@ use std::fs;
 
 use algesum::{
     AdditiveDelta, AdditiveSignature, ApplicationNamespace, BidirectionalSequenceSignature,
-    BinaryPolynomialEncoder, BoundedSetReconciler, CanonicalGraphDag, CanonicalSearchBudget,
-    DatabaseApplyPolicy, DatabaseColumn, DatabaseColumnType, DatabaseRow, DatabaseSchema,
-    DatabaseTransactionLimits, DatabaseValue, FastGraphLabeler, FileChunkProfile, GraphExecution,
-    GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree, IncidenceGraph, IncidenceGraphBuilder,
-    IncrementalGraphWorkspace, Microcanon, MicrocanonOutcome, MultiEvaluationMultisetSignature,
-    MultiEvaluationSequenceSignature, MultisetSignature, PartitionedDatabase, PrimeIntegerEncoder,
-    ReconciliationLimits, RevisionedSignature, RowMutation, SequenceSignature, SummaryEditPolicy,
-    SummaryRangeEdit, TransactionDelta,
+    BinaryPolynomialEncoder, BoundedSetReconciler, CanonicalBudgetLimit, CanonicalGraphDag,
+    CanonicalSearchBudget, DatabaseApplyPolicy, DatabaseColumn, DatabaseColumnType, DatabaseRow,
+    DatabaseSchema, DatabaseTransactionLimits, DatabaseValue, FastGraphLabeler, FileChunkProfile,
+    GraphExecution, GraphSchemaId, GraphWorkspace, HomomorphicSummaryTree, IncidenceGraph,
+    IncidenceGraphBuilder, IncrementalGraphWorkspace, Microcanon, MicrocanonOutcome,
+    MicrocanonPath, MultiEvaluationMultisetSignature, MultiEvaluationSequenceSignature,
+    MultisetSignature, PartitionedDatabase, PrimeIntegerEncoder, ReconciliationLimits,
+    RevisionedSignature, RowMutation, SequenceSignature, SummaryEditPolicy, SummaryRangeEdit,
+    TransactionDelta,
 };
 use microfield::{
     generator::BinaryFieldFactory, BinaryPolynomialField, CanonicalEncoding, Engine, Field,
     Fp251V1, FpGoldilocks64V1, Gf2_128V1, Gf2_256AltV1, Gf2_256HhV1,
 };
 
-use super::model::BenchmarkCell;
+use super::model::{
+    BenchmarkCell, GraphExactLimit, GraphExactOutcome, GraphExactPath, GraphExactTelemetry,
+};
 
 type BinaryEncoder = BinaryPolynomialEncoder;
 type Database = PartitionedDatabase<Gf2_128V1, BinaryEncoder>;
@@ -86,6 +89,7 @@ pub const SUPPORTED_OPERATIONS: &[&str] = &[
 pub struct PreparedOperation {
     pub logical_units_per_action: u64,
     pub maximum_batch_iterations: Option<u64>,
+    pub graph_exact: Option<GraphExactTelemetry>,
     pub run: Box<dyn FnMut() -> u64>,
 }
 
@@ -246,6 +250,7 @@ fn field_batch(scale: usize, seed: u64) -> Result<PreparedOperation, String> {
     Ok(PreparedOperation {
         logical_units_per_action: scale as u64,
         maximum_batch_iterations: None,
+        graph_exact: None,
         run: Box::new(move || {
             engine.mul_into(&mut output, &lhs, &rhs).unwrap();
             checksum_field(output[scale - 1])
@@ -1070,6 +1075,7 @@ fn database_transaction_end_to_end(
     Ok(PreparedOperation {
         logical_units_per_action: 1,
         maximum_batch_iterations: Some(1),
+        graph_exact: None,
         run: Box::new(move || {
             let mutations = (0..mutation_count)
                 .map(|id| algesum::RowMutation::Update {
@@ -1185,6 +1191,7 @@ fn database_selected_transaction(
     Ok(PreparedOperation {
         logical_units_per_action: 1,
         maximum_batch_iterations: Some(1),
+        graph_exact: None,
         run: Box::new(move || {
             let mutations = selected
                 .iter()
@@ -1293,20 +1300,60 @@ fn graph_fast(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
 
 fn graph_exact(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
     let graph = match cell.strategy.as_deref() {
-        Some("symmetric-cycle") => sparse_cycle(cell.scale.clamp(3, 16))?,
+        Some("symmetric-cycle" | "symmetric-cycle-budget-1") => {
+            sparse_cycle(cell.scale.clamp(3, 16))?
+        }
         _ => distinct_path(cell.scale.clamp(2, 16))?,
     };
     let schema = GraphSchemaId::derive(b"publication-exact-v1");
     let canonizer = Microcanon::new(schema);
-    let budget = CanonicalSearchBudget::new(1_000_000);
-    Ok(scaled(graph.vertex_count(), move || {
+    let node_budget = if cell.strategy.as_deref() == Some("symmetric-cycle-budget-1") {
+        1
+    } else {
+        1_000_000
+    };
+    let budget = CanonicalSearchBudget::new(node_budget);
+    let probe = canonizer
+        .canonicalize(&graph, budget)
+        .map_err(debug_error)?;
+    let report = probe.report();
+    let telemetry = GraphExactTelemetry {
+        outcome: if matches!(&probe, MicrocanonOutcome::Exact { .. }) {
+            GraphExactOutcome::Exact
+        } else {
+            GraphExactOutcome::Inconclusive
+        },
+        node_budget,
+        explored_nodes: report.explored_nodes(),
+        leaf_count: report.leaf_count(),
+        maximum_depth: report.maximum_depth(),
+        path: match report.path() {
+            MicrocanonPath::ExactRefinementDiscrete => GraphExactPath::ExactRefinementDiscrete,
+            MicrocanonPath::WeakComponentDecomposition => {
+                GraphExactPath::WeakComponentDecomposition
+            }
+            MicrocanonPath::IndividualizationRefinement => {
+                GraphExactPath::IndividualizationRefinement
+            }
+        },
+        exhausted_limit: report.exhausted_limit().map(|limit| match limit {
+            CanonicalBudgetLimit::SearchNodes => GraphExactLimit::SearchNodes,
+            CanonicalBudgetLimit::RetainedStateCells => GraphExactLimit::RetainedStateCells,
+            CanonicalBudgetLimit::RetainedBytes => GraphExactLimit::RetainedBytes,
+            CanonicalBudgetLimit::SearchDepth => GraphExactLimit::SearchDepth,
+            CanonicalBudgetLimit::ElapsedTime => GraphExactLimit::ElapsedTime,
+        }),
+    };
+    let mut prepared = scaled(graph.vertex_count(), move || {
         match canonizer.canonicalize(&graph, budget).unwrap() {
             MicrocanonOutcome::Exact { form, .. } => checksum_bytes(form.bytes()),
             MicrocanonOutcome::Inconclusive { report } => {
                 0x494e_434f_4e43_4c55 ^ report.explored_nodes()
             }
         }
-    }))
+    });
+    prepared.graph_exact = Some(telemetry);
+    Ok(prepared)
 }
 
 fn graph_full_label_reanalysis(cell: &BenchmarkCell) -> Result<PreparedOperation, String> {
@@ -1396,6 +1443,7 @@ fn single_unit(action: impl FnMut() -> u64 + 'static) -> PreparedOperation {
     PreparedOperation {
         logical_units_per_action: 1,
         maximum_batch_iterations: None,
+        graph_exact: None,
         run: Box::new(action),
     }
 }
@@ -1404,6 +1452,7 @@ fn scaled(scale: usize, action: impl FnMut() -> u64 + 'static) -> PreparedOperat
     PreparedOperation {
         logical_units_per_action: scale.max(1) as u64,
         maximum_batch_iterations: None,
+        graph_exact: None,
         run: Box::new(action),
     }
 }
@@ -1629,5 +1678,21 @@ mod tests {
     fn payload_generation_is_seeded_and_reproducible() {
         assert_eq!(payloads(4, 16, 7).unwrap(), payloads(4, 16, 7).unwrap());
         assert_ne!(payloads(4, 16, 7).unwrap(), payloads(4, 16, 8).unwrap());
+    }
+
+    #[test]
+    fn exact_graph_operation_exposes_outcome_and_budget() {
+        let mut exact = cell("graph.exact", 12);
+        exact.strategy = Some("symmetric-cycle-budget-1".into());
+        let prepared = prepare(&exact, 7).unwrap();
+        let telemetry = prepared.graph_exact.unwrap();
+        assert_eq!(telemetry.outcome, GraphExactOutcome::Inconclusive);
+        assert_eq!(telemetry.node_budget, 1);
+        assert!(telemetry.explored_nodes <= telemetry.node_budget);
+        assert_eq!(
+            telemetry.exhausted_limit,
+            Some(GraphExactLimit::SearchNodes)
+        );
+        assert_eq!(telemetry.path, GraphExactPath::IndividualizationRefinement);
     }
 }

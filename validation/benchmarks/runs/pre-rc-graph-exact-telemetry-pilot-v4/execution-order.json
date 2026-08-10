@@ -1,0 +1,246 @@
+{
+  "schema": "microfield-publication-execution-order-v1",
+  "campaign_id": "pre-rc-graph-exact-telemetry-pilot-v4",
+  "tasks": [
+    {
+      "sequence": 0,
+      "round": 0,
+      "cell": "graph-exact-path-8",
+      "process_index": 0,
+      "seed": 17407143403628399441,
+      "status": "success"
+    },
+    {
+      "sequence": 1,
+      "round": 0,
+      "cell": "graph-exact-cycle-8",
+      "process_index": 0,
+      "seed": 10664396249526124860,
+      "status": "success"
+    },
+    {
+      "sequence": 2,
+      "round": 0,
+      "cell": "graph-exact-path-16",
+      "process_index": 0,
+      "seed": 3633675684223290113,
+      "status": "success"
+    },
+    {
+      "sequence": 3,
+      "round": 0,
+      "cell": "graph-exact-cycle-16",
+      "process_index": 0,
+      "seed": 9060753480670205834,
+      "status": "success"
+    },
+    {
+      "sequence": 4,
+      "round": 0,
+      "cell": "graph-exact-cycle-12",
+      "process_index": 0,
+      "seed": 5232794902930827715,
+      "status": "success"
+    },
+    {
+      "sequence": 5,
+      "round": 0,
+      "cell": "graph-inconclusive-cycle-16",
+      "process_index": 0,
+      "seed": 2095435700751070309,
+      "status": "success"
+    },
+    {
+      "sequence": 6,
+      "round": 1,
+      "cell": "graph-exact-cycle-8",
+      "process_index": 1,
+      "seed": 13289886701566596813,
+      "status": "success"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "cell": "graph-exact-path-8",
+      "process_index": 1,
+      "seed": 5404522103854551918,
+      "status": "success"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "cell": "graph-exact-cycle-12",
+      "process_index": 1,
+      "seed": 16176552910023642930,
+      "status": "success"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "cell": "graph-exact-cycle-16",
+      "process_index": 1,
+      "seed": 13998560759099039956,
+      "status": "success"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "cell": "graph-exact-path-16",
+      "process_index": 1,
+      "seed": 13566094984544248493,
+      "status": "success"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "cell": "graph-inconclusive-cycle-16",
+      "process_index": 1,
+      "seed": 15816565166261953352,
+      "status": "success"
+    },
+    {
+      "sequence": 12,
+      "round": 2,
+      "cell": "graph-exact-cycle-8",
+      "process_index": 2,
+      "seed": 8735942161246909045,
+      "status": "success"
+    },
+    {
+      "sequence": 13,
+      "round": 2,
+      "cell": "graph-exact-cycle-12",
+      "process_index": 2,
+      "seed": 13715076809687420562,
+      "status": "success"
+    },
+    {
+      "sequence": 14,
+      "round": 2,
+      "cell": "graph-exact-path-16",
+      "process_index": 2,
+      "seed": 8743602356333634858,
+      "status": "success"
+    },
+    {
+      "sequence": 15,
+      "round": 2,
+      "cell": "graph-inconclusive-cycle-16",
+      "process_index": 2,
+      "seed": 1949920715286128297,
+      "status": "success"
+    },
+    {
+      "sequence": 16,
+      "round": 2,
+      "cell": "graph-exact-cycle-16",
+      "process_index": 2,
+      "seed": 4948904342583374990,
+      "status": "success"
+    },
+    {
+      "sequence": 17,
+      "round": 2,
+      "cell": "graph-exact-path-8",
+      "process_index": 2,
+      "seed": 1279178407767651105,
+      "status": "success"
+    },
+    {
+      "sequence": 18,
+      "round": 3,
+      "cell": "graph-exact-cycle-12",
+      "process_index": 3,
+      "seed": 7764547519223375594,
+      "status": "success"
+    },
+    {
+      "sequence": 19,
+      "round": 3,
+      "cell": "graph-exact-cycle-16",
+      "process_index": 3,
+      "seed": 9994136842306137808,
+      "status": "success"
+    },
+    {
+      "sequence": 20,
+      "round": 3,
+      "cell": "graph-exact-path-16",
+      "process_index": 3,
+      "seed": 13099767365158408201,
+      "status": "success"
+    },
+    {
+      "sequence": 21,
+      "round": 3,
+      "cell": "graph-exact-path-8",
+      "process_index": 3,
+      "seed": 7743977941683315104,
+      "status": "success"
+    },
+    {
+      "sequence": 22,
+      "round": 3,
+      "cell": "graph-exact-cycle-8",
+      "process_index": 3,
+      "seed": 5509037835242702094,
+      "status": "success"
+    },
+    {
+      "sequence": 23,
+      "round": 3,
+      "cell": "graph-inconclusive-cycle-16",
+      "process_index": 3,
+      "seed": 1729178103106815755,
+      "status": "success"
+    },
+    {
+      "sequence": 24,
+      "round": 4,
+      "cell": "graph-exact-path-16",
+      "process_index": 4,
+      "seed": 16983947961209118093,
+      "status": "success"
+    },
+    {
+      "sequence": 25,
+      "round": 4,
+      "cell": "graph-inconclusive-cycle-16",
+      "process_index": 4,
+      "seed": 14254809395983932099,
+      "status": "success"
+    },
+    {
+      "sequence": 26,
+      "round": 4,
+      "cell": "graph-exact-path-8",
+      "process_index": 4,
+      "seed": 5270960900968546504,
+      "status": "success"
+    },
+    {
+      "sequence": 27,
+      "round": 4,
+      "cell": "graph-exact-cycle-12",
+      "process_index": 4,
+      "seed": 2116304497789997617,
+      "status": "success"
+    },
+    {
+      "sequence": 28,
+      "round": 4,
+      "cell": "graph-exact-cycle-16",
+      "process_index": 4,
+      "seed": 10745842585004390704,
+      "status": "success"
+    },
+    {
+      "sequence": 29,
+      "round": 4,
+      "cell": "graph-exact-cycle-8",
+      "process_index": 4,
+      "seed": 7102551498137225405,
+      "status": "success"
+    }
+  ]
+}

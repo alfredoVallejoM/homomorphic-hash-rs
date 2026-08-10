@@ -17,7 +17,7 @@ use super::{
     model::{
         AggregateCell, AggregateReport, BenchmarkCell, BenchmarkManifest, CampaignProfile,
         EnvironmentClassification, EnvironmentReport, ExecutionOrder, ExecutionTask,
-        PairedComparison, RawObservation, ScalingCurve, WorkerReport,
+        GraphExactOutcome, PairedComparison, RawObservation, ScalingCurve, WorkerReport,
     },
     stats::{
         bootstrap_quantile_ci, bootstrap_statistic_ci, derive_seed, log_log_slope, mad, median,
@@ -71,6 +71,7 @@ pub fn run_worker(
     let seed = worker_seed(&manifest, &cell, process_index);
     let setup_start = Instant::now();
     let mut prepared = workloads::prepare(&cell, seed)?;
+    let graph_exact = prepared.graph_exact.clone();
     let setup_ns = duration_ns(setup_start.elapsed().as_nanos());
     let batch_iterations = calibrate(&manifest, &mut prepared);
     for _ in 0..manifest.warmup_observations {
@@ -98,7 +99,7 @@ pub fn run_worker(
         });
     }
     let report = WorkerReport {
-        schema: "microfield-publication-worker-v1".into(),
+        schema: "microfield-publication-worker-v2".into(),
         campaign_id: manifest.campaign_id,
         cell,
         process_index,
@@ -109,6 +110,7 @@ pub fn run_worker(
         allocation_count: allocations.count_total,
         allocated_bytes: allocations.bytes_total,
         peak_allocated_bytes: allocations.bytes_max,
+        graph_exact,
         observations,
     };
     write_json(output, &report)?;
@@ -373,8 +375,16 @@ fn aggregate(
     let claims_allowed = manifest.profile == CampaignProfile::Publication
         && environment.classification == EnvironmentClassification::Controlled
         && all_cells_precise;
+    let schema = if reports
+        .iter()
+        .all(|report| report.schema == "microfield-publication-worker-v2")
+    {
+        "microfield-publication-aggregate-v2"
+    } else {
+        "microfield-publication-aggregate-v1"
+    };
     Ok(AggregateReport {
-        schema: "microfield-publication-aggregate-v1".into(),
+        schema: schema.into(),
         campaign_id: manifest.campaign_id.clone(),
         profile: manifest.profile,
         environment_classification: environment.classification,
@@ -440,6 +450,7 @@ fn aggregate_cell(
         .iter()
         .map(|worker| worker.peak_allocated_bytes as f64)
         .collect::<Vec<_>>();
+    let graph_exact = workers[0].graph_exact.clone();
     AggregateCell {
         id: cell.id.clone(),
         family: cell.family.clone(),
@@ -460,6 +471,7 @@ fn aggregate_cell(
         allocation_count_median: median(&allocations),
         allocated_bytes_median: median(&allocated_bytes),
         peak_allocated_bytes_median: median(&peak_bytes),
+        graph_exact,
         status: if precision_met {
             "Precise"
         } else {
@@ -565,8 +577,33 @@ fn validate_worker_reports(
         .map(|cell| (cell.id.as_str(), cell))
         .collect::<BTreeMap<_, _>>();
     let mut keys = BTreeSet::new();
+    let mut graph_exact_by_cell = BTreeMap::new();
     for report in reports {
-        if report.schema != "microfield-publication-worker-v1"
+        let exact_telemetry_valid = if report.schema == "microfield-publication-worker-v1" {
+            report.graph_exact.is_none()
+        } else if report.cell.operation == "graph.exact" {
+            report.graph_exact.as_ref().is_some_and(|telemetry| {
+                telemetry.node_budget > 0
+                    && telemetry.explored_nodes <= telemetry.node_budget
+                    && (telemetry.outcome == GraphExactOutcome::Exact)
+                        == telemetry.exhausted_limit.is_none()
+            })
+        } else {
+            report.graph_exact.is_none()
+        };
+        let telemetry_consistent = match graph_exact_by_cell.get(report.cell.id.as_str()) {
+            Some(previous) => *previous == report.graph_exact.as_ref(),
+            None => {
+                graph_exact_by_cell.insert(report.cell.id.as_str(), report.graph_exact.as_ref());
+                true
+            }
+        };
+        if !matches!(
+            report.schema.as_str(),
+            "microfield-publication-worker-v1" | "microfield-publication-worker-v2"
+        ) || reports
+            .first()
+            .is_some_and(|first| first.schema != report.schema)
             || report.campaign_id != manifest.campaign_id
             || cells
                 .get(report.cell.id.as_str())
@@ -578,6 +615,8 @@ fn validate_worker_reports(
                     || sample.ns_per_logical_unit < 0.0
                     || sample.logical_units == 0
             })
+            || !exact_telemetry_valid
+            || !telemetry_consistent
             || !keys.insert((report.cell.id.as_str(), report.process_index))
         {
             return Err(format!(
@@ -660,11 +699,12 @@ fn read_raw_jsonl(path: &Path) -> Result<Vec<WorkerReport>, String> {
 
 fn write_aggregate_csv(path: &Path, report: &AggregateReport) -> Result<(), String> {
     let mut contents = String::from(
-        "cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status\n",
+        "cell,family,operation,scale,scale_unit,processes,observations,median_ns_per_unit,p95_ns_per_unit,p99_ns_per_unit,mad_ns_per_unit,median_ci95_lower,median_ci95_upper,relative_ci_half_width,precision,status,exact_outcome,exact_node_budget,exact_explored_nodes,exact_leaf_count,exact_maximum_depth,exact_path,exact_exhausted_limit\n",
     );
     for cell in &report.cells {
+        let telemetry = cell.graph_exact.as_ref();
         contents.push_str(&format!(
-            "{},{},{},{},{},{},{},{:.9},{:.9},{:.9},{:.9},{:.9},{:.9},{:.9},{},{}\n",
+            "{},{},{},{},{},{},{},{:.9},{:.9},{:.9},{:.9},{:.9},{:.9},{:.9},{},{},{},{},{},{},{},{},{}\n",
             cell.id,
             cell.family,
             cell.operation,
@@ -681,6 +721,15 @@ fn write_aggregate_csv(path: &Path, report: &AggregateReport) -> Result<(), Stri
             cell.relative_median_ci_half_width,
             cell.precision_met,
             cell.status,
+            telemetry.map_or("", |value| value.outcome.as_str()),
+            telemetry.map_or(String::new(), |value| value.node_budget.to_string()),
+            telemetry.map_or(String::new(), |value| value.explored_nodes.to_string()),
+            telemetry.map_or(String::new(), |value| value.leaf_count.to_string()),
+            telemetry.map_or(String::new(), |value| value.maximum_depth.to_string()),
+            telemetry.map_or("", |value| value.path.as_str()),
+            telemetry
+                .and_then(|value| value.exhausted_limit.map(|limit| limit.as_str()))
+                .unwrap_or(""),
         ));
     }
     fs::write(path, contents).map_err(|error| format!("write {}: {error}", path.display()))
@@ -726,6 +775,29 @@ fn write_markdown_report(
             cell.p95_ns_per_unit,
             cell.status,
         ));
+    }
+    let exact_cells = report
+        .cells
+        .iter()
+        .filter_map(|cell| cell.graph_exact.as_ref().map(|telemetry| (cell, telemetry)))
+        .collect::<Vec<_>>();
+    if !exact_cells.is_empty() {
+        contents.push_str("\n## Telemetría exacta de grafos\n\n| Celda | Outcome | Presupuesto | Explorados | Hojas | Profundidad | Ruta | Límite agotado |\n|---|---|---:|---:|---:|---:|---|---|\n");
+        for (cell, telemetry) in exact_cells {
+            contents.push_str(&format!(
+                "| `{}` | {} | {} | {} | {} | {} | {} | {} |\n",
+                cell.id,
+                telemetry.outcome.as_str(),
+                telemetry.node_budget,
+                telemetry.explored_nodes,
+                telemetry.leaf_count,
+                telemetry.maximum_depth,
+                telemetry.path.as_str(),
+                telemetry
+                    .exhausted_limit
+                    .map_or("—", |limit| limit.as_str()),
+            ));
+        }
     }
     if !report.comparisons.is_empty() {
         contents.push_str("\n## Comparaciones pareadas\n\n| Celda | Baseline | Ratio mediano | IC 95 % |\n|---|---|---:|---:|\n");
@@ -875,6 +947,7 @@ mod tests {
                 allocation_count: 0,
                 allocated_bytes: 0,
                 peak_allocated_bytes: 0,
+                graph_exact: None,
                 observations: (0..3)
                     .map(|observation_index| RawObservation {
                         observation_index,
@@ -892,5 +965,21 @@ mod tests {
         assert_eq!(report.cells[0].observation_count, 6);
         assert_eq!(report.cells[0].median_ns_per_unit, 15.0);
         assert!(!report.claims_allowed);
+
+        let mut legacy_manifest = value.clone();
+        legacy_manifest.cells[0].operation = "graph.exact".into();
+        legacy_manifest.cells[0].family = "graph".into();
+        let mut legacy_reports = reports.clone();
+        for worker in &mut legacy_reports {
+            worker.cell = legacy_manifest.cells[0].clone();
+        }
+        let legacy = aggregate(&legacy_manifest, &environment, &legacy_reports).unwrap();
+        assert_eq!(legacy.schema, "microfield-publication-aggregate-v1");
+        assert!(legacy.cells[0].graph_exact.is_none());
+
+        for worker in &mut legacy_reports {
+            worker.schema = "microfield-publication-worker-v2".into();
+        }
+        assert!(aggregate(&legacy_manifest, &environment, &legacy_reports).is_err());
     }
 }

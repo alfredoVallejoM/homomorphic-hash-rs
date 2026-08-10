@@ -39,6 +39,27 @@ observations; 44/47 cells met the 10% pilot precision target. PostgreSQL adds
 33 exactly verified samples over one million rows. Interpretation and the C3
 blockers are in `docs/microfield/pre-rc-comprehensive-pilot-results.md`.
 
+The post-C2 exact-graph telemetry campaign makes bounded-search semantics
+first-class data instead of encoding them only in checksums:
+
+```text
+cargo run --release -p microfield-validation-lab --locked -- \
+  publication-campaign \
+  --manifest validation/benchmarks/manifests/graph-exact-telemetry-pilot-v4.json \
+  --run-dir validation/benchmarks/runs/pre-rc-graph-exact-telemetry-pilot-v4
+```
+
+Its six cells and 30 independent workers were all precise. Five returned
+`exact`; a deliberately bounded cycle returned `inconclusive` with
+`search-nodes` as the exhausted limit. JSON, CSV and Markdown retain the node
+budget and exact search counters. The run is `Informative`, with
+`claims_allowed=false`.
+
+This campaign introduces the backward-compatible
+`microfield-publication-worker-v2` and `aggregate-v2` envelopes. The analyser
+continues to accept homogeneous historical `v1` worker sets; only `v2` exact
+graph workers are required to carry the structured telemetry.
+
 ```text
 cargo run --release -p microfield-validation-lab --locked -- \
   publication-campaign \

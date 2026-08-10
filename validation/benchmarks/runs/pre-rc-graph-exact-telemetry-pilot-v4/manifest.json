@@ -1,0 +1,91 @@
+{
+  "schema": "microfield-publication-benchmark-manifest-v1",
+  "campaign_id": "pre-rc-graph-exact-telemetry-pilot-v4",
+  "profile": "pilot",
+  "seed": 10723151780598845931,
+  "host_mode": "interactive",
+  "minimum_processes": 5,
+  "maximum_processes": 5,
+  "precision_check_every": 5,
+  "warmup_observations": 2,
+  "measured_observations": 5,
+  "target_observation_ns": 100000,
+  "maximum_batch_iterations": 1,
+  "bootstrap_resamples": 500,
+  "maximum_relative_ci_half_width": 0.2,
+  "cells_from": null,
+  "cells": [
+    {
+      "id": "graph-exact-path-8",
+      "family": "graph",
+      "operation": "graph.exact",
+      "scale": 8,
+      "scale_unit": "vertices",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "graph-exact-path",
+      "strategy": "distinct-path"
+    },
+    {
+      "id": "graph-exact-path-16",
+      "family": "graph",
+      "operation": "graph.exact",
+      "scale": 16,
+      "scale_unit": "vertices",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "graph-exact-path",
+      "strategy": "distinct-path"
+    },
+    {
+      "id": "graph-exact-cycle-8",
+      "family": "graph",
+      "operation": "graph.exact",
+      "scale": 8,
+      "scale_unit": "vertices",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "graph-exact-cycle",
+      "strategy": "symmetric-cycle"
+    },
+    {
+      "id": "graph-exact-cycle-12",
+      "family": "graph",
+      "operation": "graph.exact",
+      "scale": 12,
+      "scale_unit": "vertices",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "graph-exact-cycle",
+      "strategy": "symmetric-cycle"
+    },
+    {
+      "id": "graph-exact-cycle-16",
+      "family": "graph",
+      "operation": "graph.exact",
+      "scale": 16,
+      "scale_unit": "vertices",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "graph-exact-cycle",
+      "strategy": "symmetric-cycle"
+    },
+    {
+      "id": "graph-inconclusive-cycle-16",
+      "family": "graph",
+      "operation": "graph.exact",
+      "scale": 16,
+      "scale_unit": "vertices",
+      "payload_bytes": 16,
+      "dataset_size": null,
+      "baseline_cell": null,
+      "curve": "graph-inconclusive-control",
+      "strategy": "symmetric-cycle-budget-1"
+    }
+  ]
+}

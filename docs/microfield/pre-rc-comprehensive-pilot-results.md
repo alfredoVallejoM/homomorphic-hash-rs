@@ -85,6 +85,16 @@ válida en lugar de abortar o presentarse como igualdad exacta. Antes de C3 el
 informe agregado debe exponer además el resultado exacto/inconcluso como campo
 estructurado, no sólo mediante checksum.
 
+Ese bloqueo quedó cerrado en la campaña de telemetría posterior a C2. Los
+workers, el agregado JSON, el CSV y el informe Markdown exponen ahora outcome,
+presupuesto, nodos explorados, hojas, profundidad, ruta y límite agotado. Los
+30 workers fueron coherentes: caminos de 8/16 vértices `exact` por
+`ExactRefinementDiscrete` con 0 nodos de búsqueda; ciclos de 8/12/16 `exact`
+por `IndividualizationRefinement` con 7 nodos, 4 hojas y profundidad 2. La
+sexta celda forzó un presupuesto de un nodo y registró correctamente
+`inconclusive` y `search-nodes`, sin publicar una forma. La clasificación sigue
+siendo `Informative` y `claims_allowed=false`.
+
 ## PostgreSQL a un millón de filas
 
 Medianas de tres repeticiones; `Algesum` mide la aplicación y `rebuild` la
@@ -117,7 +127,8 @@ C2 cierra como calibración informativa. Antes de congelar C3 deben completarse:
 1. ~~añadir `FullRebuild` al selector adaptativo de DB y medir el cruce entre
    25 % y 75 % de densidad~~: cerrado; la ruta global perdió el A/B y queda
    opt-in, mientras la ruta por particiones mejoró 15-16 % a alta densidad;
-2. registrar outcome y presupuesto exacto de grafos como métricas estructuradas;
+2. ~~registrar outcome y presupuesto exacto de grafos como métricas
+   estructuradas~~: cerrado y verificado en 30 workers independientes;
 3. ampliar grafos con topología incremental, mallas, densidad y corpus externo;
 4. añadir el quinto punto de fragmentación y conservar operandos alternantes;
 5. ejecutar WAL/logical decoding, reinicio y concurrencia como campaña de
