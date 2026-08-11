@@ -1,0 +1,40 @@
+{
+  "schema": "algesum-c3-c0-semantic-summary-v1",
+  "campaign_id": "algesum-c3-c0-semantic-v1",
+  "date": "2026-08-11",
+  "security_classification": "non-cryptographic-algebraic-summaries",
+  "classification": "deterministic-semantic",
+  "claims_allowed": true,
+  "source_manifest": "validation/f6/manifest.json",
+  "byte_identical_to_frozen_f6_evidence": true,
+  "counted_cases": {
+    "signature_metamorphic_equations": 145636,
+    "reconciliation_exhaustive_pairs": 63232,
+    "non_isomorphic_graph_representatives": 12346,
+    "graph_relabeling_checks": 128,
+    "total": 221342,
+    "required_minimum": 12000
+  },
+  "property_gates": {
+    "finite_field_tests": 9,
+    "correctness_inventory_tests": 2,
+    "graph_property_tests": 2,
+    "state_machine_and_signature_tests": 9,
+    "failures": 0
+  },
+  "fuzz": {
+    "accepted_runs": 15000,
+    "targets": [
+      { "id": "microfield_manifests", "runs": 5000, "maximum_input_bytes": 65536 },
+      { "id": "structural_wires", "runs": 5000, "maximum_input_bytes": 4096 },
+      { "id": "graph_wires", "runs": 5000, "maximum_input_bytes": 4096 }
+    ],
+    "crashes": 0,
+    "timeouts": 0,
+    "sanitizer_findings": 0,
+    "asan_options": "detect_leaks=0",
+    "note": "LeakSanitizer alone is disabled because the sandbox uses ptrace; AddressSanitizer remains active, matching CI."
+  },
+  "semantic_failures": 0,
+  "gate": "passed"
+}

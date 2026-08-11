@@ -29,6 +29,9 @@ The aggregate local-preflight status, exact remaining gates and minimum
 Controlled process counts are recorded in
 `runs/c3-preflight-consolidated-status-v1.json` and interpreted in
 `docs/microfield/c3-preflight-consolidated-results-and-controlled-next.md`.
+C3-C0 then replays 221,342 deterministic cases/controls and 15,000 fuzz runs;
+its result is `runs/c3-c0-semantic-summary-v1.json` and the raw deterministic
+report is under `runs/c3-c0-semantic-v1`.
 
 C3-P0 adds the deterministic factor expander and the first generated F1/F2
 shards:

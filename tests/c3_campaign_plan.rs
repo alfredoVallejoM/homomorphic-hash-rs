@@ -193,6 +193,21 @@ fn c3_consolidated_status_matches_generated_inventory_and_remaining_gap() {
     assert_eq!(status["observations"], 2_770);
     assert_eq!(status["semantic_failures"], 0);
     assert_eq!(status["unstable_checksums"], 0);
+    assert_eq!(status["c3_c0_semantic"]["counted_cases"], 221_342);
+    assert_eq!(status["c3_c0_semantic"]["fuzz_runs"], 15_000);
+    assert_eq!(status["remaining_gates"][0]["status"], "complete");
+
+    let semantic: Value = serde_json::from_str(include_str!(
+        "../validation/benchmarks/runs/c3-c0-semantic-summary-v1.json"
+    ))
+    .unwrap();
+    assert!(
+        semantic["counted_cases"]["total"].as_u64().unwrap()
+            >= ledger["targets"]["minimum_semantic_cases"]
+                .as_u64()
+                .unwrap()
+    );
+    assert_eq!(semantic["gate"], "passed");
 
     let minimum_processes = status["generated_publication_cells"].as_u64().unwrap()
         * ledger["targets"]["minimum_processes_per_timed_cell"]

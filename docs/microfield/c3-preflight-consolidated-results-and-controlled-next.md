@@ -1,8 +1,8 @@
 # C3: consolidación de preflights y campaña restante
 
-Fecha: 2026-08-11. Estado: **todos los análisis C3 ejecutables en el host local
-han terminado; la campaña publicable `Controlled`, el carril semántico masivo y
-el soak de sistemas requieren la infraestructura indicada abajo**.
+Fecha: 2026-08-11. Estado: **preflights y C3-C0 terminados en el host local; la
+campaña publicable `Controlled` y el soak de sistemas requieren la
+infraestructura indicada abajo**.
 
 Algesum estudia resúmenes y firmas algebraicas homomórficas **no
 criptográficas**. Ninguna igualdad de resumen implica autenticación, seguridad
@@ -52,9 +52,8 @@ byte-exacta después de reiniciar el servidor.
 
 ## Análisis restantes, en orden obligatorio
 
-1. **C3-C0 Semantic:** materializar y ejecutar al menos 12.000 casos
-   versionados, incluyendo propiedades, oráculos diferenciales, corpus
-   adversarial, fallos y límites de cada suite.
+1. **C3-C0 Semantic — completado:** 221.342 casos/controles deterministas, 22
+   tests de propiedades/modelos y 15.000 ejecuciones fuzz sin hallazgos.
 2. **C3-Scaling Controlled:** ejecutar las 3.609 celdas con al menos 30 procesos
    por celda (**108.270 procesos por host**) desde release, árbol limpio,
    afinidad fija, frecuencias visibles y sin throttling o swap invalidante.
@@ -74,7 +73,7 @@ que el propio protocolo prohíbe usar como evidencia publicable.
 
 ## Gate actual
 
-El gate de implementación/preflight queda aprobado. El gate de publicación
-permanece cerrado por C3-C0, réplica Controlled Intel/AMD/AArch64 y D2 soak. El
+Los gates de implementación/preflight y C3-C0 quedan aprobados. El gate de
+publicación permanece cerrado por réplica Controlled Intel/AMD/AArch64 y D2 soak. El
 estado machine-readable se conserva en
 `validation/benchmarks/runs/c3-preflight-consolidated-status-v1.json`.

@@ -52,6 +52,7 @@ test en `tests/rc_supported_surface.rs`.
 | [`c3-d2-postgresql-systems-preflight-report.md`](c3-d2-postgresql-systems-preflight-report.md) | logical decoding, concurrencia, backlog, migración y restart PostgreSQL |
 | [`c3-f1-f2-closure-preflight-report.md`](c3-f1-f2-closure-preflight-report.md) | referencias independientes, backends forzados, patrones y reducción de campos |
 | [`c3-preflight-consolidated-results-and-controlled-next.md`](c3-preflight-consolidated-results-and-controlled-next.md) | consolidación cuantitativa, gate actual y secuencia Controlled pendiente |
+| [`c3-c0-semantic-results.md`](c3-c0-semantic-results.md) | 221.342 casos deterministas, propiedades/modelos y fuzz C3-C0 |
 | [`pre-rc-comprehensive-smoke-results.md`](pre-rc-comprehensive-smoke-results.md) | C1 de 65 celdas y piloto PostgreSQL hasta un millón de filas |
 | [`pre-rc-comprehensive-pilot-results.md`](pre-rc-comprehensive-pilot-results.md) | C2 de firmas K/fragmentación, grafos y PostgreSQL repetido a un millón |
 | [`post-rc-benchmark-and-publication-plan.md`](post-rc-benchmark-and-publication-plan.md) | integración, benchmark publicable, DB real y release externa |

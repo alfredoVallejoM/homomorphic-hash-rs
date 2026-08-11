@@ -1,7 +1,7 @@
 # C3: campaña extensiva de validación y rendimiento de Algesum
 
-Fecha: 2026-08-11. Estado: **preflight local consolidado para las 15 suites;
-C3-C0, D2 soak y campaña multihost `Controlled` pendientes**.
+Fecha: 2026-08-11. Estado: **preflight local y C3-C0 consolidados para las 15
+suites; D2 soak y campaña multihost `Controlled` pendientes**.
 
 La implementación y los resultados iniciales quedan fijados en
 [`c3-p0-implementation-and-preflight-report.md`](c3-p0-implementation-and-preflight-report.md)
@@ -19,6 +19,8 @@ El cierre de referencias, backends y patrones F1/F2 está en
 [`c3-f1-f2-closure-preflight-report.md`](c3-f1-f2-closure-preflight-report.md).
 El resultado agregado y el orden exacto de los gates restantes están en
 [`c3-preflight-consolidated-results-and-controlled-next.md`](c3-preflight-consolidated-results-and-controlled-next.md).
+El cierre semántico está en
+[`c3-c0-semantic-results.md`](c3-c0-semantic-results.md).
 
 Este documento sustituye cualquier propuesta de ejecutar C3 sobre unas pocas
 celdas «seleccionadas». Algesum reúne un núcleo de campos finitos, algoritmos

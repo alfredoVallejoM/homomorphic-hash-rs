@@ -11,6 +11,11 @@
   "observations": 2770,
   "semantic_failures": 0,
   "unstable_checksums": 0,
+  "c3_c0_semantic": {
+    "counted_cases": 221342,
+    "fuzz_runs": 15000,
+    "gate": "passed"
+  },
   "external_preflights": {
     "x1_sources": 5,
     "x1_vertical_tests": 4,
@@ -27,7 +32,7 @@
     {
       "id": "C3-C0",
       "requirement": "at least 12000 versioned semantic cases",
-      "status": "not-executed"
+      "status": "complete"
     },
     {
       "id": "C3-Scaling-Controlled",
